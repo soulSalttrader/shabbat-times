@@ -10,6 +10,9 @@ object Debug {
 
     fun <T : State> T.formatStateTransition(
         eventName: String,
-        new: T,
-    ): String = "${logTag()}(event=$eventName) ➜ $new"
+        next: T,
+    ): String = "${logTag()}(event=$eventName) ➜ $next"
+
+    fun <T : State> Reducer<T>.formatEventName(): String =
+        javaClass.enclosingClass.simpleName
 }
