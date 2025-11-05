@@ -8,11 +8,11 @@ object Debug {
         BuildConfig.DEBUG
     }.getOrDefault(true)
 
-    fun <T : State> T.formatStateTransition(
+    fun <S : State> S.formatStateTransition(
         eventName: String,
-        next: T,
+        next: S,
     ): String = "${logTag()}(event=$eventName) ➜ $next"
 
-    fun <T : State> Reducer<T>.formatEventName(): String =
+    fun <S : State> Reducer<S>.formatEventName(): String =
         javaClass.enclosingClass.simpleName
 }
