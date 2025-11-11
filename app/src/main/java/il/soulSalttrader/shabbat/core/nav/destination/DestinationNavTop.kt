@@ -1,10 +1,5 @@
 package il.soulSalttrader.retro.core.nav.destination
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import il.soulSalttrader.retro.R
 import il.soulSalttrader.retro.core.UiIcon
 import il.soulSalttrader.retro.core.nav.route.RouteTop
@@ -17,8 +12,8 @@ sealed interface DestinationNavTop : DestinationTop {
     object Previous : DestinationNavTop, DestinationTop by DestinationTopData(
         route = RouteTop.PreviousScreen,
         title = "Go Back",
-        selectedIcon = UiIcon.Vector(Icons.AutoMirrored.Filled.KeyboardArrowLeft),
-        unselectedIcon = UiIcon.Vector(Icons.AutoMirrored.Outlined.KeyboardArrowLeft),
+        selectedIcon = UiIcon.Resource(R.drawable.arrow_back_filled_24),
+        unselectedIcon = UiIcon.Resource(R.drawable.arrow_back_outlined_24px),
         badgeCount = null,
         role = TopBarRole.NAVIGATION,
     )
@@ -37,8 +32,8 @@ sealed interface DestinationNavTop : DestinationTop {
     object Favorite : DestinationNavTop, DestinationTop by DestinationTopData(
         route = RouteTop.FavoriteScreen,
         title = "Go Back",
-        selectedIcon = UiIcon.Vector(Icons.Default.Favorite),
-        unselectedIcon = UiIcon.Vector(Icons.Default.FavoriteBorder),
+        selectedIcon = UiIcon.Resource(R.drawable.favorite_filled_24),
+        unselectedIcon = UiIcon.Resource(R.drawable.favorite_outlined_24),
         badgeCount = null,
         role = TopBarRole.ACTION,
     )

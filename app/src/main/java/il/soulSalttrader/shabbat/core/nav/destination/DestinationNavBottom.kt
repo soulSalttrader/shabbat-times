@@ -1,12 +1,5 @@
 package il.soulSalttrader.retro.core.nav.destination
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Settings
 import kotlinx.serialization.Serializable
 import il.soulSalttrader.retro.R
 import il.soulSalttrader.retro.core.nav.route.RouteBottom
@@ -19,16 +12,16 @@ sealed interface DestinationNavBottom : DestinationBottom {
     data object Home : DestinationNavBottom, DestinationBottom by DestinationBottomData(
         route = RouteBottom.HomeScreen,
         title = "Home",
-        selectedIcon = UiIcon.Vector(Icons.Filled.Home),
-        unselectedIcon = UiIcon.Vector(Icons.Outlined.Home),
+        selectedIcon = UiIcon.Resource(R.drawable.home_filled_24),
+        unselectedIcon = UiIcon.Resource(R.drawable.home_outlined_24),
     )
 
     @Serializable
     data object Alerts : DestinationNavBottom, DestinationBottom by DestinationBottomData(
         route = RouteBottom.AlertsScreen,
         title = "Alerts",
-        selectedIcon = UiIcon.Vector(Icons.Filled.Notifications),
-        unselectedIcon = UiIcon.Vector(Icons.Outlined.Notifications),
+        selectedIcon = UiIcon.Resource(R.drawable.notifications_filled_24),
+        unselectedIcon = UiIcon.Resource(R.drawable.notifications_outlined_24),
         badgeCount = 7,
     )
 
@@ -36,16 +29,16 @@ sealed interface DestinationNavBottom : DestinationBottom {
     data object Settings : DestinationNavBottom, DestinationBottom by DestinationBottomData(
         route = RouteBottom.SettingsScreen,
         title = "Settings",
-        selectedIcon = UiIcon.Vector(Icons.Filled.Settings),
-        unselectedIcon = UiIcon.Vector(Icons.Outlined.Settings),
+        selectedIcon = UiIcon.Resource(R.drawable.settings_filled_24),
+        unselectedIcon = UiIcon.Resource(R.drawable.settings_outlined_24),
     )
 
 //    @Serializable
 //    data object More : DestinationNavBottom, DestinationBottom by DestinationBottomData(
 //        route = RouteBottom.MoreScreen,
 //        title = "More",
-//        selectedIcon = UiIcon.Vector(Icons.Filled.Menu),
-//        unselectedIcon = UiIcon.Vector(Icons.Outlined.Menu),
+//        selectedIcon = UiIcon.Resource(R.drawable.menu_filled_24),
+//        unselectedIcon = UiIcon.Resource(R.drawable.menu_outlined_24),
 //    )
 
     @Serializable
