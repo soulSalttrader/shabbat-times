@@ -8,6 +8,5 @@ data class DestinationTopData(
     override val title: String,
     override val selectedIcon: UiIcon,
     override val unselectedIcon: UiIcon,
-    override val badgeCount: Int?,
     override val role: TopBarRole,
 ) : DestinationTop

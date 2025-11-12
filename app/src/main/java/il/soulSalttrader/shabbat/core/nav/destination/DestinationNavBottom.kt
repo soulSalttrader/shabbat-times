@@ -22,7 +22,6 @@ sealed interface DestinationNavBottom : DestinationBottom {
         title = "Alerts",
         selectedIcon = UiIcon.Resource(R.drawable.notifications_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.notifications_outlined_24),
-        badgeCount = 7,
     )
 
     @Serializable

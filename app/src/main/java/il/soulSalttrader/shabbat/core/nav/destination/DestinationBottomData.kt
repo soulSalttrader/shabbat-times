@@ -8,5 +8,4 @@ data class DestinationBottomData(
     override val title: String,
     override val selectedIcon: UiIcon,
     override val unselectedIcon: UiIcon,
-    override val badgeCount: Int? = null,
 ) : DestinationBottom

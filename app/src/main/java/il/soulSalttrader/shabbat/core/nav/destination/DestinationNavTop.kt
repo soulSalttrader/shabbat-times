@@ -14,7 +14,6 @@ sealed interface DestinationNavTop : DestinationTop {
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.arrow_back_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.arrow_back_outlined_24px),
-        badgeCount = null,
         role = TopBarRole.NAVIGATION,
     )
 
@@ -24,7 +23,6 @@ sealed interface DestinationNavTop : DestinationTop {
         title = "Go Back",
         selectedIcon = UiIcon.Resource(resId = R.drawable.overview_filled_24),
         unselectedIcon = UiIcon.Resource(resId = R.drawable.overview_outlined_24),
-        badgeCount = null,
         role = TopBarRole.ACTION,
     )
 
@@ -34,7 +32,6 @@ sealed interface DestinationNavTop : DestinationTop {
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.favorite_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.favorite_outlined_24),
-        badgeCount = null,
         role = TopBarRole.ACTION,
     )
 }
