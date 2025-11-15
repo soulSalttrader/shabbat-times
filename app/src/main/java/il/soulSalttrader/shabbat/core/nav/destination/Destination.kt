@@ -1,7 +1,7 @@
 package il.soulSalttrader.retro.core.nav.destination
 
 import il.soulSalttrader.retro.core.UiIcon
-import il.soulSalttrader.retro.core.nav.route.NavTarget
+import il.soulSalttrader.retro.core.nav.NavTarget
 
 interface Destination {
     val target: NavTarget

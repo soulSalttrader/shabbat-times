@@ -2,7 +2,7 @@ package il.soulSalttrader.retro.core.nav.destination
 
 import kotlinx.serialization.Serializable
 import il.soulSalttrader.retro.R
-import il.soulSalttrader.retro.core.nav.route.NavTargetBottom
+import il.soulSalttrader.retro.core.nav.NavTargetBottom
 import il.soulSalttrader.retro.core.UiIcon
 
 @Serializable

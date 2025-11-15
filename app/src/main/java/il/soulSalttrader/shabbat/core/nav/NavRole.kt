@@ -1,4 +1,4 @@
-package il.soulSalttrader.retro.core.nav.route
+package il.soulSalttrader.retro.core.nav
 
 enum class NavRole {
     BOTTOM_TAB,

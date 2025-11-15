@@ -1,6 +1,6 @@
 package il.soulSalttrader.retro.core.nav.destination
 
-import il.soulSalttrader.retro.core.nav.route.NavTargetBottom
+import il.soulSalttrader.retro.core.nav.NavTargetBottom
 import il.soulSalttrader.retro.core.UiIcon
 
 data class DestinationBottomData(
