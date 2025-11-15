@@ -10,7 +10,7 @@ sealed interface DestinationNavTop : DestinationTop {
 
     @Serializable
     object Previous : DestinationNavTop, DestinationTop by DestinationTopData(
-        target = NavTargetTop.PreviousScreen,
+        target = NavTargetTop.Previous,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.arrow_back_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.arrow_back_outlined_24px),
@@ -19,7 +19,7 @@ sealed interface DestinationNavTop : DestinationTop {
 
     @Serializable
     object History : DestinationNavTop, DestinationTop by DestinationTopData(
-        target = NavTargetTop.HistoryScreen,
+        target = NavTargetTop.History,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(resId = R.drawable.overview_filled_24),
         unselectedIcon = UiIcon.Resource(resId = R.drawable.overview_outlined_24),
@@ -28,7 +28,7 @@ sealed interface DestinationNavTop : DestinationTop {
 
     @Serializable
     object Favorite : DestinationNavTop, DestinationTop by DestinationTopData(
-        target = NavTargetTop.FavoriteScreen,
+        target = NavTargetTop.Favorite,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.favorite_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.favorite_outlined_24),

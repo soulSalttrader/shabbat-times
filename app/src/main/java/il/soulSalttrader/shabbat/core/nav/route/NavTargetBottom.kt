@@ -4,10 +4,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface NavTargetBottom : NavTarget {
-    @Serializable object HomeScreen : NavTargetBottom
-    @Serializable object AlertsScreen : NavTargetBottom
-    @Serializable object SettingsScreen : NavTargetBottom
-//    @Serializable object MoreScreen : NavTargetBottom
-    @Serializable object BreatheScreen : NavTargetBottom
-    @Serializable object ShabbatScreen : NavTargetBottom
+    @Serializable object Home : NavTargetBottom
+    @Serializable object Alerts : NavTargetBottom
+    @Serializable object Settings : NavTargetBottom
+//    @Serializable object More : NavTargetBottom
+    @Serializable object Breathe : NavTargetBottom
+    @Serializable object Shabbat : NavTargetBottom
 }

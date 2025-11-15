@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface NavTargetTop : NavTarget {
-    @Serializable object PreviousScreen : NavTargetTop
-    @Serializable object HistoryScreen : NavTargetTop
-    @Serializable object FavoriteScreen : NavTargetTop
+    @Serializable object Previous : NavTargetTop
+    @Serializable object History : NavTargetTop
+    @Serializable object Favorite : NavTargetTop
 }
