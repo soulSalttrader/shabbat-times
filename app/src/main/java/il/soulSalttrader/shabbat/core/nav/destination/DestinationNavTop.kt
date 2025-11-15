@@ -2,7 +2,7 @@ package il.soulSalttrader.retro.core.nav.destination
 
 import il.soulSalttrader.retro.R
 import il.soulSalttrader.retro.core.UiIcon
-import il.soulSalttrader.retro.core.nav.route.RouteTop
+import il.soulSalttrader.retro.core.nav.route.NavTargetTop
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -10,7 +10,7 @@ sealed interface DestinationNavTop : DestinationTop {
 
     @Serializable
     object Previous : DestinationNavTop, DestinationTop by DestinationTopData(
-        route = RouteTop.PreviousScreen,
+        target = NavTargetTop.PreviousScreen,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.arrow_back_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.arrow_back_outlined_24px),
@@ -19,7 +19,7 @@ sealed interface DestinationNavTop : DestinationTop {
 
     @Serializable
     object History : DestinationNavTop, DestinationTop by DestinationTopData(
-        route = RouteTop.HistoryScreen,
+        target = NavTargetTop.HistoryScreen,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(resId = R.drawable.overview_filled_24),
         unselectedIcon = UiIcon.Resource(resId = R.drawable.overview_outlined_24),
@@ -28,7 +28,7 @@ sealed interface DestinationNavTop : DestinationTop {
 
     @Serializable
     object Favorite : DestinationNavTop, DestinationTop by DestinationTopData(
-        route = RouteTop.FavoriteScreen,
+        target = NavTargetTop.FavoriteScreen,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.favorite_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.favorite_outlined_24),
