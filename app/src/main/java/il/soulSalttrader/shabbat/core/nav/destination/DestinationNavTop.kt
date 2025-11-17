@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 sealed interface DestinationNavTop : Destination {
 
     @Serializable
-    object Previous : DestinationNavTop, Destination by DestinationTopData(
+    object Previous : DestinationNavTop, Destination by DestinationData(
         target = NavTargetTop.Previous,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.arrow_back_filled_24),
@@ -19,7 +19,7 @@ sealed interface DestinationNavTop : Destination {
     )
 
     @Serializable
-    object History : DestinationNavTop, Destination by DestinationTopData(
+    object History : DestinationNavTop, Destination by DestinationData(
         target = NavTargetTop.History,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(resId = R.drawable.overview_filled_24),
@@ -28,7 +28,7 @@ sealed interface DestinationNavTop : Destination {
     )
 
     @Serializable
-    object Favorite : DestinationNavTop, Destination by DestinationTopData(
+    object Favorite : DestinationNavTop, Destination by DestinationData(
         target = NavTargetTop.Favorite,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.favorite_filled_24),

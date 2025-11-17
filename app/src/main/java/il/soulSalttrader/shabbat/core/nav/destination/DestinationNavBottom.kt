@@ -10,7 +10,7 @@ import il.soulSalttrader.retro.core.nav.NavRole
 sealed interface DestinationNavBottom : Destination {
 
     @Serializable
-    data object Home : DestinationNavBottom, Destination by DestinationBottomData(
+    data object Home : DestinationNavBottom, Destination by DestinationData(
         target = NavTargetBottom.Home,
         title = "Home",
         selectedIcon = UiIcon.Resource(R.drawable.home_filled_24),
@@ -19,7 +19,7 @@ sealed interface DestinationNavBottom : Destination {
     )
 
     @Serializable
-    data object Alerts : DestinationNavBottom, Destination by DestinationBottomData(
+    data object Alerts : DestinationNavBottom, Destination by DestinationData(
         target = NavTargetBottom.Alerts,
         title = "Alerts",
         selectedIcon = UiIcon.Resource(R.drawable.notifications_filled_24),
@@ -28,7 +28,7 @@ sealed interface DestinationNavBottom : Destination {
     )
 
     @Serializable
-    data object Settings : DestinationNavBottom, Destination by DestinationBottomData(
+    data object Settings : DestinationNavBottom, Destination by DestinationData(
         target = NavTargetBottom.Settings,
         title = "Settings",
         selectedIcon = UiIcon.Resource(R.drawable.settings_filled_24),
@@ -46,7 +46,7 @@ sealed interface DestinationNavBottom : Destination {
 //    )
 
     @Serializable
-    data object Breathe : DestinationNavBottom, Destination by DestinationBottomData(
+    data object Breathe : DestinationNavBottom, Destination by DestinationData(
         target = NavTargetBottom.Breathe,
         title = "Breath",
         selectedIcon = UiIcon.Resource(R.drawable.relax_filled_24),
@@ -55,7 +55,7 @@ sealed interface DestinationNavBottom : Destination {
     )
 
     @Serializable
-    data object Shabbat : DestinationNavBottom, Destination by DestinationBottomData(
+    data object Shabbat : DestinationNavBottom, Destination by DestinationData(
         target = NavTargetBottom.Shabbat,
         title = "Shabbat",
         selectedIcon = UiIcon.Resource(R.drawable.candle_filled_24),
