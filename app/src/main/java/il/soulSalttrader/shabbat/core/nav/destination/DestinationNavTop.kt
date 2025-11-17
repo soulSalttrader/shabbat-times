@@ -7,10 +7,10 @@ import il.soulSalttrader.retro.core.nav.NavTargetTop
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface DestinationNavTop : DestinationTop {
+sealed interface DestinationNavTop : Destination {
 
     @Serializable
-    object Previous : DestinationNavTop, DestinationTop by DestinationTopData(
+    object Previous : DestinationNavTop, Destination by DestinationTopData(
         target = NavTargetTop.Previous,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.arrow_back_filled_24),
@@ -19,7 +19,7 @@ sealed interface DestinationNavTop : DestinationTop {
     )
 
     @Serializable
-    object History : DestinationNavTop, DestinationTop by DestinationTopData(
+    object History : DestinationNavTop, Destination by DestinationTopData(
         target = NavTargetTop.History,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(resId = R.drawable.overview_filled_24),
@@ -28,7 +28,7 @@ sealed interface DestinationNavTop : DestinationTop {
     )
 
     @Serializable
-    object Favorite : DestinationNavTop, DestinationTop by DestinationTopData(
+    object Favorite : DestinationNavTop, Destination by DestinationTopData(
         target = NavTargetTop.Favorite,
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.favorite_filled_24),

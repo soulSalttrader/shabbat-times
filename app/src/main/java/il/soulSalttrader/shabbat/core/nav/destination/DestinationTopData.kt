@@ -10,4 +10,4 @@ data class DestinationTopData(
     override val selectedIcon: UiIcon,
     override val unselectedIcon: UiIcon,
     override val role: NavRole,
-) : DestinationTop
+) : Destination
