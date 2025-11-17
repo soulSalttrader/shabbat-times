@@ -11,6 +11,7 @@ object NavItems {
         unselectedIcon = UiIcon.Resource(R.drawable.arrow_back_outlined_24px),
         role = NavRole.TOP_NAVIGATION,
     )
+
     val History = NavItem(
         target = NavTargetTop.History,
         title = "History",
@@ -51,13 +52,13 @@ object NavItems {
         role = NavRole.BOTTOM_TAB,
     )
 
-//    val More = NavItem(
-//        target = NavTargetBottom.More,
-//        title = "More",
-//        selectedIcon = UiIcon.Resource(R.drawable.menu_filled_24),
-//        unselectedIcon = UiIcon.Resource(R.drawable.menu_outlined_24),
-//        role = NavRole.BOTTOM_TAB,
-//    )
+    val More = NavItem(
+        target = NavTargetBottom.More,
+        title = "More",
+        selectedIcon = UiIcon.Resource(R.drawable.menu_filled_24),
+        unselectedIcon = UiIcon.Resource(R.drawable.menu_outlined_24),
+        role = NavRole.BOTTOM_TAB,
+    )
 
     val Breathe = NavItem(
         target = NavTargetBottom.Breathe,
@@ -75,7 +76,8 @@ object NavItems {
         role = NavRole.BOTTOM_TAB,
     )
 
-    val allBottomTabs = listOf(Home, Alerts, Settings, Breathe, Shabbat)
+    val allBottomTabs = listOf(Alerts, Breathe, Home, Settings, Shabbat)
+    val allTopTabs = listOf(Previous, Favorite, History)
     val allTopNavigation = listOf(Previous)
     val allTopActions = listOf(Favorite, History)
 }
