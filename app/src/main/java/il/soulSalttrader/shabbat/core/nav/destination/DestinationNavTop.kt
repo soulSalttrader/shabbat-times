@@ -2,6 +2,7 @@ package il.soulSalttrader.retro.core.nav.destination
 
 import il.soulSalttrader.retro.R
 import il.soulSalttrader.retro.core.UiIcon
+import il.soulSalttrader.retro.core.nav.NavRole
 import il.soulSalttrader.retro.core.nav.NavTargetTop
 import kotlinx.serialization.Serializable
 
@@ -14,7 +15,7 @@ sealed interface DestinationNavTop : DestinationTop {
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.arrow_back_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.arrow_back_outlined_24px),
-        role = TopBarRole.NAVIGATION,
+        role = NavRole.TOP_NAVIGATION,
     )
 
     @Serializable
@@ -23,7 +24,7 @@ sealed interface DestinationNavTop : DestinationTop {
         title = "Go Back",
         selectedIcon = UiIcon.Resource(resId = R.drawable.overview_filled_24),
         unselectedIcon = UiIcon.Resource(resId = R.drawable.overview_outlined_24),
-        role = TopBarRole.ACTION,
+        role = NavRole.TOP_ACTION,
     )
 
     @Serializable
@@ -32,6 +33,6 @@ sealed interface DestinationNavTop : DestinationTop {
         title = "Go Back",
         selectedIcon = UiIcon.Resource(R.drawable.favorite_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.favorite_outlined_24),
-        role = TopBarRole.ACTION,
+        role = NavRole.TOP_ACTION,
     )
 }

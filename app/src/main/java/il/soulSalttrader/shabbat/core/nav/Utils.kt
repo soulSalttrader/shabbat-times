@@ -5,7 +5,6 @@ import androidx.navigation.NavDestination
 import il.soulSalttrader.retro.core.nav.destination.DestinationNavBottom
 import il.soulSalttrader.retro.core.nav.destination.DestinationNavTop
 import il.soulSalttrader.retro.core.nav.destination.DestinationTop
-import il.soulSalttrader.retro.core.nav.destination.TopBarRole
 
 inline fun <reified T: Any> allSealedObjects(): List<T> =
     T::class.sealedSubclasses.mapNotNull { it.objectInstance }
@@ -20,7 +19,7 @@ fun NavDestination?.currentDestinationName(): String? =
     this?.route?.substringAfterLast('.')
 
 fun List<DestinationTop>.extractToBarItems(): Pair<DestinationTop?, List<DestinationTop>> {
-    val navItem = this.find { it.role == TopBarRole.NAVIGATION }
-    val actionItems = this.filter { it.role == TopBarRole.ACTION }
+    val navItem = this.find { it.role == NavRole.TOP_NAVIGATION }
+    val actionItems = this.filter { it.role == NavRole.TOP_ACTION }
     return navItem to actionItems
 }

@@ -1,6 +1,7 @@
 package il.soulSalttrader.retro.core.nav.destination
 
 import il.soulSalttrader.retro.core.UiIcon
+import il.soulSalttrader.retro.core.nav.NavRole
 import il.soulSalttrader.retro.core.nav.NavTarget
 
 interface Destination {
@@ -8,4 +9,5 @@ interface Destination {
     val title: String
     val selectedIcon: UiIcon
     val unselectedIcon: UiIcon
+    val role: NavRole
 }

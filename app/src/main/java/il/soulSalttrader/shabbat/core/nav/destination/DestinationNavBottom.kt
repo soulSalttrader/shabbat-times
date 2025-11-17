@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import il.soulSalttrader.retro.R
 import il.soulSalttrader.retro.core.nav.NavTargetBottom
 import il.soulSalttrader.retro.core.UiIcon
+import il.soulSalttrader.retro.core.nav.NavRole
 
 @Serializable
 sealed interface DestinationNavBottom : DestinationBottom {
@@ -14,6 +15,7 @@ sealed interface DestinationNavBottom : DestinationBottom {
         title = "Home",
         selectedIcon = UiIcon.Resource(R.drawable.home_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.home_outlined_24),
+        role = NavRole.BOTTOM_TAB,
     )
 
     @Serializable
@@ -22,6 +24,7 @@ sealed interface DestinationNavBottom : DestinationBottom {
         title = "Alerts",
         selectedIcon = UiIcon.Resource(R.drawable.notifications_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.notifications_outlined_24),
+        role = NavRole.BOTTOM_TAB,
     )
 
     @Serializable
@@ -30,6 +33,7 @@ sealed interface DestinationNavBottom : DestinationBottom {
         title = "Settings",
         selectedIcon = UiIcon.Resource(R.drawable.settings_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.settings_outlined_24),
+        role = NavRole.BOTTOM_TAB,
     )
 
 //    @Serializable
@@ -38,6 +42,7 @@ sealed interface DestinationNavBottom : DestinationBottom {
 //        title = "More",
 //        selectedIcon = UiIcon.Resource(R.drawable.menu_filled_24),
 //        unselectedIcon = UiIcon.Resource(R.drawable.menu_outlined_24),
+//        role = NavRole.BOTTOM_TAB,
 //    )
 
     @Serializable
@@ -46,6 +51,7 @@ sealed interface DestinationNavBottom : DestinationBottom {
         title = "Breath",
         selectedIcon = UiIcon.Resource(R.drawable.relax_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.relax_outlined_24),
+        role = NavRole.BOTTOM_TAB,
     )
 
     @Serializable
@@ -54,5 +60,6 @@ sealed interface DestinationNavBottom : DestinationBottom {
         title = "Shabbat",
         selectedIcon = UiIcon.Resource(R.drawable.candle_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.candle_outlined_24),
+        role = NavRole.BOTTOM_TAB,
     )
 }
