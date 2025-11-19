@@ -62,7 +62,7 @@ fun NavApp(
     ) {
         mainNavGraph(
             modifier = modifier,
-            navController = navController,
+            navManager = navManager,
             state = state,
             reducers = reducers,
             onBadgeReducer = onBadgeReducer,
