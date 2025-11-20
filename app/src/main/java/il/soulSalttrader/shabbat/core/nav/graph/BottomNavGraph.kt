@@ -8,7 +8,6 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import il.soulSalttrader.retro.breatheApp.BreatheScreen
@@ -49,7 +48,7 @@ fun NavGraphBuilder.bottomNavGraph(
         Breathe.title?.let { text -> Text(text = text) }
 
         BreatheScreen(
-            modifier = modifier,
+            modifier = Modifier,
             breatheState = state.breatheState,
             timerState = state.timerState,
             onBreatheReduce = reducers.onBreatheReducer,
