@@ -1,4 +1,4 @@
-package il.soulSalttrader.retro
+package il.soulSalttrader.retro.shabbatApp
 
 import androidx.lifecycle.ViewModel
 
