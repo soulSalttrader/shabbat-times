@@ -18,8 +18,8 @@ import il.soulSalttrader.retro.core.nav.NavItems.Breathe
 import il.soulSalttrader.retro.core.nav.NavItems.Home
 import il.soulSalttrader.retro.core.nav.NavItems.Settings
 import il.soulSalttrader.retro.core.nav.NavItems.Shabbat
-import il.soulSalttrader.retro.core.nav.NavManager
 import il.soulSalttrader.retro.core.nav.NavTargetBottom
+import il.soulSalttrader.retro.core.nav.Navigator
 import il.soulSalttrader.retro.core.simpleName
 import il.soulSalttrader.retro.counterApp.CounterScreen
 import il.soulSalttrader.retro.counterApp.remember.CounterRememberScreen
@@ -27,7 +27,7 @@ import il.soulSalttrader.retro.timerApp.TimerScreen
 
 fun NavGraphBuilder.bottomNavGraph(
     modifier: Modifier,
-    navManager: NavManager,
+    navigator: Navigator,
     state: Model,
     reducers: Reduce,
 ) {
@@ -38,7 +38,7 @@ fun NavGraphBuilder.bottomNavGraph(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Button(onClick = { navManager.navigateUp() }) {
+            Button(onClick = { navigator.navigateUp() }) {
                 Text(text = "title: ${args.simpleName()}.")
             }
         }

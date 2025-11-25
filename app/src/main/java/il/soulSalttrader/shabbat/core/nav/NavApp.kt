@@ -21,7 +21,7 @@ fun NavApp(
     state: Model,
     reducers: Reduce,
     onBadgeReducer: (BadgeReducer) -> Unit,
-    navManager: NavManager,
+    navigator: Navigator,
 ) {
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -32,11 +32,11 @@ fun NavApp(
             val route = currentBackStackEntry?.destination?.route
             Log.d("updated target", "T:$target\nR:$route")
         }
-        navManager.updateCurrentTarget(target)
+        navigator.updateCurrentTarget(target)
     }
 
     LaunchedEffect(Unit) {
-        navManager.commands.collect { action ->
+        navigator.commands.collect { action ->
             when (action) {
                 is NavAction.To        -> navController.navigate(action.target)
                 is NavAction.Up        -> navController.popBackStack()
@@ -56,7 +56,7 @@ fun NavApp(
     ) {
         mainNavGraph(
             modifier = modifier,
-            navManager = navManager,
+            navigator = navigator,
             state = state,
             reducers = reducers,
             onBadgeReducer = onBadgeReducer,

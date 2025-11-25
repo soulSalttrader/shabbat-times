@@ -8,20 +8,20 @@ import il.soulSalttrader.retro.core.BadgeReducer
 import il.soulSalttrader.retro.core.Model
 import il.soulSalttrader.retro.core.Reduce
 import il.soulSalttrader.retro.core.content.SplitScreen
-import il.soulSalttrader.retro.core.nav.NavManager
+import il.soulSalttrader.retro.core.nav.Navigator
 import il.soulSalttrader.retro.counterApp.CounterScreen
 import il.soulSalttrader.retro.counterApp.remember.CounterRememberScreen
 import il.soulSalttrader.retro.navigation.experimental.CounterScreen
 
 fun NavGraphBuilder.mainNavGraph(
     modifier: Modifier,
-    navManager: NavManager,
+    navigator: Navigator,
     state: Model,
     reducers: Reduce,
     onBadgeReducer: (BadgeReducer) -> Unit
 ) {
     topNavGraph(onBadgeReducer)
-    bottomNavGraph(modifier, navManager, state, reducers)
+    bottomNavGraph(modifier, navigator, state, reducers)
 
     composable<CounterScreen> {
         SplitScreen(
