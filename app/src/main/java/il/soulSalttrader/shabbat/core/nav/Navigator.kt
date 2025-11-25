@@ -31,4 +31,6 @@ interface Navigator {
 
     fun navigateUp(): Boolean
     fun popToRoot(): Boolean
+
+    fun updateCurrentTarget(target: NavTarget?)
 }

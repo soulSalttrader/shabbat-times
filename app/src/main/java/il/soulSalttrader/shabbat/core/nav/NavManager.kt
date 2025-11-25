@@ -16,7 +16,7 @@ class NavManager @Inject constructor() : Navigator {
     private val _currentTarget = MutableStateFlow<NavTarget?>(value = null)
     override val currentTarget = _currentTarget.asStateFlow()
 
-    fun updateCurrentTarget(target: NavTarget?) {
+    override fun updateCurrentTarget(target: NavTarget?) {
         _currentTarget.value = target
     }
 
