@@ -1,14 +1,29 @@
 package il.soulSalttrader.retro.core.nav
 
-import kotlinx.serialization.Serializable
+import androidx.navigation.NavOptionsBuilder
 
 sealed interface NavAction {
-    @Serializable
-    data class To(val target: NavTarget) : NavAction
-    @Serializable
-    data class ResetTo(val target: NavTarget) : NavAction
-    @Serializable
-    data class PopTo(val target: NavTarget) : NavAction
+
+    data class To(
+        val target: NavTarget,
+        val navOptions: NavOptionsBuilder.() -> Unit = {
+            launchSingleTop = true
+            restoreState = true
+        }
+    ) : NavAction
+
+    data class ResetTo(
+        val target: NavTarget,
+        val navOptions: NavOptionsBuilder.() -> Unit = {
+            popUpTo(0) { inclusive = true }
+            launchSingleTop = true
+        }
+    ) : NavAction
+
+    data class PopTo(
+        val target: NavTarget,
+        val navOptions: NavOptionsBuilder.() -> Unit = { }
+    ) : NavAction
 
     data object Up : NavAction
     data object PopToRoot : NavAction

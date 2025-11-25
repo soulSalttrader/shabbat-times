@@ -38,15 +38,9 @@ fun NavApp(
     LaunchedEffect(Unit) {
         navManager.commands.collect { action ->
             when (action) {
-                is NavAction.To        -> navController.navigate(action.target) {
-                    launchSingleTop = true
-                    restoreState = true
-                }
+                is NavAction.To        -> navController.navigate(action.target)
                 is NavAction.Up        -> navController.popBackStack()
-                is NavAction.ResetTo   -> navController.navigate(action.target) {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    launchSingleTop = true
-                }
+                is NavAction.ResetTo   -> navController.navigate(action.target)
                 is NavAction.PopTo     -> navController.popBackStack(action.target, inclusive = false)
                 is NavAction.PopToRoot -> navController.popBackStack(navController.graph.startDestinationId, inclusive = false)
             }
