@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ShabbatResponse(
-    val result: ShabbatResult = ShabbatResult(),
-    val response: String = "",
+    val results: ShabbatResult = ShabbatResult(),
+    val status: String = "",
 )
