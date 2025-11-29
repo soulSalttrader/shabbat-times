@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.shabbatApp.api.RetrofitInstance
-import il.soulSalttrader.retro.shabbatApp.model.ShabbatResponse
+import il.soulSalttrader.retro.shabbatApp.content.ShabbatUiState
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,20 +15,32 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor() : ViewModel() {
-    private val _uiState: MutableStateFlow<ShabbatResponse> = MutableStateFlow(ShabbatResponse())
-    val uiState: StateFlow<ShabbatResponse> = _uiState.asStateFlow()
+    private val _uiState: MutableStateFlow<ShabbatUiState> = MutableStateFlow(ShabbatUiState.Loading)
+    val uiState: StateFlow<ShabbatUiState> = _uiState.asStateFlow()
 
     init { loadShabbatTimes() }
 
+    fun retry() = loadShabbatTimes()
+
     private fun loadShabbatTimes() {
         viewModelScope.launch {
+            _uiState.value = ShabbatUiState.Loading
+
             runCatching {
                 RetrofitInstance.api.getShabbatTimes()
             }.onSuccess { response ->
-                _uiState.value = response
                 if (Debug.enabled) Log.d("ShabbatViewModel.getShabbatTimes", response.status)
-            }.onFailure { e ->
-                Log.d("ShabbatViewModel.getShabbatTimes", "${e.message}")
+
+                when {
+                    response.status.equals("OK", ignoreCase = true) -> {
+                        _uiState.value = ShabbatUiState.Success(response.results)
+                    }
+                    else -> _uiState.value = ShabbatUiState.Error("API returned ${response.status}")
+                }
+
+            }.onFailure { exception ->
+                _uiState.value = ShabbatUiState.Error(exception.message ?: "Unknown error")
+                Log.d("ShabbatViewModel.getShabbatTimes", "${exception.message}")
             }
         }
     }
