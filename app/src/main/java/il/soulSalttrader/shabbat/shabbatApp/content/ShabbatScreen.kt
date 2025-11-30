@@ -1,0 +1,26 @@
+package il.soulSalttrader.retro.shabbatApp.content
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import il.soulSalttrader.retro.shabbatApp.viewModel.ShabbatViewModel
+
+@Composable
+fun ShabbatScreen() {
+    val viewModel: ShabbatViewModel = hiltViewModel()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    when (uiState) {
+        is ShabbatUiState.Loading -> LoadingScreen()
+
+        is ShabbatUiState.Success -> ShabbatContent(
+            result = (uiState as ShabbatUiState.Success).result,
+        )
+
+        is ShabbatUiState.Error   -> ErrorScreen(
+            message = (uiState as ShabbatUiState.Error).message,
+            onRetry = viewModel::retry
+        )
+    }
+}
