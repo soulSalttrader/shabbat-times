@@ -5,7 +5,7 @@ import il.soulSalttrader.retro.shabbatApp.model.ShabbatResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface ApiService {
+interface ShabbatAPIService {
 
     @GET("json")
     suspend fun getShabbatTimes(
