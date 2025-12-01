@@ -8,12 +8,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import il.soulSalttrader.retro.shabbatApp.model.ShabbatResult
+import il.soulSalttrader.retro.shabbatApp.model.Shabbat
 
 @Composable
 fun ShabbatContent(
     modifier: Modifier = Modifier,
-    result: ShabbatResult,
+    result: Shabbat,
 ) {
     Column(modifier = modifier.padding(24.dp)) {
 
