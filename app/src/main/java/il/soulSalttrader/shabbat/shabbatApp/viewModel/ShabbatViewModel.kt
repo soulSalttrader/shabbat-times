@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.retro.core.Debug
-import il.soulSalttrader.retro.shabbatApp.api.RetrofitInstance
+import il.soulSalttrader.retro.shabbatApp.api.RetrofitClient
 import il.soulSalttrader.retro.shabbatApp.content.ShabbatUiState
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,7 @@ class ShabbatViewModel @Inject constructor() : ViewModel() {
             _uiState.value = ShabbatUiState.Loading
 
             runCatching {
-                RetrofitInstance.api.getShabbatTimes()
+                RetrofitClient.shabbatApi.getShabbatTimes()
             }.onSuccess { response ->
                 if (Debug.enabled) Log.d("ShabbatViewModel.getShabbatTimes", response.status)
 

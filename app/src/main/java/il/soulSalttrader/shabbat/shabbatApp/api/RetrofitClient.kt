@@ -7,11 +7,11 @@ import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
-object RetrofitInstance {
+object RetrofitClient {
     private val contentType = "application/json".toMediaType()
     private val client = OkHttpClientFactory.create(Debug.enabled)
 
-    val api: ShabbatAPIService by lazy {
+    val shabbatApi: ShabbatAPIService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_SUNRISE_SUNSET)
             .client(client)
