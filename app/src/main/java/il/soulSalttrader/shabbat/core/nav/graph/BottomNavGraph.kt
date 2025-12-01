@@ -1,15 +1,10 @@
 package il.soulSalttrader.retro.core.nav.graph
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import il.soulSalttrader.retro.breatheApp.BreatheScreen
 import il.soulSalttrader.retro.core.Model
 import il.soulSalttrader.retro.core.Reduce
@@ -17,12 +12,12 @@ import il.soulSalttrader.retro.core.content.SplitScreen
 import il.soulSalttrader.retro.core.nav.NavItems.Breathe
 import il.soulSalttrader.retro.core.nav.NavItems.Home
 import il.soulSalttrader.retro.core.nav.NavItems.Settings
-import il.soulSalttrader.retro.core.nav.NavItems.Shabbat
 import il.soulSalttrader.retro.core.nav.NavTargetBottom
 import il.soulSalttrader.retro.core.nav.Navigator
-import il.soulSalttrader.retro.core.simpleName
 import il.soulSalttrader.retro.counterApp.CounterScreen
 import il.soulSalttrader.retro.counterApp.remember.CounterRememberScreen
+import il.soulSalttrader.retro.shabbatApp.content.FailureScreen
+import il.soulSalttrader.retro.shabbatApp.content.ShabbatScreen
 import il.soulSalttrader.retro.timerApp.TimerScreen
 
 fun NavGraphBuilder.bottomNavGraph(
@@ -31,18 +26,7 @@ fun NavGraphBuilder.bottomNavGraph(
     state: Model,
     reducers: Reduce,
 ) {
-    composable<NavTargetBottom.Alerts> {
-        val args = it.toRoute<NavTargetBottom.Alerts>()
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = { navigator.navigateUp() }) {
-                Text(text = "title: ${args.simpleName()}.")
-            }
-        }
-    }
+    composable<NavTargetBottom.Alerts> { FailureScreen(message = "No internet connection") { } }
 
     composable<NavTargetBottom.Breathe> {
         Breathe.title?.let { text -> Text(text = text) }
@@ -81,5 +65,5 @@ fun NavGraphBuilder.bottomNavGraph(
         )
     }
 
-    composable<NavTargetBottom.Shabbat> { Shabbat.title?.let { text -> Text(text = text) } }
+    composable<NavTargetBottom.Shabbat> { ShabbatScreen() }
 }
