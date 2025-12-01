@@ -12,14 +12,14 @@ fun ShabbatScreen() {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     when (uiState) {
-        is ShabbatUiState.Loading -> LoadingScreen()
+        is ShabbatNetworkResult.Loading -> LoadingScreen()
 
-        is ShabbatUiState.Success -> ShabbatContent(
-            result = (uiState as ShabbatUiState.Success).result,
+        is ShabbatNetworkResult.Success -> ShabbatContent(
+            result = (uiState as ShabbatNetworkResult.Success).data,
         )
 
-        is ShabbatUiState.Error   -> ErrorScreen(
-            message = (uiState as ShabbatUiState.Error).message,
+        is ShabbatNetworkResult.Error   -> ErrorScreen(
+            message = (uiState as ShabbatNetworkResult.Error).message,
             onRetry = viewModel::retry
         )
     }

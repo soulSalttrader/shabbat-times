@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.shabbatApp.network.RetrofitClient
-import il.soulSalttrader.retro.shabbatApp.content.ShabbatUiState
+import il.soulSalttrader.retro.shabbatApp.content.ShabbatNetworkResult
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,8 +15,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor() : ViewModel() {
-    private val _uiState: MutableStateFlow<ShabbatUiState> = MutableStateFlow(ShabbatUiState.Loading)
-    val uiState: StateFlow<ShabbatUiState> = _uiState.asStateFlow()
+    private val _uiState: MutableStateFlow<ShabbatNetworkResult> = MutableStateFlow(ShabbatNetworkResult.Loading)
+    val uiState: StateFlow<ShabbatNetworkResult> = _uiState.asStateFlow()
 
     init { loadShabbatTimes() }
 
@@ -24,7 +24,7 @@ class ShabbatViewModel @Inject constructor() : ViewModel() {
 
     private fun loadShabbatTimes() {
         viewModelScope.launch {
-            _uiState.value = ShabbatUiState.Loading
+            _uiState.value = ShabbatNetworkResult.Loading
 
             runCatching {
                 RetrofitClient.shabbatApi.getShabbatTimes()
@@ -33,13 +33,13 @@ class ShabbatViewModel @Inject constructor() : ViewModel() {
 
                 when {
                     response.status.equals("OK", ignoreCase = true) -> {
-                        _uiState.value = ShabbatUiState.Success(response.results)
+                        _uiState.value = ShabbatNetworkResult.Success(response.results)
                     }
-                    else -> _uiState.value = ShabbatUiState.Error("API returned ${response.status}")
+                    else -> _uiState.value = ShabbatNetworkResult.Error("API returned ${response.status}")
                 }
 
             }.onFailure { exception ->
-                _uiState.value = ShabbatUiState.Error(exception.message ?: "Unknown error")
+                _uiState.value = ShabbatNetworkResult.Error(exception.message ?: "Unknown error")
                 Log.d("ShabbatViewModel.getShabbatTimes", "${exception.message}")
             }
         }
