@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.retro.core.Debug
-import il.soulSalttrader.retro.shabbatApp.api.RetrofitClient
+import il.soulSalttrader.retro.shabbatApp.network.RetrofitClient
 import il.soulSalttrader.retro.shabbatApp.content.ShabbatUiState
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

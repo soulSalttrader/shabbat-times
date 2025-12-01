@@ -1,4 +1,4 @@
-package il.soulSalttrader.retro.shabbatApp.api
+package il.soulSalttrader.retro.shabbatApp.network
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

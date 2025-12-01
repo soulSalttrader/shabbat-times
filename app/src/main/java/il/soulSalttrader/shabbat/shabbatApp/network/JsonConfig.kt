@@ -1,4 +1,4 @@
-package il.soulSalttrader.retro.shabbatApp.api
+package il.soulSalttrader.retro.shabbatApp.network
 
 import il.soulSalttrader.retro.core.Debug
 import kotlinx.serialization.json.Json
