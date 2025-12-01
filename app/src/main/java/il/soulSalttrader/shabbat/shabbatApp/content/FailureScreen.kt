@@ -21,9 +21,9 @@ import il.soulSalttrader.retro.core.content.IconTextButton
 import il.soulSalttrader.retro.core.content.UiIconImage
 
 @Composable
-fun ErrorScreen(
-    message: String,
+fun FailureScreen(
     modifier: Modifier = Modifier,
+    message: String,
     onRetry: () -> Unit,
 ) {
     Box(
@@ -69,7 +69,7 @@ fun ErrorScreen(
 @Preview
 @Composable
 fun Preview(modifier: Modifier = Modifier) {
-    ErrorScreen(
+    FailureScreen(
         modifier = Modifier,
         message = "Unable to load data. Check your connection and retry.",
         onRetry = { /* no op */ }

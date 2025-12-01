@@ -35,11 +35,11 @@ class ShabbatViewModel @Inject constructor() : ViewModel() {
                     response.status.equals("OK", ignoreCase = true) -> {
                         _uiState.value = ShabbatUiState.Success(response.results)
                     }
-                    else -> _uiState.value = ShabbatUiState.Error("API returned ${response.status}")
+                    else -> _uiState.value = ShabbatUiState.Failure(message = "API returned ${response.status}")
                 }
 
             }.onFailure { exception ->
-                _uiState.value = ShabbatUiState.Error(exception.message ?: "Unknown error")
+                _uiState.value = ShabbatUiState.Failure(message = exception.message ?: "Unknown error", cause = exception)
                 Log.d("ShabbatViewModel.getShabbatTimes", "${exception.message}")
             }
         }

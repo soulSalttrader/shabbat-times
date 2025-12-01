@@ -19,8 +19,8 @@ fun ShabbatScreen() {
             result = (uiState as ShabbatUiState.Success).data,
         )
 
-        is ShabbatUiState.Error   -> ErrorScreen(
-            message = (uiState as ShabbatUiState.Error).message,
+        is ShabbatUiState.Failure -> FailureScreen(
+            message = (uiState as ShabbatUiState.Failure).message,
             onRetry = viewModel::retry
         )
     }
