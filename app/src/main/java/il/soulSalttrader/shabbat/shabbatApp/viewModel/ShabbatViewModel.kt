@@ -29,7 +29,7 @@ class ShabbatViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = ShabbatUiState.Loading
 
-            _uiState.value = when (val result = repository.getShabbatTimes()) {
+            _uiState.value = when (val result = repository.getSolarTimes()) {
                 is NetworkResult.Success -> {
                     if (Debug.enabled) Log.d("ShabbatViewModel.refresh", "${result.data}")
 
