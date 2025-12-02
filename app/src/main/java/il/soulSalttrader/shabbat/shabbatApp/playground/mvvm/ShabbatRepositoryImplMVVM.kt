@@ -2,6 +2,7 @@ package il.soulSalttrader.retro.shabbatApp.playground.mvvm
 
 import android.util.Log
 import il.soulSalttrader.retro.core.Debug
+import il.soulSalttrader.retro.shabbatApp.model.HalachicTimes
 import il.soulSalttrader.retro.shabbatApp.model.SolarTimes
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.network.ShabbatAPIService
@@ -39,5 +40,9 @@ class ShabbatRepositoryImplMVVM @Inject constructor(
             if (Debug.enabled) Log.d("ShabbatRepositoryImplMVVM.getSolarTimes", e.message ?: "Exception")
             NetworkResult.Failure(e.message ?: "Unexpected error", e.cause)
         }
+    }
+
+    override suspend fun getHalachicTimes(): NetworkResult<HalachicTimes> {
+        TODO("Not yet implemented")
     }
 }

@@ -28,7 +28,7 @@ class ShabbatViewModelMVVM @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
-            _uiState.value = when (val result = repository.getSolarTimes()) {
+            _uiState.value = when (val result = repository.getHalachicTimes()) {
                 is NetworkResult.Success -> {
                     if (Debug.enabled) Log.d("ShabbatViewModelMVVM.refresh", "${result.data}")
 
