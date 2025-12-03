@@ -2,9 +2,10 @@ package il.soulSalttrader.retro.shabbatApp.common
 
 import android.content.Context
 import android.text.format.DateFormat
-import il.soulSalttrader.retro.shabbatApp.constants.DataTimeFormatters.API_DATE_PARSER
-import il.soulSalttrader.retro.shabbatApp.constants.DataTimeFormatters.API_TIME_PARSER_12
-import il.soulSalttrader.retro.shabbatApp.constants.DataTimeFormatters.API_TIME_PARSER_24
+import il.soulSalttrader.retro.shabbatApp.constants.DateTimeFormatters.API_DATE_PARSER
+import il.soulSalttrader.retro.shabbatApp.constants.DateTimeFormatters.API_TIME_PARSER_12
+import il.soulSalttrader.retro.shabbatApp.constants.DateTimeFormatters.API_TIME_PARSER_24
+import il.soulSalttrader.retro.shabbatApp.constants.DateTimeFormatters.HEBREW_DATE_FORMATTER
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDate.now
@@ -34,5 +35,5 @@ fun String.toLocalTimeFromApi(is24hFormat: Boolean): LocalTime =
     if (is24hFormat) LocalTime.parse(this, API_TIME_PARSER_24)
     else LocalTime.parse(this, API_TIME_PARSER_12)
 
-fun LocalDate.toDisplayString(): String = this.format(API_DATE_PARSER)
+fun LocalDate.toDisplayString(): String = this.format(HEBREW_DATE_FORMATTER)
 fun String.toLocalDateFromApi(): LocalDate = LocalDate.parse(this, API_DATE_PARSER)
