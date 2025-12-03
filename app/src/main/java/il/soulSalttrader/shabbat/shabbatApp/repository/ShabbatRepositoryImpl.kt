@@ -2,10 +2,12 @@ package il.soulSalttrader.retro.shabbatApp.repository
 
 import android.util.Log
 import il.soulSalttrader.retro.core.Debug
+import il.soulSalttrader.retro.shabbatApp.common.getOrElse
 import il.soulSalttrader.retro.shabbatApp.common.toDisplayString
 import il.soulSalttrader.retro.shabbatApp.common.upcomingCandleLightingDate
 import il.soulSalttrader.retro.shabbatApp.common.upcomingHavdalahDate
-import il.soulSalttrader.retro.shabbatApp.constants.ShabbatOffsets
+import il.soulSalttrader.retro.shabbatApp.constants.ShabbatOffsets.HILUCH_MIL_MINUTES
+import il.soulSalttrader.retro.shabbatApp.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_MINUTES
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimes
 import il.soulSalttrader.retro.shabbatApp.model.SolarTimes
 import il.soulSalttrader.retro.shabbatApp.model.toDomain
@@ -14,7 +16,7 @@ import il.soulSalttrader.retro.shabbatApp.network.ShabbatAPIService
 import il.soulSalttrader.retro.shabbatApp.settings.UserPreferences
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
@@ -55,33 +57,21 @@ class ShabbatRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getHalachicTimes(): NetworkResult<HalachicTimes> = withContext(dispatcher) {
-        coroutineScope {
-            val upcomingCandleLightingDate = upcomingCandleLightingDate()
-            val upcomingHavdalahDate = upcomingHavdalahDate()
+        val friday = upcomingCandleLightingDate()
+        val saturday = upcomingHavdalahDate()
 
-            val candleLightingDeferred = async { getSolarTimes(date = upcomingCandleLightingDate.toDisplayString()) }
-            val havdalahDeferred = async { getSolarTimes(date = upcomingHavdalahDate.toDisplayString()) }
+        val (fridaySolar, saturdaySolar) = awaitAll(
+            async { getSolarTimes(friday.toDisplayString()) },
+            async { getSolarTimes(saturday.toDisplayString()) }
+        ).map { it.getOrElse { failure -> return@withContext failure } }
 
-            val candleLightingResult = candleLightingDeferred.await()
-            val havdalahResult = havdalahDeferred.await()
-
-            if (candleLightingResult is NetworkResult.Failure) return@coroutineScope candleLightingResult
-            if (havdalahResult is NetworkResult.Failure) return@coroutineScope havdalahResult
-
-            val candleLightingData = (candleLightingResult as NetworkResult.Success).data
-            val havdalahData = (havdalahResult as NetworkResult.Success).data
-
-            val candleLightingTime = candleLightingData.sunset.minusMinutes(ShabbatOffsets.HILUCH_MIL_MINUTES)
-            val havdalahTime = havdalahData.sunset.plusMinutes(ShabbatOffsets.TZEIT_HAKOCHAVIM_MINUTES)
-
-            NetworkResult.Success(
-                data = HalachicTimes(
-                    candleLightingTime = candleLightingTime,
-                    candleLightingDate = candleLightingData.date,
-                    havdalahTime = havdalahTime,
-                    havdalahDate = havdalahData.date,
-                )
+        NetworkResult.Success(
+            HalachicTimes(
+                candleLightingTime = fridaySolar.sunset.minusMinutes(HILUCH_MIL_MINUTES),
+                candleLightingDate = friday,
+                havdalahTime       = saturdaySolar.sunset.plusMinutes(TZEIT_HAKOCHAVIM_MINUTES),
+                havdalahDate       = saturday
             )
-        }
+        )
     }
 }
