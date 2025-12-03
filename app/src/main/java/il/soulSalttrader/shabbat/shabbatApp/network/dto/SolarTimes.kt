@@ -1,4 +1,4 @@
-package il.soulSalttrader.retro.shabbatApp.model
+package il.soulSalttrader.retro.shabbatApp.network.dto
 
 import kotlinx.serialization.Serializable
 

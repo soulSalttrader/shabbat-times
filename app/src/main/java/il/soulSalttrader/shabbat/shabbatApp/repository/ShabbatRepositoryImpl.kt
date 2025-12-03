@@ -3,16 +3,10 @@ package il.soulSalttrader.retro.shabbatApp.repository
 import android.util.Log
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimes
-import il.soulSalttrader.retro.shabbatApp.model.SolarTimes
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.network.ShabbatAPIService
-import il.soulSalttrader.retro.shabbatApp.common.toDisplayString
-import il.soulSalttrader.retro.shabbatApp.common.toLocalTimeFromApi
-import il.soulSalttrader.retro.shabbatApp.common.upcomingCandleLightingDate
-import il.soulSalttrader.retro.shabbatApp.common.upcomingHavdalahDate
+import il.soulSalttrader.retro.shabbatApp.network.dto.SolarTimes
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
