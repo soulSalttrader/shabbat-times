@@ -1,11 +1,14 @@
 package il.soulSalttrader.retro.shabbatApp.viewModel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
+import il.soulSalttrader.retro.shabbatApp.model.toDisplay
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
 import jakarta.inject.Inject
@@ -16,7 +19,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    private val repository: ShabbatRepository
+    private val repository: ShabbatRepository,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val _uiState: MutableStateFlow<ShabbatUiState> = MutableStateFlow(ShabbatUiState.Loading)
     val uiState: StateFlow<ShabbatUiState> = _uiState.asStateFlow()
@@ -33,7 +37,7 @@ class ShabbatViewModel @Inject constructor(
                 is NetworkResult.Success -> {
                     if (Debug.enabled) Log.d("ShabbatViewModel.refresh", "${result.data}")
 
-                    ShabbatUiState.Success(data = result.data)
+                    ShabbatUiState.Success(data = result.data.toDisplay(context))
                 }
 
                 is NetworkResult.Failure -> {
