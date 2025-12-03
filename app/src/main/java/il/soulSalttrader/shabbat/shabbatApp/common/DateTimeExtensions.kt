@@ -1,4 +1,4 @@
-package il.soulSalttrader.retro.shabbatApp.network
+package il.soulSalttrader.retro.shabbatApp.common
 
 import android.content.Context
 import android.text.format.DateFormat
