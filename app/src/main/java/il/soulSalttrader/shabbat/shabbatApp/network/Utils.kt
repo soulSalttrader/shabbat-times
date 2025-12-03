@@ -1,9 +1,16 @@
 package il.soulSalttrader.retro.shabbatApp.network
 
+import android.content.Context
+import android.text.format.DateFormat
+import il.soulSalttrader.retro.shabbatApp.network.DataFormatter.apiDateParser
+import il.soulSalttrader.retro.shabbatApp.network.DataFormatter.apiTimeParser12
+import il.soulSalttrader.retro.shabbatApp.network.DataFormatter.apiTimeParser24
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDate.now
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 object DataFormatter {
     val hebrewDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
@@ -25,3 +32,16 @@ fun LocalDate.toStringWith(formatter: DateTimeFormatter): String = this.format(f
 
 fun upcomingCandleLightingDate(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.FRIDAY)
 fun upcomingHavdalahDate(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.SATURDAY)
+
+fun LocalTime.toDisplayString(context: Context): String {
+    val use24 = DateFormat.is24HourFormat(context)
+    val pattern = if (use24) "HH:mm" else "h:mm a"
+    return this.format(DateTimeFormatter.ofPattern(pattern, Locale.getDefault()))
+}
+
+fun String.toLocalTimeFromApi(is24hFormat: Boolean): LocalTime =
+    if (is24hFormat) LocalTime.parse(this, apiTimeParser24)
+    else LocalTime.parse(this, apiTimeParser12)
+
+fun LocalDate.toDisplayString(): String = this.format(apiDateParser)
+fun String.toLocalDateFromApi(): LocalDate = LocalDate.parse(this, apiDateParser)
