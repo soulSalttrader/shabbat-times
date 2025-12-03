@@ -3,7 +3,8 @@ package il.soulSalttrader.retro.shabbatApp.playground.mvvm
 import android.util.Log
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimes
-import il.soulSalttrader.retro.shabbatApp.network.dto.SolarTimes
+import il.soulSalttrader.retro.shabbatApp.model.SolarTimes
+import il.soulSalttrader.retro.shabbatApp.model.toDomain
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.network.ShabbatAPIService
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
@@ -26,7 +27,7 @@ class ShabbatRepositoryImplMVVM @Inject constructor(
             if (Debug.enabled) Log.d("ShabbatRepositoryImplMVVM.getSolarTimes", dto.status)
 
             when (dto.status.uppercase()) {
-                "OK" -> NetworkResult.Success(dto.results)
+                "OK" -> NetworkResult.Success(dto.results.toDomain(true))
                 else -> NetworkResult.Failure(dto.status)
             }
 

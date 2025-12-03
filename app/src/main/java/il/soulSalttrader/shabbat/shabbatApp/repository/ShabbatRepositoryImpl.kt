@@ -3,9 +3,10 @@ package il.soulSalttrader.retro.shabbatApp.repository
 import android.util.Log
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimes
+import il.soulSalttrader.retro.shabbatApp.model.SolarTimes
+import il.soulSalttrader.retro.shabbatApp.model.toDomain
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.network.ShabbatAPIService
-import il.soulSalttrader.retro.shabbatApp.network.dto.SolarTimes
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -27,7 +28,7 @@ class ShabbatRepositoryImpl @Inject constructor(
                 if (Debug.enabled) Log.d("ShabbatRepositoryImpl.getSolarTimes", dto.status)
 
                 when (dto.status.uppercase()) {
-                    "OK" -> NetworkResult.Success(data = dto.results)
+                    "OK" -> NetworkResult.Success(data = dto.results.toDomain(true))
                     else -> NetworkResult.Failure(message = dto.status)
                 }
             }
