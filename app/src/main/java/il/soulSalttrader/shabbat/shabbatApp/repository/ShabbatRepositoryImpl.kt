@@ -6,7 +6,13 @@ import il.soulSalttrader.retro.shabbatApp.model.HalachicTimes
 import il.soulSalttrader.retro.shabbatApp.model.SolarTimes
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.network.ShabbatAPIService
+import il.soulSalttrader.retro.shabbatApp.common.toDisplayString
+import il.soulSalttrader.retro.shabbatApp.common.toLocalTimeFromApi
+import il.soulSalttrader.retro.shabbatApp.common.upcomingCandleLightingDate
+import il.soulSalttrader.retro.shabbatApp.common.upcomingHavdalahDate
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
@@ -19,9 +25,9 @@ class ShabbatRepositoryImpl @Inject constructor(
     private val dispatcher: CoroutineDispatcher,
 ) : ShabbatRepository {
 
-    override suspend fun getSolarTimes(): NetworkResult<SolarTimes> = withContext(context = dispatcher) {
+    override suspend fun getSolarTimes(date: String): NetworkResult<SolarTimes> = withContext(context = dispatcher) {
         runCatching {
-            apiService.getSolarTimes()
+            apiService.getSolarTimes(date = date)
         }
             .map { dto ->
                 if (Debug.enabled) Log.d("ShabbatRepositoryImpl.getSolarTimes", dto.status)

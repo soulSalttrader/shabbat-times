@@ -20,9 +20,9 @@ class ShabbatRepositoryImplMVVM @Inject constructor(
     private val dispatcher: CoroutineDispatcher,
 ) : ShabbatRepository {
 
-    override suspend fun getSolarTimes(): NetworkResult<SolarTimes> = withContext(dispatcher) {
+    override suspend fun getSolarTimes(date: String): NetworkResult<SolarTimes> = withContext(dispatcher) {
         try {
-            val dto = apiService.getSolarTimes()
+            val dto = apiService.getSolarTimes(date = date)
             if (Debug.enabled) Log.d("ShabbatRepositoryImplMVVM.getSolarTimes", dto.status)
 
             when (dto.status.uppercase()) {
