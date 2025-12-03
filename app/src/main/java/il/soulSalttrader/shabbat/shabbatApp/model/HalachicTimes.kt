@@ -1,11 +1,11 @@
 package il.soulSalttrader.retro.shabbatApp.model
 
-import kotlinx.serialization.Serializable
+import java.time.LocalDate
+import java.time.LocalTime
 
-@Serializable
 data class HalachicTimes(
-    val candleLightingTime: String = "",
-    val candleLightingDate: String = "",
-    val havdalahTime: String = "",
-    val havdalahDate: String = "",
+    val candleLightingTime: LocalTime,
+    val candleLightingDate: LocalDate,
+    val havdalahTime: LocalTime,
+    val havdalahDate: LocalDate,
 )
