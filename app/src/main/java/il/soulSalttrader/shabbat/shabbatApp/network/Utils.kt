@@ -23,5 +23,5 @@ fun LocalDate.nextOrTodayDayOfWeek(target: DayOfWeek): LocalDate {
 
 fun LocalDate.toStringWith(formatter: DateTimeFormatter): String = this.format(formatter)
 
-fun upcomingCandleLighting(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.FRIDAY)
-fun upcomingShabbatHavdalah(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.SATURDAY)
+fun upcomingCandleLightingDate(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.FRIDAY)
+fun upcomingHavdalahDate(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.SATURDAY)
