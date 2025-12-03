@@ -8,12 +8,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import il.soulSalttrader.retro.shabbatApp.model.SolarTimes
+import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
 
 @Composable
 fun ShabbatContent(
     modifier: Modifier = Modifier,
-    result: SolarTimes,
+    result: HalachicTimesDisplay,
 ) {
     Column(modifier = modifier.padding(24.dp)) {
 
@@ -28,13 +28,13 @@ fun ShabbatContent(
         ) {
             ShabbatCard(
                 modifier = Modifier.weight(1.5f),
-                text = "${result.sunset}\nFri ${result.date}",
+                text = "${result.candleLightingTime}\n${result.candleLightingDate}",
             )
 
             ShabbatCard(
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.bodyMedium,
-                text = "${result.sunset}\nSat ${result.date}",
+                text = "${result.havdalahTime}\n${result.havdalahDate}",
             )
         }
     }
