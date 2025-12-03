@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import il.soulSalttrader.retro.shabbatApp.network.ShabbatAPIService
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepositoryImpl
+import il.soulSalttrader.retro.shabbatApp.settings.UserPreferences
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 
@@ -18,5 +19,6 @@ object RepositoryModule {
     fun provideShabbatRepository(
         apiService: ShabbatAPIService,
         dispatcher: CoroutineDispatcher,
-    ): ShabbatRepository = ShabbatRepositoryImpl(apiService, dispatcher)
+        userPreferences: UserPreferences,
+    ): ShabbatRepository = ShabbatRepositoryImpl(apiService, dispatcher, userPreferences)
 }

@@ -8,6 +8,7 @@ import il.soulSalttrader.retro.shabbatApp.model.toDomain
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.network.ShabbatAPIService
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
+import il.soulSalttrader.retro.shabbatApp.settings.UserPreferences
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okio.IOException
@@ -19,6 +20,7 @@ import javax.inject.Singleton
 class ShabbatRepositoryImplMVVM @Inject constructor(
     private val apiService: ShabbatAPIService,
     private val dispatcher: CoroutineDispatcher,
+    private val userPreferences: UserPreferences,
 ) : ShabbatRepository {
 
     override suspend fun getSolarTimes(date: String): NetworkResult<SolarTimes> = withContext(dispatcher) {
@@ -27,7 +29,7 @@ class ShabbatRepositoryImplMVVM @Inject constructor(
             if (Debug.enabled) Log.d("ShabbatRepositoryImplMVVM.getSolarTimes", dto.status)
 
             when (dto.status.uppercase()) {
-                "OK" -> NetworkResult.Success(dto.results.toDomain(true))
+                "OK" -> NetworkResult.Success(dto.results.toDomain(userPreferences.is24HourFormat()))
                 else -> NetworkResult.Failure(dto.status)
             }
 
