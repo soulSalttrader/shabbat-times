@@ -11,16 +11,17 @@ import il.soulSalttrader.retro.shabbatApp.content.ShabbatContent
 @Composable
 fun ShabbatScreenMVVM() {
     val viewModel: ShabbatViewModelMVVM = hiltViewModel()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val isLoading = uiState.isLoading
-    val isNotBlank = uiState.errorMessage?.isNotBlank() ?: false
-    val errorMessage = uiState.errorMessage ?: "Oops! Something went wrong"
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    val halachicTimes by viewModel.halachicTimes.collectAsStateWithLifecycle()
+
+    val isNotBlank = errorMessage?.isNotBlank() ?: false
+    val message = errorMessage ?: "Oops! Something went wrong"
 
     when {
         isLoading  -> LoadingScreen()
-        isNotBlank -> FailureScreen(message = errorMessage, onRetry = viewModel::retry)
-
-        else       -> ShabbatContent(result = uiState.results)
+        isNotBlank -> FailureScreen(message = message, onRetry = viewModel::retry)
+        else       -> ShabbatContent(result = halachicTimes)
     }
 }
