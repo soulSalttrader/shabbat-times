@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
+import il.soulSalttrader.retro.shabbatApp.model.toDisplay
+import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +35,21 @@ class ShabbatViewModel @Inject constructor(
     private fun loadData() {
         viewModelScope.launch {
             val result = repository.getHalachicTimes()
-            dispatch(event = ShabbatEvent.Loaded(result, context))
+
+            val displayData = when (result) {
+                is NetworkResult.Success -> result.data.toDisplay(context)
+                is NetworkResult.Failure -> null
+            }
+
+            val event = when (result) {
+                is NetworkResult.Success -> ShabbatEvent.Loaded.Success(displayData)
+                is NetworkResult.Failure -> ShabbatEvent.Loaded.Failure(
+                    message = result.message,
+                    cause = result.cause
+                )
+            }
+
+            dispatch(event)
         }
     }
 }

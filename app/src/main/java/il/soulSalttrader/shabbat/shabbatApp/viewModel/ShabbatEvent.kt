@@ -1,37 +1,33 @@
 package il.soulSalttrader.retro.shabbatApp.viewModel
 
-import android.content.Context
 import android.util.Log
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.core.Event
 import il.soulSalttrader.retro.core.ShabbatUiReducer
-import il.soulSalttrader.retro.shabbatApp.model.HalachicTimes
+import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
-import il.soulSalttrader.retro.shabbatApp.model.toDisplay
-import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 
 sealed interface ShabbatEvent : Event<ShabbatUiState> {
-    object Load : ShabbatEvent {
-        override val reducer = ShabbatUiReducer {
-            state -> state
-        }
+    data object Load : ShabbatEvent {
+        override val reducer = ShabbatUiReducer { ShabbatUiState.Loading }
     }
 
-    class Loaded(val result: NetworkResult<HalachicTimes>, context: Context) : ShabbatEvent {
-        override val reducer = ShabbatUiReducer {
-            state -> when (result) {
-                is NetworkResult.Success -> {
-                    if (Debug.enabled) Log.d("ShabbatEvent.Loaded", "${result.data}")
-                    ShabbatUiState.Success(data = result.data.toDisplay(context))
-                }
+    sealed interface Loaded : ShabbatEvent {
+        class Success(val display: HalachicTimesDisplay?) : Loaded {
+            override val reducer = ShabbatUiReducer {
+                if (Debug.enabled) Log.d("ShabbatEvent.Loaded.Success", "$display")
 
-                is NetworkResult.Failure -> {
-                    if (Debug.enabled) Log.d(
-                        "ShabbatEvent.Loaded",
-                        "message: ${result.message}, cause: ${result.cause}"
-                    )
-                    ShabbatUiState.Failure(message = result.message, cause = result.cause)
-                }
+                ShabbatUiState.Success(display)
+            }
+        }
+        class Failure(val message: String, val cause: Throwable?) : Loaded {
+            override val reducer = ShabbatUiReducer {
+                if (Debug.enabled) Log.d(
+                    "ShabbatEvent.Loaded.Failure",
+                    "message: $message, cause: $cause"
+                )
+
+                ShabbatUiState.Failure(message, cause)
             }
         }
     }
