@@ -22,7 +22,7 @@ fun ShabbatScreen() {
 
         is ShabbatUiState.Failure -> FailureScreen(
             message = (uiState as ShabbatUiState.Failure).message,
-            onRetry = { viewModel.reduce(ShabbatEvent.Load.reducer) }
+            onRetry = { viewModel.dispatch(event = ShabbatEvent.Load) }
         )
     }
 }

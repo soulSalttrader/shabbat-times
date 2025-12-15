@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import il.soulSalttrader.retro.core.ShabbatUiReducer
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
 import jakarta.inject.Inject
@@ -23,18 +22,18 @@ class ShabbatViewModel @Inject constructor(
     private val _uiState: MutableStateFlow<ShabbatUiState> = MutableStateFlow(ShabbatUiState.Loading)
     val uiState: StateFlow<ShabbatUiState> = _uiState.asStateFlow()
 
-    init { reduce(reducer = ShabbatEvent.Load.reducer) }
+    init { dispatch(event = ShabbatEvent.Load) }
 
-    fun reduce(reducer: ShabbatUiReducer) {
-        if (_uiState.value is ShabbatUiState.Loading) { loadData() }
+    fun dispatch(event: ShabbatEvent) {
+        if (event is ShabbatEvent.Load) { loadData() }
 
-        _uiState.update { current -> reducer reduce current }
+        _uiState.update { current -> event.reducer reduce current }
     }
 
     private fun loadData() {
         viewModelScope.launch {
             val result = repository.getHalachicTimes()
-            reduce(reducer = ShabbatEvent.Loaded(result, context).reducer)
+            dispatch(event = ShabbatEvent.Loaded(result, context))
         }
     }
 }
