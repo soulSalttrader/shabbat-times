@@ -20,6 +20,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -30,9 +31,9 @@ class ShabbatRepositoryImpl @Inject constructor(
     private val userPreferences: UserPreferences,
 ) : ShabbatRepository {
 
-    override suspend fun getSolarTimes(date: String): NetworkResult<SolarTimes> = withContext(context = dispatcher) {
+    override suspend fun getSolarTimes(date: LocalDate): NetworkResult<SolarTimes> = withContext(context = dispatcher) {
         runCatching {
-            apiService.getSolarTimes(date = date)
+            apiService.getSolarTimes(date = date.toDisplayString())
         }
             .map { dto ->
                 if (Debug.enabled) Log.d("ShabbatRepositoryImpl.getSolarTimes", dto.status)
@@ -61,8 +62,8 @@ class ShabbatRepositoryImpl @Inject constructor(
         val saturday = upcomingHavdalahDate()
 
         val (fridaySolar, saturdaySolar) = awaitAll(
-            async { getSolarTimes(friday.toDisplayString()) },
-            async { getSolarTimes(saturday.toDisplayString()) }
+            async { getSolarTimes(friday) },
+            async { getSolarTimes(saturday) }
         ).map { it.getOrElse { failure -> return@withContext failure } }
 
         NetworkResult.Success(

@@ -5,10 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import il.soulSalttrader.retro.shabbatApp.model.HalachicTimes
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
-import il.soulSalttrader.retro.shabbatApp.model.toDisplay
-import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
+import il.soulSalttrader.retro.shabbatApp.model.toLoadedEvent
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,19 +20,13 @@ class ShabbatViewModel @Inject constructor(
     private val repository: ShabbatRepository,
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
-    private val _uiState: MutableStateFlow<ShabbatUiState> =
-        MutableStateFlow(ShabbatUiState.Loading)
+    private val _uiState: MutableStateFlow<ShabbatUiState> = MutableStateFlow(value = ShabbatUiState.Loading)
     val uiState: StateFlow<ShabbatUiState> = _uiState.asStateFlow()
 
-    init {
-        dispatch(event = ShabbatEvent.Load)
-    }
+    init { dispatch(event = ShabbatEvent.Load) }
 
     fun dispatch(event: ShabbatEvent) {
-        if (event is ShabbatEvent.Load) {
-            loadData()
-        }
-
+        if (event is ShabbatEvent.Load) { loadData() }
         _uiState.update { current -> event.reducer reduce current }
     }
 
@@ -43,10 +35,5 @@ class ShabbatViewModel @Inject constructor(
             val result = repository.getHalachicTimes()
             dispatch(event = result.toLoadedEvent(context))
         }
-    }
-
-    private fun NetworkResult<HalachicTimes>.toLoadedEvent(context: Context) = when (this) {
-        is NetworkResult.Success -> ShabbatEvent.Loaded.Success(display = data.toDisplay(context))
-        is NetworkResult.Failure -> ShabbatEvent.Loaded.Failure(message = message, cause = cause)
     }
 }
