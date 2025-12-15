@@ -1,6 +1,8 @@
 package il.soulSalttrader.retro.shabbatApp.repository
 
+import android.content.Context
 import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.shabbatApp.common.getOrElse
 import il.soulSalttrader.retro.shabbatApp.common.toDisplayString
@@ -9,7 +11,9 @@ import il.soulSalttrader.retro.shabbatApp.common.upcomingHavdalahDate
 import il.soulSalttrader.retro.shabbatApp.constants.ShabbatOffsets.HILUCH_MIL_MINUTES
 import il.soulSalttrader.retro.shabbatApp.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_MINUTES
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimes
+import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
 import il.soulSalttrader.retro.shabbatApp.model.SolarTimes
+import il.soulSalttrader.retro.shabbatApp.model.toDisplay
 import il.soulSalttrader.retro.shabbatApp.model.toDomain
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.network.ShabbatAPIService
@@ -29,6 +33,7 @@ class ShabbatRepositoryImpl @Inject constructor(
     private val apiService: ShabbatAPIService,
     private val dispatcher: CoroutineDispatcher,
     private val userPreferences: UserPreferences,
+    @param:ApplicationContext private val context: Context,
 ) : ShabbatRepository {
 
     override suspend fun getSolarTimes(date: LocalDate): NetworkResult<SolarTimes> = withContext(context = dispatcher) {
@@ -57,7 +62,7 @@ class ShabbatRepositoryImpl @Inject constructor(
             .getOrThrow()
     }
 
-    override suspend fun getHalachicTimes(): NetworkResult<HalachicTimes> = withContext(dispatcher) {
+    override suspend fun getHalachicTimes(): NetworkResult<HalachicTimesDisplay> = withContext(dispatcher) {
         val friday = upcomingCandleLightingDate()
         val saturday = upcomingHavdalahDate()
 
@@ -72,7 +77,7 @@ class ShabbatRepositoryImpl @Inject constructor(
                 candleLightingDate = friday,
                 havdalahTime       = saturdaySolar.sunset.plusMinutes(TZEIT_HAKOCHAVIM_MINUTES),
                 havdalahDate       = saturday
-            )
+            ).toDisplay(context)
         )
     }
 }
