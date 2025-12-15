@@ -1,20 +1,18 @@
 package il.soulSalttrader.retro.shabbatApp.viewModel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import il.soulSalttrader.retro.core.Debug
+import il.soulSalttrader.retro.core.ShabbatUiReducer
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
-import il.soulSalttrader.retro.shabbatApp.model.toDisplay
-import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -25,27 +23,18 @@ class ShabbatViewModel @Inject constructor(
     private val _uiState: MutableStateFlow<ShabbatUiState> = MutableStateFlow(ShabbatUiState.Loading)
     val uiState: StateFlow<ShabbatUiState> = _uiState.asStateFlow()
 
-    init { refresh() }
+    init { reduce(reducer = ShabbatEvent.Load.reducer) }
 
-    fun retry() = refresh()
+    fun reduce(reducer: ShabbatUiReducer) {
+        if (_uiState.value is ShabbatUiState.Loading) { loadData() }
 
-    private fun refresh() {
+        _uiState.update { current -> reducer reduce current }
+    }
+
+    private fun loadData() {
         viewModelScope.launch {
-            _uiState.value = ShabbatUiState.Loading
-
-            _uiState.value = when (val result = repository.getHalachicTimes()) {
-                is NetworkResult.Success -> {
-                    if (Debug.enabled) Log.d("ShabbatViewModel.refresh", "${result.data}")
-
-                    ShabbatUiState.Success(data = result.data.toDisplay(context))
-                }
-
-                is NetworkResult.Failure -> {
-                    if (Debug.enabled) Log.d("ShabbatViewModel.refresh", "message: ${result.message}, cause: ${result.cause}")
-
-                    ShabbatUiState.Failure(message = result.message, cause = result.cause)
-                }
-            }
+            val result = repository.getHalachicTimes()
+            reduce(reducer = ShabbatEvent.Loaded(result, context).reducer)
         }
     }
 }
