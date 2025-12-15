@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimes
-import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
 import il.soulSalttrader.retro.shabbatApp.model.toDisplay
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
@@ -42,22 +41,12 @@ class ShabbatViewModel @Inject constructor(
     private fun loadData() {
         viewModelScope.launch {
             val result = repository.getHalachicTimes()
-            val displayData = result.toDisplayData()
-            val event = result.toLoadedEvent(displayData)
-
-            dispatch(event)
+            dispatch(event = result.toLoadedEvent(context))
         }
     }
 
-    private fun NetworkResult<HalachicTimes>.toDisplayData() = when (this) {
-        is NetworkResult.Success -> data.toDisplay(context)
-        is NetworkResult.Failure -> null
-    }
-
-    private fun NetworkResult<HalachicTimes>.toLoadedEvent(
-        display: HalachicTimesDisplay?
-    ) = when (this) {
-        is NetworkResult.Success -> ShabbatEvent.Loaded.Success(display)
+    private fun NetworkResult<HalachicTimes>.toLoadedEvent(context: Context) = when (this) {
+        is NetworkResult.Success -> ShabbatEvent.Loaded.Success(display = data.toDisplay(context))
         is NetworkResult.Failure -> ShabbatEvent.Loaded.Failure(message = message, cause = cause)
     }
 }
