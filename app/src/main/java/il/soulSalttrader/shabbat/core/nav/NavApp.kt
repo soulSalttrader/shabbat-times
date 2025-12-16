@@ -12,7 +12,6 @@ import il.soulSalttrader.retro.core.BadgeReducer
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.core.Model
 import il.soulSalttrader.retro.core.Reduce
-import il.soulSalttrader.retro.core.nav.NavTarget.Companion.fromBackStackEntry
 import il.soulSalttrader.retro.core.nav.graph.mainNavGraph
 
 @Composable
@@ -27,24 +26,11 @@ fun NavApp(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(currentBackStackEntry) {
-        val target = currentBackStackEntry.fromBackStackEntry()
-        if (Debug.enabled) {
-            val route = currentBackStackEntry?.destination?.route
-            Log.d("updated target", "T:$target\nR:$route")
-        }
-        navigator.updateCurrentTarget(target)
+        navigator.syncBackStackWithNavigator(currentBackStackEntry)
     }
 
     LaunchedEffect(Unit) {
-        navigator.commands.collect { action ->
-            when (action) {
-                is NavAction.To        -> navController.navigate(action.target)
-                is NavAction.Up        -> navController.popBackStack()
-                is NavAction.ResetTo   -> navController.navigate(action.target)
-                is NavAction.PopTo     -> navController.popBackStack(action.target, inclusive = false)
-                is NavAction.PopToRoot -> navController.popBackStack(navController.graph.startDestinationId, inclusive = false)
-            }
-        }
+        navigator.collectNavigationCommands(navController)
     }
 
     val startDestination = NavTargetBottom.Home
