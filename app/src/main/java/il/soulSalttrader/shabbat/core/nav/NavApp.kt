@@ -9,7 +9,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import il.soulSalttrader.retro.core.AppModel
-import il.soulSalttrader.retro.core.BadgeReducer
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.core.Reduce
 import il.soulSalttrader.retro.core.nav.graph.mainNavGraph
@@ -19,7 +18,6 @@ fun NavApp(
     modifier: Modifier,
     state: AppModel,
     reducers: Reduce,
-    onBadgeReducer: (BadgeReducer) -> Unit,
     navigator: Navigator,
 ) {
     val navController = rememberNavController()
@@ -43,7 +41,6 @@ fun NavApp(
         mainNavGraph(
             state = state,
             reducers = reducers,
-            onBadgeReducer = onBadgeReducer,
         )
     }
 
