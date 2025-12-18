@@ -7,7 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import il.soulSalttrader.retro.breatheApp.BreatheScreen
 import il.soulSalttrader.retro.core.AppModel
-import il.soulSalttrader.retro.core.Reduce
+import il.soulSalttrader.retro.core.EventHandler
 import il.soulSalttrader.retro.core.content.SplitScreen
 import il.soulSalttrader.retro.core.nav.NavItems.Breathe
 import il.soulSalttrader.retro.core.nav.NavItems.Home
@@ -21,7 +21,7 @@ import il.soulSalttrader.retro.timerApp.TimerScreen
 
 fun NavGraphBuilder.bottomNavGraph(
     state: AppModel,
-    reducers: Reduce,
+    eventHandler: EventHandler,
 ) {
     composable<NavTargetBottom.Alerts> { FailureScreen(message = "No internet connection") { } }
 
@@ -30,10 +30,8 @@ fun NavGraphBuilder.bottomNavGraph(
 
         BreatheScreen(
             modifier = Modifier,
-            breatheState = state.breathe,
-            timerState = state.timer,
-            onBreatheReduce = reducers.onBreatheReducer,
-            onTimerReduce = reducers.onTimerReducer,
+            state = state,
+            eventHandler = eventHandler,
         )
     }
 
@@ -45,7 +43,7 @@ fun NavGraphBuilder.bottomNavGraph(
             topContent = {
                 CounterScreen(
                     state = state.counter,
-                    onReduce = reducers.onCounterReducer,
+                    onEvent = eventHandler.onCounter,
                 )
             },
             bottomContent = {
@@ -58,7 +56,7 @@ fun NavGraphBuilder.bottomNavGraph(
 
         TimerScreen(
             state = state.timer,
-            onReduce = reducers.onTimerReducer,
+            onEvent = eventHandler.onTimer,
         )
     }
 

@@ -11,7 +11,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import il.soulSalttrader.retro.badge.BadgeButton
 import il.soulSalttrader.retro.badge.BadgeButtons
-import il.soulSalttrader.retro.core.Reduce
+import il.soulSalttrader.retro.core.EventHandler
 import il.soulSalttrader.retro.core.content.HistoryScreen
 import il.soulSalttrader.retro.core.nav.NavItems.Alerts
 import il.soulSalttrader.retro.core.nav.NavItems.Breathe
@@ -20,7 +20,7 @@ import il.soulSalttrader.retro.core.nav.NavItems.Home
 import il.soulSalttrader.retro.core.nav.NavTargetTop
 
 fun NavGraphBuilder.topNavGraph(
-    reducers: Reduce,
+    eventHandler: EventHandler,
 ) {
     composable<NavTargetTop.History> {
         HistoryScreen()
@@ -47,7 +47,7 @@ fun NavGraphBuilder.topNavGraph(
                     BadgeButton.clear(navItems = listOf(Alerts, Home)),
                     BadgeButton.clearAll()
                 ),
-                onReduce = reducers.onBadgeReducer,
+                onEvent = eventHandler.onBadge,
             )
         }
     }
