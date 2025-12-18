@@ -8,16 +8,16 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import il.soulSalttrader.retro.core.AppModel
 import il.soulSalttrader.retro.core.BadgeReducer
 import il.soulSalttrader.retro.core.Debug
-import il.soulSalttrader.retro.core.Model
 import il.soulSalttrader.retro.core.Reduce
 import il.soulSalttrader.retro.core.nav.graph.mainNavGraph
 
 @Composable
 fun NavApp(
     modifier: Modifier,
-    state: Model,
+    state: AppModel,
     reducers: Reduce,
     onBadgeReducer: (BadgeReducer) -> Unit,
     navigator: Navigator,
@@ -41,8 +41,6 @@ fun NavApp(
         startDestination = startDestination,
     ) {
         mainNavGraph(
-            modifier = modifier,
-            navigator = navigator,
             state = state,
             reducers = reducers,
             onBadgeReducer = onBadgeReducer,
