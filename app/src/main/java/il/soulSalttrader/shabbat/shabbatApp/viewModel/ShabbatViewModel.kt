@@ -3,6 +3,7 @@ package il.soulSalttrader.retro.shabbatApp.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.retro.core.event.ShabbatEvent
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
 import il.soulSalttrader.retro.shabbatApp.model.toLoadedEvent
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository

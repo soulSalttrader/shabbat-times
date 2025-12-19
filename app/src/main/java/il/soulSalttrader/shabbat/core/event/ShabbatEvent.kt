@@ -1,13 +1,13 @@
-package il.soulSalttrader.retro.shabbatApp.viewModel
+package il.soulSalttrader.retro.core.event
 
 import android.util.Log
 import il.soulSalttrader.retro.core.Debug
-import il.soulSalttrader.retro.core.Event
+import il.soulSalttrader.retro.core.Reducible
 import il.soulSalttrader.retro.core.ShabbatUiReducer
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
 
-sealed interface ShabbatEvent : Event<ShabbatUiState> {
+sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
     data object Load : ShabbatEvent {
         override val reducer = ShabbatUiReducer { ShabbatUiState.Loading }
     }
