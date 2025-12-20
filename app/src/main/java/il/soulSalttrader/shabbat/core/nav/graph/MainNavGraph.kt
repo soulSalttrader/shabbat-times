@@ -5,18 +5,18 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import il.soulSalttrader.retro.core.AppModel
-import il.soulSalttrader.retro.core.EventHandler
 import il.soulSalttrader.retro.core.content.SplitScreen
+import il.soulSalttrader.retro.core.event.AppEvent
 import il.soulSalttrader.retro.counterApp.CounterScreen
 import il.soulSalttrader.retro.counterApp.remember.CounterRememberScreen
 import il.soulSalttrader.retro.navigation.experimental.CounterScreen
 
 fun NavGraphBuilder.mainNavGraph(
     state: AppModel,
-    eventHandler: EventHandler,
+    onEvent: (AppEvent) -> Unit,
 ) {
-    topNavGraph(eventHandler = eventHandler)
-    bottomNavGraph(state = state, eventHandler = eventHandler)
+    topNavGraph(onEvent = onEvent)
+    bottomNavGraph(state = state, onEvent = onEvent)
 
     composable<CounterScreen> {
         SplitScreen(
@@ -24,7 +24,7 @@ fun NavGraphBuilder.mainNavGraph(
             topContent = {
                 CounterScreen(
                     state = state.counter,
-                    onEvent = eventHandler.onCounter,
+                    onEvent = onEvent,
                 )
             },
             bottomContent = {

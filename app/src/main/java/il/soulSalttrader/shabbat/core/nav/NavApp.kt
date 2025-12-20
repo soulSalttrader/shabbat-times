@@ -10,7 +10,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import il.soulSalttrader.retro.core.AppModel
 import il.soulSalttrader.retro.core.Debug
-import il.soulSalttrader.retro.core.EventHandler
+import il.soulSalttrader.retro.core.event.AppEvent
 import il.soulSalttrader.retro.core.nav.graph.mainNavGraph
 
 
@@ -18,7 +18,7 @@ import il.soulSalttrader.retro.core.nav.graph.mainNavGraph
 fun NavApp(
     modifier: Modifier,
     state: AppModel,
-    eventHandler: EventHandler,
+    onEvent: (AppEvent) -> Unit,
     navigator: Navigator,
 ) {
     val navController = rememberNavController()
@@ -41,7 +41,7 @@ fun NavApp(
     ) {
         mainNavGraph(
             state = state,
-            eventHandler = eventHandler,
+            onEvent = onEvent,
         )
     }
 
