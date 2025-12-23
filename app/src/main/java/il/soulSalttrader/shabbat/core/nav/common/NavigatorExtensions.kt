@@ -1,10 +1,12 @@
-package il.soulSalttrader.retro.core.nav
+package il.soulSalttrader.retro.core.nav.common
 
 import android.util.Log
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import il.soulSalttrader.retro.core.Debug
+import il.soulSalttrader.retro.core.nav.NavAction
 import il.soulSalttrader.retro.core.nav.NavTarget.Companion.fromBackStackEntry
+import il.soulSalttrader.retro.core.nav.Navigator
 
 fun Navigator.syncBackStackWithNavigator(currentBackStackEntry: NavBackStackEntry?) {
     val target = currentBackStackEntry.fromBackStackEntry()

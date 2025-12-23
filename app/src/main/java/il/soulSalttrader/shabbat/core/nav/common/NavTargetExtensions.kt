@@ -1,4 +1,6 @@
-package il.soulSalttrader.retro.core.nav
+package il.soulSalttrader.retro.core.nav.common
+
+import il.soulSalttrader.retro.core.nav.NavTarget
 
 fun NavTarget.simpleName(): String =
     requireNotNull(this::class.simpleName) {

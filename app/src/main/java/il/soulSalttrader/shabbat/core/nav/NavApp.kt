@@ -11,6 +11,9 @@ import androidx.navigation.compose.rememberNavController
 import il.soulSalttrader.retro.core.model.AppModel
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.core.event.AppEvent
+import il.soulSalttrader.retro.core.nav.common.collectNavigationCommands
+import il.soulSalttrader.retro.core.nav.common.currentDestinationName
+import il.soulSalttrader.retro.core.nav.common.syncBackStackWithNavigator
 import il.soulSalttrader.retro.core.nav.graph.mainNavGraph
 
 
