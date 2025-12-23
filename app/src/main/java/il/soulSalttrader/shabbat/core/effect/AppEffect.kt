@@ -10,4 +10,9 @@ sealed interface AppEffect {
         data object StartLoop : Timer
         data object StopLoop : Timer
     }
+
+    sealed interface Shabbat : AppEffect {
+        data object LoadData : Shabbat
+        data class LoadFailed(val error: Throwable) : Shabbat
+    }
 }
