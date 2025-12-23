@@ -1,6 +1,6 @@
 package il.soulSalttrader.retro.core.nav
 
-import il.soulSalttrader.retro.core.UiIcon
+import il.soulSalttrader.retro.core.content.component.UiIcon
 
 data class NavItem(
     val target: NavTarget,

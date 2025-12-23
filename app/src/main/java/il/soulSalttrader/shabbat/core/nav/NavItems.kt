@@ -1,7 +1,7 @@
 package il.soulSalttrader.retro.core.nav
 
 import il.soulSalttrader.retro.R
-import il.soulSalttrader.retro.core.UiIcon
+import il.soulSalttrader.retro.core.content.component.UiIcon
 
 object NavItems {
     val Previous = NavItem(

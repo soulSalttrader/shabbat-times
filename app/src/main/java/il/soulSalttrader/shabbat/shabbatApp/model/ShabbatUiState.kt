@@ -1,6 +1,6 @@
 package il.soulSalttrader.retro.shabbatApp.model
 
-import il.soulSalttrader.retro.core.State
+import il.soulSalttrader.retro.core.model.State
 
 sealed interface ShabbatUiState : State {
     data object Loading : ShabbatUiState

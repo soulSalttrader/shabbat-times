@@ -16,7 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.retro.R
-import il.soulSalttrader.retro.core.UiIcon
+import il.soulSalttrader.retro.core.content.component.UiIcon
 import il.soulSalttrader.retro.core.content.IconTextButton
 import il.soulSalttrader.retro.core.content.UiIconImage
 

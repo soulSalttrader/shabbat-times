@@ -2,8 +2,8 @@ package il.soulSalttrader.retro.core.event
 
 import android.util.Log
 import il.soulSalttrader.retro.core.Debug
-import il.soulSalttrader.retro.core.Reducible
-import il.soulSalttrader.retro.core.ShabbatUiReducer
+import il.soulSalttrader.retro.core.reducer.Reducible
+import il.soulSalttrader.retro.core.reducer.ShabbatUiReducer
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
 

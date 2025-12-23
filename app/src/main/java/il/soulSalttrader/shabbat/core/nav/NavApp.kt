@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import il.soulSalttrader.retro.core.AppModel
+import il.soulSalttrader.retro.core.model.AppModel
 import il.soulSalttrader.retro.core.Debug
 import il.soulSalttrader.retro.core.event.AppEvent
 import il.soulSalttrader.retro.core.nav.graph.mainNavGraph

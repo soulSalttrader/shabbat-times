@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import il.soulSalttrader.retro.breatheApp.BreatheScreen
-import il.soulSalttrader.retro.core.AppModel
+import il.soulSalttrader.retro.core.model.AppModel
 import il.soulSalttrader.retro.core.content.SplitScreen
 import il.soulSalttrader.retro.core.event.AppEvent
 import il.soulSalttrader.retro.core.nav.NavItems.Breathe
