@@ -1,7 +1,7 @@
 package il.soulSalttrader.retro.shabbatApp.permission
 
-data class PermissionState(
-    val requested: Boolean = false,
-    val explanationFor: List<String> = emptyList(),
-    val openSettings: Boolean = false,
-)
+sealed interface PermissionState {
+    data object Requesting : PermissionState
+    data class Explain(val permissions: List<String>) : PermissionState
+    data class NeedsSettings(val permissions: List<String>) : PermissionState
+}

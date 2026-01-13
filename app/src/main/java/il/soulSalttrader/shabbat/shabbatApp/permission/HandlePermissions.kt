@@ -32,29 +32,34 @@ fun HandlePermissions(
         )
     }
 
-    LaunchedEffect(permissionState.requested) {
-        if (!permissionState.requested) return@LaunchedEffect
-        onResult(permissionHandler.request(permissions))
-    }
-
-    if (permissionState.explanationFor.isNotEmpty()) {
-        ExplanatoryDialog(
+    when (permissionState) {
+        is PermissionState.Explain       -> ExplanatoryDialog(
             onConfirm = onRetry,
             onConfirmText = "Allow",
             onDismiss = onRationaleDismissed,
         )
-    }
 
-    if (permissionState.openSettings) {
-        ExplanatoryDialog(
+        is PermissionState.NeedsSettings -> ExplanatoryDialog(
             onConfirm = { context.openAppSettings() },
             onConfirmText = "Settings",
             onDismiss = onRationaleDismissed,
         )
+
+        else                             -> Unit
     }
 
-    LaunchedEffect(permissionState.openSettings) {
-        if (!permissionState.openSettings) return@LaunchedEffect
-        context.openAppSettings()
+    LaunchedEffect(permissionState) {
+        when (permissionState) {
+            is PermissionState.Requesting    -> {
+                val result = permissionHandler.request(permissions)
+                onResult(result)
+            }
+
+            is PermissionState.NeedsSettings -> {
+                context.openAppSettings()
+            }
+
+            else                             -> return@LaunchedEffect
+        }
     }
 }
