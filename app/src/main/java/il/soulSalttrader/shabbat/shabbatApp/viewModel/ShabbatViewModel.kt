@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.retro.core.effect.AppEffect
 import il.soulSalttrader.retro.core.event.ShabbatEvent
-import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
+import il.soulSalttrader.retro.shabbatApp.model.ShabbatDataState
 import il.soulSalttrader.retro.shabbatApp.model.toLoadedEvent
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
 import jakarta.inject.Inject
@@ -23,8 +23,8 @@ import kotlinx.coroutines.launch
 class ShabbatViewModel @Inject constructor(
     private val repository: ShabbatRepository,
 ) : ViewModel() {
-    private val _uiState: MutableStateFlow<ShabbatUiState> = MutableStateFlow(value = ShabbatUiState.Loading)
-    val uiState: StateFlow<ShabbatUiState> = _uiState.asStateFlow()
+    private val _uiState: MutableStateFlow<ShabbatDataState> = MutableStateFlow(value = ShabbatDataState.Loading)
+    val uiState: StateFlow<ShabbatDataState> = _uiState.asStateFlow()
 
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()

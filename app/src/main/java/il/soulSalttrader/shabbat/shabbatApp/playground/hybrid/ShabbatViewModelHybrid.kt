@@ -3,7 +3,7 @@ package il.soulSalttrader.retro.shabbatApp.playground.hybrid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
+import il.soulSalttrader.retro.shabbatApp.model.ShabbatDataState
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
 import jakarta.inject.Inject
@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 class ShabbatViewModelHybrid @Inject constructor(
     private val repository: ShabbatRepository
 ) : ViewModel() {
-    private val _state: MutableStateFlow<ShabbatUiState> = MutableStateFlow(ShabbatUiState.Loading)
+    private val _state: MutableStateFlow<ShabbatDataState> = MutableStateFlow(ShabbatDataState.Loading)
     val state = _state.asStateFlow()
 
     init { refresh() }
@@ -24,15 +24,15 @@ class ShabbatViewModelHybrid @Inject constructor(
 
     private fun refresh() {
         viewModelScope.launch {
-            _state.value = ShabbatUiState.Loading
+            _state.value = ShabbatDataState.Loading
 
             _state.value = when (val result = repository.getHalachicTimes()) {
                 is NetworkResult.Success -> {
-                    ShabbatUiState.Success(data = result.data)
+                    ShabbatDataState.Success(data = result.data)
                 }
 
                 is NetworkResult.Failure -> {
-                    ShabbatUiState.Failure(message = result.message, cause = result.cause)
+                    ShabbatDataState.Failure(message = result.message, cause = result.cause)
                 }
             }
         }

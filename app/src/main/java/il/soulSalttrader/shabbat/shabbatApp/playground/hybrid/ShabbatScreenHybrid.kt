@@ -8,7 +8,7 @@ import il.soulSalttrader.retro.shabbatApp.content.FailureScreen
 import il.soulSalttrader.retro.shabbatApp.content.LoadingScreen
 import il.soulSalttrader.retro.shabbatApp.content.ShabbatContent
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
-import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
+import il.soulSalttrader.retro.shabbatApp.model.ShabbatDataState
 
 @Composable
 fun ShabbatScreenHybrid() {
@@ -17,14 +17,14 @@ fun ShabbatScreenHybrid() {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
     when (uiState) {
-        is ShabbatUiState.Loading -> LoadingScreen()
+        is ShabbatDataState.Loading -> LoadingScreen()
 
-        is ShabbatUiState.Success -> ShabbatContent(
-            result = (uiState as ShabbatUiState.Success).data ?: HalachicTimesDisplay(),
+        is ShabbatDataState.Success -> ShabbatContent(
+            result = (uiState as ShabbatDataState.Success).data ?: HalachicTimesDisplay(),
         )
 
-        is ShabbatUiState.Failure -> FailureScreen(
-            message = (uiState as ShabbatUiState.Failure).message,
+        is ShabbatDataState.Failure -> FailureScreen(
+            message = (uiState as ShabbatDataState.Failure).message,
             onRetry = viewModel::retry
         )
     }

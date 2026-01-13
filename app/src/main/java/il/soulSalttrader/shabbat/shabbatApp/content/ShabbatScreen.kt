@@ -6,7 +6,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.retro.core.event.ShabbatEvent
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
-import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
+import il.soulSalttrader.retro.shabbatApp.model.ShabbatDataState
 import il.soulSalttrader.retro.shabbatApp.viewModel.ShabbatViewModel
 
 @Composable
@@ -15,15 +15,15 @@ fun ShabbatScreen() {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     when (uiState) {
-        is ShabbatUiState.Loading -> LoadingScreen()
+        is ShabbatDataState.Loading -> LoadingScreen()
 
-        is ShabbatUiState.Success -> ShabbatContent(
-            result = (uiState as ShabbatUiState.Success).data ?: HalachicTimesDisplay(),
+        is ShabbatDataState.Success -> ShabbatContent(
+            result = (uiState as ShabbatDataState.Success).data ?: HalachicTimesDisplay(),
             onClick = {}
         )
 
-        is ShabbatUiState.Failure -> FailureScreen(
-            message = (uiState as ShabbatUiState.Failure).message,
+        is ShabbatDataState.Failure -> FailureScreen(
+            message = (uiState as ShabbatDataState.Failure).message,
             onRetry = { viewModel.dispatch(event = ShabbatEvent.Load) }
         )
     }

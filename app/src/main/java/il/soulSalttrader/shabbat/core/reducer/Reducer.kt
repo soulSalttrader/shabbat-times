@@ -8,7 +8,7 @@ import il.soulSalttrader.retro.core.Debug.formatEventName
 import il.soulSalttrader.retro.core.Debug.formatStateTransition
 import il.soulSalttrader.retro.core.model.State
 import il.soulSalttrader.retro.counterApp.CounterState
-import il.soulSalttrader.retro.shabbatApp.model.ShabbatUiState
+import il.soulSalttrader.retro.shabbatApp.model.ShabbatDataState
 import il.soulSalttrader.retro.timerApp.TimerState
 
 fun interface Reducer<S : State> {
@@ -32,4 +32,4 @@ typealias BreatheReducer = Reducer<BreatheState>
 typealias CounterReducer = Reducer<CounterState>
 typealias TimerReducer = Reducer<TimerState>
 typealias BadgeReducer = Reducer<BadgeState>
-typealias ShabbatUiReducer = Reducer<ShabbatUiState>
+typealias ShabbatDataReducer = Reducer<ShabbatDataState>
