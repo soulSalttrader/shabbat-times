@@ -14,12 +14,14 @@ import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
 fun ShabbatContent(
     modifier: Modifier = Modifier,
     result: HalachicTimesDisplay,
+    onClick: () -> Unit = {},
 ) {
     Column(modifier = modifier.padding(24.dp)) {
 
         ShabbatCard(
             modifier = Modifier.padding(bottom = 12.dp).weight(1f),
             text = "Jerusalem",
+            onClick = onClick,
         )
 
         Row(

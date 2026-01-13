@@ -19,6 +19,7 @@ fun ShabbatCard(
     modifier: Modifier = Modifier,
     text: String,
     style: TextStyle = MaterialTheme.typography.headlineMedium,
+    onClick: () -> Unit = {},
 ) {
     Card(
         modifier = modifier.height(120.dp),
@@ -27,6 +28,7 @@ fun ShabbatCard(
             contentColor = MaterialTheme.colorScheme.onPrimary
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 120.dp),
+        onClick = onClick,
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
