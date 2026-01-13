@@ -12,7 +12,7 @@ import il.soulSalttrader.retro.core.Debug
 @Composable
 fun HandlePermissions(
     permissions: List<String>,
-    permissionState: PermissionUiState,
+    permissionState: PermissionState,
     onResult: (PermissionResult) -> Unit,
     onRationaleDismissed: () -> Unit,
     onRetry: () -> Unit,
