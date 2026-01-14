@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.retro.core.effect.AppEffect
-import il.soulSalttrader.retro.core.event.ShabbatEvent
+import il.soulSalttrader.retro.core.event.ShabbatDataEvent
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatDataState
 import il.soulSalttrader.retro.shabbatApp.model.toLoadedEvent
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
@@ -34,13 +34,13 @@ class ShabbatViewModel @Inject constructor(
         _effects.tryEmit(AppEffect.Shabbat.LoadData)
     }
 
-    fun dispatch(event: ShabbatEvent) {
+    fun dispatch(event: ShabbatDataEvent) {
         when (event) {
-            is ShabbatEvent.Load -> {
+            is ShabbatDataEvent.Load   -> {
                 _uiState.update { current -> event.reducer reduce current }
                 _effects.tryEmit(AppEffect.Shabbat.LoadData)
             }
-            is ShabbatEvent.Loaded -> {
+            is ShabbatDataEvent.Loaded -> {
                 _uiState.update { current -> event.reducer reduce current }
             }
         }

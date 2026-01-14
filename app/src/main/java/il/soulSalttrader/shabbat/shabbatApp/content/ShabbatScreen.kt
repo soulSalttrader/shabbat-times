@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import il.soulSalttrader.retro.core.event.ShabbatEvent
+import il.soulSalttrader.retro.core.event.ShabbatDataEvent
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatDataState
 import il.soulSalttrader.retro.shabbatApp.viewModel.ShabbatViewModel
@@ -24,7 +24,7 @@ fun ShabbatScreen() {
 
         is ShabbatDataState.Failure -> FailureScreen(
             message = (uiState as ShabbatDataState.Failure).message,
-            onRetry = { viewModel.dispatch(event = ShabbatEvent.Load) }
+            onRetry = { viewModel.dispatch(event = ShabbatDataEvent.Load) }
         )
     }
 }

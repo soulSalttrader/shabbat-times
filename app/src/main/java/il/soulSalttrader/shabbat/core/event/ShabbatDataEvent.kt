@@ -7,12 +7,12 @@ import il.soulSalttrader.retro.core.reducer.ShabbatDataReducer
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatDataState
 
-sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatDataState> {
-    data object Load : ShabbatEvent {
+sealed interface ShabbatDataEvent : AppEvent, Reducible<ShabbatDataState> {
+    data object Load : ShabbatDataEvent {
         override val reducer = ShabbatDataReducer { ShabbatDataState.Loading }
     }
 
-    sealed interface Loaded : ShabbatEvent {
+    sealed interface Loaded : ShabbatDataEvent {
         class Success(val display: HalachicTimesDisplay?) : Loaded {
             override val reducer = ShabbatDataReducer {
                 if (Debug.enabled) Log.d("ShabbatEvent.Loaded.Success", "$display")
