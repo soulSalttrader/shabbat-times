@@ -12,18 +12,18 @@ import il.soulSalttrader.retro.shabbatApp.viewModel.ShabbatViewModel
 @Composable
 fun ShabbatScreen() {
     val viewModel: ShabbatViewModel = hiltViewModel()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-    when (uiState) {
+    when (state.data) {
         is ShabbatDataState.Loading -> LoadingScreen()
 
         is ShabbatDataState.Success -> ShabbatContent(
-            result = (uiState as ShabbatDataState.Success).data ?: HalachicTimesDisplay(),
+            result = (state.data as ShabbatDataState.Success).data ?: HalachicTimesDisplay(),
             onClick = {}
         )
 
         is ShabbatDataState.Failure -> FailureScreen(
-            message = (uiState as ShabbatDataState.Failure).message,
+            message = (state.data as ShabbatDataState.Failure).message,
             onRetry = { viewModel.dispatch(event = ShabbatDataEvent.Load) }
         )
     }

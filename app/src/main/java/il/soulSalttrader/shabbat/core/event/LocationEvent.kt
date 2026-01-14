@@ -14,11 +14,11 @@ sealed interface LocationEvent : AppEvent, Reducible<ShabbatState> {
     }
 
     sealed interface Loaded : LocationEvent {
-        data class Success(val location: LocationData) : LocationEvent {
+        data class Success(val location: LocationData) : Loaded {
             override val reducer = ShabbatReducer { state -> state.copy(location = LocationState.Available(location)) }
         }
 
-        data class Failure(val message: String, val cause: Throwable? = null) : LocationEvent {
+        data class Failure(val message: String, val cause: Throwable? = null) : Loaded {
             override val reducer = ShabbatReducer { state -> state.copy(location = LocationState.Unavailable(message, cause)) }
         }
     }

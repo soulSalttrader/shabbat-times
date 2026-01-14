@@ -5,8 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.retro.core.effect.AppEffect
+import il.soulSalttrader.retro.core.event.AppEvent
+import il.soulSalttrader.retro.core.event.LocationEvent
+import il.soulSalttrader.retro.core.event.PermissionEvent
 import il.soulSalttrader.retro.core.event.ShabbatDataEvent
-import il.soulSalttrader.retro.shabbatApp.model.ShabbatDataState
+import il.soulSalttrader.retro.shabbatApp.model.ShabbatState
 import il.soulSalttrader.retro.shabbatApp.model.toLoadedEvent
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
 import jakarta.inject.Inject
@@ -23,8 +26,8 @@ import kotlinx.coroutines.launch
 class ShabbatViewModel @Inject constructor(
     private val repository: ShabbatRepository,
 ) : ViewModel() {
-    private val _uiState: MutableStateFlow<ShabbatDataState> = MutableStateFlow(value = ShabbatDataState.Loading)
-    val uiState: StateFlow<ShabbatDataState> = _uiState.asStateFlow()
+    private val _state: MutableStateFlow<ShabbatState> = MutableStateFlow(value = ShabbatState())
+    val state: StateFlow<ShabbatState> = _state.asStateFlow()
 
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
@@ -34,15 +37,20 @@ class ShabbatViewModel @Inject constructor(
         _effects.tryEmit(AppEffect.Shabbat.LoadData)
     }
 
-    fun dispatch(event: ShabbatDataEvent) {
+    fun dispatch(event: AppEvent) {
+        _state.update { current ->
+            when (event) {
+                is ShabbatDataEvent -> event.reducer reduce current
+                is PermissionEvent  -> event.reducer reduce current
+                is LocationEvent    -> event.reducer reduce current
+
+                else                -> current
+            }
+        }
+
         when (event) {
-            is ShabbatDataEvent.Load   -> {
-                _uiState.update { current -> event.reducer reduce current }
-                _effects.tryEmit(AppEffect.Shabbat.LoadData)
-            }
-            is ShabbatDataEvent.Loaded -> {
-                _uiState.update { current -> event.reducer reduce current }
-            }
+            is ShabbatDataEvent.Load -> _effects.tryEmit(AppEffect.Shabbat.LoadData)
+            else -> Unit
         }
     }
 
