@@ -33,13 +33,13 @@ fun HandlePermissions(
     }
 
     when (permissionState) {
-        is PermissionState.Explain       -> ExplanatoryDialog(
+        is PermissionState.ShowRationale -> ExplanatoryDialog(
             onConfirm = onRetry,
             onConfirmText = "Allow",
             onDismiss = onRationaleDismissed,
         )
 
-        is PermissionState.NeedsSettings -> ExplanatoryDialog(
+        is PermissionState.ShowSettingsPrompt -> ExplanatoryDialog(
             onConfirm = { context.openAppSettings() },
             onConfirmText = "Settings",
             onDismiss = onRationaleDismissed,
@@ -55,7 +55,7 @@ fun HandlePermissions(
                 onResult(result)
             }
 
-            is PermissionState.NeedsSettings -> {
+            is PermissionState.ShowSettingsPrompt -> {
                 context.openAppSettings()
             }
 
