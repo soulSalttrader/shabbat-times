@@ -10,16 +10,16 @@ class PermissionHandlerImpl(
     private val shouldShowRationale: (String) -> Boolean,
     private val launch: (Array<String>) -> Unit,
 ) : PermissionHandler {
-    private var continuation: CancellableContinuation<PermissionResult>? = null
+    private var continuation: CancellableContinuation<PermissionState>? = null
 
-    override suspend fun request(permissions: List<String>): PermissionResult =
+    override suspend fun request(permissions: List<String>): PermissionState =
         suspendCancellableCoroutine { cont ->
             check(continuation == null) { "Permission request already in progress" }
 
             val missing = permissions.filterNot(isGranted)
 
             if (missing.isEmpty()) {
-                cont.resume(PermissionResult.Granted)
+                cont.resume(PermissionState.Granted(permissions))
                 return@suspendCancellableCoroutine
             }
 
@@ -37,22 +37,23 @@ class PermissionHandlerImpl(
         Log.d("onResult", "granted: $result")
 
         try {
-            val deniedPermissions = result.filterValues { !it }.keys.toList()
-            Log.d("onResult", "denied: $deniedPermissions")
-            val permanentlyDenied = deniedPermissions.filterNot(shouldShowRationale)
+            val granted = result.filterValues { it }.keys.toList()
+            val denied = result.filterValues { !it }.keys.toList()
+            Log.d("onResult", "denied: $denied")
+            val permanentlyDenied = denied.filterNot(shouldShowRationale)
             Log.d("onResult", "permanently: $permanentlyDenied")
 
             when {
-                deniedPermissions.isEmpty() -> {
-                    cont.resume(PermissionResult.Granted)
+                denied.isEmpty() -> {
+                    cont.resume(PermissionState.Granted(permissions = granted))
                 }
 
                 permanentlyDenied.isNotEmpty() -> {
-                    cont.resume(PermissionResult.Blocked(permissions = permanentlyDenied))
+                    cont.resume(PermissionState.ShowSettingsPrompt(permissions = permanentlyDenied))
                 }
 
                 else -> {
-                    cont.resume(PermissionResult.Explain(permissions = deniedPermissions))
+                    cont.resume(PermissionState.ShowRationale(permissions = denied))
                 }
             }
         } finally {

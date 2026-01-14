@@ -13,7 +13,7 @@ import il.soulSalttrader.retro.core.Debug
 fun HandlePermissions(
     permissions: List<String>,
     permissionState: PermissionState,
-    onResult: (PermissionResult) -> Unit,
+    onResult: (PermissionState) -> Unit,
     onRationaleDismissed: () -> Unit,
     onRetry: () -> Unit,
 ) {
