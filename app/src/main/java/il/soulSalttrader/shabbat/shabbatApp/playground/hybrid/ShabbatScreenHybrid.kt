@@ -17,6 +17,8 @@ fun ShabbatScreenHybrid() {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
     when (uiState) {
+        is ShabbatDataState.Idle    -> LoadingScreen()
+
         is ShabbatDataState.Loading -> LoadingScreen()
 
         is ShabbatDataState.Success -> ShabbatContent(

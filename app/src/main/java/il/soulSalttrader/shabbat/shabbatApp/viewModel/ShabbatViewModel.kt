@@ -9,6 +9,7 @@ import il.soulSalttrader.retro.core.event.AppEvent
 import il.soulSalttrader.retro.core.event.LocationEvent
 import il.soulSalttrader.retro.core.event.PermissionEvent
 import il.soulSalttrader.retro.core.event.ShabbatDataEvent
+import il.soulSalttrader.retro.shabbatApp.model.ShabbatDataState
 import il.soulSalttrader.retro.shabbatApp.model.ShabbatState
 import il.soulSalttrader.retro.shabbatApp.model.toLoadedEvent
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
@@ -50,7 +51,7 @@ class ShabbatViewModel @Inject constructor(
 
         when (event) {
             is ShabbatDataEvent.Load -> _effects.tryEmit(AppEffect.Shabbat.LoadData)
-            else -> Unit
+            else                     -> Unit
         }
     }
 
@@ -58,20 +59,40 @@ class ShabbatViewModel @Inject constructor(
         viewModelScope.launch {
             _effects.collect { effect ->
                 when (effect) {
-                    is AppEffect.Shabbat.LoadData   -> loadData()
-                    is AppEffect.Shabbat.LoadFailed -> handleShabbatLoadFailed(effect)
-                    else                            -> throw IllegalArgumentException("Unknown effect: $effect.")
+                    is AppEffect.Shabbat.LoadData -> {
+                        Log.d("ShabbatVM", "→ Processing LoadData effect")
+                        loadData()
+                    }
+
+                    is AppEffect.Shabbat.LoadFailed -> {
+                        handleShabbatLoadFailed(effect)
+                        Log.d("ShabbatVM", "→ Processing LoadFailed: ${effect.error.message}")
+                    }
+
+                    else -> Log.w("ShabbatVM", "Unhandled effect: $effect")
                 }
             }
         }
     }
 
     private suspend fun loadData() {
+        if (_state.value.data is ShabbatDataState.Loading) {
+            Log.d("ShabbatVM", "Load already in progress – skipping")
+            return
+        }
+
+        _state.update { current ->
+            current.copy(data = ShabbatDataState.Loading)
+        }
+
         runCatching {
             repository.getHalachicTimes()
         }.onSuccess { result ->
+            Log.d("ShabbatVM", "Load success")
             dispatch(event = result.toLoadedEvent())
         }.onFailure { exception ->
+            Log.e("ShabbatVM", "Load failed", exception)
+            _state.update { it.copy(data = ShabbatDataState.Failure(exception.message ?: "Unknown error", exception.cause)) }
             _effects.tryEmit(AppEffect.Shabbat.LoadFailed(exception))
         }
     }

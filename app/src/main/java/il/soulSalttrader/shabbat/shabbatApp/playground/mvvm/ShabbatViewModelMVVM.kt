@@ -1,12 +1,17 @@
 package il.soulSalttrader.retro.shabbatApp.playground.mvvm
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.retro.shabbatApp.model.HalachicTimesDisplay
+import il.soulSalttrader.retro.shabbatApp.model.toLoadedEvent
 import il.soulSalttrader.retro.shabbatApp.network.NetworkResult
 import il.soulSalttrader.retro.shabbatApp.repository.ShabbatRepository
 import jakarta.inject.Inject
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,26 +30,43 @@ class ShabbatViewModelMVVM @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val debounceJob = SupervisorJob()
+
     init { refresh() }
 
-    fun retry() = refresh()
+    fun retry() {
+        debounceJob.cancelChildren()
+        viewModelScope.launch(debounceJob) {
+            delay(300)
+            refresh()
+        }
+    }
 
     private fun refresh() {
+        if (_isLoading.value) {
+            Log.d("ShabbatMVVM", "Refresh already in progress – skipping duplicate call")
+            return
+        }
+
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
 
-            when (val result = repository.getHalachicTimes()) {
-                is NetworkResult.Success -> {
-                    _halachicTimes.value = result.data
-                    _isLoading.value = false
+            runCatching {
+                repository.getHalachicTimes()
+            }.fold(
+                onSuccess = { result ->
+                    Log.d("HalachicVM", "Load success")
+                    _halachicTimes.value = (result as NetworkResult.Success).data
+                },
+                onFailure = { exception ->
+                    val msg = exception.message ?: "Failed to load Halachic times"
+                    Log.e("HalachicVM", msg, exception)
+                    _errorMessage.value = msg
                 }
+            )
 
-                is NetworkResult.Failure -> {
-                    _errorMessage.value = result.message
-                    _isLoading.value = false
-                }
-            }
+            _isLoading.value = false
         }
     }
 }
