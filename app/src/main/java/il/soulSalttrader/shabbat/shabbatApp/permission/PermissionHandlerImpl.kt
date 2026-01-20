@@ -10,16 +10,16 @@ class PermissionHandlerImpl(
     private val shouldShowRationale: (String) -> Boolean,
     private val launch: (Array<String>) -> Unit,
 ) : PermissionHandler {
-    private var continuation: CancellableContinuation<PermissionState>? = null
+    private var continuation: CancellableContinuation<PermissionResult>? = null
 
-    override suspend fun request(permissions: List<String>): PermissionState =
+    override suspend fun request(permissions: List<String>): PermissionResult =
         suspendCancellableCoroutine { cont ->
             check(continuation == null) { "Permission request already in progress" }
 
             val missing = permissions.filterNot(isGranted)
 
             if (missing.isEmpty()) {
-                cont.resume(PermissionState.Granted(permissions))
+                cont.resume(PermissionResult.Granted)
                 return@suspendCancellableCoroutine
             }
 
@@ -45,15 +45,15 @@ class PermissionHandlerImpl(
 
             when {
                 denied.isEmpty() -> {
-                    cont.resume(PermissionState.Granted(permissions = granted))
+                    cont.resume(PermissionResult.Granted)
                 }
 
                 permanentlyDenied.isNotEmpty() -> {
-                    cont.resume(PermissionState.ShowSettingsPrompt(permissions = permanentlyDenied))
+                    cont.resume(PermissionResult.Blocked(permissions = permanentlyDenied))
                 }
 
                 else -> {
-                    cont.resume(PermissionState.ShowRationale(permissions = denied))
+                    cont.resume(PermissionResult.Explain(permissions = denied))
                 }
             }
         } finally {
