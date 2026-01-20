@@ -8,14 +8,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import il.soulSalttrader.retro.core.Debug
+import il.soulSalttrader.retro.core.event.PermissionEvent
 
 @Composable
 fun HandlePermissions(
     permissions: List<String>,
     permissionState: PermissionState,
-    onResult: (PermissionState) -> Unit,
-    onRationaleDismissed: () -> Unit,
-    onRetry: () -> Unit,
+    dispatch: (PermissionEvent) -> Unit,
 ) {
     val permissionHandler = rememberPermissionHandler()
     val context = LocalContext.current
@@ -32,34 +31,38 @@ fun HandlePermissions(
         )
     }
 
-    when (permissionState) {
-        is PermissionState.ShowRationale -> ExplanatoryDialog(
-            onConfirm = onRetry,
-            onConfirmText = "Allow",
-            onDismiss = onRationaleDismissed,
-        )
+    LaunchedEffect(permissionState) {
+        if (permissionState == PermissionState.Requesting) {
+            val result = permissionHandler.request(permissions)
 
-        is PermissionState.ShowSettingsPrompt -> ExplanatoryDialog(
-            onConfirm = { context.openAppSettings() },
-            onConfirmText = "Settings",
-            onDismiss = onRationaleDismissed,
-        )
+            when (result) {
+                is PermissionResult.Granted ->
+                    dispatch(PermissionEvent.AllGranted)
 
-        else                             -> Unit
+                is PermissionResult.Explain ->
+                    dispatch(PermissionEvent.DeniedWithRationale)
+
+                is PermissionResult.Blocked ->
+                    dispatch(PermissionEvent.DeniedPermanently)
+            }
+        }
     }
 
-    LaunchedEffect(permissionState) {
-        when (permissionState) {
-            is PermissionState.Requesting    -> {
-                val result = permissionHandler.request(permissions)
-                onResult(result)
-            }
+    if (permissionState == PermissionState.Denied) {
+        ExplanatoryDialog(
+            message = "We need location to show accurate zmanim times.",
+            onConfirmText = "Allow",
+            onConfirm = { dispatch(PermissionEvent.AcceptedRationale) },
+            onDismiss = { dispatch(PermissionEvent.DismissedRationale) }
+        )
+    }
 
-            is PermissionState.ShowSettingsPrompt -> {
-                context.openAppSettings()
-            }
-
-            else                             -> return@LaunchedEffect
-        }
+    if (permissionState == PermissionState.DeniedPermanently) {
+        ExplanatoryDialog(
+            message = "Location access was permanently denied. Please enable it in settings.",
+            onConfirmText = "Open Settings",
+            onConfirm = { dispatch(PermissionEvent.RequestedAppSettings) },
+            onDismiss = { dispatch(PermissionEvent.DismissedRationale) }
+        )
     }
 }
