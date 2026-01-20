@@ -6,7 +6,7 @@ sealed interface PermissionState : State {
     data object Idle : PermissionState
     data object Requesting : PermissionState
 
-    data class Granted(val permissions: List<String>) : PermissionState
-    data class ShowRationale(val permissions: List<String>) : PermissionState
-    data class ShowSettingsPrompt(val permissions: List<String>) : PermissionState
+    data object Granted : PermissionState
+    data object Denied : PermissionState
+    data object DeniedPermanently : PermissionState
 }
