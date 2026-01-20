@@ -50,8 +50,10 @@ class ShabbatViewModel @Inject constructor(
         }
 
         when (event) {
-            is ShabbatDataEvent.Load -> _effects.tryEmit(AppEffect.Shabbat.LoadData)
-            else                     -> Unit
+            is ShabbatDataEvent.Load                -> _effects.tryEmit(AppEffect.Shabbat.LoadData)
+            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.Shabbat.OpenAppSettings)
+
+            else                                    -> Unit
         }
     }
 
