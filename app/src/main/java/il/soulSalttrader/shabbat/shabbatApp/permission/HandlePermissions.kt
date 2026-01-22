@@ -19,18 +19,6 @@ fun HandlePermissions(
     val permissionHandler = rememberPermissionHandler()
     val context = LocalContext.current
 
-    if (Debug.enabled) {
-        Log.d(
-            "PermCheck",
-            "Granted = ${
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            }"
-        )
-    }
-
     LaunchedEffect(permissionState) {
         if (permissionState == PermissionState.Requesting) {
             val result = permissionHandler.request(permissions)
@@ -48,21 +36,36 @@ fun HandlePermissions(
         }
     }
 
-    if (permissionState == PermissionState.Denied) {
-        ExplanatoryDialog(
-            message = "We need location to show accurate zmanim times.",
-            onConfirmText = "Allow",
-            onConfirm = { dispatch(PermissionEvent.AcceptedRationale) },
-            onDismiss = { dispatch(PermissionEvent.DismissedRationale) }
-        )
+    when (permissionState) {
+        PermissionState.Denied            -> {
+            ExplanatoryDialog(
+                message = "We need location to show accurate zmanim times.",
+                onConfirmText = "Allow",
+                onConfirm = { dispatch(PermissionEvent.AcceptedRationale) },
+                onDismiss = { dispatch(PermissionEvent.DismissedRationale) }
+            )
+        }
+        PermissionState.DeniedPermanently -> {
+            ExplanatoryDialog(
+                message = "Location access was permanently denied. Please enable it in settings.",
+                onConfirmText = "Open Settings",
+                onConfirm = { dispatch(PermissionEvent.RequestedAppSettings) },
+                onDismiss = { dispatch(PermissionEvent.DismissedRationale) }
+            )
+        }
+
+        else -> Unit
     }
 
-    if (permissionState == PermissionState.DeniedPermanently) {
-        ExplanatoryDialog(
-            message = "Location access was permanently denied. Please enable it in settings.",
-            onConfirmText = "Open Settings",
-            onConfirm = { dispatch(PermissionEvent.RequestedAppSettings) },
-            onDismiss = { dispatch(PermissionEvent.DismissedRationale) }
+    if (Debug.enabled) {
+        Log.d(
+            "PermCheck",
+            "Granted = ${
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            }"
         )
     }
 }
