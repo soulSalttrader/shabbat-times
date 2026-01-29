@@ -1,6 +1,7 @@
 package il.soulSalttrader.shabbattimes.nav
 
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.content.UiIcon
 
 object NavItems {
     val Previous = NavItem(
