@@ -35,7 +35,7 @@ fun NavApp(
         navigator.collectNavigationCommands(navController)
     }
 
-    val startDestination = NavTargetBottom.Home
+    val startDestination = NavTargetBottom.Shabbat
 
     NavHost(
         modifier = modifier,
