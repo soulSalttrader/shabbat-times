@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "shabbat-times"
+rootProject.name = "shabbattimes"
 include(":app")

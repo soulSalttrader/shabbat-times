@@ -17,11 +17,11 @@ kotlin {
 }
 
 android {
-    namespace = "il.soulSalttrader.shabbat-times"
+    namespace = "il.soulSalttrader.shabbattimes"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "il.soulSaltrader.shabbat-times"
+        applicationId = "il.soulSaltrader.shabbattimes"
         minSdk = 30
         targetSdk = 36
         versionCode = 1
