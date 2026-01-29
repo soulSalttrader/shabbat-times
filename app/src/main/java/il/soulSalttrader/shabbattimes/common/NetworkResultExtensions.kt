@@ -1,6 +1,6 @@
 package il.soulSalttrader.shabbattimes.common
 
-import il.soulSalttrader.shabbattimes.shabbatApp.network.NetworkResult
+import il.soulSalttrader.shabbattimes.network.NetworkResult
 
 inline fun <T> NetworkResult<T>.onSuccess(action: (T) -> Unit): NetworkResult<T> {
     if (this is NetworkResult.Success) action(data)

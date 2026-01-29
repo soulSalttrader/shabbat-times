@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes.model
 
 import android.content.Context
-import il.soulSalttrader.shabbattimes.shabbatApp.common.toDisplayString
+import il.soulSalttrader.shabbattimes.common.toDisplayString
 
 fun HalachicTimes.toDisplay(context: Context): HalachicTimesDisplay =
     HalachicTimesDisplay(

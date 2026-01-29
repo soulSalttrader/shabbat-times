@@ -1,6 +1,5 @@
 package il.soulSalttrader.shabbattimes
 
-import il.soulSalttrader.shabbattimes.BuildConfig
 import il.soulSalttrader.shabbattimes.model.State
 import il.soulSalttrader.shabbattimes.reducer.Reducer
 

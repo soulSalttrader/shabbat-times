@@ -8,7 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import il.soulSalttrader.shabbattimes.shabbatApp.model.HalachicTimesDisplay
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
 @Composable
 fun ShabbatContent(

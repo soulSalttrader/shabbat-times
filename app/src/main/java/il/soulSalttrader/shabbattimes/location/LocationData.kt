@@ -1,6 +1,6 @@
 package il.soulSalttrader.shabbattimes.location
 
-import il.soulSalttrader.shabbattimes.shabbatApp.model.Cities
+import il.soulSalttrader.shabbattimes.model.Cities
 
 data class LocationData(
     val lat: Double = Cities.JERUSALEM.lat,

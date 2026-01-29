@@ -1,8 +1,7 @@
 package il.soulSalttrader.shabbattimes.model
 
-import il.soulSalttrader.shabbattimes.shabbatApp.permission.PermissionState
-import il.soulSalttrader.shabbattimes.model.State
-import il.soulSalttrader.shabbattimes.shabbatApp.location.LocationState
+import il.soulSalttrader.shabbattimes.location.LocationState
+import il.soulSalttrader.shabbattimes.permission.PermissionState
 
 data class ShabbatState(
     val data: ShabbatDataState = ShabbatDataState.Idle,

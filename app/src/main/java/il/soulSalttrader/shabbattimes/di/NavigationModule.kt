@@ -6,7 +6,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import il.soulSalttrader.shabbattimes.nav.NavManager
 import il.soulSalttrader.shabbattimes.nav.Navigator
-
 @Module
 @InstallIn(SingletonComponent::class)
 interface NavigationModule {
