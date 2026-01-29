@@ -45,6 +45,7 @@ fun NavApp(
         mainNavGraph(
             state = state,
             onEvent = onEvent,
+            navigator = navigator,
         )
     }
 
