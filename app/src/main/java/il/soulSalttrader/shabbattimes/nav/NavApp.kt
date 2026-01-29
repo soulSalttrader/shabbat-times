@@ -20,8 +20,6 @@ import il.soulSalttrader.shabbattimes.model.State
 @Composable
 fun NavApp(
     modifier: Modifier,
-    state: State,
-    onEvent: (AppEvent) -> Unit,
     navigator: Navigator,
 ) {
     val navController = rememberNavController()
@@ -42,11 +40,7 @@ fun NavApp(
         navController = navController,
         startDestination = startDestination,
     ) {
-        mainNavGraph(
-            state = state,
-            onEvent = onEvent,
-            navigator = navigator,
-        )
+        mainNavGraph(navigator = navigator)
     }
 
     if (Debug.enabled) {
