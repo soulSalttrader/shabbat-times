@@ -9,10 +9,10 @@ import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
-import il.soulSalttrader.shabbattimes.shabbatApp.model.ShabbatDataState
-import il.soulSalttrader.shabbattimes.shabbatApp.model.ShabbatState
-import il.soulSalttrader.shabbattimes.shabbatApp.model.toLoadedEvent
-import il.soulSalttrader.shabbattimes.shabbatApp.repository.ShabbatRepository
+import il.soulSalttrader.shabbattimes.model.ShabbatDataState
+import il.soulSalttrader.shabbattimes.model.ShabbatState
+import il.soulSalttrader.shabbattimes.model.toLoadedEvent
+import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,8 +44,6 @@ class ShabbatViewModel @Inject constructor(
                 is ShabbatDataEvent -> event.reducer reduce current
                 is PermissionEvent  -> event.reducer reduce current
                 is LocationEvent    -> event.reducer reduce current
-
-                else                -> current
             }
         }
 

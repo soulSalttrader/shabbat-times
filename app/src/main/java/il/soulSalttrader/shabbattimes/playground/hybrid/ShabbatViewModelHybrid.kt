@@ -3,9 +3,9 @@ package il.soulSalttrader.shabbattimes.playground.hybrid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import il.soulSalttrader.shabbattimes.shabbatApp.model.ShabbatDataState
-import il.soulSalttrader.shabbattimes.shabbatApp.network.NetworkResult
-import il.soulSalttrader.shabbattimes.shabbatApp.repository.ShabbatRepository
+import il.soulSalttrader.shabbattimes.model.ShabbatDataState
+import il.soulSalttrader.shabbattimes.network.NetworkResult
+import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

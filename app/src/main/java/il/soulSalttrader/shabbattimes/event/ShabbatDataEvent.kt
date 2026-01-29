@@ -2,22 +2,22 @@ package il.soulSalttrader.shabbattimes.event
 
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
+import il.soulSalttrader.shabbattimes.model.ShabbatDataState
+import il.soulSalttrader.shabbattimes.model.ShabbatState
 import il.soulSalttrader.shabbattimes.reducer.Reducible
-import il.soulSalttrader.shabbattimes.reducer.Reducer
-import il.soulSalttrader.shabbattimes.shabbatApp.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.shabbatApp.model.ShabbatDataState
-import il.soulSalttrader.shabbattimes.shabbatApp.model.ShabbatState
+import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 
 sealed interface ShabbatDataEvent : AppEvent, Reducible<ShabbatState> {
     data object Load : ShabbatDataEvent {
-        override val reducer = Reducer { state ->
+        override val reducer = ShabbatReducer { state ->
             state.copy(data = ShabbatDataState.Loading)
         }
     }
 
     sealed interface Loaded : ShabbatDataEvent {
         class Success(val display: HalachicTimesDisplay?) : Loaded {
-            override val reducer = Reducer { state ->
+            override val reducer = ShabbatReducer { state ->
                 if (Debug.enabled) Log.d("ShabbatEvent.Loaded.Success", "$display")
 
                 state.copy(data = ShabbatDataState.Success(display))
@@ -25,7 +25,7 @@ sealed interface ShabbatDataEvent : AppEvent, Reducible<ShabbatState> {
         }
 
         class Failure(val message: String, val cause: Throwable?) : Loaded {
-            override val reducer = Reducer { state ->
+            override val reducer = ShabbatReducer { state ->
                 if (Debug.enabled) Log.d(
                     "ShabbatEvent.Loaded.Failure",
                     "message: $message, cause: $cause"

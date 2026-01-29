@@ -4,19 +4,20 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import il.soulSalttrader.shabbattimes.Debug
-import il.soulSalttrader.shabbattimes.shabbatApp.common.toDisplayString
-import il.soulSalttrader.shabbattimes.shabbatApp.common.upcomingCandleLightingDate
-import il.soulSalttrader.shabbattimes.shabbatApp.common.upcomingHavdalahDate
-import il.soulSalttrader.shabbattimes.shabbatApp.constants.ShabbatOffsets.HILUCH_MIL_MINUTES
-import il.soulSalttrader.shabbattimes.shabbatApp.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_MINUTES
-import il.soulSalttrader.shabbattimes.shabbatApp.model.HalachicTimes
-import il.soulSalttrader.shabbattimes.shabbatApp.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.shabbatApp.model.SolarTimes
-import il.soulSalttrader.shabbattimes.shabbatApp.model.toDisplay
-import il.soulSalttrader.shabbattimes.shabbatApp.model.toDomain
-import il.soulSalttrader.shabbattimes.shabbatApp.network.NetworkResult
-import il.soulSalttrader.shabbattimes.shabbatApp.network.ShabbatAPIService
-import il.soulSalttrader.shabbattimes.shabbatApp.settings.UserPreferences
+import il.soulSalttrader.shabbattimes.common.getOrElse
+import il.soulSalttrader.shabbattimes.common.toDisplayString
+import il.soulSalttrader.shabbattimes.common.upcomingCandleLightingDate
+import il.soulSalttrader.shabbattimes.common.upcomingHavdalahDate
+import il.soulSalttrader.shabbattimes.constants.ShabbatOffsets.HILUCH_MIL_MINUTES
+import il.soulSalttrader.shabbattimes.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_MINUTES
+import il.soulSalttrader.shabbattimes.model.HalachicTimes
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
+import il.soulSalttrader.shabbattimes.model.SolarTimes
+import il.soulSalttrader.shabbattimes.model.toDisplay
+import il.soulSalttrader.shabbattimes.model.toDomain
+import il.soulSalttrader.shabbattimes.network.NetworkResult
+import il.soulSalttrader.shabbattimes.network.ShabbatAPIService
+import il.soulSalttrader.shabbattimes.settings.UserPreferences
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -74,8 +75,8 @@ class ShabbatRepositoryImpl @Inject constructor(
             HalachicTimes(
                 candleLightingTime = fridaySolar.sunset.minusMinutes(HILUCH_MIL_MINUTES),
                 candleLightingDate = friday,
-                havdalahTime       = saturdaySolar.sunset.plusMinutes(TZEIT_HAKOCHAVIM_MINUTES),
-                havdalahDate       = saturday
+                havdalahTime = saturdaySolar.sunset.plusMinutes(TZEIT_HAKOCHAVIM_MINUTES),
+                havdalahDate = saturday
             ).toDisplay(context)
         )
     }

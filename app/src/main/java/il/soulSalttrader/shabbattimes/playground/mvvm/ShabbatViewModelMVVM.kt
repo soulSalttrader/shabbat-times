@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import il.soulSalttrader.shabbattimes.shabbatApp.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.shabbatApp.network.NetworkResult
-import il.soulSalttrader.shabbattimes.shabbatApp.repository.ShabbatRepository
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
+import il.soulSalttrader.shabbattimes.network.NetworkResult
+import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
