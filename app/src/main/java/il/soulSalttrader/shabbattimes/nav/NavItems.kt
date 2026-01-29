@@ -17,7 +17,7 @@ object NavItems {
         title = "Settings",
         selectedIcon = UiIcon.Resource(R.drawable.settings_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.settings_outlined_24),
-        role = NavRole.BOTTOM_TAB,
+        role = NavRole.TOP_ACTION,
     )
 
     val Shabbat = NavItem(
@@ -28,5 +28,5 @@ object NavItems {
         role = NavRole.BOTTOM_TAB,
     )
 
-    val allTabs = listOf(Previous, Settings, Shabbat)
+    val allNavs = listOf(Previous, Settings, Shabbat)
 }
