@@ -1,0 +1,19 @@
+package il.soulSalttrader.shabbattimes.effect
+
+sealed interface AppEffect {
+    sealed interface Breathe : AppEffect {
+        data object StartLoop : Breathe
+        data object StopLoop : Breathe
+    }
+
+    sealed interface Timer : AppEffect {
+        data object StartLoop : Timer
+        data object StopLoop : Timer
+    }
+
+    sealed interface Shabbat : AppEffect {
+        data object LoadData : Shabbat
+        data class LoadFailed(val error: Throwable) : Shabbat
+        data object OpenAppSettings : AppEffect
+    }
+}
