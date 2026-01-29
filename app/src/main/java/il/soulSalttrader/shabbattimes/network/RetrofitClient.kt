@@ -1,8 +1,8 @@
 package il.soulSalttrader.shabbattimes.network
 
 import il.soulSalttrader.shabbattimes.Debug
-import il.soulSalttrader.shabbattimes.shabbatApp.network.ApiUrl.BASE_SUNRISE_SUNSET
-import il.soulSalttrader.shabbattimes.shabbatApp.network.JsonConfig.json
+import il.soulSalttrader.shabbattimes.network.ApiUrl.BASE_SUNRISE_SUNSET
+import il.soulSalttrader.shabbattimes.network.JsonConfig.json
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory

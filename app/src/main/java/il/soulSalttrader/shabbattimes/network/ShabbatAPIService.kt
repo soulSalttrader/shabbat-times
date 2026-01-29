@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes.network
 
-import il.soulSalttrader.shabbattimes.shabbatApp.model.Cities
-import il.soulSalttrader.shabbattimes.shabbatApp.network.dto.SolarTimesDto
+import il.soulSalttrader.shabbattimes.model.Cities
+import il.soulSalttrader.shabbattimes.network.dto.SolarTimesDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 

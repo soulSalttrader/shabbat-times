@@ -1,8 +1,8 @@
 package il.soulSalttrader.shabbattimes.repository
 
-import il.soulSalttrader.shabbattimes.shabbatApp.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.shabbatApp.model.SolarTimes
-import il.soulSalttrader.shabbattimes.shabbatApp.network.NetworkResult
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
+import il.soulSalttrader.shabbattimes.model.SolarTimes
+import il.soulSalttrader.shabbattimes.network.NetworkResult
 import java.time.LocalDate
 
 interface ShabbatRepository {

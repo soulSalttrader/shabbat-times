@@ -5,10 +5,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import il.soulSalttrader.shabbattimes.Debug
-import il.soulSalttrader.shabbattimes.shabbatApp.network.ApiUrl.BASE_SUNRISE_SUNSET
-import il.soulSalttrader.shabbattimes.shabbatApp.network.JsonConfig
-import il.soulSalttrader.shabbattimes.shabbatApp.network.OkHttpClientFactory
-import il.soulSalttrader.shabbattimes.shabbatApp.network.ShabbatAPIService
+import il.soulSalttrader.shabbattimes.network.ApiUrl.BASE_SUNRISE_SUNSET
+import il.soulSalttrader.shabbattimes.network.JsonConfig
+import il.soulSalttrader.shabbattimes.network.OkHttpClientFactory
+import il.soulSalttrader.shabbattimes.network.ShabbatAPIService
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

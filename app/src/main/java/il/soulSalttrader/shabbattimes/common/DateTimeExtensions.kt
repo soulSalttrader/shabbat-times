@@ -2,10 +2,10 @@ package il.soulSalttrader.shabbattimes.common
 
 import android.content.Context
 import android.text.format.DateFormat
-import il.soulSalttrader.shabbattimes.shabbatApp.constants.DateTimeFormatters.API_DATE_PARSER
-import il.soulSalttrader.shabbattimes.shabbatApp.constants.DateTimeFormatters.API_TIME_PARSER_12
-import il.soulSalttrader.shabbattimes.shabbatApp.constants.DateTimeFormatters.API_TIME_PARSER_24
-import il.soulSalttrader.shabbattimes.shabbatApp.constants.DateTimeFormatters.HEBREW_DATE_FORMATTER
+import il.soulSalttrader.shabbattimes.constants.DateTimeFormatters.API_DATE_PARSER
+import il.soulSalttrader.shabbattimes.constants.DateTimeFormatters.API_TIME_PARSER_12
+import il.soulSalttrader.shabbattimes.constants.DateTimeFormatters.API_TIME_PARSER_24
+import il.soulSalttrader.shabbattimes.constants.DateTimeFormatters.HEBREW_DATE_FORMATTER
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDate.now

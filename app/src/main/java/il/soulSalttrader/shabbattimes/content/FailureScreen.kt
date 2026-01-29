@@ -16,9 +16,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
-import il.soulSalttrader.shabbattimes.core.content.component.UiIcon
-import il.soulSalttrader.shabbattimes.core.content.IconTextButton
-import il.soulSalttrader.shabbattimes.core.content.UiIconImage
 
 @Composable
 fun FailureScreen(
