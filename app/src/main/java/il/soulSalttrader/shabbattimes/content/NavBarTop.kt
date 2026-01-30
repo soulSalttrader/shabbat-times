@@ -39,7 +39,7 @@ fun NavBarTop(
                 IconButton(onClick = { navigator.navigateUp() }) {
                     NavBarIcon(
                         isSelected = currentNavTarget == it.target,
-                        badgeCount = 0,
+                        badgeCount = null,
                         item = it,
                     )
                 }
