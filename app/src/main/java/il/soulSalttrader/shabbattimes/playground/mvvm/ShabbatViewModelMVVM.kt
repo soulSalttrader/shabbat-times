@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
@@ -43,7 +44,7 @@ class ShabbatViewModelMVVM @Inject constructor(
 
     private fun refresh() {
         if (_isLoading.value) {
-            Log.d("ShabbatMVVM", "Refresh already in progress – skipping duplicate call")
+            if (Debug.enabled) Log.d("ShabbatMVVM", "Refresh already in progress – skipping duplicate call")
             return
         }
 
@@ -55,12 +56,12 @@ class ShabbatViewModelMVVM @Inject constructor(
                 repository.getHalachicTimes()
             }.fold(
                 onSuccess = { result ->
-                    Log.d("HalachicVM", "Load success")
+                    if (Debug.enabled) Log.d("ShabbatMVVM", "Load success")
                     _halachicTimes.value = (result as NetworkResult.Success).data
                 },
                 onFailure = { exception ->
                     val msg = exception.message ?: "Failed to load Halachic times"
-                    Log.e("HalachicVM", msg, exception)
+                    if (Debug.enabled) Log.e("ShabbatMVVM", msg, exception)
                     _errorMessage.value = msg
                 }
             )
