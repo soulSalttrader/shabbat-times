@@ -18,16 +18,15 @@ fun Navigator.syncBackStackWithNavigator(currentBackStackEntry: NavBackStackEntr
 }
 
 suspend fun Navigator.collectNavigationCommands(navController: NavHostController): Nothing {
-    this.commands.collect { action ->
-        when (action) {
-            is NavAction.To        -> navController.navigate(action.target)
-            is NavAction.Up        -> navController.popBackStack()
-            is NavAction.ResetTo   -> navController.navigate(action.target)
-            is NavAction.PopTo     -> navController.popBackStack(action.target, inclusive = false)
-            is NavAction.PopToRoot -> navController.popBackStack(
-                navController.graph.startDestinationId,
-                inclusive = false
-            )
+    commands.collect { action ->
+        with(navController) {
+            when (action) {
+                is NavAction.To        -> handleTo(action)
+                is NavAction.Up        -> handleUp()
+                is NavAction.ResetTo   -> handleResetTo(action)
+                is NavAction.PopTo     -> handlePopTo(action)
+                is NavAction.PopToRoot -> handlePopToRoot()
+            }
         }
     }
 }
