@@ -1,9 +1,8 @@
 package il.soulSalttrader.shabbattimes.location
 
 import il.soulSalttrader.shabbattimes.model.Cities
+import il.soulSalttrader.shabbattimes.model.City
 
 data class LocationData(
-    val lat: Double = Cities.JERUSALEM.lat,
-    val lng: Double = Cities.JERUSALEM.lng,
-    val timezone: String = Cities.JERUSALEM.timezone,
+    val city: City = Cities.JERUSALEM,
 )
