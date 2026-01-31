@@ -8,8 +8,8 @@ import il.soulSalttrader.shabbattimes.common.getOrElse
 import il.soulSalttrader.shabbattimes.common.toDisplayString
 import il.soulSalttrader.shabbattimes.common.upcomingCandleLightingDate
 import il.soulSalttrader.shabbattimes.common.upcomingHavdalahDate
-import il.soulSalttrader.shabbattimes.constants.ShabbatOffsets.HILUCH_MIL_MINUTES
-import il.soulSalttrader.shabbattimes.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_MINUTES
+import il.soulSalttrader.shabbattimes.model.Cities
+import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.SolarTimes
@@ -36,9 +36,14 @@ class ShabbatRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : ShabbatRepository {
 
-    override suspend fun getSolarTimes(date: LocalDate): NetworkResult<SolarTimes> = withContext(context = dispatcher) {
+    override suspend fun getSolarTimes(date: LocalDate, city: City): NetworkResult<SolarTimes> = withContext(context = dispatcher) {
         runCatching {
-            apiService.getSolarTimes(date = date.toDisplayString())
+            apiService.getSolarTimes(
+                date = date.toDisplayString(),
+                lat = city.coordinates.latitude,
+                lng = city.coordinates.longitude,
+                timezone = city.timeZone.id,
+            )
         }
             .map { dto ->
                 if (Debug.enabled) Log.d("ShabbatRepositoryImpl.getSolarTimes", dto.status)
@@ -65,17 +70,19 @@ class ShabbatRepositoryImpl @Inject constructor(
     override suspend fun getHalachicTimes(): NetworkResult<HalachicTimesDisplay> = withContext(dispatcher) {
         val friday = upcomingCandleLightingDate()
         val saturday = upcomingHavdalahDate()
+        val city = Cities.NEW_YORK
 
         val (fridaySolar, saturdaySolar) = awaitAll(
-            async { getSolarTimes(friday) },
-            async { getSolarTimes(saturday) }
+            async { getSolarTimes(friday, city) },
+            async { getSolarTimes(saturday, city) }
         ).map { it.getOrElse { failure -> return@withContext failure } }
 
         NetworkResult.Success(
             HalachicTimes(
-                candleLightingTime = fridaySolar.sunset.minusMinutes(HILUCH_MIL_MINUTES),
+                city = city,
+                candleLightingTime = fridaySolar.sunset.minusMinutes(city.candleLightingOffsetMinutes),
                 candleLightingDate = friday,
-                havdalahTime = saturdaySolar.sunset.plusMinutes(TZEIT_HAKOCHAVIM_MINUTES),
+                havdalahTime = saturdaySolar.sunset.plusMinutes(city.havdalahOffsetMinutes),
                 havdalahDate = saturday
             ).toDisplay(context)
         )
