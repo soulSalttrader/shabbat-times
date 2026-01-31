@@ -1,24 +1,29 @@
 package il.soulSalttrader.shabbattimes.model
 
+import java.time.ZoneId
+
 object Cities {
     val JERUSALEM = City(
+        id = "jerusalem-il",
         name = "Jerusalem",
-        lat = 31.768318,
-        lng = 35.213711,
-        timezone = "Asia/Jerusalem",
+        coordinates = Coordinates(latitude = 31.768318, longitude = 35.213711),
+        timeZone = ZoneId.of("Asia/Jerusalem"),
+        candleLightingOffsetMinutes = 20L,
     )
 
     val NEW_YORK = City(
+        id = "newyork-nyc",
         name = "New York",
-        lat = 40.7128,
-        lng = -74.0060,
-        timezone = "America/New_York",
+        coordinates = Coordinates(latitude = 40.7128, longitude = -74.0060),
+        timeZone = ZoneId.of("America/New_York"),
+        candleLightingOffsetMinutes = 20L,
     )
 
     val BRNO = City(
+        id = "brno-bohemia",
         name = "Brno",
-        lat = 49.194465,
-        lng = 16.610218,
-        timezone = "Europe/Vienna",
+        coordinates = Coordinates(latitude = 49.194465, longitude = 16.610218),
+        timeZone = ZoneId.of("Europe/Vienna"),
+        candleLightingOffsetMinutes = 18L,
     )
 }
