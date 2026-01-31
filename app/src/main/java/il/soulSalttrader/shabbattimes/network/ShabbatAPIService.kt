@@ -8,9 +8,9 @@ import retrofit2.http.Query
 interface ShabbatAPIService {
     @GET("json")
     suspend fun getSolarTimes(
-        @Query("lat") lat: Double = Cities.JERUSALEM.lat,
-        @Query("lng") lng: Double = Cities.JERUSALEM.lng,
-        @Query("timezone") timezone: String = Cities.JERUSALEM.timezone,
+        @Query("lat") lat: Double = Cities.JERUSALEM.coordinates.latitude,
+        @Query("lng") lng: Double = Cities.JERUSALEM.coordinates.longitude,
+        @Query("timezone") timezone: String = Cities.JERUSALEM.timeZone.id,
         @Query("time_format") timeFormat: Int = 24,
         @Query("date") date: String? = null,
     ): SolarTimesDto
