@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 data class HalachicTimes(
+    val city: City,
     val candleLightingTime: LocalTime,
     val candleLightingDate: LocalDate,
     val havdalahTime: LocalTime,
