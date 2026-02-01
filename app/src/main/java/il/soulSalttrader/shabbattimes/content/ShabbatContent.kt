@@ -20,7 +20,7 @@ fun ShabbatContent(
 
         ShabbatCard(
             modifier = Modifier.padding(bottom = 12.dp).weight(1f),
-            text = "Jerusalem",
+            text = result.city.name,
             onClick = onClick,
         )
 
