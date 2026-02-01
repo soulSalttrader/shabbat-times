@@ -9,4 +9,6 @@ data class HalachicTimesDisplay(
     val candleLightingDate: String = "",
     val havdalahTime: String = "",
     val havdalahDate: String = "",
+    val isFriday: Boolean = false,
+    val isSaturday: Boolean = false,
 )
