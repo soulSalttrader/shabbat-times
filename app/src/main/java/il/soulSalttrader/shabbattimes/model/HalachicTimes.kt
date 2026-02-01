@@ -9,4 +9,6 @@ data class HalachicTimes(
     val candleLightingDate: LocalDate,
     val havdalahTime: LocalTime,
     val havdalahDate: LocalDate,
+    val isFriday: Boolean,
+    val isSaturday: Boolean,
 )
