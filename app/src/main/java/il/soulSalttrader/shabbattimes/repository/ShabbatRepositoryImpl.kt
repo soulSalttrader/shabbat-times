@@ -71,6 +71,8 @@ class ShabbatRepositoryImpl @Inject constructor(
         val friday = upcomingCandleLightingDate()
         val saturday = upcomingHavdalahDate()
         val city = Cities.NEW_YORK
+        val isFriday = LocalDate.now(city.timeZone) == friday
+        val isSaturday = LocalDate.now(city.timeZone) == saturday
 
         val (fridaySolar, saturdaySolar) = awaitAll(
             async { getSolarTimes(friday, city) },
@@ -83,7 +85,9 @@ class ShabbatRepositoryImpl @Inject constructor(
                 candleLightingTime = fridaySolar.sunset.minusMinutes(city.candleLightingOffsetMinutes),
                 candleLightingDate = friday,
                 havdalahTime = saturdaySolar.sunset.plusMinutes(city.havdalahOffsetMinutes),
-                havdalahDate = saturday
+                havdalahDate = saturday,
+                isFriday = isFriday,
+                isSaturday = isSaturday,
             ).toDisplay(context)
         )
     }
