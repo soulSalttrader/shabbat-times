@@ -6,8 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
-import il.soulSalttrader.shabbattimes.location.LocationStatus
-import il.soulSalttrader.shabbattimes.model.Cities
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
 @Composable
@@ -23,17 +21,10 @@ fun ShabbatContent(
             items = times,
             key = { it.city.id },
         ) { time ->
-            val locationStatus = when (time.city.id == Cities.JERUSALEM.id) {
-                  true -> LocationStatus.Current()
-                  else -> {
-                      if (time.city.id == Cities.NEW_YORK.id) LocationStatus.Distance(9195)
-                      else LocationStatus.Distance(2319)
-                  }
-            }
 
             ShabbatCard(
                 item = time,
-                locationStatus = locationStatus,
+                locationStatus = time.locationStatus,
                 onClick = onClick,
             )
         }
