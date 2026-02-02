@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import il.soulSalttrader.shabbattimes.Debug
-import il.soulSalttrader.shabbattimes.common.getOrElse
+import il.soulSalttrader.shabbattimes.common.getOrThrow
 import il.soulSalttrader.shabbattimes.common.toDisplayString
 import il.soulSalttrader.shabbattimes.common.upcomingCandleLightingDate
 import il.soulSalttrader.shabbattimes.common.upcomingHavdalahDate
@@ -81,20 +81,30 @@ class ShabbatRepositoryImpl @Inject constructor(
             else -> LocationStatus.Unknown
         }
 
-        val (fridaySolar, saturdaySolar) = awaitAll(
-            async { getSolarTimes(friday, city) },
-            async { getSolarTimes(saturday, city) }
-        ).map { it.getOrElse { failure -> return@withContext failure } }
-
-        NetworkResult.Success(
-            HalachicTimes(
-                city = city,
-                candleLightingTime = fridaySolar.sunset.minusMinutes(city.candleLightingOffsetMinutes),
-                candleLightingDate = friday,
-                havdalahTime = saturdaySolar.sunset.plusMinutes(city.havdalahOffsetMinutes),
-                havdalahDate = saturday,
-                locationStatus = locationStatus,
-            ).toDisplay(context)
+        runCatching {
+            awaitAll(
+                async { getSolarTimes(friday, city) },
+                async { getSolarTimes(saturday, city) }
+            ).map { it.getOrThrow() }
+        }.fold(
+            onSuccess = { (fridaySolar, saturdaySolar) ->
+                NetworkResult.Success(
+                    HalachicTimes(
+                        city = city,
+                        candleLightingTime = fridaySolar.sunset.minusMinutes(city.candleLightingOffsetMinutes),
+                        candleLightingDate = friday,
+                        havdalahTime = saturdaySolar.sunset.plusMinutes(city.havdalahOffsetMinutes),
+                        havdalahDate = saturday,
+                        locationStatus = locationStatus,
+                    ).toDisplay(context)
+                )
+            },
+            onFailure = { e ->
+                NetworkResult.Failure(
+                    message = "Failed to calculate Shabbat times for ${city.name}",
+                    cause = e
+                )
+            }
         )
     }
 }
