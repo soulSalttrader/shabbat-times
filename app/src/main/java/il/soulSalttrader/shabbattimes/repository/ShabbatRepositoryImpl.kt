@@ -8,7 +8,10 @@ import il.soulSalttrader.shabbattimes.common.getOrElse
 import il.soulSalttrader.shabbattimes.common.toDisplayString
 import il.soulSalttrader.shabbattimes.common.upcomingCandleLightingDate
 import il.soulSalttrader.shabbattimes.common.upcomingHavdalahDate
-import il.soulSalttrader.shabbattimes.model.Cities
+import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.model.Cities.BRNO
+import il.soulSalttrader.shabbattimes.model.Cities.JERUSALEM
+import il.soulSalttrader.shabbattimes.model.Cities.NEW_YORK
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
@@ -67,12 +70,16 @@ class ShabbatRepositoryImpl @Inject constructor(
             .getOrThrow()
     }
 
-    override suspend fun getHalachicTimes(): NetworkResult<HalachicTimesDisplay> = withContext(dispatcher) {
+    override suspend fun getHalachicTimes(city: City): NetworkResult<HalachicTimesDisplay> = withContext(dispatcher) {
         val friday = upcomingCandleLightingDate()
         val saturday = upcomingHavdalahDate()
-        val city = Cities.NEW_YORK
-        val isFriday = LocalDate.now(city.timeZone) == friday
-        val isSaturday = LocalDate.now(city.timeZone) == saturday
+
+        val locationStatus = when (city) {
+            JERUSALEM -> LocationStatus.Current
+            NEW_YORK -> LocationStatus.Distance(9195)
+            BRNO -> LocationStatus.Distance(2319)
+            else -> LocationStatus.Unknown
+        }
 
         val (fridaySolar, saturdaySolar) = awaitAll(
             async { getSolarTimes(friday, city) },
@@ -86,8 +93,7 @@ class ShabbatRepositoryImpl @Inject constructor(
                 candleLightingDate = friday,
                 havdalahTime = saturdaySolar.sunset.plusMinutes(city.havdalahOffsetMinutes),
                 havdalahDate = saturday,
-                isFriday = isFriday,
-                isSaturday = isSaturday,
+                locationStatus = locationStatus,
             ).toDisplay(context)
         )
     }
