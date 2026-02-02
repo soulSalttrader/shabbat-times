@@ -1,44 +1,96 @@
 package il.soulSalttrader.shabbattimes.content
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Card
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.location.getLocationLabels
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
 @Composable
 fun ShabbatCard(
+    item: HalachicTimesDisplay,
+    locationStatus: LocationStatus,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    text: String,
-    style: TextStyle = MaterialTheme.typography.headlineMedium,
-    onClick: () -> Unit = {},
+    locationLabel: String = locationStatus.getLocationLabels(),
 ) {
-    Card(
-        modifier = modifier.height(120.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 120.dp),
+    ElevatedCard(
         onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = if (item.isFriday) CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ) else CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 120.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = text,
-                style = style,
-                textAlign = TextAlign.Center,
-            )
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = item.city.name,
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Row {
+                Text(
+                    text = locationLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row {
+                Column(modifier = Modifier.weight(1f)) {
+                    ShabbatDateTime(
+                        label = "Candle Lighting",
+                        time = item.candleLightingTime,
+                        date = item.candleLightingDate,
+                        modifier = modifier.padding(vertical = 4.dp)
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    ShabbatDateTime(
+                        label = "Havdalah",
+                        time = item.havdalahTime,
+                        date = item.havdalahDate,
+                        modifier = modifier.padding(vertical = 4.dp)
+                    )
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun ShabbatDateTime(
+    label: String,
+    time: String,
+    date: String,
+    modifier: Modifier,
+) {
+    Text(modifier = modifier, text = label, style = MaterialTheme.typography.labelMedium)
+    Text(modifier = modifier, text = time, style = MaterialTheme.typography.headlineLarge)
+    Text(modifier = modifier, text = date, style = MaterialTheme.typography.bodyMedium)
 }
