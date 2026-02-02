@@ -1,5 +1,7 @@
 package il.soulSalttrader.shabbattimes.model
 
+import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.location.LocationStatus.Distance
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,6 +11,5 @@ data class HalachicTimesDisplay(
     val candleLightingDate: String = "",
     val havdalahTime: String = "",
     val havdalahDate: String = "",
-    val isFriday: Boolean = false,
-    val isSaturday: Boolean = false,
+    val locationStatus: LocationStatus = Distance(9999),
 )

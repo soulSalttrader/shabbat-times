@@ -10,6 +10,5 @@ fun HalachicTimes.toDisplay(context: Context): HalachicTimesDisplay =
         candleLightingDate = candleLightingDate.toDisplayString(),
         havdalahTime = havdalahTime.toDisplayString(context),
         havdalahDate = havdalahDate.toDisplayString(),
-        isFriday = isFriday,
-        isSaturday = isSaturday,
+        locationStatus = locationStatus,
     )
