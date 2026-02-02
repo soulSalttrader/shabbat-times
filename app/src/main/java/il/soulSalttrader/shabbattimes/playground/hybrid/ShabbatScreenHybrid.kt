@@ -7,7 +7,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.content.FailureScreen
 import il.soulSalttrader.shabbattimes.content.LoadingScreen
 import il.soulSalttrader.shabbattimes.content.ShabbatContent
-import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.ShabbatDataState
 
 @Composable
@@ -21,12 +20,13 @@ fun ShabbatScreenHybrid() {
         is ShabbatDataState.Loading -> LoadingScreen()
 
         is ShabbatDataState.Success -> ShabbatContent(
-            result = (uiState as ShabbatDataState.Success).data ?: HalachicTimesDisplay(),
+            times = (uiState as ShabbatDataState.Success).data,
+            onClick = viewModel::retry,
         )
 
         is ShabbatDataState.Failure -> FailureScreen(
             message = (uiState as ShabbatDataState.Failure).message,
-            onRetry = viewModel::retry
+            onRetry = viewModel::retry,
         )
     }
 }

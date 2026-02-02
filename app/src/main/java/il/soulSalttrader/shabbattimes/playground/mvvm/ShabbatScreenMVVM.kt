@@ -22,6 +22,6 @@ fun ShabbatScreenMVVM() {
     when {
         isLoading  -> LoadingScreen()
         isNotBlank -> FailureScreen(message = message, onRetry = viewModel::retry)
-        else       -> ShabbatContent(result = halachicTimes)
+        else       -> ShabbatContent(times = listOf(halachicTimes))
     }
 }
