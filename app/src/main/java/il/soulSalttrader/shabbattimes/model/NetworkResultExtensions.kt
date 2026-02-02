@@ -1,10 +1,9 @@
 package il.soulSalttrader.shabbattimes.model
 
-import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent.Loaded.Failure
-import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent.Loaded.Success
+import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 
-fun NetworkResult<HalachicTimesDisplay>.toLoadedEvent() = when (this) {
-    is NetworkResult.Success -> Success(display = data)
-    is NetworkResult.Failure -> Failure(message = message, cause = cause)
-}
+fun List<NetworkResult<HalachicTimesDisplay>>.toLoadedEvent(): ShabbatDataEvent.Loaded =
+    filterIsInstance<NetworkResult.Success<HalachicTimesDisplay>>()
+        .map { it.data }
+        .let(ShabbatDataEvent.Loaded::Success)

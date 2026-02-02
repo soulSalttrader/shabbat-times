@@ -16,7 +16,7 @@ sealed interface ShabbatDataEvent : AppEvent, Reducible<ShabbatState> {
     }
 
     sealed interface Loaded : ShabbatDataEvent {
-        class Success(val display: HalachicTimesDisplay?) : Loaded {
+        class Success(val display: List<HalachicTimesDisplay>) : Loaded {
             override val reducer = ShabbatReducer { state ->
                 if (Debug.enabled) Log.d("ShabbatEvent.Loaded.Success", "$display")
 
