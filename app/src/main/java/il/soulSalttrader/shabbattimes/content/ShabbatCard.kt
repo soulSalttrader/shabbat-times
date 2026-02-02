@@ -33,7 +33,7 @@ fun ShabbatCard(
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 8.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = if (item.isFriday) CardDefaults.cardColors(
+        colors = if (item.locationStatus == LocationStatus.Current) CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ) else CardDefaults.cardColors(
