@@ -14,8 +14,6 @@ import il.soulSalttrader.shabbattimes.model.Cities.JERUSALEM
 import il.soulSalttrader.shabbattimes.model.Cities.NEW_YORK
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
-import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.model.SolarTimes
 import il.soulSalttrader.shabbattimes.model.toDisplay
 import il.soulSalttrader.shabbattimes.model.toDomain
 import il.soulSalttrader.shabbattimes.network.NetworkResult
@@ -38,8 +36,9 @@ class ShabbatRepositoryImpl @Inject constructor(
     private val userPreferences: UserPreferences,
     @param:ApplicationContext private val context: Context,
 ) : ShabbatRepository {
+    val cities = mutableListOf(JERUSALEM, BRNO, NEW_YORK)
 
-    override suspend fun getSolarTimes(date: LocalDate, city: City): NetworkResult<SolarTimes> = withContext(context = dispatcher) {
+    override suspend fun getSolarTimes(date: LocalDate, city: City) = withContext(context = dispatcher) {
         runCatching {
             apiService.getSolarTimes(
                 date = date.toDisplayString(),
@@ -70,7 +69,7 @@ class ShabbatRepositoryImpl @Inject constructor(
             .getOrThrow()
     }
 
-    override suspend fun getHalachicTimes(city: City): NetworkResult<HalachicTimesDisplay> = withContext(dispatcher) {
+    override suspend fun getHalachicTimes(city: City) = withContext(dispatcher) {
         val friday = upcomingCandleLightingDate()
         val saturday = upcomingHavdalahDate()
 
@@ -107,4 +106,22 @@ class ShabbatRepositoryImpl @Inject constructor(
             }
         )
     }
+
+    override suspend fun getHalachicTimesForCities() = withContext(dispatcher) {
+            cities.map { city ->
+                async {
+                    runCatching {
+                        getHalachicTimes(city).getOrThrow()
+                    }.fold(
+                        onSuccess = { NetworkResult.Success(it) },
+                        onFailure = { e ->
+                            NetworkResult.Failure(
+                                message = "Failed to load times for ${city.name}: ${e.message}",
+                                cause = e
+                            )
+                        }
+                    )
+                }
+            }.awaitAll()
+        }
 }

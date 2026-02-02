@@ -87,7 +87,7 @@ class ShabbatViewModel @Inject constructor(
         }
 
         runCatching {
-            repository.getHalachicTimes()
+            repository.getHalachicTimesForCities()
         }.onSuccess { result ->
             if (Debug.enabled) Log.d("ShabbatVM", "Load success")
             dispatch(event = result.toLoadedEvent())
