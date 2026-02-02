@@ -12,7 +12,6 @@ import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
-import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.ShabbatDataState
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.openAppSettings
@@ -35,12 +34,12 @@ fun ShabbatScreen() {
     val context = LocalContext.current
 
     when (state.data) {
-        is ShabbatDataState.Idle -> LoadingScreen()
+        is ShabbatDataState.Idle    -> LoadingScreen()
 
         is ShabbatDataState.Loading -> LoadingScreen()
 
         is ShabbatDataState.Success -> ShabbatContent(
-            result = (state.data as ShabbatDataState.Success).data ?: HalachicTimesDisplay(),
+            times = (state.data as ShabbatDataState.Success).data,
             onClick = { viewModel.dispatch(PermissionEvent.Request) },
         )
 
