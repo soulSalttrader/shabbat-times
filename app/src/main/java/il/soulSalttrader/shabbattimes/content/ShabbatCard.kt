@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.getLocationLabels
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
@@ -52,11 +53,22 @@ fun ShabbatCard(
             }
 
             Row {
-                Text(
-                    text = locationLabel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(1f)
-                )
+                when (locationStatus) {
+                    is LocationStatus.Current -> {
+                        UiIconLabel(
+                            text = locationLabel,
+                            icon = UiIcon.Resource(R.drawable.home_pin_24px),
+                        )
+                    }
+
+                    else                      -> {
+                        Text(
+                            text = locationLabel,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
             }
 
             Spacer(Modifier.height(16.dp))
