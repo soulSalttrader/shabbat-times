@@ -43,5 +43,11 @@ fun ShabbatScaffold(
                 scrollBehavior = scrollBehavior,
             )
         },
+        floatingActionButton = {
+            FabMenu(
+                navItems = bottomNavItems,
+                navigator = navigator,
+            )
+        }
     ) { innerPadding -> content(innerPadding) }
 }
