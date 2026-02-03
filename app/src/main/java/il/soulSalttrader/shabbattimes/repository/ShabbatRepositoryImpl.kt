@@ -9,11 +9,12 @@ import il.soulSalttrader.shabbattimes.common.toDisplayString
 import il.soulSalttrader.shabbattimes.common.upcomingCandleLightingDate
 import il.soulSalttrader.shabbattimes.common.upcomingHavdalahDate
 import il.soulSalttrader.shabbattimes.location.LocationStatus
-import il.soulSalttrader.shabbattimes.model.Cities.BRNO
-import il.soulSalttrader.shabbattimes.model.Cities.JERUSALEM
-import il.soulSalttrader.shabbattimes.model.Cities.NEW_YORK
+import il.soulSalttrader.shabbattimes.model.SeedCities.BRNO
+import il.soulSalttrader.shabbattimes.model.SeedCities.JERUSALEM
+import il.soulSalttrader.shabbattimes.model.SeedCities.NEW_YORK
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
+import il.soulSalttrader.shabbattimes.model.SeedCities
 import il.soulSalttrader.shabbattimes.model.toDisplay
 import il.soulSalttrader.shabbattimes.model.toDomain
 import il.soulSalttrader.shabbattimes.network.NetworkResult
@@ -36,7 +37,6 @@ class ShabbatRepositoryImpl @Inject constructor(
     private val userPreferences: UserPreferences,
     @param:ApplicationContext private val context: Context,
 ) : ShabbatRepository {
-    val cities = mutableListOf(JERUSALEM, BRNO, NEW_YORK)
 
     override suspend fun getSolarTimes(date: LocalDate, city: City) = withContext(context = dispatcher) {
         runCatching {
@@ -108,7 +108,7 @@ class ShabbatRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getHalachicTimesForCities() = withContext(dispatcher) {
-            cities.map { city ->
+            SeedCities.initial.map { city ->
                 async {
                     runCatching {
                         getHalachicTimes(city).getOrThrow()
