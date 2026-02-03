@@ -2,7 +2,7 @@ package il.soulSalttrader.shabbattimes.model
 
 import java.time.ZoneId
 
-object Cities {
+object SeedCities {
     val JERUSALEM = City(
         id = "jerusalem-il",
         name = "Jerusalem",
@@ -29,4 +29,5 @@ object Cities {
         candleLightingOffsetMinutes = 18L,
         havdalahOffsetMinutes = 40L,
     )
+    val initial = listOf(JERUSALEM, NEW_YORK, BRNO)
 }
