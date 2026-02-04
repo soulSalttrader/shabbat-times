@@ -15,7 +15,7 @@ import il.soulSalttrader.shabbattimes.nav.NavTarget
 import il.soulSalttrader.shabbattimes.nav.NavTargetBottom
 import il.soulSalttrader.shabbattimes.nav.Navigator
 import il.soulSalttrader.shabbattimes.nav.common.extractTopBarItems
-import il.soulSalttrader.shabbattimes.nav.common.simpleName
+import il.soulSalttrader.shabbattimes.nav.common.titleOr
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +37,7 @@ fun NavBarTop(
             actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             subtitleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
-        title = { Text(text = currentNavTarget?.simpleName() ?: "None") },
+        title = { currentNavTarget?.titleOr("No title")?.let { Text(text = it) } },
         navigationIcon = {
             topNavigationItem?.let {
                 IconButton(

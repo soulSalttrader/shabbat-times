@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import il.soulSalttrader.shabbattimes.nav.NavItem
 import il.soulSalttrader.shabbattimes.nav.NavTarget
 import il.soulSalttrader.shabbattimes.nav.Navigator
-import il.soulSalttrader.shabbattimes.nav.common.simpleName
+import il.soulSalttrader.shabbattimes.nav.common.titleOr
 
 @Composable
 fun NavBarBottom(
@@ -35,7 +35,7 @@ fun NavBarBottom(
                 },
                 label = {
                     Text(
-                        text = item.target.simpleName(),
+                        text = item.target.titleOr("No title"),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },

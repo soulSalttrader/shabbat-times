@@ -22,11 +22,13 @@ object NavItems {
 
     val Shabbat = NavItem(
         target = NavTargetBottom.Shabbat,
-        title = "Shabbat",
+        title = "Shabbat Times",
         selectedIcon = UiIcon.Resource(R.drawable.candle_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.candle_outlined_24),
         role = NavRole.BOTTOM_TAB,
     )
 
     val allNavs = listOf(Previous, Settings, Shabbat)
+
+    val navItemsByTarget = listOf(Previous, Settings, Shabbat).associateBy { it.target }
 }
