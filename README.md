@@ -24,6 +24,17 @@ candle-lighting time and Havdalah time based on accurate solar data.
 It automatically computes these times using real-world sunset data fetched via a public REST API and
 applies the appropriate halachic offsets (+42 min / −18 min).
 
+### 📸 Screenshots
+
+- Screenshots reflect the current UI direction.
+- Some interactions and data flows are still under active development.
+
+<p align="start">
+  <img src="docs/home_screen.png" width="240" />
+</p>
+
+---
+
 ### 🏛️ Architecture
 
 The app is built using modern Android architecture principles and libraries:
