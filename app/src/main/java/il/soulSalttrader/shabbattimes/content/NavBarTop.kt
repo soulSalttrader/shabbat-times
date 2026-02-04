@@ -8,8 +8,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import il.soulSalttrader.shabbattimes.nav.NavItem
 import il.soulSalttrader.shabbattimes.nav.NavTarget
+import il.soulSalttrader.shabbattimes.nav.NavTargetBottom
 import il.soulSalttrader.shabbattimes.nav.Navigator
 import il.soulSalttrader.shabbattimes.nav.common.extractTopBarItems
 import il.soulSalttrader.shabbattimes.nav.common.simpleName
@@ -19,8 +22,9 @@ import il.soulSalttrader.shabbattimes.nav.common.simpleName
 fun NavBarTop(
     navItems: List<NavItem>,
     navigator: Navigator,
-    currentNavTarget: NavTarget? = null,
     scrollBehavior: TopAppBarScrollBehavior,
+    currentNavTarget: NavTarget? = null,
+    isNavIconVisible: Boolean = currentNavTarget != NavTargetBottom.Shabbat,
 ) {
     val (topNavigationItem, topActionItems) = navItems.extractTopBarItems()
 
@@ -36,9 +40,13 @@ fun NavBarTop(
         title = { Text(text = currentNavTarget?.simpleName() ?: "None") },
         navigationIcon = {
             topNavigationItem?.let {
-                IconButton(onClick = { navigator.navigateUp() }) {
+                IconButton(
+                    onClick = { navigator.navigateUp() },
+                    enabled = isNavIconVisible,
+                    modifier = Modifier.alpha(if (isNavIconVisible) 1f else 0f)
+                ) {
                     NavBarIcon(
-                        isSelected = currentNavTarget == it.target,
+                        isSelected = false,
                         badgeCount = null,
                         item = it,
                     )
