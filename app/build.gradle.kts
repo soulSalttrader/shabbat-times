@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -28,6 +29,29 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val secretsFile by lazy {
+            rootProject.file("secrets.properties")
+        }
+
+        val geoApiKey: String by lazy {
+            val properties = Properties()
+
+            secretsFile
+                .takeIf { it.exists() && it.isFile }
+                ?.inputStream()
+                ?.use { properties.load(it) }
+
+            properties.getProperty("geoapify.api.key")
+                ?: System.getenv("GEOAPIFY_API_KEY")
+                ?: error("GEOAPIFY_API_KEY environment variable is required!")
+        }
+
+        buildConfigField(
+            type = "String",
+            name = "GEOAPIFY_API_KEY",
+            value = "\"$geoApiKey\""
+        )
     }
 
     buildTypes {
