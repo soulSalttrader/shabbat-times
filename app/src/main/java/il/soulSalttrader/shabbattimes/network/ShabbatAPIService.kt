@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes.network
 
 import il.soulSalttrader.shabbattimes.model.SeedCities
-import il.soulSalttrader.shabbattimes.network.dto.SolarTimesDto
+import il.soulSalttrader.shabbattimes.network.dto.SolarTimesResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -13,5 +13,5 @@ interface ShabbatAPIService {
         @Query("timezone") timezone: String = SeedCities.JERUSALEM.timeZone.id,
         @Query("time_format") timeFormat: Int = 24,
         @Query("date") date: String? = null,
-    ): SolarTimesDto
+    ): SolarTimesResponseDto
 }
