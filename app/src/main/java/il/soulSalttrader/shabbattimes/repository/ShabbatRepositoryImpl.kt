@@ -4,28 +4,27 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.common.asNetworkFailure
 import il.soulSalttrader.shabbattimes.common.getOrThrow
 import il.soulSalttrader.shabbattimes.common.toDisplayString
 import il.soulSalttrader.shabbattimes.common.upcomingCandleLightingDate
 import il.soulSalttrader.shabbattimes.common.upcomingHavdalahDate
 import il.soulSalttrader.shabbattimes.location.LocationStatus
-import il.soulSalttrader.shabbattimes.model.SeedCities.BRNO
-import il.soulSalttrader.shabbattimes.model.SeedCities.JERUSALEM
-import il.soulSalttrader.shabbattimes.model.SeedCities.NEW_YORK
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.SeedCities
+import il.soulSalttrader.shabbattimes.model.SeedCities.BRNO
+import il.soulSalttrader.shabbattimes.model.SeedCities.JERUSALEM
+import il.soulSalttrader.shabbattimes.model.SeedCities.NEW_YORK
 import il.soulSalttrader.shabbattimes.model.toDisplay
-import il.soulSalttrader.shabbattimes.model.toDomain
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.ShabbatAPIService
+import il.soulSalttrader.shabbattimes.network.dto.asNetworkResult
 import il.soulSalttrader.shabbattimes.settings.UserPreferences
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
-import java.io.IOException
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -39,6 +38,7 @@ class ShabbatRepositoryImpl @Inject constructor(
 ) : ShabbatRepository {
 
     override suspend fun getSolarTimes(date: LocalDate, city: City) = withContext(context = dispatcher) {
+        val tag = "ShabbatRepositoryImpl.getSolarTimes"
         runCatching {
             apiService.getSolarTimes(
                 date = date.toDisplayString(),
@@ -48,25 +48,14 @@ class ShabbatRepositoryImpl @Inject constructor(
             )
         }
             .map { dto ->
-                if (Debug.enabled) Log.d("ShabbatRepositoryImpl.getSolarTimes", dto.status)
-
-                when (dto.status.uppercase()) {
-                    "OK" -> NetworkResult.Success(data = dto.results.toDomain(userPreferences.is24HourFormat()))
-                    else -> NetworkResult.Failure(message = dto.status)
-                }
+                if (Debug.enabled) Log.d(tag, dto.status)
+                dto.asNetworkResult(use24HourFormat = userPreferences.is24HourFormat())
             }
             .recover { exception ->
-                val message = when (exception) {
-                    is HttpException -> "HTTP ${exception.code()}"
-                    is IOException   -> "No internet connection. ${exception.message}."
-                    else             -> exception.message ?: "Unexpected error"
-                }
-
-                if (Debug.enabled) Log.d("ShabbatRepositoryImpl.getSolarTimes", message)
-
-                NetworkResult.Failure(message = message, cause = exception)
+                if (Debug.enabled) Log.d(tag, "API call failed", exception)
+                exception.asNetworkFailure()
             }
-            .getOrThrow()
+            .getOrElse { NetworkResult.Failure("Critical failure") }
     }
 
     override suspend fun getHalachicTimes(city: City) = withContext(dispatcher) {
