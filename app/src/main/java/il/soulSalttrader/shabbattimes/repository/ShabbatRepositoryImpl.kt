@@ -9,6 +9,7 @@ import il.soulSalttrader.shabbattimes.common.getOrThrow
 import il.soulSalttrader.shabbattimes.common.toDisplayString
 import il.soulSalttrader.shabbattimes.common.upcomingCandleLightingDate
 import il.soulSalttrader.shabbattimes.common.upcomingHavdalahDate
+import il.soulSalttrader.shabbattimes.di.SolarTimesService
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
@@ -31,7 +32,7 @@ import javax.inject.Singleton
 
 @Singleton
 class ShabbatRepositoryImpl @Inject constructor(
-    private val api: SolarTimesApi,
+    private val apiService: SolarTimesService,
     private val dispatcher: CoroutineDispatcher,
     private val userPreferences: UserPreferences,
     @param:ApplicationContext private val context: Context,
@@ -40,7 +41,7 @@ class ShabbatRepositoryImpl @Inject constructor(
     override suspend fun getSolarTimes(date: LocalDate, city: City) = withContext(context = dispatcher) {
         val tag = "ShabbatRepositoryImpl.getSolarTimes"
         runCatching {
-            api.getSolarTimes(
+            apiService.api.getSolarTimes(
                 date = date.toDisplayString(),
                 lat = city.coordinates.latitude,
                 lng = city.coordinates.longitude,
