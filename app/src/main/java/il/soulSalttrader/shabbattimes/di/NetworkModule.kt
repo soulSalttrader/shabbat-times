@@ -5,7 +5,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.network.ApiUrl.BASE_GEOAPIFY
 import il.soulSalttrader.shabbattimes.network.ApiUrl.BASE_SUNRISE_SUNSET
+import il.soulSalttrader.shabbattimes.network.GeoapifyApi
 import il.soulSalttrader.shabbattimes.network.JsonConfig
 import il.soulSalttrader.shabbattimes.network.OkHttpClientFactory
 import il.soulSalttrader.shabbattimes.network.SolarTimesApi
@@ -37,6 +39,25 @@ object NetworkModule {
 
         return Retrofit.Builder()
             .baseUrl(BASE_SUNRISE_SUNSET)
+            .client(client)
+            .addConverterFactory(JsonConfig.json.asConverterFactory(contentType))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun geoapifyService(@SolarTimesRetrofit sunriseRetrofit: Retrofit): GeoapifyApi =
+        GeoapifyService(sunriseRetrofit).api
+
+    @Provides
+    @Singleton
+    @GeoapifyRetrofit
+    fun provideGeoapifyRetrofit(): Retrofit {
+        val client = OkHttpClientFactory.create(Debug.enabled)
+        val contentType = "application/json".toMediaType()
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_GEOAPIFY)
             .client(client)
             .addConverterFactory(JsonConfig.json.asConverterFactory(contentType))
             .build()
