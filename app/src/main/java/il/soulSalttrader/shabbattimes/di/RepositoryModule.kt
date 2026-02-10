@@ -6,7 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import il.soulSalttrader.shabbattimes.network.ShabbatAPIService
+import il.soulSalttrader.shabbattimes.network.SolarTimesApi
 import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
 import il.soulSalttrader.shabbattimes.repository.ShabbatRepositoryImpl
 import il.soulSalttrader.shabbattimes.settings.UserPreferences
@@ -19,9 +19,9 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideShabbatRepository(
-        apiService: ShabbatAPIService,
+        api: SolarTimesApi,
         dispatcher: CoroutineDispatcher,
         userPreferences: UserPreferences,
         @ApplicationContext context: Context,
-    ): ShabbatRepository = ShabbatRepositoryImpl(apiService, dispatcher, userPreferences, context)
+    ): ShabbatRepository = ShabbatRepositoryImpl(api, dispatcher, userPreferences, context)
 }

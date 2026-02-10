@@ -11,12 +11,12 @@ object RetrofitClient {
     private val contentType = "application/json".toMediaType()
     private val client = OkHttpClientFactory.create(Debug.enabled)
 
-    val shabbatApi: ShabbatAPIService by lazy {
+    val shabbatApi: SolarTimesApi by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_SUNRISE_SUNSET)
             .client(client)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
-            .create(ShabbatAPIService::class.java)
+            .create(SolarTimesApi::class.java)
     }
 }
