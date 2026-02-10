@@ -8,7 +8,7 @@ import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.network.ApiUrl.BASE_SUNRISE_SUNSET
 import il.soulSalttrader.shabbattimes.network.JsonConfig
 import il.soulSalttrader.shabbattimes.network.OkHttpClientFactory
-import il.soulSalttrader.shabbattimes.network.ShabbatAPIService
+import il.soulSalttrader.shabbattimes.network.SolarTimesApi
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -21,8 +21,8 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 object NetworkModule {
     @Provides
     @Singleton
-    fun shabbatAPIService(retrofit: Retrofit): ShabbatAPIService =
-        retrofit.create(ShabbatAPIService::class.java)
+    fun shabbatAPIService(retrofit: Retrofit): SolarTimesApi =
+        retrofit.create(SolarTimesApi::class.java)
 
     @Provides
     @Singleton
@@ -30,7 +30,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(): Retrofit {
+    @SolarTimesRetrofit
+    fun provideSolarTimesRetrofit(): Retrofit {
         val client = OkHttpClientFactory.create(Debug.enabled)
         val contentType = "application/json".toMediaType()
 

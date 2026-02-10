@@ -5,7 +5,7 @@ import il.soulSalttrader.shabbattimes.network.dto.SolarTimesResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface ShabbatAPIService {
+interface SolarTimesApi {
     @GET("json")
     suspend fun getSolarTimes(
         @Query("lat") lat: Double = SeedCities.JERUSALEM.coordinates.latitude,
