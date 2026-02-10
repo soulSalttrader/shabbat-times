@@ -62,10 +62,16 @@ class ShabbatRepositoryImpl @Inject constructor(
         val friday = upcomingCandleLightingDate()
         val saturday = upcomingHavdalahDate()
 
+        val candleLightingOffsetMinutes = 18L
+        val havdalahOffsetMinutes = 40L
+
+        val distanceJerusalemToNycKm = 9195
+        val distanceJerusalemToBrnoKm = 2319
+
         val locationStatus = when (city) {
             JERUSALEM -> LocationStatus.Current
-            NEW_YORK -> LocationStatus.Distance(9195)
-            BRNO -> LocationStatus.Distance(2319)
+            NEW_YORK -> LocationStatus.Distance(distanceJerusalemToNycKm)
+            BRNO -> LocationStatus.Distance(distanceJerusalemToBrnoKm)
             else -> LocationStatus.Unknown
         }
 
@@ -79,9 +85,9 @@ class ShabbatRepositoryImpl @Inject constructor(
                 NetworkResult.Success(
                     HalachicTimes(
                         city = city,
-                        candleLightingTime = fridaySolar.sunset.minusMinutes(city.candleLightingOffsetMinutes),
+                        candleLightingTime = fridaySolar.sunset.minusMinutes(candleLightingOffsetMinutes),
                         candleLightingDate = friday,
-                        havdalahTime = saturdaySolar.sunset.plusMinutes(city.havdalahOffsetMinutes),
+                        havdalahTime = saturdaySolar.sunset.plusMinutes(havdalahOffsetMinutes),
                         havdalahDate = saturday,
                         locationStatus = locationStatus,
                     ).toDisplay(context)
