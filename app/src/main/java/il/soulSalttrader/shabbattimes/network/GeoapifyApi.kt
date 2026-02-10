@@ -6,7 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 import java.util.Locale
 
-interface GeoapifyService {
+interface GeoapifyApi {
     @GET("autocomplete")
     suspend fun autocomplete(
         @Query("text") queryText: String,
