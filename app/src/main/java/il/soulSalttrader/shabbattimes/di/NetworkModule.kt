@@ -21,12 +21,12 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 object NetworkModule {
     @Provides
     @Singleton
-    fun shabbatAPIService(retrofit: Retrofit): SolarTimesApi =
-        retrofit.create(SolarTimesApi::class.java)
+    fun provideCoroutineDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
     @Provides
     @Singleton
-    fun provideCoroutineDispatcher(): CoroutineDispatcher = Dispatchers.IO
+    fun solarTimesService(@SolarTimesRetrofit sunriseRetrofit: Retrofit): SolarTimesApi =
+        SolarTimesService(sunriseRetrofit).api
 
     @Provides
     @Singleton
