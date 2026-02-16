@@ -15,13 +15,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.nav.NavItem
 import il.soulSalttrader.shabbattimes.nav.NavItems.Previous
 import il.soulSalttrader.shabbattimes.nav.NavItems.Settings
-import il.soulSalttrader.shabbattimes.nav.NavItems.Shabbat
 import il.soulSalttrader.shabbattimes.nav.Navigator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShabbatScaffold(
-    bottomNavItems: List<NavItem> = listOf(Shabbat),
     topNavItems: List<NavItem> = listOf(Settings, Previous),
     navigator: Navigator,
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
@@ -43,11 +41,5 @@ fun ShabbatScaffold(
                 scrollBehavior = scrollBehavior,
             )
         },
-        floatingActionButton = {
-            FabMenu(
-                navItems = bottomNavItems,
-                navigator = navigator,
-            )
-        }
     ) { innerPadding -> content(innerPadding) }
 }
