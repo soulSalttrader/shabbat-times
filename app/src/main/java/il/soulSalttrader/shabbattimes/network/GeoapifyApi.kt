@@ -11,7 +11,7 @@ interface GeoapifyApi {
     suspend fun autocomplete(
         @Query("text") queryText: String,
         @Query("filter") countryFilter: String? = null,
-        @Query("bias") locationBias: String? = "ipstack",
+//        @Query("bias") locationBias: String? = "ipstack",
         @Query("type") resultType: String? = "city",
 
         @Query("limit") maxResults: Int = 5,
@@ -24,7 +24,7 @@ interface GeoapifyApi {
     suspend fun forwardSearch(
         @Query("text") queryText: String,
         @Query("filter") countryFilter: String? = null,
-        @Query("bias") locationBias: String? = "ipstack",
+//        @Query("bias") locationBias: String? = "ipstack",
         @Query("type") resultType: String? = "city",
 
         @Query("limit") maxResults: Int = 5,
