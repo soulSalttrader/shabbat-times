@@ -4,6 +4,7 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.Debug.formatEventName
 import il.soulSalttrader.shabbattimes.Debug.formatStateTransition
+import il.soulSalttrader.shabbattimes.model.SearchUiState
 import il.soulSalttrader.shabbattimes.model.ShabbatState
 import il.soulSalttrader.shabbattimes.model.State
 
@@ -25,3 +26,4 @@ fun interface Reducer<S : State> {
 }
 
 typealias ShabbatReducer = Reducer<ShabbatState>
+typealias SearchReducer = Reducer<SearchUiState>
