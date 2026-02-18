@@ -33,16 +33,20 @@ class InMemoryCityRepository @Inject constructor(
     }
 
     override suspend fun geocodeAutocomplete(query: String): Flow<List<City>> = flow {
-        if (query.trim().length < 2) {
+        val normalized = query.trim()
+        if (normalized.length < 2) {
             emit(emptyList())
             return@flow
         }
 
-        val response = geoapifyService.api.autocomplete(queryText = query.trim())
+        val response = geoapifyService.api.autocomplete(
+            queryText = normalized
+        )
         if (Debug.enabled) { Log.d("InMemoryRepo", "$response")}
 
         emit(response.results?.map { it.toCityDomain() } ?: emptyList())
-    }.flowOn(dispatcher)
+    }
+        .flowOn(dispatcher)
         .catch { emit(emptyList()) }
 
     override suspend fun geocodeForward(query: String): Flow<City?> {
