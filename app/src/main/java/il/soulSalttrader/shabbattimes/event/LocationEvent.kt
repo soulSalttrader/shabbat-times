@@ -15,7 +15,7 @@ sealed interface LocationEvent : AppEvent, Reducible<ShabbatState> {
     sealed interface Loaded : LocationEvent {
         data class Success(val location: LocationData) : Loaded {
             override val reducer = ShabbatReducer { state ->
-                state.copy(location = LocationState.Available(location))
+                state.copy(location = LocationState.Current(location))
             }
         }
 
