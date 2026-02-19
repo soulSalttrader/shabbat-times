@@ -13,6 +13,7 @@ import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.model.ShabbatDataState
 import il.soulSalttrader.shabbattimes.model.ShabbatState
 import il.soulSalttrader.shabbattimes.model.toLoadedEvent
+import il.soulSalttrader.shabbattimes.repository.CityRepository
 import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,12 +22,16 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    private val repository: ShabbatRepository,
+    private val shabbatRepository: ShabbatRepository,
+    private val cityRepository: CityRepository,
 ) : ViewModel() {
     private val _state: MutableStateFlow<ShabbatState> = MutableStateFlow(value = ShabbatState())
     val state: StateFlow<ShabbatState> = _state.asStateFlow()
@@ -45,6 +50,7 @@ class ShabbatViewModel @Inject constructor(
                 is ShabbatDataEvent -> event.reducer reduce current
                 is PermissionEvent  -> event.reducer reduce current
                 is LocationEvent    -> event.reducer reduce current
+                else -> current
             }
         }
 
@@ -76,7 +82,7 @@ class ShabbatViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadData() {
+    private fun loadData() {
         if (_state.value.data is ShabbatDataState.Loading) {
             if (Debug.enabled) Log.d("ShabbatVM", "Load already in progress – skipping")
             return
@@ -86,15 +92,25 @@ class ShabbatViewModel @Inject constructor(
             current.copy(data = ShabbatDataState.Loading)
         }
 
-        runCatching {
-            repository.getHalachicTimesForCities()
-        }.onSuccess { result ->
-            if (Debug.enabled) Log.d("ShabbatVM", "Load success")
-            dispatch(event = result.toLoadedEvent())
-        }.onFailure { exception ->
-            if (Debug.enabled) Log.e("ShabbatVM", "Load failed", exception)
-            _state.update { it.copy(data = ShabbatDataState.Failure(exception.message ?: "Unknown error", exception.cause)) }
-            _effects.tryEmit(AppEffect.Shabbat.LoadFailed(exception))
+        viewModelScope.launch {
+            shabbatRepository
+                .getHalachicTimesForCities(cityRepository.cities)
+                .map { it.toLoadedEvent() }
+                .catch { exception ->
+                    if (Debug.enabled) Log.e("ShabbatVM", "Load failed", exception)
+
+                    dispatch(
+                        ShabbatDataEvent.Loaded.Failure(
+                            message = exception.message ?: "Unknown error",
+                            cause = exception
+                        )
+                    )
+                    _effects.tryEmit(AppEffect.Shabbat.LoadFailed(exception))
+                }
+                .collectLatest { event ->
+                    if (Debug.enabled) Log.d("ShabbatVM", "Load success")
+                    dispatch(event)
+                }
         }
     }
 
