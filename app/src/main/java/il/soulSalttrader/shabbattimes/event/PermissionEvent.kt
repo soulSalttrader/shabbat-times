@@ -1,11 +1,11 @@
 package il.soulSalttrader.shabbattimes.event
 
-import il.soulSalttrader.shabbattimes.model.ShabbatState
+import il.soulSalttrader.shabbattimes.model.ShabbatUiState
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 
-sealed interface PermissionEvent : AppEvent, Reducible<ShabbatState> {
+sealed interface PermissionEvent : AppEvent, Reducible<ShabbatUiState> {
     data object Request : PermissionEvent {
         override val reducer = ShabbatReducer { state ->
             state.copy(permission = PermissionState.Requesting)
