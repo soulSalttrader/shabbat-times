@@ -11,7 +11,7 @@ import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.model.ShabbatDataState
-import il.soulSalttrader.shabbattimes.model.ShabbatState
+import il.soulSalttrader.shabbattimes.model.ShabbatUiState
 import il.soulSalttrader.shabbattimes.model.toLoadedEvent
 import il.soulSalttrader.shabbattimes.repository.CityRepository
 import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
@@ -33,8 +33,8 @@ class ShabbatViewModel @Inject constructor(
     private val shabbatRepository: ShabbatRepository,
     private val cityRepository: CityRepository,
 ) : ViewModel() {
-    private val _state: MutableStateFlow<ShabbatState> = MutableStateFlow(value = ShabbatState())
-    val state: StateFlow<ShabbatState> = _state.asStateFlow()
+    private val _state: MutableStateFlow<ShabbatUiState> = MutableStateFlow(value = ShabbatUiState())
+    val state: StateFlow<ShabbatUiState> = _state.asStateFlow()
 
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()

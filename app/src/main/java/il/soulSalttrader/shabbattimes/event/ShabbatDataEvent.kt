@@ -4,11 +4,11 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.ShabbatDataState
-import il.soulSalttrader.shabbattimes.model.ShabbatState
+import il.soulSalttrader.shabbattimes.model.ShabbatUiState
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 
-sealed interface ShabbatDataEvent : AppEvent, Reducible<ShabbatState> {
+sealed interface ShabbatDataEvent : AppEvent, Reducible<ShabbatUiState> {
     data object Load : ShabbatDataEvent {
         override val reducer = ShabbatReducer { state ->
             state.copy(data = ShabbatDataState.Loading)
