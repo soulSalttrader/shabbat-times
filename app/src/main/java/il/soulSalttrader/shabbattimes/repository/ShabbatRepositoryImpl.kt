@@ -13,18 +13,21 @@ import il.soulSalttrader.shabbattimes.di.SolarTimesService
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
-import il.soulSalttrader.shabbattimes.model.SeedCities
 import il.soulSalttrader.shabbattimes.model.SeedCities.BRNO
 import il.soulSalttrader.shabbattimes.model.SeedCities.JERUSALEM
 import il.soulSalttrader.shabbattimes.model.SeedCities.NEW_YORK
 import il.soulSalttrader.shabbattimes.model.toDisplay
 import il.soulSalttrader.shabbattimes.network.NetworkResult
-import il.soulSalttrader.shabbattimes.network.SolarTimesApi
 import il.soulSalttrader.shabbattimes.network.dto.asNetworkResult
 import il.soulSalttrader.shabbattimes.settings.UserPreferences
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
@@ -103,21 +106,29 @@ class ShabbatRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun getHalachicTimesForCities() = withContext(dispatcher) {
-            SeedCities.initial.map { city ->
-                async {
-                    runCatching {
-                        getHalachicTimes(city).getOrThrow()
-                    }.fold(
-                        onSuccess = { NetworkResult.Success(it) },
-                        onFailure = { e ->
-                            NetworkResult.Failure(
-                                message = "Failed to load times for ${city.name}: ${e.message}",
-                                cause = e
-                            )
-                        }
-                    )
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun getHalachicTimesForCities(cities: Flow<List<City>>) = withContext(dispatcher) {
+        cities.flatMapLatest { cityList ->
+                flow {
+                    val results = coroutineScope {
+                        cityList.map { city ->
+                            async(dispatcher) {
+                                runCatching {
+                                    getHalachicTimes(city).getOrThrow()
+                                }.fold(
+                                    onSuccess = { NetworkResult.Success(it) },
+                                    onFailure = { e ->
+                                        NetworkResult.Failure(
+                                            message = "Failed to load times for ${city.name}: ${e.message}",
+                                            cause = e
+                                        )
+                                    }
+                                )
+                            }
+                        }.awaitAll()
+                    }
+                    emit(results)
                 }
-            }.awaitAll()
+            }
         }
 }
