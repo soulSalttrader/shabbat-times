@@ -1,21 +1,38 @@
 package il.soulSalttrader.shabbattimes.content
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
+import il.soulSalttrader.shabbattimes.model.SearchItem
+import il.soulSalttrader.shabbattimes.model.SearchItems.Add
 import il.soulSalttrader.shabbattimes.model.SearchUiState
 import il.soulSalttrader.shabbattimes.model.ShabbatDataState
 import il.soulSalttrader.shabbattimes.model.ShabbatUiState
@@ -28,6 +45,7 @@ fun ShabbatContent(
     searchUiState: SearchUiState,
     searchDispatch: (AppEvent) -> Unit,
 ) {
+    var searchActive by remember { mutableStateOf(false) }
     val halachicTimesDisplay = (shabbatState.data as ShabbatDataState.Success).data
 
     Box(
@@ -60,6 +78,22 @@ fun ShabbatContent(
                 }
             }
         }
+
+        AnimatedSearchScrim(
+            searchActive = searchActive,
+            onDismiss = { searchActive = false },
+        )
+
+        AnimatedSearchOverlay(
+            searchActive = searchActive,
+            searchUiState = searchUiState,
+            searchDispatch = searchDispatch,
+        )
+
+        AnimatedSearchFab(
+            searchActive = searchActive,
+            onToggle = { searchActive = !searchActive },
+        )
     }
 }
 
@@ -97,6 +131,59 @@ private fun LazyListScope.sectionHeader(
         Text(
             text = title,
             modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun BoxScope.AnimatedSearchScrim(
+    modifier: Modifier = Modifier,
+    searchActive: Boolean,
+    onDismiss: () -> Unit,
+) {
+    AnimatedVisibility(visible = searchActive) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
+                .clickable { onDismiss() }
+        )
+    }
+}
+
+@Composable
+private fun BoxScope.AnimatedSearchOverlay(
+    modifier: Modifier = Modifier,
+    searchActive: Boolean,
+    searchUiState: SearchUiState,
+    searchDispatch: (AppEvent) -> Unit,
+) {
+    AnimatedVisibility(
+        visible = searchActive,
+        enter = slideInVertically { -it / 2 } + fadeIn(),
+        exit = slideOutVertically { -it / 2 } + fadeOut()
+    ) {
+        TODO("CitySearch composable")
+    }
+}
+
+@Composable
+private fun BoxScope.AnimatedSearchFab(
+    searchActive: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+    fabItems: List<SearchItem> = listOf(Add),
+) {
+    AnimatedVisibility(
+        modifier = modifier
+            .align(Alignment.BottomEnd)
+            .navigationBarsPadding()
+            .padding(16.dp),
+        visible = !searchActive
+    ) {
+        FabMenu(
+            items = fabItems,
+            onClick = { onToggle() },
         )
     }
 }
