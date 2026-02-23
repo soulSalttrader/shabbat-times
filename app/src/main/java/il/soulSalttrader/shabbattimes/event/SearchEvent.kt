@@ -49,7 +49,6 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
             state.copy(
                 query = city.name,
                 selectedSuggestion = city,
-                resultState = SearchResultState.Idle,
             )
         }
     }
