@@ -20,20 +20,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
+import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.SearchItem
 import il.soulSalttrader.shabbattimes.model.SearchItems.Add
 import il.soulSalttrader.shabbattimes.model.SearchUiState
+import il.soulSalttrader.shabbattimes.model.SearchVisibility
 import il.soulSalttrader.shabbattimes.model.ShabbatDataState
 import il.soulSalttrader.shabbattimes.model.ShabbatUiState
 
@@ -45,7 +43,11 @@ fun ShabbatContent(
     searchUiState: SearchUiState,
     searchDispatch: (AppEvent) -> Unit,
 ) {
-    var searchActive by remember { mutableStateOf(false) }
+    val searchActive  = when (searchUiState.visibility) {
+        SearchVisibility.Collapsed -> false
+        SearchVisibility.Expanded  -> true
+    }
+
     val halachicTimesDisplay = (shabbatState.data as ShabbatDataState.Success).data
 
     Box(
@@ -55,8 +57,7 @@ fun ShabbatContent(
             contentPadding = PaddingValues(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            val grouped =
-                halachicTimesDisplay.groupBy { it.locationStatus is LocationStatus.Current }
+            val grouped = halachicTimesDisplay.groupBy { it.locationStatus is LocationStatus.Current }
 
             grouped[true]?.let { currentItems ->
                 shabbatTimesSection(
@@ -81,7 +82,7 @@ fun ShabbatContent(
 
         AnimatedSearchScrim(
             searchActive = searchActive,
-            onDismiss = { searchActive = false },
+            onDismiss = { searchDispatch(SearchEvent.SearchVisibilityChanged(false)) },
         )
 
         AnimatedSearchOverlay(
@@ -92,7 +93,9 @@ fun ShabbatContent(
 
         AnimatedSearchFab(
             searchActive = searchActive,
-            onToggle = { searchActive = !searchActive },
+            onToggle = { searchDispatch(
+                SearchEvent.SearchVisibilityChanged(expanded = !searchActive)
+            )},
         )
     }
 }

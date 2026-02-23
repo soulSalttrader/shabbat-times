@@ -4,6 +4,7 @@ import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.SearchMode
 import il.soulSalttrader.shabbattimes.model.SearchResultState
 import il.soulSalttrader.shabbattimes.model.SearchUiState
+import il.soulSalttrader.shabbattimes.model.SearchVisibility
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.SearchReducer
 
@@ -55,9 +56,11 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
 
     data class SearchVisibilityChanged(val expanded: Boolean) : SearchEvent {
         override val reducer = SearchReducer { state ->
-            if (expanded) state
-            else state.copy(
-                resultState = SearchResultState.Idle
+            state.copy(
+                visibility = when(expanded) {
+                    true -> SearchVisibility.Expanded
+                    else -> SearchVisibility.Collapsed
+                }
             )
         }
     }
