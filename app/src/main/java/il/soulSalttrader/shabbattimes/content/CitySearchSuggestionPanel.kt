@@ -3,9 +3,27 @@ package il.soulSalttrader.shabbattimes.content
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import il.soulSalttrader.shabbattimes.model.City
 
+@Composable
+private fun SuggestionListItem(
+    suggestion: City,
+    modifier: Modifier,
+    onSuggestionSelected: (City) -> Unit,
+) {
+    ListItem(
+        headlineContent = { Text(suggestion.name) },
+        supportingContent = { Text("${suggestion.timeZone}") },
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                onSuggestionSelected(suggestion)
+            }
+    )
+}
 
 private fun LazyListScope.suggestionHint(
     query: String,
