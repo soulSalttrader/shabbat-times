@@ -77,4 +77,10 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
     data object RetrySearch : SearchEvent {
         override val reducer = SearchReducer { state -> state }
     }
+
+    object SearchCommitted : SearchEvent {
+        override val reducer = SearchReducer { state ->
+            state.copy(visibility = SearchVisibility.Collapsed)
+        }
+    }
 }
