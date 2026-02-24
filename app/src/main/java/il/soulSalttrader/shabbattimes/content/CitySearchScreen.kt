@@ -9,6 +9,8 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.event.AppEvent
@@ -16,6 +18,8 @@ import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.model.SearchResultState
 import il.soulSalttrader.shabbattimes.model.SearchUiState
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
@@ -31,6 +35,17 @@ fun CitySearchScreen(
     }
 
     val state = rememberTextFieldState("")
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { state.text.toString() }
+            .distinctUntilChanged()
+            .debounce(300)
+            .collect { query ->
+                searchDispatch(
+                    SearchEvent.QueryChanged(newQuery = state.text.toString())
+                )
+            }
+    }
 
     Surface(
         modifier = modifier
