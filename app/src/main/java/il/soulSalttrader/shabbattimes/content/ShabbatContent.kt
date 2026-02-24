@@ -166,7 +166,14 @@ private fun BoxScope.AnimatedSearchOverlay(
         enter = slideInVertically { -it / 2 } + fadeIn(),
         exit = slideOutVertically { -it / 2 } + fadeOut()
     ) {
-        TODO("CitySearch composable")
+        CitySearchScreen(
+            searchUiState = searchUiState,
+            searchDispatch = searchDispatch,
+            expanded = searchActive,
+            modifier = modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 48.dp),
+        )
     }
 }
 
