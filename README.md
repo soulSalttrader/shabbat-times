@@ -12,6 +12,7 @@ over-engineered solutions to showcase design trade-offs and scalability.
     1. [MVI Terminology Mapping](#mvi-terminology-mapping)
 3. [Navigation](#3--navigation)
 4. [Permissions Management](#4--permissions-management)
+5. [Search Architecture](#5--search-architecture)
 
 ---
 
@@ -1236,3 +1237,7 @@ fun HandlePermissions(
 
 - This centralizes state updates and effects.
 - See: [3. ViewModel — MVI (and experimental MVVM)](#-3-viewmodel--mvi-and-experimental-mvvm) 
+
+---
+
+## 5. 🔍︎ Search Architecture
