@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -12,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
+import il.soulSalttrader.shabbattimes.model.SearchResultState
 import il.soulSalttrader.shabbattimes.model.SearchUiState
 import kotlinx.coroutines.FlowPreview
 
@@ -23,6 +25,11 @@ fun CitySearchScreen(
     expanded: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val suggestions = when (searchUiState.resultState) {
+        is SearchResultState.Results -> searchUiState.resultState.cities
+        else                         -> emptyList()
+    }
+
     val state = rememberTextFieldState("")
 
     Surface(
@@ -54,6 +61,15 @@ fun CitySearchScreen(
                 },
             )
 
+            CitySearchSuggestionPanel(
+                query = state.text.toString(),
+                expanded = expanded,
+                suggestions = suggestions,
+                onSuggestionSelected = { suggestion ->
+                    searchDispatch(SearchEvent.SuggestionSelected(suggestion))
+                    state.setTextAndPlaceCursorAtEnd(suggestion.name)
+                },
+            )
         }
     }
 }
