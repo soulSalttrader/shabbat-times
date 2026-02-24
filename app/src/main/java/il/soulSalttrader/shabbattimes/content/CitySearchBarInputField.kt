@@ -6,12 +6,60 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
 import kotlinx.coroutines.FlowPreview
+
+@Composable
+fun CitySearchBarInputField(
+    state: TextFieldState,
+    hasQuery: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    expanded: Boolean,
+    onSearch: (String) -> Unit,
+    onClear: () -> Unit,
+
+    placeholder: @Composable (() -> Unit)? = {
+        Text("City, address or zip code")
+    },
+
+    leadingIcon: @Composable (() -> Unit)? = {
+        LeadingSearchIcon()
+    },
+
+    trailingIcon: @Composable (() -> Unit)? = {
+        TrailingSearchIconButton(
+            onClick = onTrailingIconClick(hasQuery, onClear, onExpandedChange, expanded)
+        )
+    },
+) {
+    SearchBarInputField(
+        state = state,
+        expanded = expanded,
+        onSearch = onSearch,
+        onExpandedChange = onExpandedChange,
+        placeholder = placeholder,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+    )
+}
+
+private fun onTrailingIconClick(
+    hasQuery: Boolean,
+    onClear: () -> Unit,
+    onExpandedChange: (Boolean) -> Unit,
+    expanded: Boolean,
+) = {
+    when {
+        hasQuery -> onClear()
+        else     -> onExpandedChange(expanded)
+    }
+}
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 private fun SearchBarInputField(
