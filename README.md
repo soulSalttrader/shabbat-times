@@ -30,7 +30,10 @@ applies the appropriate halachic offsets (+42 min / −18 min).
 - Some interactions and data flows are still under active development.
 
 <p align="start">
-  <img src="docs/home_screen.png" width="240" />
+  <img src="docs/home_screen.png" width="180" />
+  <img src="docs/search_auto_dark.png" width="180" />
+  <img src="docs/home_screen_light.png" width="180" />
+  <img src="docs/search_auto_light.png" width="180" />
 </p>
 
 ---
