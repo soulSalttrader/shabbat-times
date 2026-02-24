@@ -48,39 +48,45 @@ The app is built using modern Android architecture principles and libraries:
 ```kotlin
 @Composable
 fun ShabbatScreen() {
-    val viewModel: ShabbatViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val shabbatViewModel: ShabbatViewModel = hiltViewModel()
+    val shabbatState by shabbatViewModel.state.collectAsStateWithLifecycle()
+
+    val searchViewModel: SearchViewModel = hiltViewModel()
+    val searchUiState by searchViewModel.state.collectAsStateWithLifecycle()
 
     HandlePermissions(
         permissions = listOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
         ),
-        permissionState = state.permission,
-        dispatch = viewModel::dispatch,
+        permissionState = shabbatState.permission,
+        dispatch = shabbatViewModel::dispatch,
     )
 
     val context = LocalContext.current
 
-    when (state.data) {
-        is ShabbatDataState.Idle -> LoadingScreen()
+    when (shabbatState.data) {
+        is ShabbatDataState.Idle    -> LoadingScreen()
 
         is ShabbatDataState.Loading -> LoadingScreen()
 
         is ShabbatDataState.Success -> ShabbatContent(
-            result = (state.data as ShabbatDataState.Success).data ?: HalachicTimesDisplay(),
-            onClick = { viewModel.dispatch(PermissionEvent.Request) },
+            shabbatState = shabbatState,
+            shabbatDispatch = shabbatViewModel::dispatch,
+
+            searchUiState = searchUiState,
+            searchDispatch = searchViewModel::dispatch,
         )
 
         is ShabbatDataState.Failure -> FailureScreen(
-            message = (state.data as ShabbatDataState.Failure).message,
-            onRetry = { viewModel.dispatch(ShabbatDataEvent.Load) },
+            message = (shabbatState.data as ShabbatDataState.Failure).message,
+            onRetry = { shabbatViewModel.dispatch(ShabbatDataEvent.Load) },
         )
     }
 
-    LaunchedEffect(state.permission) {
-        if (Debug.enabled) { Log.d("ShabbatScreen", "$state") }
-        viewModel.effects.collect { effect ->
+    LaunchedEffect(shabbatState.permission) {
+        if (Debug.enabled) { Log.d("ShabbatScreen", "$shabbatState") }
+        shabbatViewModel.effects.collect { effect ->
             if (Debug.enabled) { Log.d("ShabbatScreen", "$effect") }
 
             when (effect) {
