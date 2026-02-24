@@ -107,10 +107,12 @@ fun ShabbatScreen() {
 ```kotlin
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    private val repository: ShabbatRepository,
+  private val shabbatRepository: ShabbatRepository,
+  private val cityRepository: CityRepository,
 ) : ViewModel() {
-    private val _state: MutableStateFlow<ShabbatState> = MutableStateFlow(value = ShabbatState())
-    val state: StateFlow<ShabbatState> = _state.asStateFlow()
+    private val _state: MutableStateFlow<ShabbatUiState> =
+        MutableStateFlow(value = ShabbatUiState())
+    val state: StateFlow<ShabbatUiState> = _state.asStateFlow()
 
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
@@ -126,6 +128,7 @@ class ShabbatViewModel @Inject constructor(
                 is ShabbatDataEvent -> event.reducer reduce current
                 is PermissionEvent  -> event.reducer reduce current
                 is LocationEvent    -> event.reducer reduce current
+                else                -> current
             }
         }
 
@@ -141,23 +144,29 @@ class ShabbatViewModel @Inject constructor(
         viewModelScope.launch {
             _effects.collect { effect ->
                 when (effect) {
-                    is AppEffect.Shabbat.LoadData -> {
+                    is AppEffect.Shabbat.LoadData   -> {
                         if (Debug.enabled) Log.d("ShabbatVM", "→ Processing LoadData effect")
                         loadData()
                     }
 
                     is AppEffect.Shabbat.LoadFailed -> {
                         handleShabbatLoadFailed(effect)
-                        if (Debug.enabled) Log.d("ShabbatVM", "→ Processing LoadFailed: ${effect.error.message}")
+                        if (Debug.enabled) Log.d(
+                            "ShabbatVM",
+                            "→ Processing LoadFailed: ${effect.error.message}"
+                        )
                     }
 
-                    else -> if (Debug.enabled) Log.w("ShabbatVM", "Unhandled effect: $effect")
+                    else                            -> if (Debug.enabled) Log.w(
+                        "ShabbatVM",
+                        "Unhandled effect: $effect"
+                    )
                 }
             }
         }
     }
 
-    private suspend fun loadData() {
+    private fun loadData() {
         if (_state.value.data is ShabbatDataState.Loading) {
             if (Debug.enabled) Log.d("ShabbatVM", "Load already in progress – skipping")
             return
@@ -167,15 +176,25 @@ class ShabbatViewModel @Inject constructor(
             current.copy(data = ShabbatDataState.Loading)
         }
 
-        runCatching {
-            repository.getHalachicTimes()
-        }.onSuccess { result ->
-            if (Debug.enabled) Log.d("ShabbatVM", "Load success")
-            dispatch(event = result.toLoadedEvent())
-        }.onFailure { exception ->
-            if (Debug.enabled) Log.e("ShabbatVM", "Load failed", exception)
-            _state.update { it.copy(data = ShabbatDataState.Failure(exception.message ?: "Unknown error", exception.cause)) }
-            _effects.tryEmit(AppEffect.Shabbat.LoadFailed(exception))
+        viewModelScope.launch {
+            shabbatRepository
+                .getHalachicTimesForCities(cityRepository.cities)
+                .map { it.toLoadedEvent() }
+                .catch { exception ->
+                    if (Debug.enabled) Log.e("ShabbatVM", "Load failed", exception)
+
+                    dispatch(
+                        ShabbatDataEvent.Loaded.Failure(
+                            message = exception.message ?: "Unknown error",
+                            cause = exception
+                        )
+                    )
+                    _effects.tryEmit(AppEffect.Shabbat.LoadFailed(exception))
+                }
+                .collectLatest { event ->
+                    if (Debug.enabled) Log.d("ShabbatVM", "Load success")
+                    dispatch(event)
+                }
         }
     }
 // ...
@@ -260,6 +279,25 @@ class ShabbatViewModelMVVM @Inject constructor(
 
 #### 🔵 5. Data Layer — Clean architecture with repository abstraction
 
+```kotlin
+interface ShabbatRepository {
+    suspend fun getSolarTimes(date: LocalDate, city: City): NetworkResult<SolarTimes>
+    suspend fun getHalachicTimes(city: City): NetworkResult<HalachicTimesDisplay>
+    suspend fun getHalachicTimesForCities(cities: Flow<List<City>>): Flow<List<NetworkResult<HalachicTimesDisplay>>>
+}
+```
+
+```kotlin
+interface CityRepository {
+    val cities: Flow<List<City>>
+    suspend fun addCity(city: City)
+
+    suspend fun geocodeAutocomplete(query: String): Flow<List<City>>
+    suspend fun geocodeForward(query: String): Flow<City?>
+    suspend fun geocodeReverse(latitude: Double, longitude: Double): City?
+}
+```
+
 #### 🔵 6. KotlinX Serialization — For DTO parsing
 
 #### 🔵 7. Domain Layer — Strongly typed models (LocalDate, LocalTime)
@@ -295,19 +333,51 @@ suspend fun getSolarTimes(
 ): SolarTimesDto
 ```
 
+```kotlin
+    @GET("autocomplete")
+    suspend fun autocomplete(
+        @Query("text") queryText: String,
+        @Query("filter") countryFilter: String? = null,
+        @Query("type") resultType: String? = "city",
+
+        @Query("limit") maxResults: Int = 5,
+        @Query("lang") preferredLanguage: String = Locale.getDefault().language,
+        @Query("format") format: String = "json",
+        @Query("apiKey") apiKey: String = BuildConfig.GEOAPIFY_API_KEY,
+    ): GeoapifyResponseDto
+```
+
 #### 🟢 3. DTO and domain mapping:
 
 ```kotlin
 @Serializable
-data class SolarTimesDto(
-    val results: SolarTimes = SolarTimes(),
+data class SolarTimesResponseDto(
+    val results: SolarTimesResultDto = SolarTimesResultDto(),
     val status: String = "",
 )
 
 @Serializable
-data class SolarTimes(
+data class SolarTimesResultDto(
     val date: String = "",
     val sunset: String = "",
+)
+
+@Serializable
+data class GeoapifyResponseDto(
+    val results: List<GeoapifyResultDto>? = null,
+    val status: String? = null,
+    val query: GeoapifyQuery? = null
+)
+
+@Serializable
+data class GeoapifyResultDto(
+  // ────────────────────────────────────────────────
+  // Core location
+  // ────────────────────────────────────────────────
+  @SerialName("lat")          val latitude: Double? = null,
+  @SerialName("lon")          val longitude: Double? = null,
+  val timezone: GeoapifyTimezone? = null,
+// ...
 )
 ```
 
