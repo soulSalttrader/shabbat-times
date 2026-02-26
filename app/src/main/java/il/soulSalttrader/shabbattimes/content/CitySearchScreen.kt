@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -72,7 +73,7 @@ fun CitySearchScreen(
                 },
                 onClear = {
                     searchDispatch(SearchEvent.QueryCleared)
-                    state.edit { replace(0, length, "") }
+                    state.clearText()
                 },
             )
 
