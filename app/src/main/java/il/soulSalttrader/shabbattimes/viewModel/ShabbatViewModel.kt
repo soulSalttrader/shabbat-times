@@ -24,7 +24,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -63,23 +65,21 @@ class ShabbatViewModel @Inject constructor(
     }
 
     private fun handleEffects() {
-        viewModelScope.launch {
-            _effects.collect { effect ->
+        _effects
+            .onEach { effect ->
                 when (effect) {
                     is AppEffect.Shabbat.LoadData -> {
                         if (Debug.enabled) Log.d("ShabbatVM", "→ Processing LoadData effect")
                         loadData()
                     }
-
                     is AppEffect.Shabbat.LoadFailed -> {
                         handleShabbatLoadFailed(effect)
                         if (Debug.enabled) Log.d("ShabbatVM", "→ Processing LoadFailed: ${effect.error.message}")
                     }
-
                     else -> if (Debug.enabled) Log.w("ShabbatVM", "Unhandled effect: $effect")
                 }
             }
-        }
+            .launchIn(viewModelScope)
     }
 
     private fun loadData() {
