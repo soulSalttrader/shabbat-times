@@ -5,6 +5,7 @@ import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.di.GeoapifyService
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.SeedCities.JERUSALEM
+import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.dto.toCityDomain
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -49,14 +50,14 @@ class InMemoryCityRepository @Inject constructor(
         .flowOn(dispatcher)
         .catch { emit(emptyList()) }
 
-    override suspend fun geocodeForward(query: String): Flow<City?> {
+    override suspend fun geocodeForward(query: String): NetworkResult<City?> {
         TODO("Not yet implemented")
     }
 
     override suspend fun geocodeReverse(
         latitude: Double,
         longitude: Double,
-    ): City? {
+    ): NetworkResult<City?> {
         TODO("Not yet implemented")
     }
 }
