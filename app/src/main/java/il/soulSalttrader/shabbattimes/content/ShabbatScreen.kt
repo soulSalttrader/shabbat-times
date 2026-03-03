@@ -11,7 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
-import il.soulSalttrader.shabbattimes.model.ShabbatDataState
+import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.openAppSettings
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel
@@ -39,19 +39,23 @@ fun ShabbatScreen() {
     when (shabbatState.data) {
         is ShabbatDataState.Idle    -> LoadingScreen()
 
-        is ShabbatDataState.Loading -> LoadingScreen()
+        is ShabbatResultState.NoResults -> LoadingScreen()
 
-        is ShabbatDataState.Success -> ShabbatContent(
-            shabbatState = shabbatState,
-            shabbatDispatch = shabbatViewModel::dispatch,
+        is ShabbatResultState.Results   -> {
+            val suggestions = searchUiState.suggestionsOrEmpty()
+            val searchActive  = searchUiState.isSearchActive()
+
+            ShabbatContent(
+                halachicTimesDisplay = halachicTimes.data,
+                shabbatDispatch = shabbatViewModel::dispatch,
 
             searchUiState = searchUiState,
             searchDispatch = searchViewModel::dispatch,
         )
 
-        is ShabbatDataState.Failure -> FailureScreen(
-            message = (shabbatState.data as ShabbatDataState.Failure).message,
-            onRetry = { shabbatViewModel.dispatch(ShabbatDataEvent.Load) },
+        is ShabbatResultState.Failure   -> FailureScreen(
+            message = halachicTimes.message,
+            onRetry = { shabbatViewModel.dispatch(ShabbatDataEvent.RetryLoadTimes) },
         )
     }
 
