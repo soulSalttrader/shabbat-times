@@ -21,13 +21,9 @@ import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.dto.asNetworkResult
 import il.soulSalttrader.shabbattimes.settings.UserPreferences
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
@@ -106,29 +102,11 @@ class ShabbatRepositoryImpl @Inject constructor(
         )
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun getHalachicTimesForCities(cities: Flow<List<City>>) = withContext(dispatcher) {
-        cities.flatMapLatest { cityList ->
-                flow {
-                    val results = coroutineScope {
-                        cityList.map { city ->
-                            async(dispatcher) {
-                                runCatching {
-                                    getHalachicTimes(city).getOrThrow()
-                                }.fold(
-                                    onSuccess = { NetworkResult.Success(it) },
-                                    onFailure = { e ->
-                                        NetworkResult.Failure(
-                                            message = "Failed to load times for ${city.name}: ${e.message}",
-                                            cause = e
-                                        )
-                                    }
-                                )
-                            }
-                        }.awaitAll()
-                    }
-                    emit(results)
-                }
+    override suspend fun getHalachicTimes(cities: List<City>) = coroutineScope {
+        cities.map { city ->
+            async(dispatcher) {
+                getHalachicTimes(city)
             }
-        }
+        }.awaitAll()
+    }
 }
