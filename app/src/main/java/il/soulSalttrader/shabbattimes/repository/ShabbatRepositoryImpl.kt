@@ -5,7 +5,6 @@ import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.common.asNetworkFailure
-import il.soulSalttrader.shabbattimes.common.getOrThrow
 import il.soulSalttrader.shabbattimes.common.toDisplayString
 import il.soulSalttrader.shabbattimes.common.upcomingCandleLightingDate
 import il.soulSalttrader.shabbattimes.common.upcomingHavdalahDate
@@ -19,6 +18,7 @@ import il.soulSalttrader.shabbattimes.repository.SeedCities.NEW_YORK
 import il.soulSalttrader.shabbattimes.model.toDisplay
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.dto.asNetworkResult
+import il.soulSalttrader.shabbattimes.network.getOrThrow
 import il.soulSalttrader.shabbattimes.settings.UserPreferences
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
