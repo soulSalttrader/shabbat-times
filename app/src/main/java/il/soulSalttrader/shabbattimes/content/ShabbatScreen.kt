@@ -36,8 +36,10 @@ fun ShabbatScreen() {
 
     val context = LocalContext.current
 
-    when (shabbatState.data) {
-        is ShabbatDataState.Idle    -> LoadingScreen()
+    when (val halachicTimes = shabbatState.data) {
+        is ShabbatResultState.Idle      -> LoadingScreen()
+
+        is ShabbatResultState.Loading   -> LoadingScreen()
 
         is ShabbatResultState.NoResults -> LoadingScreen()
 
@@ -49,9 +51,12 @@ fun ShabbatScreen() {
                 halachicTimesDisplay = halachicTimes.data,
                 shabbatDispatch = shabbatViewModel::dispatch,
 
-            searchUiState = searchUiState,
-            searchDispatch = searchViewModel::dispatch,
-        )
+                suggestions = suggestions,
+                hasQuery = searchUiState.query.isNotEmpty(),
+                searchActive = searchActive,
+                searchDispatch = searchViewModel::dispatch,
+            )
+        }
 
         is ShabbatResultState.Failure   -> FailureScreen(
             message = halachicTimes.message,
