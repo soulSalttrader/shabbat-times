@@ -4,7 +4,7 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.di.GeoapifyService
 import il.soulSalttrader.shabbattimes.model.City
-import il.soulSalttrader.shabbattimes.model.SeedCities.JERUSALEM
+import il.soulSalttrader.shabbattimes.repository.SeedCities.JERUSALEM
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.dto.toCityDomain
 import jakarta.inject.Inject
