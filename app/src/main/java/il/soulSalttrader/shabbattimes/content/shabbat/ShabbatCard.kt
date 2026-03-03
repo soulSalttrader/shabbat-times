@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.shabbat
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIcon
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconLabel
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.LocationStatus.Current
 import il.soulSalttrader.shabbattimes.location.getLocationLabels

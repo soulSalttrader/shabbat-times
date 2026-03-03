@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.uiIcon
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme

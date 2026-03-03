@@ -1,4 +1,6 @@
-package il.soulSalttrader.shabbattimes.model
+package il.soulSalttrader.shabbattimes.content.search
+
+import il.soulSalttrader.shabbattimes.model.City
 
 sealed interface SearchResultState {
     object Idle : SearchResultState

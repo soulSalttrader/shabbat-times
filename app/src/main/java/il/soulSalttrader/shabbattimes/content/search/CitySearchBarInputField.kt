@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.search
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIcon
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 import kotlinx.coroutines.FlowPreview
 
 @Composable

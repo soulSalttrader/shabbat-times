@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.search
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable

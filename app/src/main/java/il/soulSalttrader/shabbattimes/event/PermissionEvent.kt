@@ -1,6 +1,6 @@
 package il.soulSalttrader.shabbattimes.event
 
-import il.soulSalttrader.shabbattimes.model.ShabbatUiState
+import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer

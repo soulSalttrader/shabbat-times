@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.uiIcon
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size

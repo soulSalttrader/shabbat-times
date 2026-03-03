@@ -1,6 +1,7 @@
-package il.soulSalttrader.shabbattimes.model
+package il.soulSalttrader.shabbattimes.content.shabbat
 
 import il.soulSalttrader.shabbattimes.location.LocationState
+import il.soulSalttrader.shabbattimes.model.State
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 
 data class ShabbatUiState(
