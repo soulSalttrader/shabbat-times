@@ -13,9 +13,9 @@ import il.soulSalttrader.shabbattimes.di.SolarTimesService
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
-import il.soulSalttrader.shabbattimes.model.SeedCities.BRNO
-import il.soulSalttrader.shabbattimes.model.SeedCities.JERUSALEM
-import il.soulSalttrader.shabbattimes.model.SeedCities.NEW_YORK
+import il.soulSalttrader.shabbattimes.repository.SeedCities.BRNO
+import il.soulSalttrader.shabbattimes.repository.SeedCities.JERUSALEM
+import il.soulSalttrader.shabbattimes.repository.SeedCities.NEW_YORK
 import il.soulSalttrader.shabbattimes.model.toDisplay
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.dto.asNetworkResult

@@ -1,6 +1,4 @@
-package il.soulSalttrader.shabbattimes.model
-
-import il.soulSalttrader.shabbattimes.network.NetworkResult
+package il.soulSalttrader.shabbattimes.network
 
 inline fun <T, R> NetworkResult<T>.fold(
     onSuccess: (T) -> R,
