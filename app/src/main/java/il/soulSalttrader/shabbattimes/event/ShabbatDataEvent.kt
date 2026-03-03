@@ -3,36 +3,49 @@ package il.soulSalttrader.shabbattimes.event
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.model.ShabbatDataState
+import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.model.ShabbatUiState
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 
 sealed interface ShabbatDataEvent : AppEvent, Reducible<ShabbatUiState> {
-    data object Load : ShabbatDataEvent {
+    data object LoadTimes : ShabbatDataEvent {
         override val reducer = ShabbatReducer { state ->
-            state.copy(data = ShabbatDataState.Loading)
+            state.copy(data = ShabbatResultState.Loading)
+        }
+    }
+    class TimesLoadFailed(val message: String, val cause: Throwable?) : ShabbatDataEvent {
+        override val reducer = ShabbatReducer { state ->
+            if (Debug.enabled) Log.d("ShabbatEvent", "message: $message, cause: $cause")
+            state.copy(data = ShabbatResultState.Failure(message, cause))
         }
     }
 
-    sealed interface Loaded : ShabbatDataEvent {
-        class Success(val display: List<HalachicTimesDisplay>) : Loaded {
-            override val reducer = ShabbatReducer { state ->
-                if (Debug.enabled) Log.d("ShabbatEvent.Loaded.Success", "$display")
-
-                state.copy(data = ShabbatDataState.Success(display))
-            }
+    data class TimesLoaded(val times: List<HalachicTimesDisplay>) : ShabbatDataEvent {
+        override val reducer = ShabbatReducer { state ->
+            if (Debug.enabled) Log.d("ShabbatEvent", "$times")
+            state.copy(
+                data = when {
+                    times.isEmpty() -> ShabbatResultState.NoResults
+                    else            -> ShabbatResultState.Results(data = times)
+                },
+            )
         }
+    }
 
-        class Failure(val message: String, val cause: Throwable?) : Loaded {
-            override val reducer = ShabbatReducer { state ->
-                if (Debug.enabled) Log.d(
-                    "ShabbatEvent.Loaded.Failure",
-                    "message: $message, cause: $cause"
-                )
+    data object RetryLoadTimes : ShabbatDataEvent {
+        override val reducer = ShabbatReducer { state -> state }
+    }
 
-                state.copy(data = ShabbatDataState.Failure(message, cause))
-            }
+    data object RefreshTimes : ShabbatDataEvent {
+        override val reducer = ShabbatReducer { state ->
+            state.copy(data = ShabbatResultState.Loading)
+        }
+    }
+
+    data object ClearTimes : ShabbatDataEvent {
+        override val reducer = ShabbatReducer { state ->
+            state.copy(data = ShabbatResultState.Idle)
         }
     }
 }
