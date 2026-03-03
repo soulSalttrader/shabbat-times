@@ -16,8 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
-import il.soulSalttrader.shabbattimes.model.SearchResultState
-import il.soulSalttrader.shabbattimes.model.SearchUiState
+import il.soulSalttrader.shabbattimes.model.City
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -25,16 +24,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 fun CitySearchScreen(
-    searchUiState: SearchUiState,
+    hasQuery: Boolean,
+    suggestions: List<City>,
     searchDispatch: (AppEvent) -> Unit,
     expanded: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val suggestions = when (searchUiState.resultState) {
-        is SearchResultState.Results -> searchUiState.resultState.cities
-        else                         -> emptyList()
-    }
-
     val state = rememberTextFieldState("")
 
     LaunchedEffect(Unit) {
@@ -60,7 +55,7 @@ fun CitySearchScreen(
         ) {
             CitySearchBarInputField(
                 state = state,
-                hasQuery = searchUiState.query.isNotEmpty(),
+                hasQuery = hasQuery,
                 expanded = expanded,
                 onExpandedChange = { expanded ->
                     searchDispatch(
