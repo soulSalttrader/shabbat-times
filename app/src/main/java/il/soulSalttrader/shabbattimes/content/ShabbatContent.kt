@@ -27,28 +27,21 @@ import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.SearchItem
 import il.soulSalttrader.shabbattimes.model.SearchItems.Add
-import il.soulSalttrader.shabbattimes.model.SearchUiState
-import il.soulSalttrader.shabbattimes.model.SearchVisibility
-import il.soulSalttrader.shabbattimes.model.ShabbatDataState
-import il.soulSalttrader.shabbattimes.model.ShabbatUiState
 
 @Composable
 fun ShabbatContent(
-    shabbatState: ShabbatUiState,
+    halachicTimesDisplay: List<HalachicTimesDisplay>,
     shabbatDispatch: (AppEvent) -> Unit,
 
-    searchUiState: SearchUiState,
+    suggestions: List<City>,
+    hasQuery: Boolean,
+    searchActive: Boolean,
     searchDispatch: (AppEvent) -> Unit,
 ) {
-    val searchActive  = when (searchUiState.visibility) {
-        SearchVisibility.Collapsed -> false
-        SearchVisibility.Expanded  -> true
-    }
-
-    val halachicTimesDisplay = (shabbatState.data as ShabbatDataState.Success).data
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -86,8 +79,9 @@ fun ShabbatContent(
         )
 
         AnimatedSearchOverlay(
+            suggestions = suggestions,
+            hasQuery = hasQuery,
             searchActive = searchActive,
-            searchUiState = searchUiState,
             searchDispatch = searchDispatch,
         )
 
@@ -157,8 +151,9 @@ private fun BoxScope.AnimatedSearchScrim(
 @Composable
 private fun BoxScope.AnimatedSearchOverlay(
     modifier: Modifier = Modifier,
+    suggestions: List<City>,
+    hasQuery: Boolean,
     searchActive: Boolean,
-    searchUiState: SearchUiState,
     searchDispatch: (AppEvent) -> Unit,
 ) {
     AnimatedVisibility(
@@ -167,7 +162,8 @@ private fun BoxScope.AnimatedSearchOverlay(
         exit = slideOutVertically { -it / 2 } + fadeOut()
     ) {
         CitySearchScreen(
-            searchUiState = searchUiState,
+            suggestions = suggestions,
+            hasQuery = hasQuery,
             searchDispatch = searchDispatch,
             expanded = searchActive,
             modifier = modifier
