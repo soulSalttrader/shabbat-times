@@ -16,6 +16,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.content.uiIcon.IconTextButton
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIcon
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 
 @Composable
 fun FailureScreen(
@@ -32,7 +35,10 @@ fun FailureScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            UiIconImage(icon = UiIcon.Resource(R.drawable.sentiment_very_dissatisfied_outlined_192), contentDescription = null)
+            UiIconImage(
+                icon = UiIcon.Resource(R.drawable.sentiment_very_dissatisfied_outlined_192),
+                contentDescription = null
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 

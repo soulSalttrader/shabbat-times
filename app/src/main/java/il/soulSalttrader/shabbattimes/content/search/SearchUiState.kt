@@ -1,4 +1,7 @@
-package il.soulSalttrader.shabbattimes.model
+package il.soulSalttrader.shabbattimes.content.search
+
+import il.soulSalttrader.shabbattimes.model.City
+import il.soulSalttrader.shabbattimes.model.State
 
 data class SearchUiState(
     val query: String = "",

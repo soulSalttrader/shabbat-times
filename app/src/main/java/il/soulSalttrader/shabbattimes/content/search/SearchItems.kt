@@ -1,7 +1,7 @@
-package il.soulSalttrader.shabbattimes.model
+package il.soulSalttrader.shabbattimes.content.search
 
 import il.soulSalttrader.shabbattimes.R
-import il.soulSalttrader.shabbattimes.content.UiIcon
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIcon
 
 object SearchItems {
 

@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.nav
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar

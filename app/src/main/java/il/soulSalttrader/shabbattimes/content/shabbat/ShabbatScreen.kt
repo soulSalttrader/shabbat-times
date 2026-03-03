@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.shabbat
 
 import android.Manifest
 import android.util.Log
@@ -9,9 +9,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.content.FailureScreen
+import il.soulSalttrader.shabbattimes.content.LoadingScreen
+import il.soulSalttrader.shabbattimes.content.search.isSearchActive
+import il.soulSalttrader.shabbattimes.content.search.suggestionsOrEmpty
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
-import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.openAppSettings
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel

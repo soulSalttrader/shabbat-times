@@ -1,4 +1,7 @@
-package il.soulSalttrader.shabbattimes.model
+package il.soulSalttrader.shabbattimes.content.shabbat
+
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
+import il.soulSalttrader.shabbattimes.model.State
 
 sealed interface ShabbatResultState : State {
     data object Idle : ShabbatResultState

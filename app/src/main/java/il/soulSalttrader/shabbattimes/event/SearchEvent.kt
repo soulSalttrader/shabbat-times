@@ -1,10 +1,10 @@
 package il.soulSalttrader.shabbattimes.event
 
 import il.soulSalttrader.shabbattimes.model.City
-import il.soulSalttrader.shabbattimes.model.SearchMode
-import il.soulSalttrader.shabbattimes.model.SearchResultState
-import il.soulSalttrader.shabbattimes.model.SearchUiState
-import il.soulSalttrader.shabbattimes.model.SearchVisibility
+import il.soulSalttrader.shabbattimes.content.search.SearchMode
+import il.soulSalttrader.shabbattimes.content.search.SearchResultState
+import il.soulSalttrader.shabbattimes.content.search.SearchUiState
+import il.soulSalttrader.shabbattimes.content.search.SearchVisibility
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.SearchReducer
 

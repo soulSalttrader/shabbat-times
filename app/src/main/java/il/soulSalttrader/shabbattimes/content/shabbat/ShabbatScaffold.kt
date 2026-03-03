@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.shabbat
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import il.soulSalttrader.shabbattimes.content.nav.NavBarTop
 import il.soulSalttrader.shabbattimes.nav.NavItem
 import il.soulSalttrader.shabbattimes.nav.NavItems.Previous
 import il.soulSalttrader.shabbattimes.nav.NavItems.Settings

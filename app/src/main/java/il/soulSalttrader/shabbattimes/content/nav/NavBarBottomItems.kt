@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.nav
 
 import androidx.compose.runtime.Composable
 import il.soulSalttrader.shabbattimes.nav.NavItem

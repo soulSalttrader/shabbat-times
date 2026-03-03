@@ -14,8 +14,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import il.soulSalttrader.shabbattimes.R
-import il.soulSalttrader.shabbattimes.model.SearchItem
-import il.soulSalttrader.shabbattimes.model.SearchItems.Add
+import il.soulSalttrader.shabbattimes.content.search.SearchItem
+import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIcon
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

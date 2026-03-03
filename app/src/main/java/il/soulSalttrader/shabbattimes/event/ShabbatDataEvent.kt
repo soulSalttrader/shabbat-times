@@ -3,8 +3,8 @@ package il.soulSalttrader.shabbattimes.event
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.model.ShabbatResultState
-import il.soulSalttrader.shabbattimes.model.ShabbatUiState
+import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatResultState
+import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 

@@ -2,7 +2,7 @@ package il.soulSalttrader.shabbattimes.event
 
 import il.soulSalttrader.shabbattimes.location.LocationData
 import il.soulSalttrader.shabbattimes.location.LocationState
-import il.soulSalttrader.shabbattimes.model.ShabbatUiState
+import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 

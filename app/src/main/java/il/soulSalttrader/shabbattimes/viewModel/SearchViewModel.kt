@@ -7,7 +7,7 @@ import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.model.City
-import il.soulSalttrader.shabbattimes.model.SearchUiState
+import il.soulSalttrader.shabbattimes.content.search.SearchUiState
 import il.soulSalttrader.shabbattimes.repository.CityRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi

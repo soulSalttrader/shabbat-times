@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.model
+package il.soulSalttrader.shabbattimes.content.search
 
 sealed interface SearchMode {
     object Autocomplete : SearchMode

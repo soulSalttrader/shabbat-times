@@ -1,7 +1,8 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.nav
 
 import androidx.compose.material3.BadgedBox
 import androidx.compose.runtime.Composable
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.nav.NavItem
 
 @Composable
