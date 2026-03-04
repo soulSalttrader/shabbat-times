@@ -3,11 +3,13 @@ package il.soulSalttrader.shabbattimes.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.shabbattimes.content.search.SearchUiState
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.model.City
-import il.soulSalttrader.shabbattimes.content.search.SearchUiState
+import il.soulSalttrader.shabbattimes.network.onFailure
+import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.CityRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -47,10 +50,22 @@ class SearchViewModel @Inject constructor(
     private val suggestionsFlow: StateFlow<List<City>> = queryFlow
         .debounce(300)
         .flatMapLatest { query ->
-            when {
-                query.length < 2 -> flowOf(emptyList())
-                else -> repository.geocodeAutocomplete(query)
-            }
+            query.takeUnless { it.isEmpty() }
+                ?.let { nonEmptyQuery ->
+                    flow {
+                        val result = repository.geocodeAutocomplete(nonEmptyQuery)
+
+                        result
+                            .onSuccess(tag = "SearchVM") { suggestions ->
+                                SearchEvent.SuggestionsLoaded(cities = suggestions)
+                                emit(suggestions)
+                            }
+                            .onFailure(tag = "SearchVM") { e ->
+                                SearchEvent.SuggestionsLoadFailed(message = e.message, cause = e.cause)
+                            }
+                    }
+                } ?: flowOf(emptyList())
+
         }
         .catch { emit(emptyList()) }
         .stateIn(
