@@ -1,12 +1,16 @@
 package il.soulSalttrader.shabbattimes.event
 
+import android.util.Log
+import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.content.search.SearchMode
 import il.soulSalttrader.shabbattimes.content.search.SearchResultState
 import il.soulSalttrader.shabbattimes.content.search.SearchUiState
 import il.soulSalttrader.shabbattimes.content.search.SearchVisibility
+import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatResultState
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.SearchReducer
+import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 
 sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
     data class QueryChanged(val newQuery: String) : SearchEvent {
@@ -32,6 +36,12 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
         }
     }
 
+    data object LoadSuggestions : SearchEvent {
+        override val reducer = SearchReducer { state ->
+            state.copy(resultState = SearchResultState.Loading)
+        }
+    }
+
     data class SuggestionsLoaded(val cities: List<City>) : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(
@@ -41,6 +51,13 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
                     else                  -> SearchResultState.Results(cities)
                 }
             )
+        }
+    }
+
+    class SuggestionsLoadFailed(val message: String, val cause: Throwable?) : SearchEvent {
+        override val reducer = SearchReducer { state ->
+            if (Debug.enabled) Log.d("ShabbatEvent", "message: $message, cause: $cause")
+            state.copy(resultState = SearchResultState.Failure(message, cause))
         }
     }
 

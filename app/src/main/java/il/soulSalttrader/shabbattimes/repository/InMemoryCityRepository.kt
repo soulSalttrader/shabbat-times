@@ -4,19 +4,16 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.di.GeoapifyService
 import il.soulSalttrader.shabbattimes.model.City
-import il.soulSalttrader.shabbattimes.repository.SeedCities.JERUSALEM
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.dto.toCityDomain
+import il.soulSalttrader.shabbattimes.repository.SeedCities.JERUSALEM
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 
 @Singleton
 class InMemoryCityRepository @Inject constructor(
@@ -33,22 +30,21 @@ class InMemoryCityRepository @Inject constructor(
         }
     }
 
-    override suspend fun geocodeAutocomplete(query: String): Flow<List<City>> = flow {
-        val normalized = query.trim()
-        if (normalized.length < 2) {
-            emit(emptyList())
-            return@flow
+    override suspend fun geocodeAutocomplete(query: String) = withContext(dispatcher) {
+            val normalized = query.trim()
+            if (normalized.length < 2) {
+                return@withContext NetworkResult.Success(emptyList())
+            }
+
+            runCatching {
+                val response = geoapifyService.api.autocomplete(queryText = normalized)
+                if (Debug.enabled) Log.d("InMemoryRepo", "$response")
+                response.results?.map { it.toCityDomain() } ?: emptyList()
+            }.fold(
+                onSuccess = { cities -> NetworkResult.Success(data = cities) },
+                onFailure = { e -> NetworkResult.Failure(message = "Autocomplete failed: ${e.message}", cause = e.cause) }
+            )
         }
-
-        val response = geoapifyService.api.autocomplete(
-            queryText = normalized
-        )
-        if (Debug.enabled) { Log.d("InMemoryRepo", "$response")}
-
-        emit(response.results?.map { it.toCityDomain() } ?: emptyList())
-    }
-        .flowOn(dispatcher)
-        .catch { emit(emptyList()) }
 
     override suspend fun geocodeForward(query: String): NetworkResult<City?> {
         TODO("Not yet implemented")
