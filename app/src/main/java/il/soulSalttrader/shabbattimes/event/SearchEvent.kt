@@ -3,6 +3,7 @@ package il.soulSalttrader.shabbattimes.event
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.content.Input
+import il.soulSalttrader.shabbattimes.content.Selection
 import il.soulSalttrader.shabbattimes.content.search.SearchMode
 import il.soulSalttrader.shabbattimes.content.search.SearchResultState
 import il.soulSalttrader.shabbattimes.content.search.SearchUiState
@@ -29,19 +30,19 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
         override val reducer = SearchReducer { state ->
             state.copy(
                 query = Input.Idle,
-                selectedSuggestion = null,
+                selectedSuggestion = Selection.Idle,
                 resultState = SearchResultState.Idle,
             )
         }
     }
 
-    data object LoadSuggestions : SearchEvent {
+    data object LoadCities : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(resultState = SearchResultState.Loading)
         }
     }
 
-    data class SuggestionsLoaded(val cities: List<City>) : SearchEvent {
+    data class CitiesLoaded(val cities: List<City>) : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(
                 resultState = when {
@@ -54,7 +55,7 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
         }
     }
 
-    class SuggestionsLoadFailed(val message: String, val cause: Throwable?) : SearchEvent {
+    class CitiesLoadFailed(val message: String, val cause: Throwable?) : SearchEvent {
         override val reducer = SearchReducer { state ->
             if (Debug.enabled) Log.d("ShabbatEvent", "message: $message, cause: $cause")
             state.copy(resultState = SearchResultState.Failure(message, cause))
@@ -65,7 +66,7 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
         override val reducer = SearchReducer { state ->
             state.copy(
                 query = Input.Value(value = city.name),
-                selectedSuggestion = city,
+                selectedSuggestion = Selection.Selected(value = city),
             )
         }
     }
