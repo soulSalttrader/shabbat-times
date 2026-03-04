@@ -11,6 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.content.FailureScreen
 import il.soulSalttrader.shabbattimes.content.LoadingScreen
+import il.soulSalttrader.shabbattimes.content.search.hasQuery
 import il.soulSalttrader.shabbattimes.content.search.isSearchActive
 import il.soulSalttrader.shabbattimes.content.search.suggestionsOrEmpty
 import il.soulSalttrader.shabbattimes.effect.AppEffect
@@ -49,13 +50,14 @@ fun ShabbatScreen() {
         is ShabbatResultState.Results   -> {
             val suggestions = searchUiState.suggestionsOrEmpty()
             val searchActive  = searchUiState.isSearchActive()
+            val hasQuery = searchUiState.hasQuery()
 
             ShabbatContent(
                 halachicTimesDisplay = halachicTimes.data,
                 shabbatDispatch = shabbatViewModel::dispatch,
 
                 suggestions = suggestions,
-                hasQuery = searchUiState.query.isNotEmpty(),
+                hasQuery = hasQuery,
                 searchActive = searchActive,
                 searchDispatch = searchViewModel::dispatch,
             )
