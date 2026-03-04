@@ -3,6 +3,7 @@ package il.soulSalttrader.shabbattimes.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.shabbattimes.content.normalizedOrEmpty
 import il.soulSalttrader.shabbattimes.content.search.SearchUiState
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
@@ -43,7 +44,7 @@ class SearchViewModel @Inject constructor(
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
     private val queryFlow: Flow<String> = _state
-        .map { it.query.trim() }
+        .map { it.query.normalizedOrEmpty() }
         .distinctUntilChanged()
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
