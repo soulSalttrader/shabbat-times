@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.content.normalizedOrEmpty
+import il.soulSalttrader.shabbattimes.content.normalizedOrNull
 import il.soulSalttrader.shabbattimes.content.search.SearchUiState
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
@@ -58,11 +59,11 @@ class SearchViewModel @Inject constructor(
 
                         result
                             .onSuccess(tag = "SearchVM") { suggestions ->
-                                SearchEvent.SuggestionsLoaded(cities = suggestions)
+                                SearchEvent.CitiesLoaded(cities = suggestions)
                                 emit(suggestions)
                             }
                             .onFailure(tag = "SearchVM") { e ->
-                                SearchEvent.SuggestionsLoadFailed(message = e.message, cause = e.cause)
+                                SearchEvent.CitiesLoadFailed(message = e.message, cause = e.cause)
                             }
                     }
                 } ?: flowOf(emptyList())
@@ -79,7 +80,7 @@ class SearchViewModel @Inject constructor(
         _state,
         suggestionsFlow,
     ) { state, suggestions ->
-        SearchEvent.SuggestionsLoaded(suggestions).reducer reduce state
+        SearchEvent.CitiesLoaded(suggestions).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -101,7 +102,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun handleSuggestionSelected(state: SearchUiState) {
-        val city = state.selectedSuggestion ?: return
+        val city = state.selectedSuggestion.normalizedOrNull() ?: return
 
         viewModelScope.launch {
             repository.addCity(city)
