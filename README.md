@@ -66,22 +66,31 @@ fun ShabbatScreen() {
 
     val context = LocalContext.current
 
-    when (shabbatState.data) {
-        is ShabbatDataState.Idle    -> LoadingScreen()
+    when (val halachicTimes = shabbatState.data) {
+        is ShabbatResultState.Idle      -> LoadingScreen()
 
-        is ShabbatDataState.Loading -> LoadingScreen()
+        is ShabbatResultState.Loading   -> LoadingScreen()
 
-        is ShabbatDataState.Success -> ShabbatContent(
-            shabbatState = shabbatState,
-            shabbatDispatch = shabbatViewModel::dispatch,
+        is ShabbatResultState.NoResults -> LoadingScreen()
 
-            searchUiState = searchUiState,
-            searchDispatch = searchViewModel::dispatch,
-        )
+        is ShabbatResultState.Results   -> {
+            val suggestions = searchUiState.suggestionsOrEmpty()
+            val searchActive  = searchUiState.isSearchActive()
 
-        is ShabbatDataState.Failure -> FailureScreen(
-            message = (shabbatState.data as ShabbatDataState.Failure).message,
-            onRetry = { shabbatViewModel.dispatch(ShabbatDataEvent.Load) },
+            ShabbatContent(
+                halachicTimesDisplay = halachicTimes.data,
+                shabbatDispatch = shabbatViewModel::dispatch,
+
+                suggestions = suggestions,
+                hasQuery = searchUiState.query.isNotEmpty(),
+                searchActive = searchActive,
+                searchDispatch = searchViewModel::dispatch,
+            )
+        }
+
+        is ShabbatResultState.Failure   -> FailureScreen(
+            message = halachicTimes.message,
+            onRetry = { shabbatViewModel.dispatch(ShabbatDataEvent.RetryLoadTimes) },
         )
     }
 
@@ -101,27 +110,61 @@ fun ShabbatScreen() {
 
 #### 🔵 2. DI — Dagger Hilt
 
-#### 🔵 3. ViewModel — MVI (and experimental MVVM)
+#### 🔵 3. ViewModel — MVI
 
 - MVI
 
 ```kotlin
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-  private val shabbatRepository: ShabbatRepository,
-  private val cityRepository: CityRepository,
+    private val shabbatRepository: ShabbatRepository,
+    private val cityRepository: CityRepository,
 ) : ViewModel() {
-    private val _state: MutableStateFlow<ShabbatUiState> =
-        MutableStateFlow(value = ShabbatUiState())
-    val state: StateFlow<ShabbatUiState> = _state.asStateFlow()
-
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
-    init {
-        handleEffects()
-        _effects.tryEmit(AppEffect.Shabbat.LoadData)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val halachicTimesFlow: StateFlow<List<HalachicTimesDisplay>> =
+        cityRepository.cities
+            .flatMapLatest { cities ->
+                cities.takeUnless { it.isEmpty() }
+                    ?.let { nonEmptyCities ->
+                        flow {
+                            val results = shabbatRepository.getHalachicTimes(nonEmptyCities)
+
+                            results.forEach { result ->
+                                result
+                                    .onSuccess(tag = "ShabbatVM") { times ->
+                                        dispatch(ShabbatDataEvent.TimesLoaded(listOf(times)))
+                                    }
+                                    .onFailure(tag = "ShabbatVM") { e ->
+                                        dispatch(ShabbatDataEvent.TimesLoadFailed(e.message, e.cause))
+                                    }
+                            }
+                            emit(results.filterIsInstance<NetworkResult.Success<HalachicTimesDisplay>>().map { it.data })
+                        }
+                    } ?: flowOf(emptyList())
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
+
+    private val _state: MutableStateFlow<ShabbatUiState> =
+        MutableStateFlow(value = ShabbatUiState())
+
+    val state: StateFlow<ShabbatUiState> = combine(
+        flow = _state,
+        flow2 = halachicTimesFlow,
+    ) { state, halachicTimes ->
+        ShabbatDataEvent.TimesLoaded(halachicTimes).reducer reduce state
     }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ShabbatUiState(),
+        )
 
     fun dispatch(event: AppEvent) {
         _state.update { current ->
@@ -134,127 +177,8 @@ class ShabbatViewModel @Inject constructor(
         }
 
         when (event) {
-            is ShabbatDataEvent.Load                -> _effects.tryEmit(AppEffect.Shabbat.LoadData)
             is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.Shabbat.OpenAppSettings)
-
             else                                    -> Unit
-        }
-    }
-
-    private fun handleEffects() {
-        viewModelScope.launch {
-            _effects.collect { effect ->
-                when (effect) {
-                    is AppEffect.Shabbat.LoadData   -> {
-                        if (Debug.enabled) Log.d("ShabbatVM", "→ Processing LoadData effect")
-                        loadData()
-                    }
-
-                    is AppEffect.Shabbat.LoadFailed -> {
-                        handleShabbatLoadFailed(effect)
-                        if (Debug.enabled) Log.d(
-                            "ShabbatVM",
-                            "→ Processing LoadFailed: ${effect.error.message}"
-                        )
-                    }
-
-                    else                            -> if (Debug.enabled) Log.w(
-                        "ShabbatVM",
-                        "Unhandled effect: $effect"
-                    )
-                }
-            }
-        }
-    }
-
-    private fun loadData() {
-        if (_state.value.data is ShabbatDataState.Loading) {
-            if (Debug.enabled) Log.d("ShabbatVM", "Load already in progress – skipping")
-            return
-        }
-
-        _state.update { current ->
-            current.copy(data = ShabbatDataState.Loading)
-        }
-
-        viewModelScope.launch {
-            shabbatRepository
-                .getHalachicTimesForCities(cityRepository.cities)
-                .map { it.toLoadedEvent() }
-                .catch { exception ->
-                    if (Debug.enabled) Log.e("ShabbatVM", "Load failed", exception)
-
-                    dispatch(
-                        ShabbatDataEvent.Loaded.Failure(
-                            message = exception.message ?: "Unknown error",
-                            cause = exception
-                        )
-                    )
-                    _effects.tryEmit(AppEffect.Shabbat.LoadFailed(exception))
-                }
-                .collectLatest { event ->
-                    if (Debug.enabled) Log.d("ShabbatVM", "Load success")
-                    dispatch(event)
-                }
-        }
-    }
-// ...
-}
-```
-
-- MVVM
-
-```kotlin
-@HiltViewModel
-class ShabbatViewModelMVVM @Inject constructor(
-    private val repository: ShabbatRepository
-) : ViewModel() {
-    private val _halachicTimes = MutableStateFlow(HalachicTimesDisplay())
-    val halachicTimes: StateFlow<HalachicTimesDisplay> = _halachicTimes.asStateFlow()
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
-
-    private val debounceJob = SupervisorJob()
-
-    init { refresh() }
-
-    fun retry() {
-        debounceJob.cancelChildren()
-        viewModelScope.launch(debounceJob) {
-            delay(300)
-            refresh()
-        }
-    }
-
-    private fun refresh() {
-        if (_isLoading.value) {
-            if (Debug.enabled) Log.d("ShabbatMVVM", "Refresh already in progress – skipping duplicate call")
-            return
-        }
-
-        viewModelScope.launch {
-            _isLoading.value = true
-            _errorMessage.value = null
-
-            runCatching {
-                repository.getHalachicTimes()
-            }.fold(
-                onSuccess = { result ->
-                    if (Debug.enabled) Log.d("ShabbatMVVM", "Load success")
-                    _halachicTimes.value = (result as NetworkResult.Success).data
-                },
-                onFailure = { exception ->
-                    val msg = exception.message ?: "Failed to load Halachic times"
-                    if (Debug.enabled) Log.e("ShabbatMVVM", msg, exception)
-                    _errorMessage.value = msg
-                }
-            )
-
-            _isLoading.value = false
         }
     }
 }
@@ -284,7 +208,7 @@ class ShabbatViewModelMVVM @Inject constructor(
 interface ShabbatRepository {
     suspend fun getSolarTimes(date: LocalDate, city: City): NetworkResult<SolarTimes>
     suspend fun getHalachicTimes(city: City): NetworkResult<HalachicTimesDisplay>
-    suspend fun getHalachicTimesForCities(cities: Flow<List<City>>): Flow<List<NetworkResult<HalachicTimesDisplay>>>
+    suspend fun getHalachicTimes(cities: List<City>): List<NetworkResult<HalachicTimesDisplay>>
 }
 ```
 
@@ -293,9 +217,9 @@ interface CityRepository {
     val cities: Flow<List<City>>
     suspend fun addCity(city: City)
 
-    suspend fun geocodeAutocomplete(query: String): Flow<List<City>>
-    suspend fun geocodeForward(query: String): Flow<City?>
-    suspend fun geocodeReverse(latitude: Double, longitude: Double): City?
+    suspend fun geocodeAutocomplete(query: String): NetworkResult<List<City>>
+    suspend fun geocodeForward(query: String): NetworkResult<City?>
+    suspend fun geocodeReverse(latitude: Double, longitude: Double): NetworkResult<City?>
 }
 ```
 
@@ -336,16 +260,16 @@ suspend fun getSolarTimes(
 
 ```kotlin
     @GET("autocomplete")
-    suspend fun autocomplete(
-        @Query("text") queryText: String,
-        @Query("filter") countryFilter: String? = null,
-        @Query("type") resultType: String? = "city",
+suspend fun autocomplete(
+    @Query("text") queryText: String,
+    @Query("filter") countryFilter: String? = null,
+    @Query("type") resultType: String? = "city",
 
-        @Query("limit") maxResults: Int = 5,
-        @Query("lang") preferredLanguage: String = Locale.getDefault().language,
-        @Query("format") format: String = "json",
-        @Query("apiKey") apiKey: String = BuildConfig.GEOAPIFY_API_KEY,
-    ): GeoapifyResponseDto
+    @Query("limit") maxResults: Int = 5,
+    @Query("lang") preferredLanguage: String = Locale.getDefault().language,
+    @Query("format") format: String = "json",
+    @Query("apiKey") apiKey: String = BuildConfig.GEOAPIFY_API_KEY,
+): GeoapifyResponseDto
 ```
 
 #### 🟢 3. DTO and domain mapping:
@@ -372,12 +296,9 @@ data class GeoapifyResponseDto(
 
 @Serializable
 data class GeoapifyResultDto(
-  // ────────────────────────────────────────────────
-  // Core location
-  // ────────────────────────────────────────────────
-  @SerialName("lat")          val latitude: Double? = null,
-  @SerialName("lon")          val longitude: Double? = null,
-  val timezone: GeoapifyTimezone? = null,
+    @SerialName("lat") val latitude: Double? = null,
+    @SerialName("lon") val longitude: Double? = null,
+    val timezone: GeoapifyTimezone? = null,
 // ...
 )
 ```
@@ -479,13 +400,14 @@ fun LocalDate.toDisplayString(): String
 #### 🟠 1. The app currently includes:
 
 - Initial Shabbat screen with:
-    - hardcoded Jerusalem location
-    - candle lighting date & time
+    - Hardcoded Jerusalem location
+    - Candle lighting date & time
     - Havdalah date & time
     - Fully functional REST API integration
     - Domain-accurate halachic time calculations
     - Strong type-safety with Kotlin time models
     - First stable working implementation
+    - City Autocomplete search
 
 ### 🔜 Future Work
 
@@ -529,24 +451,48 @@ confusion (e.g., "Event" instead of "Intent").
 ### Pure MVI Cycle (Concise)
 
 ```kotlin
-UI → dispatch(Event)
-→ pure state reduction → new AppState
-→ (optional) emit AppEffect
-→ effect collector handles imperative work
-→ may dispatch new Events
-→ UI updates
+cityRepository.cities → halachicTimesFlow
+→ repository called reactively
+→ results mapped to Events (TimesLoaded / TimesLoadFailed)
+→ combined with _state → new ShabbatUiState
+→ UI observes StateFlow → renders automatically
 ```
 
 ### Step-by-Step
 
 1. User Interaction
 
-- The UI calls viewModel.dispatch(event) with an AppEvent (e.g. PermissionEvent.Request)).
+- UI calls viewModel.dispatch(event) (e.g. RetryLoadTimes)
 
 2. Pure State Reduction
 
-- The event, being Reducible&lt;S&gt;, carries its own pure reducer.
-- The ViewModel applies it to the relevant sub-state and updates the immutable
+- The event’s reducer produces a new immutable UiState
+- The ViewModel updates its internal StateFlow
+
+3. Reactive Triggers
+
+- One or more Flows (combine, flatMapLatest, etc.) observe relevant parts of the state
+- These Flows automatically react to the new state
+
+4. Asynchronous Work
+
+- Repository calls are triggered reactively inside Flows
+- Results are mapped to domain/UI models
+
+
+- halachicTimesFlow observes cityRepository.cities.
+- For each new list of cities, the repository is called automatically.
+- Success/failure results are dispatched to _state via events (TimesLoaded, TimesLoadFailed).
+- The final state is a combination of _state + halachicTimesFlow.
+- UI observes state directly — no explicit effect collection coroutine is required.
+
+5. State Feedback
+
+- Repository results are transformed into new Events (e.g. TimesLoaded, TimesLoadFailed)
+- Reducers update the state again
+
+6. UI Update
+- Compose observes the new state and recomposes automatically
 
   ```kotlin
   fun dispatch(event: AppEvent) {
@@ -555,50 +501,26 @@ UI → dispatch(Event)
                 is ShabbatDataEvent -> event.reducer reduce current
                 is PermissionEvent  -> event.reducer reduce current
                 is LocationEvent    -> event.reducer reduce current
+                else                -> current
             }
+        }
+
+        when (event) {
+            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.Shabbat.OpenAppSettings)
+            else                                    -> Unit
         }
   }
   ```
-
-- The UI automatically recomposes with the new state.
-
-3. Side Effects (If Needed)
-
-- If the state transition requires real-world work (network request, navigation, toast, etc.), the ViewModel emits an AppEffect:
-
-   ```kotlin
-   _effects.tryEmit(AppEffect.Shabbat.OpenAppSettings)
-   ```
-
-4. Imperative Work
-
-- A single coroutine (launched once in init) collects all effects and executes the necessary
-  actions:
-
-  ```kotlin
-  effects.collect { effect -> 
-      when (effect) {
-          AppEffect.Shabbat.LoadData -> loadShabbatData() 
-      // ... 
-      } 
-  }
-  ```
-
-5. Feedback Loop
-
-- These actions may dispatch new events (e.g. ShabbatEvent.Loaded.Success / Failure), which restart the cycle.
 
 ### In Plain English
 
 - The user does something → an Event is created and sent to the ViewModel.
 - The Event knows exactly how to calculate the new State (pure, no side effects).
 - The ViewModel updates the State → the UI refreshes automatically.
-- If something “real” needs to happen (load data, show a toast), the ViewModel sends
-  an Effect.
+- If something “real” needs to happen (load data, show a toast), the ViewModel sends an Effect.
 - One permanent listener in the ViewModel catches all Effects and performs the actual work.
 - That work can create new Events, keeping everything flowing in one direction.
-- This unidirectional, pure MVI flow ensures predictability, testability, and easy reasoning about
-  application behavior.
+- This unidirectional, pure MVI flow ensures predictability, testability, and easy reasoning about application behavior.
 
 ### MVI Terminology Mapping
 
@@ -616,27 +538,51 @@ UI → dispatch(Event)
 
 - `Events` are declarative: "I want to load Shabbat times", "Start breathing".
     - They only describe intent and how the state should change.
-- `Effects` are imperative: "Actually perform the network request", "Start the breathing loop".
-    - They are executed outside the pure reducer, keeping state transitions predictable and
-      testable.
+- `Effects` are reactive:
+    - Async work (network, disk, permissions) is triggered by observing state or repository flows
+    - This work lives in Flows (flatMapLatest, combine, etc.), not inside reducers
 
 ### Benefits
 
-- This unidirectional, pure MVI flow ensures predictability, testability, and easy reasoning about
-  application behavior.
-- Pure reducers → easy unit testing (just input event → expected state)
-- All side effects centralized in one collector → consistent error handling, logging, retry
-- Clear responsibilities → UI stays dumb, ViewModel stays focused on orchestration
-- Scalable → new async flows (e.g., analytics, push notifications) follow the same pattern
+- Unidirectional data flow ensures predictability and traceability
+- Pure reducers → easy unit testing (event → state)
+- Side effects are driven by state, not by imperative commands
+- Async work is lifecycle-aware and cancelable by default
+- No hidden behavior: everything reacts to explicit state changes
+- Scales naturally as new Flows are added (data, permissions, location, analytics)
 
 ### Example: Shabbat loading
 
-1. UI or init → `dispatch(ShabbatEvent.Load)`
-2. Reducer → `ShabbatUiState.Loading`
-3. ViewModel emits `AppEffect.Shabbat.LoadData`
-4. Effect collector → calls repository → dispatches `ShabbatEvent.Loaded.Success/Failure`
-5. Reducer → `ShabbatUiState.Success` or `Failure`
-6. UI updates automatically
+1. ViewModel observes cities (cityRepository.cities) as a Flow.
+2. For each change in cities, halachicTimesFlow triggers:
+   - If cities are empty → emits emptyList().
+   - If cities are present → calls shabbatRepository.getHalachicTimes(cities).
+   - Maps each result to a NetworkResult and dispatches TimesLoaded or TimesLoadFailed events to _state.
+3. halachicTimesFlow emits a list of successful HalachicTimesDisplay.
+4. State is derived by combining _state + halachicTimesFlow:
+
+```kotlin
+val state: StateFlow<ShabbatUiState> = combine(
+        flow = _state,
+        flow2 = halachicTimesFlow,
+    ) { state, halachicTimes ->
+        ShabbatDataEvent.TimesLoaded(halachicTimes).reducer reduce state
+    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ShabbatUiState(),
+        )
+```
+
+- This means the final ShabbatUiState always contains the latest halachic times, automatically updated when either _state or halachicTimesFlow changes.
+
+5. UI observes state with collectAsStateWithLifecycle() and updates automatically — no explicit effect collector needed.
+
+Notes:
+- No explicit “LoadData” effect is required.
+- The state is fully reactive: adding/removing cities automatically triggers new repository calls and UI updates.
+- Failures are propagated via the same reactive flow and can be handled in the UI.
 
 ---
 
@@ -1233,11 +1179,444 @@ fun HandlePermissions(
 
 - dispatch(event):
     - Updates _state using the event's reducer (for data, permission, or location events).
-    - Emits effects for side actions (e.g., load data or open settings).
+    - Emits effects for side actions (e.g., open settings).
 
 - This centralizes state updates and effects.
-- See: [3. ViewModel — MVI (and experimental MVVM)](#-3-viewmodel--mvi-and-experimental-mvvm) 
+- See: [3. ViewModel — MVI (and experimental MVVM)](#-3-viewmodel--mvi-and-experimental-mvvm)
 
 ---
 
 ## 5. 🔍︎ Search Architecture
+
+The app features a modular and reusable search implementation built with Jetpack Compose,
+designed for easy integration and customization. The primary use case is city searching,
+but the components are structured to be adaptable for other search functionalities.
+
+### Key Features
+
+- Reusable Components: The search bar is broken down into generic, reusable composables (SearchBarInputField) that can be specialized for specific use cases (CitySearchBarInputField).
+- State-Driven UI: The search bar's appearance and behavior (e.g., expanded state, clear button visibility) are driven by a central UI state.
+- Clean Architecture: Follows a clean pattern where UI components are stateless and receive state and event handlers from a ViewModel or screen-level composable.
+- Helper Functions: Logic for complex interactions, like the trailing icon's dual-purpose click handling, is encapsulated in small, testable helper functions.
+
+### Core Components
+
+| Component               | Role                                                                                                                                                            | Type       |
+|-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| SearchBarInputField     | A generic, private composable that wraps SearchBarDefaults.InputField and provides a standard setup for text state, expansion, and search actions.              | Composable | 
+| CitySearchBarInputField | A specialized, public composable that configures SearchBarInputField with specific defaults for city searching (placeholder text, icons, etc.).                 | Composable | 
+| CitySearchScreen        | The main screen composable that orchestrates the search UI, manages state, and handles user events.                                                             | Composable |
+| onTrailingIconClick     | A private helper function that determines the action for the trailing icon: clear the query if it exists, or toggle the search bar's expansion state otherwise. | Function   |
+
+### High-Level Flow
+
+1. The CitySearchScreen composable holds the search UI state (SearchUiState) and an event dispatcher.
+2. It renders the CitySearchBarInputField, passing the current state (query, expanded status) and event handlers (onSearch, onClear, onExpandedChange).
+3. CitySearchBarInputField is pre-configured with a leading search icon and a trailing icon.
+4. The trailing icon's onClick is wired to the onTrailingIconClick helper.
+    - If the user types a query, hasQuery becomes true, and clicking the icon calls onClear().
+    - If the query is empty, clicking the icon calls onExpandedChange().
+5. All user actions are dispatched as events, which a ViewModel processes to update the state, triggering a recomposition of the UI.
+
+### Structured Components
+
+#### 🔵 1. SearchBarInputField
+
+A foundational, private composable that provides a standardized implementation of a search input
+field. It abstracts away the boilerplate of SearchBarDefaults.InputField.
+
+- Purpose: To create a reusable and configurable search input without exposing the underlying Material 3 implementation details.
+- Key Parameters: state, expanded, onSearch, onExpandedChange, placeholder, leadingIcon, trailingIcon.
+
+```kotlin
+@Composable
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
+private fun SearchBarInputField(
+    state: TextFieldState,
+    expanded: Boolean,
+    onSearch: (String) -> Unit,
+    onExpandedChange: (Boolean) -> Unit,
+
+    modifier: Modifier = Modifier,
+    placeholder: @Composable (() -> Unit)?,
+    leadingIcon: @Composable (() -> Unit)?,
+    trailingIcon: @Composable (() -> Unit)?,
+    shape: Shape = RoundedCornerShape(16.dp),
+) {
+    SearchBarDefaults.InputField(
+        state = state,
+        expanded = expanded,
+        onSearch = { onSearch(state.text.toString()) },
+        onExpandedChange = { onExpandedChange(!expanded) },
+        modifier = modifier.fillMaxWidth(),
+        placeholder = placeholder,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        shape = shape,
+    )
+}
+```
+
+#### 🔵 2. CitySearchBarInputField
+
+A public-facing, specialized composable that builds upon SearchBarInputField to create a search bar
+specifically for city lookups.
+
+- Purpose: To provide a ready-to-use component for city search, complete with appropriate icons and placeholder text. It simplifies integration into different screens.
+- Behavior: It wires the generic SearchBarInputField with default composables for the placeholder, leadingIcon, and trailingIcon, including the onTrailingIconClick logic.
+
+```kotlin
+@Composable
+fun CitySearchBarInputField(
+    state: TextFieldState,
+    hasQuery: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    expanded: Boolean,
+    onSearch: (String) -> Unit,
+    onClear: () -> Unit,
+    // ...
+) {
+    SearchBarInputField(
+        state = state,
+        expanded = expanded,
+        onSearch = onSearch,
+        onExpandedChange = onExpandedChange,
+        placeholder = placeholder,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+    )
+}
+```
+
+#### 🔵 3. Integration in CitySearchScreen
+
+The CitySearchScreen acts as the container that brings all the pieces together. It is responsible for state management and event handling.
+
+- Role: Holds and observes the SearchUiState from a ViewModel.
+- Provides the concrete implementations for onSearch, onClear, and onExpandedChange by dispatching events.
+- Integrates CitySearchBarInputField and the upcoming CitySearchSuggestionPanel.
+
+```kotlin
+fun CitySearchScreen(
+    hasQuery: Boolean,
+    suggestions: List<City>,
+    searchDispatch: (AppEvent) -> Unit,
+    expanded: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    //...
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        shape = RoundedCornerShape(20.dp),
+        tonalElevation = 6.dp
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            CitySearchBarInputField(
+                state = state,
+                hasQuery = hasQuery,
+                expanded = expanded,
+                onExpandedChange = { expanded ->
+                    searchDispatch(
+                        SearchEvent.SearchVisibilityChanged(expanded = !expanded)
+                    )
+                },
+                onSearch = { query ->
+                    searchDispatch(SearchEvent.QueryChanged(newQuery = query))
+                    searchDispatch(SearchEvent.SearchCommitted)
+                },
+                onClear = {
+                    searchDispatch(SearchEvent.QueryCleared)
+                    state.clearText()
+                },
+            )
+
+            CitySearchSuggestionPanel(
+                query = state.text.toString(),
+                expanded = expanded,
+                suggestions = suggestions,
+                onSuggestionSelected = { suggestion ->
+                    searchDispatch(SearchEvent.SuggestionSelected(suggestion))
+                    state.setTextAndPlaceCursorAtEnd(suggestion.name)
+                },
+            )
+        }
+    }
+}
+```
+
+#### 🔵 4. onTrailingIconClick Helper
+
+A private function that encapsulates the logic for the trailing icon's click behavior, promoting
+code clarity and reuse.
+
+- Purpose: To decide whether to clear the search text or collapse the search bar based on the current query state.
+- Key Parameters: hasQuery, onClear, onExpandedChange, expanded.
+
+```kotlin
+private fun onTrailingIconClick(
+    hasQuery: Boolean,
+    onClear: () -> Unit,
+    onExpandedChange: (Boolean) -> Unit,
+    expanded: Boolean,
+) = {
+    when {
+        hasQuery -> onClear()
+        else     -> onExpandedChange(expanded)
+    }
+}
+```
+
+## 5.1 🧠 Search State Management (SearchViewModel)
+
+### The SearchViewModel
+
+- Is the architectural component responsible for managing the state and business logic of the search feature. It connects the user's interactions in the CitySearchScreen with the data layer (InMemoryCityRepository) and exposes a reactive UI state.
+
+### Key Responsibilities
+
+- State Exposure: Exposes a SearchUiState StateFlow that the UI observes for recomposition.
+- Event Handling: Provides a searchDispatch function to receive and process events from the UI, such as text input, search execution, and clearing the query.
+- Business Logic: Contains the core logic for fetching autocomplete suggestions, debouncing user input to prevent excessive network calls, and updating the UI state accordingly.
+- Asynchronous Operations: Manages coroutines for network requests, ensuring they are launched on the correct dispatcher (IO) and are lifecycle-aware via viewModelScope.Core Components|
+
+| Component      | Role                                                                                                                                                             | Type             |
+|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|
+| SearchUiState  | A data class that represents the entire state of the search screen at any given moment, including the query, search results, loading status, and expanded state. | Data Class       |
+| SearchEvent    | A sealed interface defining all possible user actions that can be dispatched from the UI to the ViewModel (e.g., QueryChanged, SearchTriggered, Clear, ...).     | Sealed Interface |
+| searchDispatch | The single public function on the ViewModel that the UI calls to send SearchEvents for processing.                                                               | Function         | 
+| debounce       | A Flow operator used within the ViewModel to delay processing of the QueryChanged event, preventing a network request for every keystroke.                       | Coroutine Flow   |
+
+#### SearchUiState
+
+```kotlin
+data class SearchUiState(
+    val query: Input<String> = Input.Idle,
+    val selectedSuggestion: Selection<City?> = Selection.Idle,
+    val resultState: SearchResultState = SearchResultState.Idle,
+    val visibility: SearchVisibility = SearchVisibility.Collapsed,
+    val searchMode: SearchMode = SearchMode.Autocomplete,
+) : State
+```
+
+#### SearchEvent
+
+```kotlin
+sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
+    data class QueryChanged(val newQuery: String) : SearchEvent {
+        override val reducer = SearchReducer { state ->
+            state.copy(
+                query = newQuery,
+                resultState =
+                    when (newQuery.trim().length >= 2) {
+                        true -> SearchResultState.Loading
+                        else -> SearchResultState.Idle
+                    }
+            )
+        }
+    }
+
+    data object QueryCleared : SearchEvent {
+        override val reducer = SearchReducer { state ->
+            state.copy(
+                query = "",
+                selectedSuggestion = null,
+                resultState = SearchResultState.Idle,
+            )
+        }
+    }
+
+    data class SuggestionsLoaded(val cities: List<City>) : SearchEvent {
+        override val reducer = SearchReducer { state ->
+            state.copy(
+                resultState = when {
+                    state.query.isBlank() -> SearchResultState.Idle
+                    cities.isEmpty()      -> SearchResultState.NoResults
+                    else                  -> SearchResultState.Results(cities)
+                }
+            )
+        }
+    }
+//    ...
+}
+```
+
+#### searchDispatch
+
+```kotlin
+fun dispatch(event: AppEvent) {
+        val newState = _state.updateAndGet { current ->
+            when (event) {
+                is SearchEvent -> event.reducer reduce current
+                else -> current
+            }
+        }
+
+        when (event) {
+            is SearchEvent.SuggestionSelected -> handleSuggestionSelected(newState)
+            else -> Unit
+        }
+}
+```
+
+### High-Level Flow
+
+1. The CitySearchScreen collects the searchUiState StateFlow from the SearchViewModel. 
+2. A user types in the CitySearchBarInputField. For each character change, the UI calls searchDispatch(SearchEvent.QueryChanged(newText)).
+3. Inside the ViewModel, the debounce operator waits for a quiet period (e.g., 500ms) before processing the latest query.
+4. Once the debounce period passes, the ViewModel calls repository.geocodeAutocomplete(query).
+5. While the request is in flight, the ViewModel updates searchUiState to set isLoading = true.
+6. When the Flow from the repository emits the list of city suggestions, the ViewModel updates searchUiState with the new results and sets isLoading = false.
+7. The UI, observing the state change, automatically recomposes to display the suggestions in the CitySearchSuggestionPanel.
+8. If the user taps the "clear" icon, the UI calls searchDispatch(SearchEvent.Clear), and the ViewModel resets the query and suggestions in the state.
+
+### Code Structure
+
+```kotlin
+@HiltViewModel
+class SearchViewModel @Inject constructor(
+  private val repository: CityRepository,
+) : ViewModel() {
+    private val _state: MutableStateFlow<SearchUiState> = MutableStateFlow(value = SearchUiState())
+    
+    private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
+    val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
+    
+    private val queryFlow: Flow<String> = _state
+        .map { it.query.trim() }
+        .distinctUntilChanged()
+    
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    private val suggestionsFlow: StateFlow<List<City>> = queryFlow
+        .debounce(300)
+        .flatMapLatest { query ->
+          when {
+              query.length < 2 -> flowOf(emptyList())
+              else -> repository.geocodeAutocomplete(query)
+          }
+        }
+        .catch { emit(emptyList()) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
+    
+    val state: StateFlow<SearchUiState> = combine(
+        _state,
+        suggestionsFlow,
+    ) { state, suggestions ->
+        SearchEvent.SuggestionsLoaded(suggestions).reducer reduce state
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = SearchUiState()
+    )
+    
+    fun dispatch(event: AppEvent) {
+        val newState = _state.updateAndGet { current ->
+            when (event) {
+                is SearchEvent -> event.reducer reduce current
+                else -> current
+            }
+        }
+    
+        when (event) {
+            is SearchEvent.SuggestionSelected -> handleSuggestionSelected(newState)
+            else -> Unit
+        }
+    }
+    
+    private fun handleSuggestionSelected(state: SearchUiState) {
+        val city = state.selectedSuggestion ?: return
+    
+        viewModelScope.launch { 
+            repository.addCity(city)
+        }
+    }
+}
+```
+
+### 5.2 💾 Data Layer (InMemoryCityRepository)
+
+The InMemoryCityRepository is the default implementation of the CityRepository interface. It acts as
+the single source of truth for city data, handling both the persistence of selected cities and
+communication with the external Geoapify API for geocoding services.
+
+#### Key Responsibilities
+
+- Data Storage: Maintains an in-memory StateFlow<List<City>> that holds the list of cities the user has added. This list is initialized with a seed value (JERUSALEM).
+- API Abstraction: Abstracts the details of making network calls to the Geoapify service. The ViewModel interacts with the repository, not directly with Retrofit.
+- Autocomplete Logic: Implements the geocodeAutocomplete function, which takes a search query, validates it, calls the autocomplete API, and maps the DTOs (Data Transfer Objects) to the City domain model.
+- Error Handling: Includes a .catch block on the Flow to gracefully handle network errors, emitting an empty list to prevent the app from crashing.
+- Concurrency: Uses a provided CoroutineDispatcher (typically Dispatchers.IO) via flowOn to ensure that network operations are performed off the main thread.
+
+#### Core Components
+
+| Component           | Role                                                                                                                                           | Type                  |
+|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
+| cities / cities     | A MutableStateFlow and its public StateFlow counterpart that hold the current list of saved cities, providing a reactive stream for observers. | StateFlow<List<City>> | 
+| geoapifyService     | The Retrofit service class used to make API calls to Geoapify. It's injected via Hilt.                                                         | Retrofit Service      | 
+| dispatcher          | The CoroutineDispatcher used to specify the execution context for the flow (e.g., Dispatchers.IO).                                             | CoroutineDispatcher   |
+| geocodeAutocomplete | The primary function for fetching search suggestions. It returns a Flow<List<City>>.                                                           | suspend fun           |
+
+#### High-Level Flow
+
+1. The user types into the search field.
+2. SearchUiState.query changes and is emitted via queryFlow.
+3. queryFlow is debounced and filtered in the ViewModel.
+4. When the query is valid, the ViewModel calls CityRepository.geocodeAutocomplete(query).
+5. The repository:
+   - Normalizes the query.
+   - Short-circuits if the query is too short.
+   - Performs the network call on the injected dispatcher.
+   - Maps API DTOs to City domain models.
+   - Returns a NetworkResult<List<City>>.
+6. The ViewModel maps the NetworkResult to UI events (SuggestionsLoaded, Failure, etc.).
+7. Reducers update SearchUiState.resultState.
+8. UI observes StateFlow<SearchUiState> and re-renders automatically.
+
+#### Code Structure
+
+```kotlin
+@Singleton
+class InMemoryCityRepository @Inject constructor(
+    private val geoapifyService: GeoapifyService,
+    private val dispatcher: CoroutineDispatcher,
+) : CityRepository {
+    private val _cities: MutableStateFlow<List<City>> = MutableStateFlow(listOf(JERUSALEM))
+    override val cities: StateFlow<List<City>> = _cities
+
+    override suspend fun addCity(city: City) {
+        _cities.update { current ->
+            if (current.any { it.id == city.id }) current
+            else current + city
+        }
+    }
+
+    override suspend fun geocodeAutocomplete(query: String) = withContext(dispatcher) {
+        val normalized = query.trim()
+        if (normalized.length < 2) {
+            return@withContext NetworkResult.Success(emptyList())
+        }
+
+        runCatching {
+            val response = geoapifyService.api.autocomplete(queryText = normalized)
+            if (Debug.enabled) Log.d("InMemoryRepo", "$response")
+            response.results?.map { it.toCityDomain() } ?: emptyList()
+        }.fold(
+            onSuccess = { cities -> NetworkResult.Success(data = cities) },
+            onFailure = { e ->
+                NetworkResult.Failure(
+                    message = "Autocomplete failed: ${e.message}",
+                    cause = e.cause
+                )
+            }
+        )
+    }
+}
+```
