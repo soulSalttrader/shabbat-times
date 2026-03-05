@@ -76,13 +76,14 @@ fun ShabbatScreen() {
         is ShabbatResultState.Results   -> {
             val suggestions = searchUiState.suggestionsOrEmpty()
             val searchActive  = searchUiState.isSearchActive()
+            val hasQuery = searchUiState.hasQuery()
 
             ShabbatContent(
                 halachicTimesDisplay = halachicTimes.data,
                 shabbatDispatch = shabbatViewModel::dispatch,
 
                 suggestions = suggestions,
-                hasQuery = searchUiState.query.isNotEmpty(),
+                hasQuery = hasQuery,
                 searchActive = searchActive,
                 searchDispatch = searchViewModel::dispatch,
             )
@@ -1479,25 +1480,37 @@ fun dispatch(event: AppEvent) {
 ```kotlin
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-  private val repository: CityRepository,
+    private val repository: CityRepository,
 ) : ViewModel() {
     private val _state: MutableStateFlow<SearchUiState> = MutableStateFlow(value = SearchUiState())
-    
+
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
-    
+
     private val queryFlow: Flow<String> = _state
-        .map { it.query.trim() }
+        .map { it.query.normalizedOrEmpty() }
         .distinctUntilChanged()
-    
+
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     private val suggestionsFlow: StateFlow<List<City>> = queryFlow
         .debounce(300)
         .flatMapLatest { query ->
-          when {
-              query.length < 2 -> flowOf(emptyList())
-              else -> repository.geocodeAutocomplete(query)
-          }
+            query.takeUnless { it.isEmpty() }
+                ?.let { nonEmptyQuery ->
+                    flow {
+                        val result = repository.geocodeAutocomplete(nonEmptyQuery)
+
+                        result
+                            .onSuccess(tag = "SearchVM") { suggestions ->
+                                SearchEvent.CitiesLoaded(cities = suggestions)
+                                emit(suggestions)
+                            }
+                            .onFailure(tag = "SearchVM") { e ->
+                                SearchEvent.CitiesLoadFailed(message = e.message, cause = e.cause)
+                            }
+                    }
+                } ?: flowOf(emptyList())
+
         }
         .catch { emit(emptyList()) }
         .stateIn(
@@ -1505,18 +1518,18 @@ class SearchViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList(),
         )
-    
+
     val state: StateFlow<SearchUiState> = combine(
         _state,
         suggestionsFlow,
     ) { state, suggestions ->
-        SearchEvent.SuggestionsLoaded(suggestions).reducer reduce state
+        SearchEvent.CitiesLoaded(suggestions).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = SearchUiState()
     )
-    
+
     fun dispatch(event: AppEvent) {
         val newState = _state.updateAndGet { current ->
             when (event) {
@@ -1524,17 +1537,17 @@ class SearchViewModel @Inject constructor(
                 else -> current
             }
         }
-    
+
         when (event) {
             is SearchEvent.SuggestionSelected -> handleSuggestionSelected(newState)
             else -> Unit
         }
     }
-    
+
     private fun handleSuggestionSelected(state: SearchUiState) {
-        val city = state.selectedSuggestion ?: return
-    
-        viewModelScope.launch { 
+        val city = state.selectedSuggestion.normalizedOrNull() ?: return
+
+        viewModelScope.launch {
             repository.addCity(city)
         }
     }
