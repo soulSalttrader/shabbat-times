@@ -59,17 +59,18 @@ class SearchViewModel @Inject constructor(
 
                         result
                             .onSuccess(tag = "SearchVM") { suggestions ->
-                                SearchEvent.CitiesLoaded(cities = suggestions)
                                 emit(suggestions)
                             }
-                            .onFailure(tag = "SearchVM") { e ->
-                                SearchEvent.CitiesLoadFailed(message = e.message, cause = e.cause)
+                            .onFailure(tag = "SearchVM") {
+                                e -> _effects.tryEmit(AppEffect.ShowToast(message = "Network failed"))
                             }
                     }
                 } ?: flowOf(emptyList())
-
         }
-        .catch { emit(emptyList()) }
+        .catch {throwable ->
+            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+            emit(emptyList())
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
