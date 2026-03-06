@@ -46,6 +46,7 @@ The app is built using modern Android architecture principles and libraries:
 #### 🔵 1. UI — Jetpack Compose
 
 - Example:
+
 ```kotlin
 @Composable
 fun ShabbatScreen() {
@@ -75,7 +76,7 @@ fun ShabbatScreen() {
 
         is ShabbatResultState.Results   -> {
             val suggestions = searchUiState.suggestionsOrEmpty()
-            val searchActive  = searchUiState.isSearchActive()
+            val searchActive = searchUiState.isSearchActive()
             val hasQuery = searchUiState.hasQuery()
 
             ShabbatContent(
@@ -95,13 +96,27 @@ fun ShabbatScreen() {
         )
     }
 
-    LaunchedEffect(shabbatState.permission) {
-        if (Debug.enabled) { Log.d("ShabbatScreen", "$shabbatState") }
-        shabbatViewModel.effects.collect { effect ->
-            if (Debug.enabled) { Log.d("ShabbatScreen", "$effect") }
-
+    LaunchedEffect(Unit) {
+        searchViewModel.effects.collect { effect ->
             when (effect) {
-                is AppEffect.Shabbat.OpenAppSettings -> context.openAppSettings()
+                is AppEffect.ShowToast -> {
+                    if (Debug.enabled) { Log.d("ShabbatScreen", "Toast: $effect ${effect.message}") }
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
+
+                else -> Unit
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        shabbatViewModel.effects.collect { effect ->
+            when (effect) {
+                is AppEffect.OpenAppSettings -> {
+                    if (Debug.enabled) { Log.d("ShabbatScreen", "OpenAppSettings: $shabbatState") }
+                    context.openAppSettings()
+                }
+
                 else -> Unit
             }
         }
@@ -132,19 +147,24 @@ class ShabbatViewModel @Inject constructor(
                     ?.let { nonEmptyCities ->
                         flow {
                             val results = shabbatRepository.getHalachicTimes(nonEmptyCities)
+                            val successes = mutableListOf<HalachicTimesDisplay>()
 
                             results.forEach { result ->
                                 result
-                                    .onSuccess(tag = "ShabbatVM") { times ->
-                                        dispatch(ShabbatDataEvent.TimesLoaded(listOf(times)))
+                                    .onSuccess(tag = "ShabbatVM") { halachicTimesDisplay ->
+                                        successes.add(halachicTimesDisplay)
                                     }
                                     .onFailure(tag = "ShabbatVM") { e ->
-                                        dispatch(ShabbatDataEvent.TimesLoadFailed(e.message, e.cause))
+                                        _effects.tryEmit(value = AppEffect.ShowToast(message = "Network failed"))
                                     }
                             }
-                            emit(results.filterIsInstance<NetworkResult.Success<HalachicTimesDisplay>>().map { it.data })
+                            emit(value = successes)
                         }
                     } ?: flowOf(emptyList())
+            }
+            .catch {throwable ->
+                _effects.tryEmit(value = AppEffect.ShowToast(message = "Unexpected error: ${throwable.message}"))
+                emit(value = emptyList())
             }
             .stateIn(
                 scope = viewModelScope,
@@ -178,7 +198,7 @@ class ShabbatViewModel @Inject constructor(
         }
 
         when (event) {
-            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.Shabbat.OpenAppSettings)
+            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
             else                                    -> Unit
         }
     }
@@ -507,7 +527,7 @@ cityRepository.cities → halachicTimesFlow
         }
 
         when (event) {
-            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.Shabbat.OpenAppSettings)
+            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
             else                                    -> Unit
         }
   }
@@ -1502,17 +1522,18 @@ class SearchViewModel @Inject constructor(
 
                         result
                             .onSuccess(tag = "SearchVM") { suggestions ->
-                                SearchEvent.CitiesLoaded(cities = suggestions)
                                 emit(suggestions)
                             }
-                            .onFailure(tag = "SearchVM") { e ->
-                                SearchEvent.CitiesLoadFailed(message = e.message, cause = e.cause)
+                            .onFailure(tag = "SearchVM") {
+                                e -> _effects.tryEmit(AppEffect.ShowToast(message = "Network failed"))
                             }
                     }
                 } ?: flowOf(emptyList())
-
         }
-        .catch { emit(emptyList()) }
+        .catch {throwable ->
+            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+            emit(emptyList())
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
