@@ -10,7 +10,6 @@ import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.CityRepository
@@ -23,6 +22,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -46,19 +46,24 @@ class ShabbatViewModel @Inject constructor(
                     ?.let { nonEmptyCities ->
                         flow {
                             val results = shabbatRepository.getHalachicTimes(nonEmptyCities)
+                            val successes = mutableListOf<HalachicTimesDisplay>()
 
                             results.forEach { result ->
                                 result
-                                    .onSuccess(tag = "ShabbatVM") { times ->
-                                        dispatch(ShabbatDataEvent.TimesLoaded(listOf(times)))
+                                    .onSuccess(tag = "ShabbatVM") { halachicTimesDisplay ->
+                                        successes.add(halachicTimesDisplay)
                                     }
                                     .onFailure(tag = "ShabbatVM") { e ->
-                                        dispatch(ShabbatDataEvent.TimesLoadFailed(e.message, e.cause))
+                                        _effects.tryEmit(value = AppEffect.ShowToast(message = "Network failed"))
                                     }
                             }
-                            emit(results.filterIsInstance<NetworkResult.Success<HalachicTimesDisplay>>().map { it.data })
+                            emit(value = successes)
                         }
                     } ?: flowOf(emptyList())
+            }
+            .catch {throwable ->
+                _effects.tryEmit(value = AppEffect.ShowToast(message = "Unexpected error: ${throwable.message}"))
+                emit(value = emptyList())
             }
             .stateIn(
                 scope = viewModelScope,
@@ -92,7 +97,7 @@ class ShabbatViewModel @Inject constructor(
         }
 
         when (event) {
-            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.Shabbat.OpenAppSettings)
+            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
             else                                    -> Unit
         }
     }
