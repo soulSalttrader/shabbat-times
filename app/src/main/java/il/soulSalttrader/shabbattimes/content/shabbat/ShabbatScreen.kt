@@ -2,6 +2,7 @@ package il.soulSalttrader.shabbattimes.content.shabbat
 
 import android.Manifest
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,7 +50,7 @@ fun ShabbatScreen() {
 
         is ShabbatResultState.Results   -> {
             val suggestions = searchUiState.suggestionsOrEmpty()
-            val searchActive  = searchUiState.isSearchActive()
+            val searchActive = searchUiState.isSearchActive()
             val hasQuery = searchUiState.hasQuery()
 
             ShabbatContent(
@@ -69,13 +70,27 @@ fun ShabbatScreen() {
         )
     }
 
-    LaunchedEffect(shabbatState.permission) {
-        if (Debug.enabled) { Log.d("ShabbatScreen", "$shabbatState") }
-        shabbatViewModel.effects.collect { effect ->
-            if (Debug.enabled) { Log.d("ShabbatScreen", "$effect") }
-
+    LaunchedEffect(Unit) {
+        searchViewModel.effects.collect { effect ->
             when (effect) {
-                is AppEffect.Shabbat.OpenAppSettings -> context.openAppSettings()
+                is AppEffect.ShowToast -> {
+                    if (Debug.enabled) { Log.d("ShabbatScreen", "Toast: $effect ${effect.message}") }
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
+
+                else -> Unit
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        shabbatViewModel.effects.collect { effect ->
+            when (effect) {
+                is AppEffect.OpenAppSettings -> {
+                    if (Debug.enabled) { Log.d("ShabbatScreen", "OpenAppSettings: $shabbatState") }
+                    context.openAppSettings()
+                }
+
                 else -> Unit
             }
         }
