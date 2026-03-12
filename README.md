@@ -1209,16 +1209,16 @@ fun HandlePermissions(
 
 ## 5. 🔍︎ Search Architecture
 
-The app features a modular and reusable search implementation built with Jetpack Compose,
-designed for easy integration and customization. The primary use case is city searching,
-but the components are structured to be adaptable for other search functionalities.
+The search functionality is designed as a reactive, modular system that bridges user input with the core calculation engine. It demonstrates a clean separation between generic UI components, domain-specific state wrappers, and optimized data fetching.
 
 ### Key Features
 
-- Reusable Components: The search bar is broken down into generic, reusable composables (SearchBarInputField) that can be specialized for specific use cases (CitySearchBarInputField).
-- State-Driven UI: The search bar's appearance and behavior (e.g., expanded state, clear button visibility) are driven by a central UI state.
-- Clean Architecture: Follows a clean pattern where UI components are stateless and receive state and event handlers from a ViewModel or screen-level composable.
-- Helper Functions: Logic for complex interactions, like the trailing icon's dual-purpose click handling, is encapsulated in small, testable helper functions.
+- **Atomic UI Design**: A three-tier hierarchy (Generic `SearchBarInputField` → Domain-Specific `CitySearchBarInputField` → `CitySearchScreen`) that ensures UI components remain stateless, reusable, and easy to test.
+- **Self-Reducing MVI**: Search events implement `Reducible<SearchUiState>`, moving business logic into discrete, testable units (`SearchReducer`) and keeping the ViewModel as a clean orchestrator.
+- **Robust State Wrappers**: Replaces primitive strings with `Input<T>` and `Selection<T>` types to explicitly model field states (Idle, Value, Loading, Empty), eliminating "null-checking hell" in the UI.
+- **Reactive Data Pipeline**: Utilizes a reactive bridge where a city selection in the search module automatically triggers a data re-fetch in the halachic module via `flatMapLatest`.
+- **Performance Optimized**: Features built-in 300ms debouncing, minimum query thresholds (2+ chars), and automatic geo-localization based on the user's system locale.
+- **Smart UX Logic**: Encapsulates complex interactions, such as the dual-purpose trailing icon (Clear vs. Collapse), into isolated helper functions to maintain UI readability.
 
 ### Core Components
 
@@ -1231,23 +1231,22 @@ but the components are structured to be adaptable for other search functionaliti
 
 ### High-Level Flow
 
-1. The CitySearchScreen composable holds the search UI state (SearchUiState) and an event dispatcher.
-2. It renders the CitySearchBarInputField, passing the current state (query, expanded status) and event handlers (onSearch, onClear, onExpandedChange).
-3. CitySearchBarInputField is pre-configured with a leading search icon and a trailing icon.
-4. The trailing icon's onClick is wired to the onTrailingIconClick helper.
-    - If the user types a query, hasQuery becomes true, and clicking the icon calls onClear().
-    - If the query is empty, clicking the icon calls onExpandedChange().
-5. All user actions are dispatched as events, which a ViewModel processes to update the state, triggering a recomposition of the UI.
+This feature operates on a unidirectional data flow that spans from UI interactions to asynchronous network results:
+1. Intent: The user types; the UI dispatches SearchEvent.QueryChanged.
+2. State Reduction: The event’s reducer immediately updates the Input value in the ViewModel's private state.
+3. Throttling: A reactive queryFlow observes the state, applying a 300ms debounce and filtering for distinctUntilChanged to prevent redundant API pressure.
+4. Async Fetch: The suggestionsFlow uses flatMapLatest to trigger the CityRepository. If the query is < 2 characters, it short-circuits to an idle state.
+5. Network Resilience: The Repository executes the geocoding request on Dispatchers.IO using runCatching, returning a NetworkResult.
+6. State Synthesis: The UI state is a combine of the base UI state and the suggestionsFlow. Results are "reduced" back into the state via CitiesLoaded to maintain MVI purity.
+7. Recomposition: CitySearchScreen observes the synthesized StateFlow and re-renders the suggestions panel automatically.
 
 ### Structured Components
 
 #### 🔵 1. SearchBarInputField
 
-A foundational, private composable that provides a standardized implementation of a search input
-field. It abstracts away the boilerplate of SearchBarDefaults.InputField.
-
-- Purpose: To create a reusable and configurable search input without exposing the underlying Material 3 implementation details.
-- Key Parameters: state, expanded, onSearch, onExpandedChange, placeholder, leadingIcon, trailingIcon.
+A foundational, private composable that abstracts Material 3's SearchBarDefaults.InputField into a standardized, reusable component.
+- Purpose: Encapsulates boilerplate configurations (shape, padding, text-field state logic) to ensure UI consistency across different search contexts while hiding implementation details.
+- Contract: Exposes a clean API for state management and functional callbacks (onSearch, onExpandedChange).
 
 ```kotlin
 @Composable
@@ -1280,11 +1279,9 @@ private fun SearchBarInputField(
 
 #### 🔵 2. CitySearchBarInputField
 
-A public-facing, specialized composable that builds upon SearchBarInputField to create a search bar
-specifically for city lookups.
-
-- Purpose: To provide a ready-to-use component for city search, complete with appropriate icons and placeholder text. It simplifies integration into different screens.
-- Behavior: It wires the generic SearchBarInputField with default composables for the placeholder, leadingIcon, and trailingIcon, including the onTrailingIconClick logic.
+A domain-specific specialization of SearchBarInputField pre-configured for geographic lookups.
+- Purpose: Provides a specialized search entry point with pre-defined city-related icons and localized strings.
+- Smart Logic: Integrates the onTrailingIconClick helper to handle the contextual transition between "clearing text" and "collapsing the UI."
 
 ```kotlin
 @Composable
@@ -1296,6 +1293,11 @@ fun CitySearchBarInputField(
     onSearch: (String) -> Unit,
     onClear: () -> Unit,
     // ...
+    trailingIcon: @Composable (() -> Unit)? = {
+        TrailingSearchIconButton(
+            onClick = onTrailingIconClick(hasQuery, onClear, onExpandedChange, expanded)
+        )
+    },
 ) {
     SearchBarInputField(
         state = state,
@@ -1309,13 +1311,11 @@ fun CitySearchBarInputField(
 }
 ```
 
-#### 🔵 3. Integration in CitySearchScreen
+#### 🔵 3. CitySearchScreen (The Orchestrator)
 
-The CitySearchScreen acts as the container that brings all the pieces together. It is responsible for state management and event handling.
-
-- Role: Holds and observes the SearchUiState from a ViewModel.
-- Provides the concrete implementations for onSearch, onClear, and onExpandedChange by dispatching events.
-- Integrates CitySearchBarInputField and the upcoming CitySearchSuggestionPanel.
+The top-level screen container that bridges the MVI state with the UI components.
+- Role: A stateless orchestrator that observes the SearchUiState and maps UI callbacks to the dispatch function.
+- Composition: Manages the vertical layout between the input field and the CitySearchSuggestionPanel, ensuring smooth transitions between expanded and collapsed states.
 
 ```kotlin
 fun CitySearchScreen(
@@ -1372,11 +1372,9 @@ fun CitySearchScreen(
 
 #### 🔵 4. onTrailingIconClick Helper
 
-A private function that encapsulates the logic for the trailing icon's click behavior, promoting
-code clarity and reuse.
-
-- Purpose: To decide whether to clear the search text or collapse the search bar based on the current query state.
-- Key Parameters: hasQuery, onClear, onExpandedChange, expanded.
+A logic-unit helper that decouples UI behavior from the Composable’s declaration.
+- Context-Awareness: Evaluates the hasQuery state to determine whether the user intends to clear the current search or exit the search mode entirely.
+- Benefit: Keeps the UI code clean and ensures consistent "Smart Clear" behavior across all search entry points.
 
 ```kotlin
 private fun onTrailingIconClick(
@@ -1396,14 +1394,15 @@ private fun onTrailingIconClick(
 
 ### The SearchViewModel
 
-- Is the architectural component responsible for managing the state and business logic of the search feature. It connects the user's interactions in the CitySearchScreen with the data layer (InMemoryCityRepository) and exposes a reactive UI state.
+- The SearchViewModel is the architectural bridge between user interactions in the CitySearchScreen and the CityRepository. It leverages a Reactive Stream approach to transform raw input into a filtered list of city suggestions while maintaining a single source of truth.
 
 ### Key Responsibilities
 
-- State Exposure: Exposes a SearchUiState StateFlow that the UI observes for recomposition.
-- Event Handling: Provides a searchDispatch function to receive and process events from the UI, such as text input, search execution, and clearing the query.
-- Business Logic: Contains the core logic for fetching autocomplete suggestions, debouncing user input to prevent excessive network calls, and updating the UI state accordingly.
-- Asynchronous Operations: Manages coroutines for network requests, ensuring they are launched on the correct dispatcher (IO) and are lifecycle-aware via viewModelScope.Core Components|
+- Reactive State Exposure: Exposes a synthesized SearchUiState via StateFlow. This state is a combination of the base UI state (query, visibility) and the asynchronous results stream.
+- Unidirectional Event Dispatch: Provides a single dispatch(AppEvent) entry point. It utilizes Self-Reducing Events, where each SearchEvent contains the logic (reducer) to transition the state.
+- Declarative Pipeline: Instead of manual logic blocks, it uses a declarative pipeline (queryFlow → debounce → flatMapLatest) to process suggestions. This ensures that the UI logic remains side-effect-free.
+- Lifecycle-Aware Streaming: Manages the search lifecycle using stateIn(viewModelScope). It ensures that network-heavy flows are only active while the UI is subscribed, with a 5-second timeout to handle configuration changes.
+- Side-Effect Management: Separates state updates from one-shot actions (like showing a Toast for network errors) using a SharedFlow of AppEffects.
 
 | Component      | Role                                                                                                                                                             | Type             |
 |----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|
@@ -1431,7 +1430,7 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
     data class QueryChanged(val newQuery: String) : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(
-                query = newQuery,
+                query = Input.Value(value = newQuery),
                 resultState =
                     when (newQuery.trim().length >= 2) {
                         true -> SearchResultState.Loading
@@ -1444,25 +1443,26 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
     data object QueryCleared : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(
-                query = "",
-                selectedSuggestion = null,
+                query = Input.Idle,
+                selectedSuggestion = Selection.Idle,
                 resultState = SearchResultState.Idle,
             )
         }
     }
 
-    data class SuggestionsLoaded(val cities: List<City>) : SearchEvent {
+    data class CitiesLoaded(val cities: List<City>) : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(
                 resultState = when {
-                    state.query.isBlank() -> SearchResultState.Idle
-                    cities.isEmpty()      -> SearchResultState.NoResults
-                    else                  -> SearchResultState.Results(cities)
+                    state.query is Input.Idle  -> SearchResultState.Idle
+                    state.query is Input.Empty -> SearchResultState.Idle
+                    cities.isEmpty()           -> SearchResultState.NoResults
+                    else                       -> SearchResultState.Results(cities)
                 }
             )
         }
     }
-//    ...
+    // ...
 }
 ```
 
@@ -1486,14 +1486,14 @@ fun dispatch(event: AppEvent) {
 
 ### High-Level Flow
 
-1. The CitySearchScreen collects the searchUiState StateFlow from the SearchViewModel. 
-2. A user types in the CitySearchBarInputField. For each character change, the UI calls searchDispatch(SearchEvent.QueryChanged(newText)).
-3. Inside the ViewModel, the debounce operator waits for a quiet period (e.g., 500ms) before processing the latest query.
-4. Once the debounce period passes, the ViewModel calls repository.geocodeAutocomplete(query).
-5. While the request is in flight, the ViewModel updates searchUiState to set isLoading = true.
-6. When the Flow from the repository emits the list of city suggestions, the ViewModel updates searchUiState with the new results and sets isLoading = false.
-7. The UI, observing the state change, automatically recomposes to display the suggestions in the CitySearchSuggestionPanel.
-8. If the user taps the "clear" icon, the UI calls searchDispatch(SearchEvent.Clear), and the ViewModel resets the query and suggestions in the state.
+1. State Observation: CitySearchScreen observes the state StateFlow, which is a combined result of local UI state and a reactive suggestions stream.
+2. Event Dispatch: When the user types, the UI dispatches SearchEvent.QueryChanged. The reducer immediately updates the local _state.
+3. Reactive Query Stream: A internal queryFlow extracts the normalized string from the state, using distinctUntilChanged to ignore redundant updates.
+4. Debounced Transformation: The suggestionsFlow listens to the query stream, applying a 300ms debounce to prevent API spamming.
+5. Reactive Fetching: Using flatMapLatest, the query is transformed into a network request. If the query is empty, it short-circuits to an empty list.
+6. Resilient Execution: The repository is called; successes emit suggestions to the stream, while failures are caught and piped to a SharedFlow of Effects (to show Toasts) without breaking the stream.
+7. State Synthesis: The final UI state is created by combining the base _state with the latest suggestionsFlow. Every time the suggestions change, they are pushed through SearchEvent.CitiesLoaded.reducer to update the results display.
+8. UI Recomposition: The UI observes this synthesized state and automatically updates the CitySearchSuggestionPanel.
 
 ### Code Structure
 
@@ -1575,6 +1575,8 @@ class SearchViewModel @Inject constructor(
 }
 ```
 
+[!TIP] The Reactive Bridge: Note that the SearchViewModel never communicates with the ShabbatViewModel directly. It simply updates the CityRepository, which the ShabbatViewModel observes reactively. This decoupling ensures that adding a city from any part of the app (Search, Location Services, or Defaults) automatically updates the Shabbat times globally.
+
 ### 5.2 💾 Data Layer (InMemoryCityRepository)
 
 The InMemoryCityRepository is the default implementation of the CityRepository interface. It acts as
@@ -1583,11 +1585,11 @@ communication with the external Geoapify API for geocoding services.
 
 #### Key Responsibilities
 
-- Data Storage: Maintains an in-memory StateFlow<List<City>> that holds the list of cities the user has added. This list is initialized with a seed value (JERUSALEM).
-- API Abstraction: Abstracts the details of making network calls to the Geoapify service. The ViewModel interacts with the repository, not directly with Retrofit.
-- Autocomplete Logic: Implements the geocodeAutocomplete function, which takes a search query, validates it, calls the autocomplete API, and maps the DTOs (Data Transfer Objects) to the City domain model.
-- Error Handling: Includes a .catch block on the Flow to gracefully handle network errors, emitting an empty list to prevent the app from crashing.
-- Concurrency: Uses a provided CoroutineDispatcher (typically Dispatchers.IO) via flowOn to ensure that network operations are performed off the main thread.
+- Data Storage: Maintains an in-memory StateFlow<List<City>> as the single source of truth for the user's saved locations. The list is initialized with a default seed (JERUSALEM) and updated reactively.
+- API Abstraction: Decouples the business logic from infrastructure details by abstracting the Geoapify REST API. The ViewModel interacts only with domain models, unaware of the underlying Retrofit implementation.
+- Autocomplete Logic: Encapsulates query normalization (trimming) and validation logic. It prevents unnecessary network traffic by short-circuiting requests for queries shorter than two characters.
+- Resilient Network Calls: Utilizes runCatching and a specialized NetworkResult wrapper to handle API exceptions. This ensures that failures (like timeouts or lack of connectivity) are caught at the source and returned as state rather than crashing the application.
+- Thread Safety & Concurrency: Explicitly manages execution context using withContext(dispatcher). By offloading network requests to Dispatchers.IO, it guarantees that the main thread remains responsive during heavy I/O operations.
 
 #### Core Components
 
@@ -1600,19 +1602,17 @@ communication with the external Geoapify API for geocoding services.
 
 #### High-Level Flow
 
-1. The user types into the search field.
-2. SearchUiState.query changes and is emitted via queryFlow.
-3. queryFlow is debounced and filtered in the ViewModel.
-4. When the query is valid, the ViewModel calls CityRepository.geocodeAutocomplete(query).
-5. The repository:
-   - Normalizes the query.
-   - Short-circuits if the query is too short.
-   - Performs the network call on the injected dispatcher.
-   - Maps API DTOs to City domain models.
+1. User Input: The user types into the search field, triggering SearchEvent.QueryChanged, which updates the Input state in _state.
+2. Reactive Stream: The queryFlow observes changes to the normalized query string. 
+3. Throttling: queryFlow is debounced (300ms) and filtered for distinct changes to prevent redundant API pressure.
+4. Data Fetching: The suggestionsFlow uses flatMapLatest to call repository.geocodeAutocomplete(query).
+5. Repository Execution: The repository:
+   - Normalizes the query and short-circuits if length < 2.
+   - Performs the network call on the IO dispatcher using runCatching.
    - Returns a NetworkResult<List<City>>.
-6. The ViewModel maps the NetworkResult to UI events (SuggestionsLoaded, Failure, etc.).
-7. Reducers update SearchUiState.resultState.
-8. UI observes StateFlow<SearchUiState> and re-renders automatically.
+6. State Synthesis: The suggestionsFlow extracts the data from the NetworkResult. If it's a failure, it emits an AppEffect.ShowToast side-effect.
+7. The MVI Bridge: The final state is produced by combining _state and suggestionsFlow. Every time new suggestions arrive, they are piped through SearchEvent.CitiesLoaded(suggestions).reducer to update the resultState.
+8. UI Update: The UI observes the StateFlow<SearchUiState> and re-renders the CitySearchSuggestionPanel automatically.
 
 #### Code Structure
 
