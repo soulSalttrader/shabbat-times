@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.content.ExplanatoryDialog
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 
 @Composable
