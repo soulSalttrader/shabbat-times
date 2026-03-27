@@ -30,6 +30,12 @@ class InMemoryCityRepository @Inject constructor(
         }
     }
 
+    override suspend fun removeCity(city: City) {
+        _cities.update { cities ->
+            cities.filter { it.id != city.id }
+        }
+    }
+
     override suspend fun geocodeAutocomplete(query: String) = withContext(dispatcher) {
             val normalized = query.trim()
             if (normalized.length < 2) {
