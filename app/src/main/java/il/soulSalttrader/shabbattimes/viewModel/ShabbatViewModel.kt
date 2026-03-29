@@ -3,6 +3,7 @@ package il.soulSalttrader.shabbattimes.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.shabbattimes.content.normalizedOrNull
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
@@ -28,7 +29,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
@@ -87,7 +89,7 @@ class ShabbatViewModel @Inject constructor(
         )
 
     fun dispatch(event: AppEvent) {
-        _state.update { current ->
+        val newState = _state.updateAndGet { current ->
             when (event) {
                 is ShabbatDataEvent -> event.reducer reduce current
                 is PermissionEvent  -> event.reducer reduce current
@@ -98,7 +100,16 @@ class ShabbatViewModel @Inject constructor(
 
         when (event) {
             is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
+            is ShabbatDataEvent.TimeDeleted         -> handleDeleteTime(newState)
             else                                    -> Unit
+        }
+    }
+
+    private fun handleDeleteTime(state: ShabbatUiState) {
+        val city = state.selectedCity.normalizedOrNull() ?: return
+
+        viewModelScope.launch {
+            cityRepository.removeCity(city)
         }
     }
 }
