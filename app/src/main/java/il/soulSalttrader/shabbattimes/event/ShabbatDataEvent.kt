@@ -2,9 +2,11 @@ package il.soulSalttrader.shabbattimes.event
 
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.content.Selection
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatResultState
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
+import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 
@@ -46,6 +48,15 @@ sealed interface ShabbatDataEvent : AppEvent, Reducible<ShabbatUiState> {
     data object ClearTimes : ShabbatDataEvent {
         override val reducer = ShabbatReducer { state ->
             state.copy(data = ShabbatResultState.Idle)
+        }
+    }
+
+    data class TimeDeleted(val city: City) : ShabbatDataEvent {
+        override val reducer = ShabbatReducer { state ->
+            state.copy(
+                data = ShabbatResultState.Idle,
+                selectedCity = Selection.Selected(city)
+            )
         }
     }
 }
