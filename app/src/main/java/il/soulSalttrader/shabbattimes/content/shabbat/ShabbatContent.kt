@@ -24,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.content.FabMenu
+import il.soulSalttrader.shabbattimes.content.SwipeConfigs
+import il.soulSalttrader.shabbattimes.content.SwipeToDismissContainer
 import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.event.AppEvent
@@ -33,6 +35,7 @@ import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
+import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 
 @Composable
 fun ShabbatContent(
@@ -59,6 +62,7 @@ fun ShabbatContent(
                     items = currentItems,
                     key = "current_header",
                     title = "My current location",
+                    onLeftSwipe = { city -> shabbatDispatch(ShabbatDataEvent.TimeDeleted(city)) },
                     onClick = { shabbatDispatch(PermissionEvent.Request) },
                 )
             }
@@ -69,6 +73,7 @@ fun ShabbatContent(
                         items = otherItems,
                         key = "others_header",
                         title = "Other locations",
+                        onLeftSwipe = { city -> shabbatDispatch(ShabbatDataEvent.TimeDeleted(city)) },
                         onClick = { shabbatDispatch(PermissionEvent.Request) },
                     )
                 }
@@ -100,24 +105,35 @@ private fun LazyListScope.shabbatTimesSection(
     items: List<HalachicTimesDisplay>,
     key: String,
     title: String,
+    onLeftSwipe: (City) -> Unit,
     onClick: () -> Unit,
 ) {
     sectionHeader(key = key, title = title)
-    sectionCards(items = items, onClick = { onClick() })
+    sectionCards(
+        items = items,
+        onClick = { onClick() },
+        onLeftSwipe = { city -> onLeftSwipe(city) }
+    )
 }
 
 private fun LazyListScope.sectionCards(
     modifier: Modifier = Modifier,
     items: List<HalachicTimesDisplay>,
+    onLeftSwipe: (City) -> Unit,
     onClick: () -> Unit,
 ) {
     items(items, key = { it.city.id }) { time ->
-        ShabbatCard(
-            modifier = modifier,
+        SwipeToDismissContainer(
             item = time,
-            locationStatus = time.locationStatus,
-            onClick = { onClick() }
-        )
+            leftSwipe = SwipeConfigs.swipeToDelete(onSwipe = { onLeftSwipe(time.city) }),
+        ) {
+            ShabbatCard(
+                modifier = modifier,
+                item = time,
+                locationStatus = time.locationStatus,
+                onClick = { onClick() }
+            )
+        }
     }
 }
 
