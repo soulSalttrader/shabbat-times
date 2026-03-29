@@ -21,15 +21,8 @@ import kotlinx.coroutines.launch
 fun <T> SwipeToDismissContainer(
     item: T,
     modifier: Modifier = Modifier,
-
-    onSwipeLeft: (T) -> Unit,
-    leftSwipeEnabled: Boolean = true,
-    leftAction: SwipeAction = SwipeAction.Delete,
-
-    onSwipeRight: (T) -> Unit = {},
-    rightSwipeEnabled: Boolean = false,
-    rightAction: SwipeAction? = null,
-
+    leftSwipe: SwipeConfig<T>,
+    rightSwipe: SwipeConfig<T> = SwipeConfigs.none(),
     content: @Composable () -> Unit,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -38,8 +31,8 @@ fun <T> SwipeToDismissContainer(
 
     LaunchedEffect(dismissState.currentValue) {
         when (dismissState.currentValue) {
-            SwipeToDismissBoxValue.EndToStart -> if (leftSwipeEnabled) showDeleteDialog = true
-            SwipeToDismissBoxValue.StartToEnd -> if (rightSwipeEnabled) onSwipeRight(item)
+            SwipeToDismissBoxValue.EndToStart -> if (leftSwipe.isEnabled) showDeleteDialog = true
+            SwipeToDismissBoxValue.StartToEnd -> if (rightSwipe.isEnabled) rightSwipe.onSwipe(item)
             else                              -> {}
         }
     }
@@ -50,12 +43,12 @@ fun <T> SwipeToDismissContainer(
         backgroundContent = {
             SwipeBackground(
                 dismissState,
-                leftAction = leftAction,
-                rightAction = rightAction,
+                leftAction = leftSwipe.action,
+                rightAction = rightSwipe.action,
             )
         },
-        enableDismissFromStartToEnd = rightSwipeEnabled,
-        enableDismissFromEndToStart = leftSwipeEnabled,
+        enableDismissFromStartToEnd = rightSwipe.isEnabled,
+        enableDismissFromEndToStart = leftSwipe.isEnabled,
     ) { content() }
 
     if (showDeleteDialog) {
@@ -65,7 +58,7 @@ fun <T> SwipeToDismissContainer(
             onConfirmText = "Delete",
             onDismissText = "Undo",
             onConfirm = {
-                onSwipeLeft(item)
+                leftSwipe.onSwipe(item)
                 showDeleteDialog = false
             },
             onDismiss = {
