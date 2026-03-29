@@ -4,8 +4,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxDefaults
+import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,7 +25,6 @@ fun <T> SwipeToDismissContainer(
     onSwipeLeft: (T) -> Unit,
     leftSwipeEnabled: Boolean = true,
     leftAction: SwipeAction = SwipeAction.Delete,
-    onDeleteConfirmed: (T) -> Unit,
 
     onSwipeRight: (T) -> Unit = {},
     rightSwipeEnabled: Boolean = false,
@@ -34,22 +33,13 @@ fun <T> SwipeToDismissContainer(
     content: @Composable () -> Unit,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
-    val dismissState = rememberSwipeToDismissBoxState(
-        initialValue = SwipeToDismissBoxValue.Settled,
-        positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
-    )
+    val dismissState = rememberSwipeToDismissState()
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(dismissState.currentValue) {
-        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
-            showDeleteDialog = true
-        }
-    }
-
-    val dismissValue: (SwipeToDismissBoxValue) -> Unit = { dismissedValue ->
-        when (dismissedValue) {
-            SwipeToDismissBoxValue.EndToStart -> { onSwipeLeft(item) }
-            SwipeToDismissBoxValue.StartToEnd -> { onSwipeRight(item) }
+        when (dismissState.currentValue) {
+            SwipeToDismissBoxValue.EndToStart -> if (leftSwipeEnabled) showDeleteDialog = true
+            SwipeToDismissBoxValue.StartToEnd -> if (rightSwipeEnabled) onSwipeRight(item)
             else                              -> {}
         }
     }
@@ -57,7 +47,6 @@ fun <T> SwipeToDismissContainer(
     SwipeToDismissBox(
         state = dismissState,
         modifier = modifier,
-        onDismiss = dismissValue,
         backgroundContent = {
             SwipeBackground(
                 dismissState,
@@ -76,7 +65,7 @@ fun <T> SwipeToDismissContainer(
             onConfirmText = "Delete",
             onDismissText = "Undo",
             onConfirm = {
-                onDeleteConfirmed(item)
+                onSwipeLeft(item)
                 showDeleteDialog = false
             },
             onDismiss = {
@@ -87,4 +76,22 @@ fun <T> SwipeToDismissContainer(
             onDismissColor = { MaterialTheme.colorScheme.primary },
         )
     }
+}
+
+
+/**
+ * Remembers a [SwipeToDismissBoxState] **without** using [androidx.compose.runtime.saveable.rememberSaveable].
+ *
+ * Use this instead of [androidx.compose.material3.rememberSwipeToDismissBoxState] when items can be dynamically
+ * removed and re-added to the list, to prevent stale swipe state from being restored.
+ */
+@Composable
+private fun rememberSwipeToDismissState(
+    initialValue: SwipeToDismissBoxValue = SwipeToDismissBoxValue.Settled,
+    positionalThreshold: (totalDistance: Float) -> Float = SwipeToDismissBoxDefaults.positionalThreshold,
+): SwipeToDismissBoxState = remember {
+    SwipeToDismissBoxState(
+        initialValue = initialValue,
+        positionalThreshold = positionalThreshold,
+    )
 }
