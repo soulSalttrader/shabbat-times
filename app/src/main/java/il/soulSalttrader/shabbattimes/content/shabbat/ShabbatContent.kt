@@ -31,7 +31,7 @@ import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
-import il.soulSalttrader.shabbattimes.location.LocationStatus
+
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
@@ -55,29 +55,12 @@ fun ShabbatContent(
             contentPadding = PaddingValues(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            val grouped = halachicTimesDisplay.groupBy { it.locationStatus is LocationStatus.Current }
-
-            grouped[true]?.let { currentItems ->
-                shabbatTimesSection(
-                    items = currentItems,
-                    key = "current_header",
-                    title = "My current location",
-                    onLeftSwipe = { city -> shabbatDispatch(ShabbatDataEvent.TimeDeleted(city)) },
-                    onClick = { shabbatDispatch(PermissionEvent.Request) },
-                )
-            }
-
-            grouped[false]?.let { otherItems ->
-                if (otherItems.isNotEmpty()) {
-                    shabbatTimesSection(
-                        items = otherItems,
-                        key = "others_header",
-                        title = "Other locations",
-                        onLeftSwipe = { city -> shabbatDispatch(ShabbatDataEvent.TimeDeleted(city)) },
-                        onClick = { shabbatDispatch(PermissionEvent.Request) },
-                    )
-                }
-            }
+            section(
+                header = "My locations",
+                items = state.list,
+                onLeftSwipe = { city -> shabbatDispatch(ShabbatDataEvent.TimeDeleted(city)) },
+                onClick = { shabbatDispatch(PermissionEvent.Request) }
+            )
         }
 
         AnimatedSearchScrim(
@@ -101,27 +84,20 @@ fun ShabbatContent(
     }
 }
 
-private fun LazyListScope.shabbatTimesSection(
-    items: List<HalachicTimesDisplay>,
-    key: String,
-    title: String,
-    onLeftSwipe: (City) -> Unit,
-    onClick: () -> Unit,
-) {
-    sectionHeader(key = key, title = title)
-    sectionCards(
-        items = items,
-        onClick = { onClick() },
-        onLeftSwipe = { city -> onLeftSwipe(city) }
-    )
-}
-
-private fun LazyListScope.sectionCards(
+fun LazyListScope.section(
     modifier: Modifier = Modifier,
     items: List<HalachicTimesDisplay>,
+    header: String,
     onLeftSwipe: (City) -> Unit,
     onClick: () -> Unit,
 ) {
+    item(header) {
+        Text(
+            text = header,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        )
+    }
+
     items(items, key = { it.city.id }) { time ->
         SwipeToDismissContainer(
             item = time,
@@ -134,19 +110,6 @@ private fun LazyListScope.sectionCards(
                 onClick = { onClick() }
             )
         }
-    }
-}
-
-private fun LazyListScope.sectionHeader(
-    modifier: Modifier = Modifier,
-    key: String,
-    title: String,
-) {
-    item(key) {
-        Text(
-            text = title,
-            modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        )
     }
 }
 
