@@ -58,9 +58,16 @@ fun ShabbatContent(
             section(
                 header = "My locations",
                 items = state.list,
-                onLeftSwipe = { city -> shabbatDispatch(ShabbatDataEvent.TimeDeleted(city)) },
-                onClick = { shabbatDispatch(PermissionEvent.Request) }
-            )
+                keyOf = { it.city.id },
+                onLeftSwipe = { time -> shabbatDispatch(ShabbatDataEvent.TimeDeleted(time.city)) },
+            ) { item ->
+                ShabbatCard(
+                    modifier = Modifier,
+                    item = item,
+                    locationStatus = item.locationStatus,
+                    onClick = { shabbatDispatch(PermissionEvent.Request) }
+                )
+            }
         }
 
         AnimatedSearchScrim(

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.content.SwipeConfigs
@@ -11,12 +12,12 @@ import il.soulSalttrader.shabbattimes.content.SwipeToDismissContainer
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
-fun LazyListScope.section(
-    modifier: Modifier = Modifier,
-    items: List<HalachicTimesDisplay>,
+fun <T> LazyListScope.section(
+    items: List<T>,
     header: String,
-    onLeftSwipe: (City) -> Unit,
-    onClick: () -> Unit,
+    keyOf: (T) -> Any,
+    onLeftSwipe: (T) -> Unit,
+    content: @Composable (T) -> Unit,
 ) {
     item(header) {
         Text(
@@ -25,7 +26,7 @@ fun LazyListScope.section(
         )
     }
 
-    items(items, key = { it.city.id }) { time ->
+    items(items, key = { keyOf(it) }) { item ->
         SwipeToDismissContainer(
             item = time,
             leftSwipe = SwipeConfigs.swipeToDelete(onSwipe = { onLeftSwipe(time.city) }),
@@ -37,5 +38,12 @@ fun LazyListScope.section(
                 onClick = { onClick() }
             )
         }
+            item = item,
+            leftSwipe = SwipeConfigs.swipeToDelete(onSwipe = { onLeftSwipe(item) }),
+        ) {
+            content(item)
+        }
+    }
+}
     }
 }
