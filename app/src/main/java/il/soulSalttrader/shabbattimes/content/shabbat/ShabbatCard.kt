@@ -1,5 +1,6 @@
 package il.soulSalttrader.shabbattimes.content.shabbat
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIcon
+import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconLabel
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.LocationStatus.Current
@@ -35,10 +37,11 @@ fun ShabbatCard(
     colors: CardColors = getDefaultCardColors(item.locationStatus),
     elevation: CardElevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
     locationLabel: String = locationStatus.getLocationLabels(),
+    isDraggable: Boolean = false,
     onClick: () -> Unit = {},
 ) {
     ElevatedCard(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 8.dp),
         shape = shape,
@@ -46,19 +49,39 @@ fun ShabbatCard(
         elevation = elevation,
         onClick = onClick,
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            CityTitle(item.city.name)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(modifier = Modifier.padding(16.dp).weight(1f)) {
+                CityTitle(item.city.name)
 
-            UiIconLocationLabel(locationStatus, locationLabel)
+                UiIconLocationLabel(locationStatus, locationLabel)
 
-            Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(16.dp))
 
-            ShabbatKeyTimes(
-                candleLightingTime = item.candleLightingTime,
-                candleLightingDate = item.candleLightingDate,
-                havdalahTime = item.havdalahTime,
-                havdalahDate = item.havdalahDate,
-            )
+                ShabbatKeyTimes(
+                    candleLightingTime = item.candleLightingTime,
+                    candleLightingDate = item.candleLightingDate,
+                    havdalahTime = item.havdalahTime,
+                    havdalahDate = item.havdalahDate,
+                )
+            }
+
+            isDraggable.takeIf { it }?.let {
+                UiIconImage(
+                    modifier = modifier,
+                    icon = UiIcon.Resource(R.drawable.drag_indicator),
+                    contentDescription = "dragIndicator",
+                    contentColor = when (locationStatus) {
+                        Current -> colors.contentColor
+                        else -> colors.contentColor
+                    },
+                )
+            }
         }
     }
 }
