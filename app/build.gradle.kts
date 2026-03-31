@@ -116,4 +116,6 @@ dependencies {
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 
     implementation(libs.material3)
+
+    implementation(libs.reorderable)
 }
