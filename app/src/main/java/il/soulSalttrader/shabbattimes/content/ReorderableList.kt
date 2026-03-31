@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content.shabbat
+package il.soulSalttrader.shabbattimes.content
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
@@ -15,8 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import il.soulSalttrader.shabbattimes.content.SwipeConfigs
-import il.soulSalttrader.shabbattimes.content.SwipeToDismissContainer
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
 import sh.calvin.reorderable.rememberReorderableLazyListState
