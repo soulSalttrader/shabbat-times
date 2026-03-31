@@ -15,27 +15,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.content.FabMenu
-import il.soulSalttrader.shabbattimes.content.SwipeConfigs
-import il.soulSalttrader.shabbattimes.content.SwipeToDismissContainer
+import il.soulSalttrader.shabbattimes.content.rememberReorderableState
 import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
+import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
+import il.soulSalttrader.shabbattimes.content.section
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
-
+import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
-import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 
 @Composable
 fun ShabbatContent(
@@ -47,23 +44,31 @@ fun ShabbatContent(
     searchActive: Boolean,
     searchDispatch: (AppEvent) -> Unit,
 ) {
+    val state = rememberReorderableState(items = halachicTimesDisplay, keyOf = { it.city.id })
+
+    LaunchedEffect(halachicTimesDisplay) {
+        state.updateList(halachicTimesDisplay)
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
+            state = state.lazyListState,
             contentPadding = PaddingValues(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             section(
+                state = state.reorderableState,
                 header = "My locations",
                 items = state.list,
                 keyOf = { it.city.id },
                 onLeftSwipe = { time -> shabbatDispatch(ShabbatDataEvent.TimeDeleted(time.city)) },
-            ) { item ->
+            ) { item, modifier ->
                 ShabbatCard(
-                    modifier = Modifier,
+                    modifier = modifier,
                     item = item,
+                    isDraggable = true,
                     locationStatus = item.locationStatus,
                     onClick = { shabbatDispatch(PermissionEvent.Request) }
                 )
@@ -88,35 +93,6 @@ fun ShabbatContent(
                 SearchEvent.SearchVisibilityChanged(expanded = !searchActive)
             )},
         )
-    }
-}
-
-fun LazyListScope.section(
-    modifier: Modifier = Modifier,
-    items: List<HalachicTimesDisplay>,
-    header: String,
-    onLeftSwipe: (City) -> Unit,
-    onClick: () -> Unit,
-) {
-    item(header) {
-        Text(
-            text = header,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        )
-    }
-
-    items(items, key = { it.city.id }) { time ->
-        SwipeToDismissContainer(
-            item = time,
-            leftSwipe = SwipeConfigs.swipeToDelete(onSwipe = { onLeftSwipe(time.city) }),
-        ) {
-            ShabbatCard(
-                modifier = modifier,
-                item = time,
-                locationStatus = time.locationStatus,
-                onClick = { onClick() }
-            )
-        }
     }
 }
 
