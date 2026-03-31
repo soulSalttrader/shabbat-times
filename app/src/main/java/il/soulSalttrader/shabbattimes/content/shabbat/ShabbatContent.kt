@@ -26,7 +26,7 @@ import il.soulSalttrader.shabbattimes.content.reorderable.rememberReorderableSta
 import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
-import il.soulSalttrader.shabbattimes.content.reorderable.section
+import il.soulSalttrader.shabbattimes.content.reorderable.reorderableSection
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
@@ -58,7 +58,7 @@ fun ShabbatContent(
             contentPadding = PaddingValues(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            section(
+            reorderableSection(
                 state = state.reorderableState,
                 header = "My locations",
                 items = state.list,

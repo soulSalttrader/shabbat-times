@@ -19,7 +19,7 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-fun <T> LazyListScope.section(
+fun <T> LazyListScope.reorderableSection(
     state: ReorderableLazyListState,
     items: List<T>,
     header: String,
