@@ -4,17 +4,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.content.SwipeConfigs
 import il.soulSalttrader.shabbattimes.content.SwipeToDismissContainer
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 fun <T> LazyListScope.section(
     state: ReorderableLazyListState,
@@ -69,4 +74,22 @@ fun <T> mergeWithCurrentOrder(
         addAll(current.filter { keyOf(it) in updatedKeys })
         addAll(updated.filter { new -> current.none { keyOf(it) == keyOf(new) } })
     }
+}
+
+@Composable
+fun <T> rememberReorderableState(
+    items: List<T>,
+    keyOf: (T) -> Any,
+): ReorderableState<T> {
+    val lazyListState  = rememberLazyListState()
+    val hapticFeedback = LocalHapticFeedback.current
+    val state          = remember { ReorderableState(items, lazyListState, keyOf) }
+
+    state.reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        state.list = state.list.toMutableList()
+            .apply { add(to.index - 1, removeAt(from.index - 1)) }
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+    }
+
+    return state
 }
