@@ -11,13 +11,16 @@ import il.soulSalttrader.shabbattimes.content.SwipeConfigs
 import il.soulSalttrader.shabbattimes.content.SwipeToDismissContainer
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.ReorderableLazyListState
 
 fun <T> LazyListScope.section(
+    state: ReorderableLazyListState,
     items: List<T>,
     header: String,
     keyOf: (T) -> Any,
     onLeftSwipe: (T) -> Unit,
-    content: @Composable (T) -> Unit,
+    content: @Composable (T, Modifier) -> Unit,
 ) {
     item(header) {
         Text(
@@ -27,21 +30,16 @@ fun <T> LazyListScope.section(
     }
 
     items(items, key = { keyOf(it) }) { item ->
-        SwipeToDismissContainer(
-            item = time,
-            leftSwipe = SwipeConfigs.swipeToDelete(onSwipe = { onLeftSwipe(time.city) }),
+        ReorderableItem(
+            state = state,
+            key = keyOf(item),
         ) {
-            ShabbatCard(
-                modifier = modifier,
-                item = time,
-                locationStatus = time.locationStatus,
-                onClick = { onClick() }
-            )
-        }
-            item = item,
-            leftSwipe = SwipeConfigs.swipeToDelete(onSwipe = { onLeftSwipe(item) }),
-        ) {
-            content(item)
+            SwipeToDismissContainer(
+                item = item,
+                leftSwipe = SwipeConfigs.swipeToDelete(onSwipe = { onLeftSwipe(item) }),
+            ) {
+                content(item, Modifier.draggableHandle())
+            }
         }
     }
 }
