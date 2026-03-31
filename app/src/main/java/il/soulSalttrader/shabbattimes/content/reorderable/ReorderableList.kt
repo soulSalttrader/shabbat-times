@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.reorderable
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
