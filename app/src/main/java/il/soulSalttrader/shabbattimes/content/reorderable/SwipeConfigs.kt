@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.reorderable
 
 object SwipeConfigs {
     fun <T> swipeToDelete(onSwipe: (T) -> Unit) = SwipeConfig(

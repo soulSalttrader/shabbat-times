@@ -22,11 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.content.FabMenu
-import il.soulSalttrader.shabbattimes.content.rememberReorderableState
+import il.soulSalttrader.shabbattimes.content.reorderable.rememberReorderableState
 import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
-import il.soulSalttrader.shabbattimes.content.section
+import il.soulSalttrader.shabbattimes.content.reorderable.section
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
