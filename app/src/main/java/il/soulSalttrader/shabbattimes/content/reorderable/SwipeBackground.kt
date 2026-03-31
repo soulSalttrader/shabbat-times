@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.reorderable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

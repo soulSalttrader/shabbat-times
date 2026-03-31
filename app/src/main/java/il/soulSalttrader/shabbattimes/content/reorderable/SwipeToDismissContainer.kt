@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.content
+package il.soulSalttrader.shabbattimes.content.reorderable
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import il.soulSalttrader.shabbattimes.content.ExplanatoryDialog
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
