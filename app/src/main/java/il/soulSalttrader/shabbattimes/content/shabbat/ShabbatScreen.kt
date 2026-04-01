@@ -12,7 +12,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.content.FailureScreen
 import il.soulSalttrader.shabbattimes.content.LoadingScreen
-import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfigs
+import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
+import il.soulSalttrader.shabbattimes.content.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.content.search.hasQuery
 import il.soulSalttrader.shabbattimes.content.search.isSearchActive
 import il.soulSalttrader.shabbattimes.content.search.suggestionsOrEmpty
@@ -84,7 +85,7 @@ fun ShabbatScreen() {
         is ShabbatResultState.Results   -> {
             ShabbatContent(
                 halachicTimesDisplay = halachicTimes.data,
-                leftSwipe = SwipeConfigs.swipeToDelete {
+                swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) {
                     shabbatViewModel.dispatch(ShabbatDataEvent.TimeDeleted(it.city))
                 },
 

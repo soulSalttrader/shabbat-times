@@ -24,8 +24,7 @@ fun <T> LazyListScope.reorderableSection(
     items: List<T>,
     header: String,
     keyOf: (T) -> Any,
-    leftSwipe: SwipeConfig<T>,
-    rightSwipe: SwipeConfig<T>,
+    swipeConfig: SwipeConfig<T>,
     content: @Composable (T, Modifier) -> Unit,
 ) {
     item(header) {
@@ -42,8 +41,7 @@ fun <T> LazyListScope.reorderableSection(
         ) {
             SwipeToDismissContainer(
                 item = item,
-                leftSwipe = leftSwipe,
-                rightSwipe = rightSwipe,
+                swipeConfig = swipeConfig,
             ) {
                 content(item, Modifier.draggableHandle())
             }
