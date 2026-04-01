@@ -26,26 +26,19 @@ import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.content.reorderable.rememberReorderableState
 import il.soulSalttrader.shabbattimes.content.reorderable.reorderableSection
 import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
+import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
-import il.soulSalttrader.shabbattimes.content.search.SearchState
-import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
 @Composable
 fun ShabbatContent(
     halachicTimesDisplay: List<HalachicTimesDisplay>,
     swipeConfig: SwipeConfig<HalachicTimesDisplay> = SwipeConfig(),
-    searchState: SearchState,
+    searchConfig: SearchConfig,
     isDraggable: Boolean = true,
 
     onClick: () -> Unit = {},
-
-    onChangeVisibility: (Boolean) -> Unit,
-    onSearchCommitted: () -> Unit,
-    onSuggestionSelected: (City) -> Unit,
-    onQueryChanged: (String) -> Unit,
-    onQueryCleared: () -> Unit,
 ) {
     val state = rememberReorderableState(items = halachicTimesDisplay, keyOf = { it.city.id })
 
@@ -79,22 +72,15 @@ fun ShabbatContent(
         }
 
         AnimatedSearchScrim(
-            searchActive = searchState.searchActive,
-            onDismiss = { onChangeVisibility(false) },
+            searchActive = searchConfig.state.searchActive,
+            onDismiss = { searchConfig.action.onChangeVisibility(false) },
         )
 
-        AnimatedSearchOverlay(
-            searchState = searchState,
-            onChangeVisibility = onChangeVisibility,
-            onSearchCommitted = onSearchCommitted,
-            onSuggestionSelected = onSuggestionSelected,
-            onQueryChanged = onQueryChanged,
-            onQueryCleared = onQueryCleared,
-        )
+        AnimatedSearchOverlay(searchConfig = searchConfig)
 
         AnimatedSearchFab(
-            searchActive = searchState.searchActive,
-            onToggle = { onChangeVisibility(!searchState.searchActive) },
+            searchActive = searchConfig.state.searchActive,
+            onToggle = { searchConfig.action.onChangeVisibility(!searchConfig.state.searchActive) },
         )
     }
 }
@@ -118,25 +104,15 @@ private fun BoxScope.AnimatedSearchScrim(
 @Composable
 private fun BoxScope.AnimatedSearchOverlay(
     modifier: Modifier = Modifier,
-    searchState: SearchState,
-    onChangeVisibility: (Boolean) -> Unit,
-    onSearchCommitted: () -> Unit,
-    onSuggestionSelected: (City) -> Unit,
-    onQueryChanged: (String) -> Unit,
-    onQueryCleared: () -> Unit,
+    searchConfig: SearchConfig,
 ) {
     AnimatedVisibility(
-        visible = searchState.searchActive,
+        visible = searchConfig.state.searchActive,
         enter = slideInVertically { -it / 2 } + fadeIn(),
         exit = slideOutVertically { -it / 2 } + fadeOut()
     ) {
         CitySearchScreen(
-            searchState = searchState,
-            onChangeVisibility = onChangeVisibility,
-            onSearchCommitted = onSearchCommitted,
-            onSuggestionSelected = onSuggestionSelected,
-            onQueryChanged = onQueryChanged,
-            onQueryCleared = onQueryCleared,
+            searchConfig = searchConfig,
             modifier = modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 48.dp),
