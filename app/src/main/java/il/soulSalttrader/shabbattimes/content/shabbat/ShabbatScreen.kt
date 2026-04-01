@@ -66,7 +66,18 @@ fun ShabbatScreen() {
                 onChangeVisibility = { visible ->
                     searchViewModel.dispatch(SearchEvent.SearchVisibilityChanged(visible))
                 },
-                searchDispatch = searchViewModel::dispatch,
+                onSearchCommitted = {
+                    searchViewModel.dispatch(SearchEvent.SearchCommitted)
+                },
+                onSuggestionSelected = { suggestion ->
+                    searchViewModel.dispatch(SearchEvent.SuggestionSelected(suggestion))
+                },
+                onQueryChanged = { query ->
+                    searchViewModel.dispatch(SearchEvent.QueryChanged(query))
+                },
+                onQueryCleared = {
+                    searchViewModel.dispatch(SearchEvent.QueryCleared)
+                },
             )
         }
 
@@ -83,7 +94,18 @@ fun ShabbatScreen() {
                 onChangeVisibility = { visible ->
                     searchViewModel.dispatch(SearchEvent.SearchVisibilityChanged(visible))
                 },
-                searchDispatch = searchViewModel::dispatch,
+                onSearchCommitted = {
+                    searchViewModel.dispatch(SearchEvent.SearchCommitted)
+                },
+                onSuggestionSelected = { suggestion ->
+                    searchViewModel.dispatch(SearchEvent.SuggestionSelected(suggestion))
+                },
+                onQueryChanged = { query ->
+                    searchViewModel.dispatch(SearchEvent.QueryChanged(query))
+                },
+                onQueryCleared = {
+                    searchViewModel.dispatch(SearchEvent.QueryCleared)
+                },
             )
         }
 
