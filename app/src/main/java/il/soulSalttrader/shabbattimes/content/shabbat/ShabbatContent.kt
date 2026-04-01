@@ -28,6 +28,7 @@ import il.soulSalttrader.shabbattimes.content.reorderable.reorderableSection
 import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
+import il.soulSalttrader.shabbattimes.content.search.SearchState
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
@@ -35,13 +36,11 @@ import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 fun ShabbatContent(
     halachicTimesDisplay: List<HalachicTimesDisplay>,
     swipeConfig: SwipeConfig<HalachicTimesDisplay> = SwipeConfig(),
+    searchState: SearchState,
     isDraggable: Boolean = true,
 
     onClick: () -> Unit = {},
 
-    suggestions: List<City>,
-    hasQuery: Boolean,
-    searchActive: Boolean,
     onChangeVisibility: (Boolean) -> Unit,
     onSearchCommitted: () -> Unit,
     onSuggestionSelected: (City) -> Unit,
@@ -80,14 +79,12 @@ fun ShabbatContent(
         }
 
         AnimatedSearchScrim(
-            searchActive = searchActive,
+            searchActive = searchState.searchActive,
             onDismiss = { onChangeVisibility(false) },
         )
 
         AnimatedSearchOverlay(
-            suggestions = suggestions,
-            hasQuery = hasQuery,
-            searchActive = searchActive,
+            searchState = searchState,
             onChangeVisibility = onChangeVisibility,
             onSearchCommitted = onSearchCommitted,
             onSuggestionSelected = onSuggestionSelected,
@@ -96,8 +93,8 @@ fun ShabbatContent(
         )
 
         AnimatedSearchFab(
-            searchActive = searchActive,
-            onToggle = { onChangeVisibility(!searchActive) },
+            searchActive = searchState.searchActive,
+            onToggle = { onChangeVisibility(!searchState.searchActive) },
         )
     }
 }
@@ -121,9 +118,7 @@ private fun BoxScope.AnimatedSearchScrim(
 @Composable
 private fun BoxScope.AnimatedSearchOverlay(
     modifier: Modifier = Modifier,
-    suggestions: List<City>,
-    hasQuery: Boolean,
-    searchActive: Boolean,
+    searchState: SearchState,
     onChangeVisibility: (Boolean) -> Unit,
     onSearchCommitted: () -> Unit,
     onSuggestionSelected: (City) -> Unit,
@@ -131,14 +126,12 @@ private fun BoxScope.AnimatedSearchOverlay(
     onQueryCleared: () -> Unit,
 ) {
     AnimatedVisibility(
-        visible = searchActive,
+        visible = searchState.searchActive,
         enter = slideInVertically { -it / 2 } + fadeIn(),
         exit = slideOutVertically { -it / 2 } + fadeOut()
     ) {
         CitySearchScreen(
-            suggestions = suggestions,
-            hasQuery = hasQuery,
-            expanded = searchActive,
+            searchState = searchState,
             onChangeVisibility = onChangeVisibility,
             onSearchCommitted = onSearchCommitted,
             onSuggestionSelected = onSuggestionSelected,

@@ -14,9 +14,7 @@ import il.soulSalttrader.shabbattimes.content.FailureScreen
 import il.soulSalttrader.shabbattimes.content.LoadingScreen
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeState
-import il.soulSalttrader.shabbattimes.content.search.hasQuery
-import il.soulSalttrader.shabbattimes.content.search.isSearchActive
-import il.soulSalttrader.shabbattimes.content.search.suggestionsOrEmpty
+import il.soulSalttrader.shabbattimes.content.search.default
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
@@ -45,9 +43,6 @@ fun ShabbatScreen() {
     )
 
     val context = LocalContext.current
-    val suggestions = searchUiState.suggestionsOrEmpty()
-    val searchActive = searchUiState.isSearchActive()
-    val hasQuery = searchUiState.hasQuery()
 
     when (val halachicTimes = shabbatState.data) {
         is ShabbatResultState.Idle      -> LoadingScreen()
@@ -58,12 +53,10 @@ fun ShabbatScreen() {
             ShabbatContent(
                 halachicTimesDisplay = listOf(HalachicTimesDisplay()),
                 isDraggable = false,
+                searchState = searchUiState.default(),
 
                 onClick = { shabbatViewModel.dispatch(PermissionEvent.Request)},
 
-                suggestions = suggestions,
-                hasQuery = hasQuery,
-                searchActive = searchActive,
                 onChangeVisibility = { visible ->
                     searchViewModel.dispatch(SearchEvent.SearchVisibilityChanged(visible))
                 },
@@ -88,10 +81,8 @@ fun ShabbatScreen() {
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) {
                     shabbatViewModel.dispatch(ShabbatDataEvent.TimeDeleted(it.city))
                 },
+                searchState = searchUiState.default(),
 
-                suggestions = suggestions,
-                hasQuery = hasQuery,
-                searchActive = searchActive,
                 onChangeVisibility = { visible ->
                     searchViewModel.dispatch(SearchEvent.SearchVisibilityChanged(visible))
                 },
