@@ -7,10 +7,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class HalachicTimesDisplay(
-    val city: City = SeedCities.JERUSALEM,
-    val candleLightingTime: String = "",
+    val city: City = SeedCities.NONE,
+    val candleLightingTime: String = "--:--",
     val candleLightingDate: String = "",
-    val havdalahTime: String = "",
+    val havdalahTime: String = "--:--",
     val havdalahDate: String = "",
-    val locationStatus: LocationStatus = Distance(9999),
+    val locationStatus: LocationStatus = LocationStatus.Unknown,
 )
