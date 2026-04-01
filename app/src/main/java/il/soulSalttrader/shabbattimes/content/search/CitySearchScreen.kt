@@ -14,8 +14,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import il.soulSalttrader.shabbattimes.event.AppEvent
-import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.model.City
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -26,9 +24,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 fun CitySearchScreen(
     hasQuery: Boolean,
     suggestions: List<City>,
-    searchDispatch: (AppEvent) -> Unit,
     expanded: Boolean,
     modifier: Modifier = Modifier,
+    onChangeVisibility: (Boolean) -> Unit,
+    onSearchCommitted: () -> Unit,
+    onSuggestionSelected: (City) -> Unit,
+    onQueryChanged: (String) -> Unit,
+    onQueryCleared: () -> Unit,
 ) {
     val state = rememberTextFieldState("")
 
@@ -36,11 +38,7 @@ fun CitySearchScreen(
         snapshotFlow { state.text.toString() }
             .distinctUntilChanged()
             .debounce(300)
-            .collect { query ->
-                searchDispatch(
-                    SearchEvent.QueryChanged(newQuery = state.text.toString())
-                )
-            }
+            .collect { query -> onQueryChanged(query) }
     }
 
     Surface(
@@ -57,17 +55,13 @@ fun CitySearchScreen(
                 state = state,
                 hasQuery = hasQuery,
                 expanded = expanded,
-                onExpandedChange = { expanded ->
-                    searchDispatch(
-                        SearchEvent.SearchVisibilityChanged(expanded = !expanded)
-                    )
-                },
+                onExpandedChange = { expanded -> onChangeVisibility(!expanded) },
                 onSearch = { query ->
-                    searchDispatch(SearchEvent.QueryChanged(newQuery = query))
-                    searchDispatch(SearchEvent.SearchCommitted)
+                    onQueryChanged(query)
+                    onSearchCommitted()
                 },
                 onClear = {
-                    searchDispatch(SearchEvent.QueryCleared)
+                    onQueryCleared()
                     state.clearText()
                 },
             )
@@ -77,7 +71,7 @@ fun CitySearchScreen(
                 expanded = expanded,
                 suggestions = suggestions,
                 onSuggestionSelected = { suggestion ->
-                    searchDispatch(SearchEvent.SuggestionSelected(suggestion))
+                    onSuggestionSelected(suggestion)
                     state.setTextAndPlaceCursorAtEnd(suggestion.name)
                 },
             )
