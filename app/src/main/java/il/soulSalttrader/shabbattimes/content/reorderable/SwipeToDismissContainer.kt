@@ -23,7 +23,7 @@ fun <T> SwipeToDismissContainer(
     item: T,
     modifier: Modifier = Modifier,
     leftSwipe: SwipeConfig<T>,
-    rightSwipe: SwipeConfig<T> = SwipeConfigs.none(),
+    rightSwipe: SwipeConfig<T>,
     content: @Composable () -> Unit,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
