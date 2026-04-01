@@ -33,17 +33,17 @@ import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
 @Composable
 fun ShabbatContent(
-    halachicTimesDisplay: List<HalachicTimesDisplay>,
+    items: List<HalachicTimesDisplay>,
     swipeConfig: SwipeConfig<HalachicTimesDisplay> = SwipeConfig(),
     searchConfig: SearchConfig,
     isDraggable: Boolean = true,
 
     onClick: () -> Unit = {},
 ) {
-    val state = rememberReorderableState(items = halachicTimesDisplay, keyOf = { it.city.id })
+    val state = rememberReorderableState(items = items, keyOf = { it.city.id })
 
-    LaunchedEffect(halachicTimesDisplay) {
-        state.updateList(halachicTimesDisplay)
+    LaunchedEffect(items) {
+        state.updateList(items)
     }
 
     Box(
@@ -71,32 +71,23 @@ fun ShabbatContent(
             }
         }
 
-        AnimatedSearchScrim(
-            searchActive = searchConfig.state.searchActive,
-            onDismiss = { searchConfig.action.onChangeVisibility(false) },
-        )
-
+        AnimatedSearchScrim(searchConfig = searchConfig)
         AnimatedSearchOverlay(searchConfig = searchConfig)
-
-        AnimatedSearchFab(
-            searchActive = searchConfig.state.searchActive,
-            onToggle = { searchConfig.action.onChangeVisibility(!searchConfig.state.searchActive) },
-        )
+        AnimatedSearchFab(searchConfig = searchConfig)
     }
 }
 
 @Composable
 private fun BoxScope.AnimatedSearchScrim(
     modifier: Modifier = Modifier,
-    searchActive: Boolean,
-    onDismiss: () -> Unit,
+    searchConfig: SearchConfig
 ) {
-    AnimatedVisibility(visible = searchActive) {
+    AnimatedVisibility(visible = searchConfig.state.searchActive) {
         Box(
             modifier = modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
-                .clickable { onDismiss() }
+                .clickable { searchConfig.action.onChangeVisibility(false) }
         )
     }
 }
@@ -122,9 +113,8 @@ private fun BoxScope.AnimatedSearchOverlay(
 
 @Composable
 private fun BoxScope.AnimatedSearchFab(
-    searchActive: Boolean,
-    onToggle: () -> Unit,
     modifier: Modifier = Modifier,
+    searchConfig: SearchConfig,
     fabItems: List<SearchItem> = listOf(Add),
 ) {
     AnimatedVisibility(
@@ -132,11 +122,11 @@ private fun BoxScope.AnimatedSearchFab(
             .align(Alignment.BottomEnd)
             .navigationBarsPadding()
             .padding(16.dp),
-        visible = !searchActive
+        visible = !searchConfig.state.searchActive,
     ) {
         FabMenu(
             items = fabItems,
-            onClick = { onToggle() },
+            onClick = { searchConfig.action.onChangeVisibility(!searchConfig.state.searchActive) },
         )
     }
 }
