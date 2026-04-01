@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
@@ -118,7 +119,7 @@ private fun ShabbatKeyTimes(
         }
         Column(modifier = Modifier.weight(1f)) {
             ShabbatDateTime(
-                label = "Havdalah",
+                label = "Havdalah Time",
                 time = havdalahTime,
                 date = havdalahDate,
                 modifier = modifier.padding(vertical = 4.dp)
@@ -157,7 +158,12 @@ private fun CityTitle(
         Text(
             text = name,
             style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.weight(1f)
+            maxLines = 1,
+            modifier = Modifier.weight(1f),
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                maxFontSize = MaterialTheme.typography.headlineLarge.fontSize
+            )
         )
     }
 }
