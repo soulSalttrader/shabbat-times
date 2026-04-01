@@ -14,7 +14,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import il.soulSalttrader.shabbattimes.model.City
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -22,13 +21,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 fun CitySearchScreen(
-    searchState: SearchState,
+    searchConfig: SearchConfig,
     modifier: Modifier = Modifier,
-    onChangeVisibility: (Boolean) -> Unit,
-    onSearchCommitted: () -> Unit,
-    onSuggestionSelected: (City) -> Unit,
-    onQueryChanged: (String) -> Unit,
-    onQueryCleared: () -> Unit,
 ) {
     val state = rememberTextFieldState("")
 
@@ -36,7 +30,7 @@ fun CitySearchScreen(
         snapshotFlow { state.text.toString() }
             .distinctUntilChanged()
             .debounce(300)
-            .collect { query -> onQueryChanged(query) }
+            .collect { query -> searchConfig.action.onQueryChanged(query) }
     }
 
     Surface(
@@ -51,25 +45,25 @@ fun CitySearchScreen(
         ) {
             CitySearchBarInputField(
                 state = state,
-                hasQuery = searchState.hasQuery,
-                expanded = searchState.searchActive,
-                onExpandedChange = { expanded -> onChangeVisibility(!expanded) },
+                hasQuery = searchConfig.state.hasQuery,
+                expanded = searchConfig.state.searchActive,
+                onExpandedChange = { expanded -> searchConfig.action.onChangeVisibility(!expanded) },
                 onSearch = { query ->
-                    onQueryChanged(query)
-                    onSearchCommitted()
+                    searchConfig.action.onQueryChanged(query)
+                    searchConfig.action.onSearchCommitted()
                 },
                 onClear = {
-                    onQueryCleared()
+                    searchConfig.action.onQueryCleared()
                     state.clearText()
                 },
             )
 
             CitySearchSuggestionPanel(
                 query = state.text.toString(),
-                expanded = searchState.searchActive,
-                suggestions = searchState.suggestions,
+                expanded = searchConfig.state.searchActive,
+                suggestions = searchConfig.state.suggestions,
                 onSuggestionSelected = { suggestion ->
-                    onSuggestionSelected(suggestion)
+                    searchConfig.action.onSuggestionSelected(suggestion)
                     state.setTextAndPlaceCursorAtEnd(suggestion.name)
                 },
             )
