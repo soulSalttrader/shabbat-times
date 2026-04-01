@@ -22,26 +22,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.content.FabMenu
+import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
+import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfigs
 import il.soulSalttrader.shabbattimes.content.reorderable.rememberReorderableState
 import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
 import il.soulSalttrader.shabbattimes.content.reorderable.reorderableSection
 import il.soulSalttrader.shabbattimes.event.AppEvent
-import il.soulSalttrader.shabbattimes.event.PermissionEvent
-import il.soulSalttrader.shabbattimes.event.SearchEvent
-import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
 @Composable
 fun ShabbatContent(
     halachicTimesDisplay: List<HalachicTimesDisplay>,
-    shabbatDispatch: (AppEvent) -> Unit,
+    leftSwipe: SwipeConfig<HalachicTimesDisplay> = SwipeConfigs.none(),
+    rightSwipe: SwipeConfig<HalachicTimesDisplay> = SwipeConfigs.none(),
+    isDraggable: Boolean = true,
+
+    onClick: () -> Unit = {},
 
     suggestions: List<City>,
     hasQuery: Boolean,
     searchActive: Boolean,
+    onChangeVisibility: (Boolean) -> Unit,
     searchDispatch: (AppEvent) -> Unit,
 ) {
     val state = rememberReorderableState(items = halachicTimesDisplay, keyOf = { it.city.id })
@@ -63,21 +67,22 @@ fun ShabbatContent(
                 header = "My locations",
                 items = state.list,
                 keyOf = { it.city.id },
-                onLeftSwipe = { time -> shabbatDispatch(ShabbatDataEvent.TimeDeleted(time.city)) },
+                leftSwipe = leftSwipe,
+                rightSwipe = rightSwipe,
             ) { item, modifier ->
                 ShabbatCard(
                     modifier = modifier,
                     item = item,
-                    isDraggable = true,
+                    isDraggable = isDraggable,
                     locationStatus = item.locationStatus,
-                    onClick = { shabbatDispatch(PermissionEvent.Request) }
+                    onClick = { onClick() }
                 )
             }
         }
 
         AnimatedSearchScrim(
             searchActive = searchActive,
-            onDismiss = { searchDispatch(SearchEvent.SearchVisibilityChanged(false)) },
+            onDismiss = { onChangeVisibility(false) },
         )
 
         AnimatedSearchOverlay(
@@ -89,9 +94,7 @@ fun ShabbatContent(
 
         AnimatedSearchFab(
             searchActive = searchActive,
-            onToggle = { searchDispatch(
-                SearchEvent.SearchVisibilityChanged(expanded = !searchActive)
-            )},
+            onToggle = { onChangeVisibility(!searchActive) },
         )
     }
 }

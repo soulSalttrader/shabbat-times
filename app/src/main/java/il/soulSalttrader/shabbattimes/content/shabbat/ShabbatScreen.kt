@@ -12,11 +12,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.content.FailureScreen
 import il.soulSalttrader.shabbattimes.content.LoadingScreen
+import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfigs
 import il.soulSalttrader.shabbattimes.content.search.hasQuery
 import il.soulSalttrader.shabbattimes.content.search.isSearchActive
 import il.soulSalttrader.shabbattimes.content.search.suggestionsOrEmpty
 import il.soulSalttrader.shabbattimes.effect.AppEffect
+import il.soulSalttrader.shabbattimes.event.PermissionEvent
+import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.openAppSettings
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel
@@ -40,26 +44,45 @@ fun ShabbatScreen() {
     )
 
     val context = LocalContext.current
+    val suggestions = searchUiState.suggestionsOrEmpty()
+    val searchActive = searchUiState.isSearchActive()
+    val hasQuery = searchUiState.hasQuery()
 
     when (val halachicTimes = shabbatState.data) {
         is ShabbatResultState.Idle      -> LoadingScreen()
 
         is ShabbatResultState.Loading   -> LoadingScreen()
 
-        is ShabbatResultState.NoResults -> LoadingScreen()
-
-        is ShabbatResultState.Results   -> {
-            val suggestions = searchUiState.suggestionsOrEmpty()
-            val searchActive = searchUiState.isSearchActive()
-            val hasQuery = searchUiState.hasQuery()
-
+        is ShabbatResultState.NoResults -> {
             ShabbatContent(
-                halachicTimesDisplay = halachicTimes.data,
-                shabbatDispatch = shabbatViewModel::dispatch,
+                halachicTimesDisplay = listOf(HalachicTimesDisplay()),
+                isDraggable = false,
+
+                onClick = { shabbatViewModel.dispatch(PermissionEvent.Request)},
 
                 suggestions = suggestions,
                 hasQuery = hasQuery,
                 searchActive = searchActive,
+                onChangeVisibility = { visible ->
+                    searchViewModel.dispatch(SearchEvent.SearchVisibilityChanged(visible))
+                },
+                searchDispatch = searchViewModel::dispatch,
+            )
+        }
+
+        is ShabbatResultState.Results   -> {
+            ShabbatContent(
+                halachicTimesDisplay = halachicTimes.data,
+                leftSwipe = SwipeConfigs.swipeToDelete {
+                    shabbatViewModel.dispatch(ShabbatDataEvent.TimeDeleted(it.city))
+                },
+
+                suggestions = suggestions,
+                hasQuery = hasQuery,
+                searchActive = searchActive,
+                onChangeVisibility = { visible ->
+                    searchViewModel.dispatch(SearchEvent.SearchVisibilityChanged(visible))
+                },
                 searchDispatch = searchViewModel::dispatch,
             )
         }
