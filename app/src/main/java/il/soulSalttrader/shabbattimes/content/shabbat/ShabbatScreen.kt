@@ -14,10 +14,10 @@ import il.soulSalttrader.shabbattimes.content.FailureScreen
 import il.soulSalttrader.shabbattimes.content.LoadingScreen
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeState
+import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.default
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
-import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
@@ -53,25 +53,12 @@ fun ShabbatScreen() {
             ShabbatContent(
                 halachicTimesDisplay = listOf(HalachicTimesDisplay()),
                 isDraggable = false,
-                searchState = searchUiState.default(),
+                searchConfig = SearchConfig(
+                    state = searchUiState.default(),
+                    action = searchViewModel.default(),
+                ),
 
                 onClick = { shabbatViewModel.dispatch(PermissionEvent.Request)},
-
-                onChangeVisibility = { visible ->
-                    searchViewModel.dispatch(SearchEvent.SearchVisibilityChanged(visible))
-                },
-                onSearchCommitted = {
-                    searchViewModel.dispatch(SearchEvent.SearchCommitted)
-                },
-                onSuggestionSelected = { suggestion ->
-                    searchViewModel.dispatch(SearchEvent.SuggestionSelected(suggestion))
-                },
-                onQueryChanged = { query ->
-                    searchViewModel.dispatch(SearchEvent.QueryChanged(query))
-                },
-                onQueryCleared = {
-                    searchViewModel.dispatch(SearchEvent.QueryCleared)
-                },
             )
         }
 
@@ -81,23 +68,10 @@ fun ShabbatScreen() {
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) {
                     shabbatViewModel.dispatch(ShabbatDataEvent.TimeDeleted(it.city))
                 },
-                searchState = searchUiState.default(),
-
-                onChangeVisibility = { visible ->
-                    searchViewModel.dispatch(SearchEvent.SearchVisibilityChanged(visible))
-                },
-                onSearchCommitted = {
-                    searchViewModel.dispatch(SearchEvent.SearchCommitted)
-                },
-                onSuggestionSelected = { suggestion ->
-                    searchViewModel.dispatch(SearchEvent.SuggestionSelected(suggestion))
-                },
-                onQueryChanged = { query ->
-                    searchViewModel.dispatch(SearchEvent.QueryChanged(query))
-                },
-                onQueryCleared = {
-                    searchViewModel.dispatch(SearchEvent.QueryCleared)
-                },
+                searchConfig = SearchConfig(
+                    state = searchUiState.default(),
+                    action = searchViewModel.default(),
+                ),
             )
         }
 
