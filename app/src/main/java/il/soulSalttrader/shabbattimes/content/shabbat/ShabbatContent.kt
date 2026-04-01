@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.content.FabMenu
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
-import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfigs
 import il.soulSalttrader.shabbattimes.content.reorderable.rememberReorderableState
 import il.soulSalttrader.shabbattimes.content.reorderable.reorderableSection
 import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
@@ -35,8 +34,7 @@ import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 @Composable
 fun ShabbatContent(
     halachicTimesDisplay: List<HalachicTimesDisplay>,
-    leftSwipe: SwipeConfig<HalachicTimesDisplay> = SwipeConfigs.none(),
-    rightSwipe: SwipeConfig<HalachicTimesDisplay> = SwipeConfigs.none(),
+    swipeConfig: SwipeConfig<HalachicTimesDisplay> = SwipeConfig(),
     isDraggable: Boolean = true,
 
     onClick: () -> Unit = {},
@@ -69,8 +67,7 @@ fun ShabbatContent(
                 header = "My locations",
                 items = state.list,
                 keyOf = { it.city.id },
-                leftSwipe = leftSwipe,
-                rightSwipe = rightSwipe,
+                swipeConfig = swipeConfig,
             ) { item, modifier ->
                 ShabbatCard(
                     modifier = modifier,

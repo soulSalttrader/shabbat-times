@@ -15,22 +15,21 @@ import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 
 @Composable
-fun SwipeBackground(
+fun <T> SwipeBackground(
     dismissState: SwipeToDismissBoxState,
-    leftAction: SwipeAction,
-    rightAction: SwipeAction?,
+    swipeConfig: SwipeConfig<T>,
 ) {
     val direction = dismissState.dismissDirection
-    val action = when (direction) {
-        SwipeToDismissBoxValue.StartToEnd -> rightAction ?: leftAction
-        else -> leftAction
+    val swipe = when (direction) {
+        SwipeToDismissBoxValue.StartToEnd -> swipeConfig.toRight
+        else -> swipeConfig.toLeft
     }
 
     Row(
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp)
-            .background(action.backgroundColor(), RoundedCornerShape(16.dp))
+            .background(swipe.appearance.backgroundColor(), RoundedCornerShape(16.dp))
             .padding(24.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = when (direction) {
@@ -41,9 +40,9 @@ fun SwipeBackground(
     ) {
 
         UiIconImage(
-            icon = action.icon,
-            contentDescription = action.contentDescription,
-            contentColor = action.contentColor(),
+            icon = swipe.appearance.icon,
+            contentDescription = swipe.appearance.contentDescription,
+            contentColor = swipe.appearance.contentColor(),
         )
     }
 }
