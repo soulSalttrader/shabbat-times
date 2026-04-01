@@ -22,9 +22,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 fun CitySearchScreen(
-    hasQuery: Boolean,
-    suggestions: List<City>,
-    expanded: Boolean,
+    searchState: SearchState,
     modifier: Modifier = Modifier,
     onChangeVisibility: (Boolean) -> Unit,
     onSearchCommitted: () -> Unit,
@@ -53,8 +51,8 @@ fun CitySearchScreen(
         ) {
             CitySearchBarInputField(
                 state = state,
-                hasQuery = hasQuery,
-                expanded = expanded,
+                hasQuery = searchState.hasQuery,
+                expanded = searchState.searchActive,
                 onExpandedChange = { expanded -> onChangeVisibility(!expanded) },
                 onSearch = { query ->
                     onQueryChanged(query)
@@ -68,8 +66,8 @@ fun CitySearchScreen(
 
             CitySearchSuggestionPanel(
                 query = state.text.toString(),
-                expanded = expanded,
-                suggestions = suggestions,
+                expanded = searchState.searchActive,
+                suggestions = searchState.suggestions,
                 onSuggestionSelected = { suggestion ->
                     onSuggestionSelected(suggestion)
                     state.setTextAndPlaceCursorAtEnd(suggestion.name)
