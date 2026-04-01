@@ -2,6 +2,7 @@ package il.soulSalttrader.shabbattimes.repository
 
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.Coordinates
+import il.soulSalttrader.shabbattimes.model.city
 import java.time.ZoneId
 import java.util.UUID
 
@@ -29,5 +30,11 @@ object SeedCities {
         timeZone = ZoneId.of("Europe/Vienna"),
         timeFormat = 24,
     )
+
+    val NONE = city {
+        name = "Tap to use current location"
+        coordinates = Coordinates(latitude = 0.0, longitude = 0.0)
+    }
+
     val initial = listOf(JERUSALEM, NEW_YORK, BRNO)
 }
