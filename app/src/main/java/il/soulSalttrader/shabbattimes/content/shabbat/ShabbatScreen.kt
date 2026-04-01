@@ -51,7 +51,7 @@ fun ShabbatScreen() {
 
         is ShabbatResultState.NoResults -> {
             ShabbatContent(
-                halachicTimesDisplay = listOf(HalachicTimesDisplay()),
+                items = listOf(HalachicTimesDisplay()),
                 isDraggable = false,
                 searchConfig = SearchConfig(
                     state = searchUiState.default(),
@@ -64,7 +64,7 @@ fun ShabbatScreen() {
 
         is ShabbatResultState.Results   -> {
             ShabbatContent(
-                halachicTimesDisplay = halachicTimes.data,
+                items = halachicTimes.data,
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) {
                     shabbatViewModel.dispatch(ShabbatDataEvent.TimeDeleted(it.city))
                 },
