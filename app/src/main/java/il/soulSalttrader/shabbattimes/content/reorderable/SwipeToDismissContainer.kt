@@ -22,8 +22,7 @@ import kotlinx.coroutines.launch
 fun <T> SwipeToDismissContainer(
     item: T,
     modifier: Modifier = Modifier,
-    leftSwipe: SwipeConfig<T>,
-    rightSwipe: SwipeConfig<T>,
+    swipeConfig: SwipeConfig<T>,
     content: @Composable () -> Unit,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -32,8 +31,8 @@ fun <T> SwipeToDismissContainer(
 
     LaunchedEffect(dismissState.currentValue) {
         when (dismissState.currentValue) {
-            SwipeToDismissBoxValue.EndToStart -> if (leftSwipe.isEnabled) showDeleteDialog = true
-            SwipeToDismissBoxValue.StartToEnd -> if (rightSwipe.isEnabled) rightSwipe.onSwipe(item)
+            SwipeToDismissBoxValue.EndToStart -> if (swipeConfig.toLeft.isEnabled) showDeleteDialog = true
+            SwipeToDismissBoxValue.StartToEnd -> if (swipeConfig.toRight.isEnabled) swipeConfig.onSwipe(item)
             else                              -> {}
         }
     }
@@ -43,13 +42,12 @@ fun <T> SwipeToDismissContainer(
         modifier = modifier,
         backgroundContent = {
             SwipeBackground(
-                dismissState,
-                leftAction = leftSwipe.action,
-                rightAction = rightSwipe.action,
+                dismissState = dismissState,
+                swipeConfig = swipeConfig,
             )
         },
-        enableDismissFromStartToEnd = rightSwipe.isEnabled,
-        enableDismissFromEndToStart = leftSwipe.isEnabled,
+        enableDismissFromStartToEnd = swipeConfig.toRight.isEnabled,
+        enableDismissFromEndToStart = swipeConfig.toLeft.isEnabled,
     ) { content() }
 
     if (showDeleteDialog) {
@@ -59,7 +57,7 @@ fun <T> SwipeToDismissContainer(
             onConfirmText = "Delete",
             onDismissText = "Undo",
             onConfirm = {
-                leftSwipe.onSwipe(item)
+                swipeConfig.onSwipe(item)
                 showDeleteDialog = false
             },
             onDismiss = {
