@@ -25,11 +25,10 @@ import il.soulSalttrader.shabbattimes.content.FabMenu
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfigs
 import il.soulSalttrader.shabbattimes.content.reorderable.rememberReorderableState
+import il.soulSalttrader.shabbattimes.content.reorderable.reorderableSection
 import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
-import il.soulSalttrader.shabbattimes.content.reorderable.reorderableSection
-import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
@@ -46,7 +45,10 @@ fun ShabbatContent(
     hasQuery: Boolean,
     searchActive: Boolean,
     onChangeVisibility: (Boolean) -> Unit,
-    searchDispatch: (AppEvent) -> Unit,
+    onSearchCommitted: () -> Unit,
+    onSuggestionSelected: (City) -> Unit,
+    onQueryChanged: (String) -> Unit,
+    onQueryCleared: () -> Unit,
 ) {
     val state = rememberReorderableState(items = halachicTimesDisplay, keyOf = { it.city.id })
 
@@ -89,7 +91,11 @@ fun ShabbatContent(
             suggestions = suggestions,
             hasQuery = hasQuery,
             searchActive = searchActive,
-            searchDispatch = searchDispatch,
+            onChangeVisibility = onChangeVisibility,
+            onSearchCommitted = onSearchCommitted,
+            onSuggestionSelected = onSuggestionSelected,
+            onQueryChanged = onQueryChanged,
+            onQueryCleared = onQueryCleared,
         )
 
         AnimatedSearchFab(
@@ -121,7 +127,11 @@ private fun BoxScope.AnimatedSearchOverlay(
     suggestions: List<City>,
     hasQuery: Boolean,
     searchActive: Boolean,
-    searchDispatch: (AppEvent) -> Unit,
+    onChangeVisibility: (Boolean) -> Unit,
+    onSearchCommitted: () -> Unit,
+    onSuggestionSelected: (City) -> Unit,
+    onQueryChanged: (String) -> Unit,
+    onQueryCleared: () -> Unit,
 ) {
     AnimatedVisibility(
         visible = searchActive,
@@ -131,8 +141,12 @@ private fun BoxScope.AnimatedSearchOverlay(
         CitySearchScreen(
             suggestions = suggestions,
             hasQuery = hasQuery,
-            searchDispatch = searchDispatch,
             expanded = searchActive,
+            onChangeVisibility = onChangeVisibility,
+            onSearchCommitted = onSearchCommitted,
+            onSuggestionSelected = onSuggestionSelected,
+            onQueryChanged = onQueryChanged,
+            onQueryCleared = onQueryCleared,
             modifier = modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 48.dp),
