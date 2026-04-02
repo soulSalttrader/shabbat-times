@@ -6,6 +6,12 @@ import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 
 sealed interface PermissionEvent : AppEvent, Reducible<ShabbatUiState> {
+    data object ShowEducation : PermissionEvent {
+        override val reducer = ShabbatReducer { state ->
+            state.copy(permission = PermissionState.Education)
+        }
+    }
+
     data object Request : PermissionEvent {
         override val reducer = ShabbatReducer { state ->
             state.copy(permission = PermissionState.Requesting)

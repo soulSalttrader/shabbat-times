@@ -25,19 +25,27 @@ fun HandlePermissions(
             val result = permissionHandler.request(permissions)
 
             when (result) {
-                is PermissionResult.Granted ->
-                    dispatch(PermissionEvent.AllGranted)
-
-                is PermissionResult.Explain ->
-                    dispatch(PermissionEvent.DeniedWithRationale)
-
-                is PermissionResult.Blocked ->
-                    dispatch(PermissionEvent.DeniedPermanently)
+                is PermissionResult.Granted -> dispatch(PermissionEvent.AllGranted)
+                is PermissionResult.Explain -> dispatch(PermissionEvent.DeniedWithRationale)
+                is PermissionResult.Blocked -> dispatch(PermissionEvent.DeniedPermanently)
             }
         }
     }
 
     when (permissionState) {
+        PermissionState.Education -> {
+            ExplanatoryDialog(
+                message = "To show candle lightning and havdalah time for your current position, " +
+                        "the app needs access to your location.\n" +
+                        "\n" +
+                        "Your location is only used locally — never stored or shared.",
+                title = "Times, wherever you are",
+                onConfirmText = "Continue",
+                onConfirm = { dispatch(PermissionEvent.Request) },
+                onDismissText = "Add manually instead",
+                onDismiss = { dispatch(PermissionEvent.DismissedRationale) },
+            )
+        }
         PermissionState.Denied            -> {
             ExplanatoryDialog(
                 message = "We need location to show accurate zmanim times.",
