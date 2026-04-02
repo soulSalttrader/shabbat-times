@@ -4,6 +4,7 @@ import il.soulSalttrader.shabbattimes.model.State
 
 sealed interface PermissionState : State {
     data object Idle : PermissionState
+    data object Education : PermissionState
     data object Requesting : PermissionState
 
     data object Granted : PermissionState
