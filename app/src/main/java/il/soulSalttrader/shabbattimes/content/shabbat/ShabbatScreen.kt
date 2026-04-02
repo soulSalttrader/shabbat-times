@@ -21,6 +21,7 @@ import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
+import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.permission.openAppSettings
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel
 import il.soulSalttrader.shabbattimes.viewModel.ShabbatViewModel
@@ -58,7 +59,12 @@ fun ShabbatScreen() {
                     action = searchViewModel.default(),
                 ),
 
-                onClick = { shabbatViewModel.dispatch(PermissionEvent.Request)},
+                onClick = {
+                    when (shabbatState.permission) {
+                        PermissionState.Granted -> shabbatViewModel.dispatch(PermissionEvent.Request)
+                        else                    -> shabbatViewModel.dispatch(PermissionEvent.ShowEducation)
+                    }
+                },
             )
         }
 
@@ -85,11 +91,13 @@ fun ShabbatScreen() {
         searchViewModel.effects.collect { effect ->
             when (effect) {
                 is AppEffect.ShowToast -> {
-                    if (Debug.enabled) { Log.d("ShabbatScreen", "Toast: $effect ${effect.message}") }
+                    if (Debug.enabled) {
+                        Log.d("ShabbatScreen", "Toast: $effect ${effect.message}")
+                    }
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
 
-                else -> Unit
+                else                   -> Unit
             }
         }
     }
@@ -98,11 +106,13 @@ fun ShabbatScreen() {
         shabbatViewModel.effects.collect { effect ->
             when (effect) {
                 is AppEffect.OpenAppSettings -> {
-                    if (Debug.enabled) { Log.d("ShabbatScreen", "OpenAppSettings: $shabbatState") }
+                    if (Debug.enabled) {
+                        Log.d("ShabbatScreen", "OpenAppSettings: $shabbatState")
+                    }
                     context.openAppSettings()
                 }
 
-                else -> Unit
+                else                         -> Unit
             }
         }
     }
