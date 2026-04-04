@@ -19,19 +19,23 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T> SwipeToDismissContainer(
+fun <T> SwipeableItem(
     item: T,
     modifier: Modifier = Modifier,
     swipeConfig: SwipeConfig<T>,
+    message: String = "This action cannot be undone.",
+    title: String = "Delete item?",
+    onConfirmText: String = "Delete",
+    onDismissText: String = "Undo",
     content: @Composable () -> Unit,
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    val dismissState = rememberSwipeToDismissState()
+    var showDialog by remember { mutableStateOf(false) }
+    val dismissState = rememberSwipeItemState()
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(dismissState.currentValue) {
         when (dismissState.currentValue) {
-            SwipeToDismissBoxValue.EndToStart -> if (swipeConfig.toLeft.isEnabled) showDeleteDialog = true
+            SwipeToDismissBoxValue.EndToStart -> if (swipeConfig.toLeft.isEnabled) showDialog = true
             SwipeToDismissBoxValue.StartToEnd -> if (swipeConfig.toRight.isEnabled) swipeConfig.onSwipe(item)
             else                              -> {}
         }
@@ -42,7 +46,7 @@ fun <T> SwipeToDismissContainer(
         modifier = modifier,
         backgroundContent = {
             SwipeBackground(
-                dismissState = dismissState,
+                state = dismissState,
                 swipeConfig = swipeConfig,
             )
         },
@@ -50,18 +54,18 @@ fun <T> SwipeToDismissContainer(
         enableDismissFromEndToStart = swipeConfig.toLeft.isEnabled,
     ) { content() }
 
-    if (showDeleteDialog) {
+    if (showDialog) {
         ExplanatoryDialog(
-            message = "This action cannot be undone.",
-            title = "Delete item?",
-            onConfirmText = "Delete",
-            onDismissText = "Undo",
+            message = message,
+            title = title,
+            onConfirmText = onConfirmText,
+            onDismissText = onDismissText,
             onConfirm = {
                 swipeConfig.onSwipe(item)
-                showDeleteDialog = false
+                showDialog = false
             },
             onDismiss = {
-                showDeleteDialog = false
+                showDialog = false
                 coroutineScope.launch { dismissState.reset() }
             },
             onConfirmColor = { MaterialTheme.colorScheme.error },
@@ -78,7 +82,7 @@ fun <T> SwipeToDismissContainer(
  * removed and re-added to the list, to prevent stale swipe state from being restored.
  */
 @Composable
-private fun rememberSwipeToDismissState(
+private fun rememberSwipeItemState(
     initialValue: SwipeToDismissBoxValue = SwipeToDismissBoxValue.Settled,
     positionalThreshold: (totalDistance: Float) -> Float = SwipeToDismissBoxDefaults.positionalThreshold,
 ): SwipeToDismissBoxState = remember {

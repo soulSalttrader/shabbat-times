@@ -19,7 +19,7 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-fun <T> LazyListScope.reorderableSection(
+fun <T> LazyListScope.reorderableList(
     state: ReorderableLazyListState,
     items: List<T>,
     header: String,
@@ -39,7 +39,7 @@ fun <T> LazyListScope.reorderableSection(
             state = state,
             key = keyOf(item),
         ) {
-            SwipeToDismissContainer(
+            SwipeableItem(
                 item = item,
                 swipeConfig = swipeConfig,
             ) {
