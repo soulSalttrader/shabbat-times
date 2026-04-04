@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.content.FabMenu
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.content.reorderable.rememberReorderableState
-import il.soulSalttrader.shabbattimes.content.reorderable.reorderableSection
+import il.soulSalttrader.shabbattimes.content.reorderable.reorderableList
 import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
@@ -54,7 +54,7 @@ fun ShabbatContent(
             contentPadding = PaddingValues(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            reorderableSection(
+            reorderableList(
                 state = state.reorderableState,
                 header = "My locations",
                 items = state.list,
