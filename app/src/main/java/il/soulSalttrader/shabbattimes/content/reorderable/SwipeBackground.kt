@@ -16,10 +16,10 @@ import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 
 @Composable
 fun <T> SwipeBackground(
-    dismissState: SwipeToDismissBoxState,
+    state: SwipeToDismissBoxState,
     swipeConfig: SwipeConfig<T>,
 ) {
-    val direction = dismissState.dismissDirection
+    val direction = state.dismissDirection
     val swipe = when (direction) {
         SwipeToDismissBoxValue.StartToEnd -> swipeConfig.toRight
         else -> swipeConfig.toLeft
