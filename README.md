@@ -13,6 +13,7 @@ over-engineered solutions to showcase design trade-offs and scalability.
 3. [Navigation](#3--navigation)
 4. [Permissions Management](#4--permissions-management)
 5. [Search Architecture](#5--search-architecture)
+6. [Reorderable cards](#6--reorderable-cards)
 
 ---
 
@@ -31,10 +32,17 @@ applies the appropriate halachic offsets (+42 min / −18 min).
 - Some interactions and data flows are still under active development.
 
 <p align="start">
-  <img src="docs/home_screen.png" width="180" />
-  <img src="docs/search_auto_dark.png" width="180" />
-  <img src="docs/home_screen_light.png" width="180" />
-  <img src="docs/search_auto_light.png" width="180" />
+  <img src="docs/init01.png" width="180" />
+  <img src="docs/init02%20(edu).png" width="180" />
+  <img src="docs/init03%20(perm).png" width="180" />
+  <img src="docs/init04%20(manually).png" width="180" />
+</p>
+
+<p align="start">
+  <img src="docs/list01.png" width="180" />
+  <img src="docs/list02%20(swipe).png" width="180" />
+  <img src="docs/list03%20(swipe).png" width="180" />
+  <img src="docs/list04%20(current).png" width="180" />
 </p>
 
 ---
@@ -72,21 +80,34 @@ fun ShabbatScreen() {
 
         is ShabbatResultState.Loading   -> LoadingScreen()
 
-        is ShabbatResultState.NoResults -> LoadingScreen()
+        is ShabbatResultState.NoResults -> {
+            ShabbatContent(
+                items = listOf(HalachicTimesDisplay()),
+                isDraggable = false,
+                searchConfig = SearchConfig(
+                    state = searchUiState.default(),
+                    action = searchViewModel.default(),
+                ),
+
+                onClick = {
+                    when (shabbatState.permission) {
+                        PermissionState.Granted -> shabbatViewModel.dispatch(PermissionEvent.Request)
+                        else                    -> shabbatViewModel.dispatch(PermissionEvent.ShowEducation)
+                    }
+                },
+            )
+        }
 
         is ShabbatResultState.Results   -> {
-            val suggestions = searchUiState.suggestionsOrEmpty()
-            val searchActive = searchUiState.isSearchActive()
-            val hasQuery = searchUiState.hasQuery()
-
             ShabbatContent(
-                halachicTimesDisplay = halachicTimes.data,
-                shabbatDispatch = shabbatViewModel::dispatch,
-
-                suggestions = suggestions,
-                hasQuery = hasQuery,
-                searchActive = searchActive,
-                searchDispatch = searchViewModel::dispatch,
+                items = halachicTimes.data,
+                swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) {
+                    shabbatViewModel.dispatch(ShabbatDataEvent.TimeDeleted(it.city))
+                },
+                searchConfig = SearchConfig(
+                    state = searchUiState.default(),
+                    action = searchViewModel.default(),
+                ),
             )
         }
 
@@ -100,11 +121,13 @@ fun ShabbatScreen() {
         searchViewModel.effects.collect { effect ->
             when (effect) {
                 is AppEffect.ShowToast -> {
-                    if (Debug.enabled) { Log.d("ShabbatScreen", "Toast: $effect ${effect.message}") }
+                    if (Debug.enabled) {
+                        Log.d("ShabbatScreen", "Toast: $effect ${effect.message}")
+                    }
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
 
-                else -> Unit
+                else                   -> Unit
             }
         }
     }
@@ -113,11 +136,13 @@ fun ShabbatScreen() {
         shabbatViewModel.effects.collect { effect ->
             when (effect) {
                 is AppEffect.OpenAppSettings -> {
-                    if (Debug.enabled) { Log.d("ShabbatScreen", "OpenAppSettings: $shabbatState") }
+                    if (Debug.enabled) {
+                        Log.d("ShabbatScreen", "OpenAppSettings: $shabbatState")
+                    }
                     context.openAppSettings()
                 }
 
-                else -> Unit
+                else                         -> Unit
             }
         }
     }
@@ -188,7 +213,7 @@ class ShabbatViewModel @Inject constructor(
         )
 
     fun dispatch(event: AppEvent) {
-        _state.update { current ->
+        val newState = _state.updateAndGet { current ->
             when (event) {
                 is ShabbatDataEvent -> event.reducer reduce current
                 is PermissionEvent  -> event.reducer reduce current
@@ -199,7 +224,16 @@ class ShabbatViewModel @Inject constructor(
 
         when (event) {
             is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
+            is ShabbatDataEvent.TimeDeleted         -> handleDeleteTime(newState)
             else                                    -> Unit
+        }
+    }
+
+    private fun handleDeleteTime(state: ShabbatUiState) {
+        val city = state.selectedCity.normalizedOrNull() ?: return
+
+        viewModelScope.launch {
+            cityRepository.removeCity(city)
         }
     }
 }
@@ -237,6 +271,7 @@ interface ShabbatRepository {
 interface CityRepository {
     val cities: Flow<List<City>>
     suspend fun addCity(city: City)
+    suspend fun removeCity(city: City)
 
     suspend fun geocodeAutocomplete(query: String): NetworkResult<List<City>>
     suspend fun geocodeForward(query: String): NetworkResult<City?>
@@ -280,7 +315,7 @@ suspend fun getSolarTimes(
 ```
 
 ```kotlin
-    @GET("autocomplete")
+@GET("autocomplete")
 suspend fun autocomplete(
     @Query("text") queryText: String,
     @Query("filter") countryFilter: String? = null,
@@ -364,11 +399,14 @@ data class HalachicTimes(
 #### 🟡 3. Display model (used only by UI):
 
 ```kotlin
+@Serializable
 data class HalachicTimesDisplay(
-    val candleLightingTime: String = "",
+    val city: City = SeedCities.NONE,
+    val candleLightingTime: String = "--:--",
     val candleLightingDate: String = "",
-    val havdalahTime: String = "",
+    val havdalahTime: String = "--:--",
     val havdalahDate: String = "",
+    val locationStatus: LocationStatus = LocationStatus.Unknown,
 )
 ```
 
@@ -421,7 +459,6 @@ fun LocalDate.toDisplayString(): String
 #### 🟠 1. The app currently includes:
 
 - Initial Shabbat screen with:
-    - Hardcoded Jerusalem location
     - Candle lighting date & time
     - Havdalah date & time
     - Fully functional REST API integration
@@ -517,19 +554,20 @@ cityRepository.cities → halachicTimesFlow
 
   ```kotlin
   fun dispatch(event: AppEvent) {
-        _state.update { current ->
-            when (event) {
-                is ShabbatDataEvent -> event.reducer reduce current
-                is PermissionEvent  -> event.reducer reduce current
-                is LocationEvent    -> event.reducer reduce current
-                else                -> current
-            }
-        }
+      val newState = _state.updateAndGet { current ->
+          when (event) {
+              is ShabbatDataEvent -> event.reducer reduce current
+              is PermissionEvent  -> event.reducer reduce current
+              is LocationEvent    -> event.reducer reduce current
+              else                -> current
+          }
+      }
 
-        when (event) {
-            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
-            else                                    -> Unit
-        }
+      when (event) {
+          is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
+          is ShabbatDataEvent.TimeDeleted         -> handleDeleteTime(newState)
+          else                                    -> Unit
+      }
   }
   ```
 
@@ -1575,7 +1613,7 @@ class SearchViewModel @Inject constructor(
 }
 ```
 
-[!TIP] The Reactive Bridge: Note that the SearchViewModel never communicates with the ShabbatViewModel directly. It simply updates the CityRepository, which the ShabbatViewModel observes reactively. This decoupling ensures that adding a city from any part of the app (Search, Location Services, or Defaults) automatically updates the Shabbat times globally.
+> The Reactive Bridge: Note that the SearchViewModel never communicates with the ShabbatViewModel directly. It simply updates the CityRepository, which the ShabbatViewModel observes reactively. This decoupling ensures that adding a city from any part of the app (Search, Location Services, or Defaults) automatically updates the Shabbat times globally.
 
 ### 5.2 💾 Data Layer (InMemoryCityRepository)
 
@@ -1632,6 +1670,12 @@ class InMemoryCityRepository @Inject constructor(
         }
     }
 
+    override suspend fun removeCity(city: City) {
+        _cities.update { cities ->
+            cities.filter { it.id != city.id }
+        }
+    }
+
     override suspend fun geocodeAutocomplete(query: String) = withContext(dispatcher) {
         val normalized = query.trim()
         if (normalized.length < 2) {
@@ -1654,3 +1698,88 @@ class InMemoryCityRepository @Inject constructor(
     }
 }
 ```
+
+## 6. 🔀 Reorderable Cards
+Cards support both drag-to-reorder and swipe-to-delete, implemented as a generic, self-contained container that wraps any card type.
+
+### Drag & Drop
+Long-press the drag handle icon (visible on draggable card) to enter drag mode and reorder cards freely.
+
+### Swipe to Delete
+Swipe a card left to trigger deletion. A confirmation dialog appears before the card is removed, preventing accidental deletes.
+
+### Usage
+The reorderable container is generic and composable — it works with any item type and plugs into an existing LazyColumn:
+
+```kotlin
+fun <T> LazyListScope.reorderableSection(
+    state: ReorderableLazyListState,
+    items: List<T>,
+    header: String,
+    keyOf: (T) -> Any,
+    swipeConfig: SwipeConfig<T>,
+    content: @Composable (T, Modifier) -> Unit,
+) {
+    item(header) {
+        Text(
+            text = header,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        )
+    }
+
+    items(items, key = { keyOf(it) }) { item ->
+        ReorderableItem(
+            state = state,
+            key = keyOf(item),
+        ) {
+            SwipeableItem(
+                item = item,
+                swipeConfig = swipeConfig,
+            ) {
+                content(item, Modifier.draggableHandle())
+            }
+        }
+    }
+}
+```
+
+then
+
+```kotlin
+@Composable
+fun ShabbatContent(
+  items: List<HalachicTimesDisplay>,
+  swipeConfig: SwipeConfig<HalachicTimesDisplay> = SwipeConfig(),
+  searchConfig: SearchConfig,
+  isDraggable: Boolean = true,
+
+  onClick: () -> Unit = {},
+) {
+    val state = rememberReorderableState(items = items, keyOf = { it.city.id })
+    
+    //... 
+    LazyColumn(
+          state = state.lazyListState,
+          contentPadding = PaddingValues(vertical = 8.dp),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        reorderableSection(
+            state = state.reorderableState,
+            header = "My locations",
+            items = state.list,
+            keyOf = { it.city.id },
+            swipeConfig = swipeConfig,
+        ) { item, modifier ->
+            ShabbatCard(
+                modifier = modifier,
+                item = item,
+                isDraggable = isDraggable,
+                locationStatus = item.locationStatus,
+                onClick = { onClick() }
+            )
+        }
+    }
+    //...
+```
+
+Both draggable and swipeable can be toggled independently via parameters, making the container reusable across different screens with different interaction needs. 
