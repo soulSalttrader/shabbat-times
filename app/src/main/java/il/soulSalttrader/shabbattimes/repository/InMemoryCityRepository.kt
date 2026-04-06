@@ -59,7 +59,13 @@ class InMemoryCityRepository @Inject constructor(
     override suspend fun geocodeReverse(
         latitude: Double,
         longitude: Double,
-    ): NetworkResult<City?> {
-        TODO("Not yet implemented")
+    ): NetworkResult<City> = withContext(dispatcher) {
+        runCatching {
+            val response = geoapifyService.api.reverseGeocode(lat = latitude, lon = longitude)
+            response.results?.firstOrNull()?.toCityDomain() ?: SeedCities.NONE
+        }.fold(
+            onSuccess = { city -> NetworkResult.Success(data = city) },
+            onFailure = { e -> NetworkResult.Failure(message = "Reverse geocode failed: ${e.message}", cause = e.cause) }
+        )
     }
 }
