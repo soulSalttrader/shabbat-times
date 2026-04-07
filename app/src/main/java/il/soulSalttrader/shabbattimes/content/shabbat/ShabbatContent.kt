@@ -65,7 +65,7 @@ fun ShabbatContent(
                     modifier = modifier,
                     item = item,
                     isDraggable = isDraggable,
-                    locationStatus = item.locationStatus,
+                    locationStatus = item.city.locationStatus,
                     onClick = { onClick() }
                 )
             }

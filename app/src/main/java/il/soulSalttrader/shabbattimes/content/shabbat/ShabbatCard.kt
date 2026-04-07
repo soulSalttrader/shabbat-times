@@ -35,7 +35,7 @@ fun ShabbatCard(
     locationStatus: LocationStatus,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(16.dp),
-    colors: CardColors = getDefaultCardColors(item.locationStatus),
+    colors: CardColors = getDefaultCardColors(item.city.locationStatus),
     elevation: CardElevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
     locationLabel: String = locationStatus.getLocationLabels(),
     isDraggable: Boolean = false,

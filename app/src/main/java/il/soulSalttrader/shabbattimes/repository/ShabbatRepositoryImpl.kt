@@ -65,16 +65,6 @@ class ShabbatRepositoryImpl @Inject constructor(
         val candleLightingOffsetMinutes = 18L
         val havdalahOffsetMinutes = 40L
 
-        val distanceJerusalemToNycKm = 9195
-        val distanceJerusalemToBrnoKm = 2319
-
-        val locationStatus = when (city) {
-            JERUSALEM -> LocationStatus.Current
-            NEW_YORK -> LocationStatus.Distance(distanceJerusalemToNycKm)
-            BRNO -> LocationStatus.Distance(distanceJerusalemToBrnoKm)
-            else -> LocationStatus.Unknown
-        }
-
         runCatching {
             awaitAll(
                 async { getSolarTimes(friday, city) },
@@ -89,7 +79,6 @@ class ShabbatRepositoryImpl @Inject constructor(
                         candleLightingDate = friday,
                         havdalahTime = saturdaySolar.sunset.plusMinutes(havdalahOffsetMinutes),
                         havdalahDate = saturday,
-                        locationStatus = locationStatus,
                     ).toDisplay(context)
                 )
             },

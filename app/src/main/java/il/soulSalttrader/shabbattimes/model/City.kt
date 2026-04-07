@@ -1,5 +1,6 @@
 package il.soulSalttrader.shabbattimes.model
 
+import il.soulSalttrader.shabbattimes.location.LocationStatus
 import kotlinx.serialization.Serializable
 import java.time.ZoneId
 
@@ -8,6 +9,7 @@ data class City(
     val id: String,
     val name: String,
     val coordinates: Coordinates,
+    val locationStatus: LocationStatus = LocationStatus.Unknown,
     @Serializable(with = ZoneIdAsStringSerializer::class)
     val timeZone: ZoneId,
     val timeFormat: Int = 24,
