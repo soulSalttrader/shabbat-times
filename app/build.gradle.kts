@@ -118,4 +118,6 @@ dependencies {
     implementation(libs.material3)
 
     implementation(libs.reorderable)
+
+    implementation(libs.play.services.location)
 }
