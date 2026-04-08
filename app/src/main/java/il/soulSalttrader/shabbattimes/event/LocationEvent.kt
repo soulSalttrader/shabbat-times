@@ -20,13 +20,19 @@ sealed interface LocationEvent : AppEvent, Reducible<LocationUiState> {
                 },
                 data = when (state.data.city) {
                     SeedCities.NONE, null -> LocationData()
-                    else            -> LocationData(city = state.data.city)
+                    else                  -> LocationData(city = state.data.city)
                 },
                 status = when (state.data.city) {
                     SeedCities.NONE, null -> LocationStatus.Unknown
-                    else            -> LocationStatus.Current
+                    else                  -> LocationStatus.Current
                 },
             )
+        }
+    }
+
+    class LoadFailed(val message: String, val cause: Throwable?) : LocationEvent {
+        override val reducer = LocationReducer { state ->
+            state.copy(state = LocationState.Unavailable(message, cause))
         }
     }
 }
