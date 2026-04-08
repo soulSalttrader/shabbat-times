@@ -2,27 +2,31 @@ package il.soulSalttrader.shabbattimes.event
 
 import il.soulSalttrader.shabbattimes.location.LocationData
 import il.soulSalttrader.shabbattimes.location.LocationState
-import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
+import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.location.LocationUiState
+import il.soulSalttrader.shabbattimes.reducer.LocationReducer
 import il.soulSalttrader.shabbattimes.reducer.Reducible
-import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
+import il.soulSalttrader.shabbattimes.repository.SeedCities
 
-sealed interface LocationEvent : AppEvent, Reducible<ShabbatUiState> {
+sealed interface LocationEvent : AppEvent, Reducible<LocationUiState> {
 
-    data object Load : LocationEvent {
-        override val reducer = ShabbatReducer { state -> state.copy(location = LocationState.Loading) }
-    }
-
-    sealed interface Loaded : LocationEvent {
-        data class Success(val location: LocationData) : Loaded {
-            override val reducer = ShabbatReducer { state ->
-                state.copy(location = LocationState.Current(location))
-            }
-        }
-
-        data class Failure(val message: String, val cause: Throwable? = null) : Loaded {
-            override val reducer = ShabbatReducer { state ->
-                state.copy(location = LocationState.Unavailable(message, cause))
-            }
+    data object LocationLoaded : LocationEvent {
+        override val reducer = LocationReducer { state ->
+            state.copy(
+                state = when (state.data.city) {
+                    SeedCities.NONE -> LocationState.Idle
+                    null            -> LocationState.Unavailable("City not found")
+                    else            -> LocationState.Current(location = LocationData(city = state.data.city))
+                },
+                data = when (state.data.city) {
+                    SeedCities.NONE, null -> LocationData()
+                    else            -> LocationData(city = state.data.city)
+                },
+                status = when (state.data.city) {
+                    SeedCities.NONE, null -> LocationStatus.Unknown
+                    else            -> LocationStatus.Current
+                },
+            )
         }
     }
 }
