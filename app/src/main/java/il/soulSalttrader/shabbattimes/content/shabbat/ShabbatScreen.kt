@@ -3,6 +3,7 @@ package il.soulSalttrader.shabbattimes.content.shabbat
 import android.Manifest
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,15 +18,19 @@ import il.soulSalttrader.shabbattimes.content.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.default
 import il.soulSalttrader.shabbattimes.effect.AppEffect
+import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
+import il.soulSalttrader.shabbattimes.location.LocationState
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.permission.openAppSettings
+import il.soulSalttrader.shabbattimes.viewModel.LocationViewModel
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel
 import il.soulSalttrader.shabbattimes.viewModel.ShabbatViewModel
 
+@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
 @Composable
 fun ShabbatScreen() {
     val shabbatViewModel: ShabbatViewModel = hiltViewModel()
@@ -33,6 +38,9 @@ fun ShabbatScreen() {
 
     val searchViewModel: SearchViewModel = hiltViewModel()
     val searchUiState by searchViewModel.state.collectAsStateWithLifecycle()
+
+    val locationViewModel: LocationViewModel = hiltViewModel()
+    val locationUiState by locationViewModel.state.collectAsStateWithLifecycle()
 
     HandlePermissions(
         permissions = listOf(
@@ -61,7 +69,7 @@ fun ShabbatScreen() {
 
                 onClick = {
                     when (shabbatState.permission) {
-                        PermissionState.Granted -> shabbatViewModel.dispatch(PermissionEvent.Request)
+                        PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.LocationLoaded)
                         else                    -> shabbatViewModel.dispatch(PermissionEvent.ShowEducation)
                     }
                 },
