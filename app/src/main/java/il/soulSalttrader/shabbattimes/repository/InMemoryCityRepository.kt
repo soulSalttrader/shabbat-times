@@ -3,10 +3,10 @@ package il.soulSalttrader.shabbattimes.repository
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.di.GeoapifyService
+import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.dto.toCityDomain
-import il.soulSalttrader.shabbattimes.repository.SeedCities.JERUSALEM
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,7 +20,7 @@ class InMemoryCityRepository @Inject constructor(
     private val geoapifyService: GeoapifyService,
     private val dispatcher: CoroutineDispatcher,
 ) : CityRepository {
-    private val _cities: MutableStateFlow<List<City>> = MutableStateFlow(listOf(JERUSALEM))
+    private val _cities: MutableStateFlow<List<City>> = MutableStateFlow(emptyList())
     override val cities: StateFlow<List<City>> = _cities
 
     override suspend fun addCity(city: City) {
@@ -33,6 +33,13 @@ class InMemoryCityRepository @Inject constructor(
     override suspend fun removeCity(city: City) {
         _cities.update { cities ->
             cities.filter { it.id != city.id }
+        }
+    }
+
+    override suspend fun setCurrentCity(city: City) {
+        require(city.locationStatus == LocationStatus.Current) { "city '${city}' must have Current status" }
+        _cities.update { cities ->
+            listOf(city) + cities.filter { it.locationStatus != LocationStatus.Current }
         }
     }
 
