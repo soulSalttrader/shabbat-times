@@ -1,38 +1,35 @@
 package il.soulSalttrader.shabbattimes.event
 
-import il.soulSalttrader.shabbattimes.location.LocationData
+import android.location.Location
 import il.soulSalttrader.shabbattimes.location.LocationState
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.LocationUiState
+import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.reducer.LocationReducer
 import il.soulSalttrader.shabbattimes.reducer.Reducible
-import il.soulSalttrader.shabbattimes.repository.SeedCities
 
 sealed interface LocationEvent : AppEvent, Reducible<LocationUiState> {
+    data object LocationRequested : LocationEvent {
+        override val reducer = LocationReducer { state ->
+            state.copy(location = LocationState.Loading)
+        }
+    }
 
-    data object LocationLoaded : LocationEvent {
+    data class LocationLoaded(val location: Location) : LocationEvent {
         override val reducer = LocationReducer { state ->
             state.copy(
-                state = when (state.data.city) {
-                    SeedCities.NONE -> LocationState.Idle
-                    null            -> LocationState.Unavailable("City not found")
-                    else            -> LocationState.Current(location = LocationData(city = state.data.city))
-                },
-                data = when (state.data.city) {
-                    SeedCities.NONE, null -> LocationData()
-                    else                  -> LocationData(city = state.data.city)
-                },
-                status = when (state.data.city) {
-                    SeedCities.NONE, null -> LocationStatus.Unknown
-                    else                  -> LocationStatus.Current
-                },
+                location = LocationState.Result(location),
+                status = LocationStatus.Current,
             )
         }
     }
 
-    class LoadFailed(val message: String, val cause: Throwable?) : LocationEvent {
+    data object CurrentLocationRemoved : LocationEvent {
         override val reducer = LocationReducer { state ->
-            state.copy(state = LocationState.Unavailable(message, cause))
+            state.copy(
+                permission = PermissionState.Idle,
+                location = LocationState.Idle,
+            )
         }
     }
 }
