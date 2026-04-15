@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 
 @HiltViewModel
@@ -88,6 +89,17 @@ class LocationViewModel @Inject constructor(
             emit(null)
         }
 
+    val state: StateFlow<LocationUiState> = combine(
+        _state,
+        locationFlow,
+        cityFlow,
+    ) { state, location, _ ->
+        location?.let { LocationEvent.LocationLoaded(it).reducer reduce state } ?: state
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = LocationUiState()
+    )
 
     fun dispatch(event: AppEvent) {
         _state.updateAndGet { current ->
