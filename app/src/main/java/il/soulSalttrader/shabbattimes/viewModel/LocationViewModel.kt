@@ -19,9 +19,13 @@ import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.CityRepository
 import jakarta.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
@@ -50,27 +54,18 @@ class LocationViewModel @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
-    private fun handleLocationLoaded(
+    private fun currentLocationFlow(
         priority: Int = Priority.PRIORITY_HIGH_ACCURACY,
-        interval: Long = 10_000L,
-    ) {
-        val locationRequest = LocationRequest.Builder(priority,interval)
-            .setMaxUpdates(1)
+        interval: Long = 1L,
+    ): Flow<Location> = callbackFlow {
+        val locationRequest = LocationRequest.Builder(priority, interval)
+            .setMinUpdateDistanceMeters(1000f)
             .build()
 
         val callback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 val location = result.locations.lastOrNull() ?: return
-                fusedClient.removeLocationUpdates(this)
-
-                viewModelScope.launch {
-                    repository.geocodeReverse(
-                        latitude = location.latitude,
-                        longitude = location.longitude,
-                    )
-                        .onSuccess("VMl") { city -> repository.addCity(city.copy(locationStatus = LocationStatus.Current)) }
-                        .onFailure("VMl") { e -> dispatch(LocationEvent.LoadFailed(e.message, e.cause)) }
-                }
+                trySend(location)
             }
         }
 
@@ -79,5 +74,7 @@ class LocationViewModel @Inject constructor(
             callback,
             Looper.getMainLooper(),
         )
+
+        awaitClose { fusedClient.removeLocationUpdates(callback) }
     }
 }
