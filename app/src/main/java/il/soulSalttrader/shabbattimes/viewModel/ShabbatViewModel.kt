@@ -7,7 +7,6 @@ import il.soulSalttrader.shabbattimes.content.normalizedOrNull
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
-import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.network.onFailure
@@ -91,13 +90,11 @@ class ShabbatViewModel @Inject constructor(
         val newState = _state.updateAndGet { current ->
             when (event) {
                 is ShabbatDataEvent -> event.reducer reduce current
-                is PermissionEvent  -> event.reducer reduce current
                 else                -> current
             }
         }
 
         when (event) {
-            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
             is ShabbatDataEvent.TimeDeleted         -> handleDeleteTime(newState)
             else                                    -> Unit
         }
