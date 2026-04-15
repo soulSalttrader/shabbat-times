@@ -21,7 +21,6 @@ import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
-import il.soulSalttrader.shabbattimes.location.LocationState
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.PermissionState
@@ -47,8 +46,8 @@ fun ShabbatScreen() {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
         ),
-        permissionState = shabbatState.permission,
-        dispatch = shabbatViewModel::dispatch,
+        permissionState = locationUiState.permission,
+        dispatch = locationViewModel::dispatch,
     )
 
     val context = LocalContext.current
@@ -71,6 +70,9 @@ fun ShabbatScreen() {
                     when (shabbatState.permission) {
                         PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.LocationLoaded)
                         else                    -> shabbatViewModel.dispatch(PermissionEvent.ShowEducation)
+                    when (locationUiState.permission) {
+                        PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.LocationRequested)
+                        else                    -> locationViewModel.dispatch(PermissionEvent.ShowEducation)
                     }
                 },
             )
@@ -111,11 +113,11 @@ fun ShabbatScreen() {
     }
 
     LaunchedEffect(Unit) {
-        shabbatViewModel.effects.collect { effect ->
+        locationViewModel.effects.collect { effect ->
             when (effect) {
                 is AppEffect.OpenAppSettings -> {
                     if (Debug.enabled) {
-                        Log.d("ShabbatScreen", "OpenAppSettings: $shabbatState")
+                        Log.d("ShabbatScreen", "OpenAppSettings: $locationUiState")
                     }
                     context.openAppSettings()
                 }
