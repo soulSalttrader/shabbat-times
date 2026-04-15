@@ -12,6 +12,7 @@ import com.google.android.gms.location.Priority
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.LocationEvent
+import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.LocationUiState
 import il.soulSalttrader.shabbattimes.network.onFailure
@@ -34,16 +35,17 @@ class LocationViewModel @Inject constructor(
     val state: StateFlow<LocationUiState> = _state.asStateFlow()
 
     fun dispatch(event: AppEvent) {
-        val newState = _state.updateAndGet { current ->
+        _state.updateAndGet { current ->
             when (event) {
                 is LocationEvent -> event.reducer reduce current
+                is PermissionEvent  -> event.reducer reduce current
                 else             -> current
             }
         }
 
         when (event) {
-            is LocationEvent.LocationLoaded -> handleLocationLoaded()
-            else -> newState
+            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
+            else -> Unit
         }
     }
 
