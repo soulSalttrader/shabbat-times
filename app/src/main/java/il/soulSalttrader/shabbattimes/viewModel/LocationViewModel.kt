@@ -23,8 +23,10 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -37,6 +39,8 @@ class LocationViewModel @Inject constructor(
 
     private val _state: MutableStateFlow<LocationUiState> = MutableStateFlow(LocationUiState())
     val state: StateFlow<LocationUiState> = _state.asStateFlow()
+    private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
+    val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
     fun dispatch(event: AppEvent) {
         _state.updateAndGet { current ->
