@@ -37,10 +37,13 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 
@@ -140,4 +143,11 @@ class LocationViewModel @Inject constructor(
 
         awaitClose { fusedClient.removeLocationUpdates(callback) }
     }
+
+    private val currentCityObserver = repository.cities
+        .map { cities -> cities.none { it.locationStatus == LocationStatus.Current } }
+        .distinctUntilChanged()
+        .filter { it }
+        .onEach { dispatch(LocationEvent.CurrentLocationRemoved) }
+        .launchIn(scope = viewModelScope)
 }
