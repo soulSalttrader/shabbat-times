@@ -22,6 +22,8 @@ import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.repository.CityRepository
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,8 +33,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.updateAndGet
-import kotlinx.coroutines.launch
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(
@@ -48,6 +53,16 @@ class LocationViewModel @Inject constructor(
     private val permissionFlow: Flow<PermissionState> = _state
         .map { state -> state.permission }
         .distinctUntilChanged()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val locationFlow: Flow<Location?> = permissionFlow
+        .flatMapLatest { permission ->
+            when (permission) {
+                is PermissionState.Granted -> currentLocationFlow()
+                else -> flowOf(null)
+            }
+        }
+
 
     fun dispatch(event: AppEvent) {
         _state.updateAndGet { current ->
