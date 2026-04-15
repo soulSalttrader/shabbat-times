@@ -1,6 +1,7 @@
 package il.soulSalttrader.shabbattimes.viewModel
 
 import android.annotation.SuppressLint
+import android.location.Location
 import android.os.Looper
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +11,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
@@ -17,6 +19,7 @@ import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.LocationUiState
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
+import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.repository.CityRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -38,9 +41,13 @@ class LocationViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<LocationUiState> = MutableStateFlow(LocationUiState())
-    val state: StateFlow<LocationUiState> = _state.asStateFlow()
+
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
+
+    private val permissionFlow: Flow<PermissionState> = _state
+        .map { state -> state.permission }
+        .distinctUntilChanged()
 
     fun dispatch(event: AppEvent) {
         _state.updateAndGet { current ->
