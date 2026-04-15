@@ -17,6 +17,7 @@ import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.LocationUiState
+import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.permission.PermissionState
@@ -33,8 +34,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.updateAndGet
@@ -61,6 +65,27 @@ class LocationViewModel @Inject constructor(
                 is PermissionState.Granted -> currentLocationFlow()
                 else -> flowOf(null)
             }
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    private val cityFlow: Flow<City?> = locationFlow
+        .flatMapLatest { location ->
+            location?.let {
+                flow<City?> {
+                    repository.geocodeReverse(it.latitude, it.longitude)
+                        .onSuccess("LocationVM") { city ->
+                            repository.setCurrentCity(city.copy(locationStatus = LocationStatus.Current))
+                            emit(city)
+                        }
+                        .onFailure("LocationVM") { e ->
+                            _effects.tryEmit(AppEffect.ShowToast(message = "Network failed"))
+                        }
+                }
+            } ?: flowOf(null)
+        }
+        .catch { throwable ->
+            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+            emit(null)
         }
 
 
