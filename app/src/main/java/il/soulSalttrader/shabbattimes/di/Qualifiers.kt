@@ -9,3 +9,7 @@ annotation class SolarTimesRetrofit
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class GeoapifyRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ApplicationScope
