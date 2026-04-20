@@ -3,7 +3,6 @@ package il.soulSalttrader.shabbattimes.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import il.soulSalttrader.shabbattimes.content.normalizedOrNull
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
@@ -28,19 +27,18 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
-import kotlinx.coroutines.launch
+
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
     private val shabbatRepository: ShabbatRepository,
-    private val cityRepository: CityRepository,
+    cityRepository: CityRepository,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val halachicTimesFlow: StateFlow<List<HalachicTimesDisplay>> =
-        cityRepository.cities
+    val halachicTimesFlow: StateFlow<List<HalachicTimesDisplay>> = cityRepository.cities
             .flatMapLatest { cities ->
                 cities.takeUnless { it.isEmpty() }
                     ?.let { nonEmptyCities ->
@@ -79,32 +77,18 @@ class ShabbatViewModel @Inject constructor(
         flow2 = halachicTimesFlow,
     ) { state, halachicTimes ->
         ShabbatDataEvent.TimesLoaded(halachicTimes).reducer reduce state
-    }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ShabbatUiState(),
-        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ShabbatUiState(),
+    )
 
     fun dispatch(event: AppEvent) {
-        val newState = _state.updateAndGet { current ->
+        _state.updateAndGet { current ->
             when (event) {
                 is ShabbatDataEvent -> event.reducer reduce current
                 else                -> current
             }
-        }
-
-        when (event) {
-            is ShabbatDataEvent.TimeDeleted         -> handleDeleteTime(newState)
-            else                                    -> Unit
-        }
-    }
-
-    private fun handleDeleteTime(state: ShabbatUiState) {
-        val city = state.selectedCity.normalizedOrNull() ?: return
-
-        viewModelScope.launch {
-            cityRepository.removeCity(city)
         }
     }
 }
