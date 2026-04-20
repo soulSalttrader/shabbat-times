@@ -1,15 +1,9 @@
 package il.soulSalttrader.shabbattimes.viewModel
 
-import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Looper
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.Priority
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
@@ -22,10 +16,10 @@ import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.repository.CityRepository
+import il.soulSalttrader.shabbattimes.repository.LocationRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +27,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -49,8 +42,8 @@ import kotlinx.coroutines.flow.updateAndGet
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(
-    private val repository: CityRepository,
-    private val fusedClient: FusedLocationProviderClient,
+    private val cityRepository: CityRepository,
+    private val locationRepository: LocationRepository,
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<LocationUiState> = MutableStateFlow(LocationUiState())
@@ -66,7 +59,7 @@ class LocationViewModel @Inject constructor(
     private val locationFlow: Flow<Location?> = permissionFlow
         .flatMapLatest { permission ->
             when (permission) {
-                is PermissionState.Granted -> currentLocationFlow()
+                is PermissionState.Granted -> locationRepository.location
                 else -> flowOf(null)
             }
         }
@@ -76,9 +69,9 @@ class LocationViewModel @Inject constructor(
         .flatMapLatest { location ->
             location?.let {
                 flow<City?> {
-                    repository.geocodeReverse(it.latitude, it.longitude)
+                    cityRepository.geocodeReverse(it.latitude, it.longitude)
                         .onSuccess("LocationVM") { city ->
-                            repository.setCurrentCity(city.copy(locationStatus = LocationStatus.Current))
+                            cityRepository.setCurrentCity(city.copy(locationStatus = LocationStatus.Current))
                             emit(city)
                         }
                         .onFailure("LocationVM") { e ->
@@ -119,32 +112,7 @@ class LocationViewModel @Inject constructor(
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun currentLocationFlow(
-        priority: Int = Priority.PRIORITY_HIGH_ACCURACY,
-        interval: Long = 1L,
-    ): Flow<Location> = callbackFlow {
-        val locationRequest = LocationRequest.Builder(priority, interval)
-            .setMinUpdateDistanceMeters(1000f)
-            .build()
-
-        val callback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                val location = result.locations.lastOrNull() ?: return
-                trySend(location)
-            }
-        }
-
-        fusedClient.requestLocationUpdates(
-            locationRequest,
-            callback,
-            Looper.getMainLooper(),
-        )
-
-        awaitClose { fusedClient.removeLocationUpdates(callback) }
-    }
-
-    private val currentCityObserver = repository.cities
+    private val currentCityObserver = cityRepository.cities
         .map { cities -> cities.none { it.locationStatus == LocationStatus.Current } }
         .distinctUntilChanged()
         .filter { it }
