@@ -21,16 +21,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
@@ -44,8 +43,6 @@ class CityViewModel @Inject constructor(
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
     private val _state: MutableStateFlow<CityUiState> = MutableStateFlow(value = CityUiState())
-    val state: StateFlow<CityUiState> = _state
-    val state: StateFlow<CityUiState> = _state.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     private val cityFlow: Flow<City?> = locationRepository.location
@@ -54,6 +51,7 @@ class CityViewModel @Inject constructor(
                 flow<City?> {
                     cityRepository.geocodeReverse(it.latitude, it.longitude)
                         .onSuccess("CityVM") { city ->
+                            cityRepository.setCurrentCity(city.copy(locationStatus = LocationStatus.Current))
                             emit(city)
                         }
                         .onFailure("CityVM") { e ->
@@ -67,12 +65,16 @@ class CityViewModel @Inject constructor(
             emit(null)
         }
 
-    init {
-        cityFlow
-            .filterNotNull()
-            .onEach { city -> dispatch(CityEvent.CurrentCityLoaded(city)) }
-            .launchIn(viewModelScope)
-    }
+    val state: StateFlow<CityUiState> = combine(
+        _state,
+        cityFlow,
+    ) { state, city ->
+        city?.let { CityEvent.CurrentCityLoaded(city).reducer reduce state } ?: state
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = CityUiState()
+    )
 
     fun dispatch(event: AppEvent) {
         val newState = _state.updateAndGet { current ->
@@ -84,16 +86,7 @@ class CityViewModel @Inject constructor(
 
         when (event) {
             is CityEvent.CityDeleted -> handleDeleteCity(newState)
-            is CityEvent.CurrentCityLoaded -> handleCurrentCityLoaded(newState)
             else                     -> Unit
-        }
-    }
-
-    private fun handleCurrentCityLoaded(state: CityUiState) {
-        val city = state.selectedCity.normalizedOrNull() ?: return
-
-        viewModelScope.launch {
-            cityRepository.setCurrentCity(city.copy(locationStatus = LocationStatus.Current))
         }
     }
 
