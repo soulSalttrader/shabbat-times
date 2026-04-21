@@ -11,6 +11,8 @@ import il.soulSalttrader.shabbattimes.repository.CityRepository
 import il.soulSalttrader.shabbattimes.repository.InMemoryCityRepository
 import il.soulSalttrader.shabbattimes.repository.LocationRepository
 import il.soulSalttrader.shabbattimes.repository.LocationRepositoryImpl
+import il.soulSalttrader.shabbattimes.repository.PermissionRepository
+import il.soulSalttrader.shabbattimes.repository.PermissionRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
 import il.soulSalttrader.shabbattimes.repository.ShabbatRepositoryImpl
 import il.soulSalttrader.shabbattimes.settings.UserPreferences
@@ -42,5 +44,10 @@ object RepositoryModule {
     fun provideLocationRepository(
         fusedClient: FusedLocationProviderClient,
         @ApplicationScope scope: CoroutineScope,
-    ): LocationRepository = LocationRepositoryImpl(fusedClient, scope)
+        permissionRepository: PermissionRepository,
+    ): LocationRepository = LocationRepositoryImpl(fusedClient, scope, permissionRepository)
+
+    @Provides
+    @Singleton
+    fun providePermissionRepository(): PermissionRepository = PermissionRepositoryImpl()
 }
