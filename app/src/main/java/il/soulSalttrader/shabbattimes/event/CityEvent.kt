@@ -14,4 +14,12 @@ sealed interface CityEvent : AppEvent, Reducible<CityUiState> {
             )
         }
     }
+
+    data class CurrentCityLoaded(val city: City) : CityEvent {
+        override val reducer = CityReducer { state ->
+            state.copy(
+                selectedCity = Selection.Selected(city),
+            )
+        }
+    }
 }
