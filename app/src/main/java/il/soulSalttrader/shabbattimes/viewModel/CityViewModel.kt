@@ -8,12 +8,12 @@ import il.soulSalttrader.shabbattimes.content.normalizedOrNull
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.CityEvent
-import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.CityRepository
 import il.soulSalttrader.shabbattimes.repository.LocationRepository
+import il.soulSalttrader.shabbattimes.useCase.ResolveCurrentCityUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 class CityViewModel @Inject constructor(
     private val cityRepository: CityRepository,
     locationRepository: LocationRepository,
+    private val resolveCurrentCity: ResolveCurrentCityUseCase,
 ) : ViewModel() {
 
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
@@ -49,14 +50,9 @@ class CityViewModel @Inject constructor(
         .flatMapLatest { location ->
             location?.let {
                 flow<City?> {
-                    cityRepository.geocodeReverse(it.latitude, it.longitude)
-                        .onSuccess("CityVM") { city ->
-                            cityRepository.setCurrentCity(city.copy(locationStatus = LocationStatus.Current))
-                            emit(city)
-                        }
-                        .onFailure("CityVM") { e ->
-                            _effects.tryEmit(AppEffect.ShowToast(message = "Network failed"))
-                        }
+                    resolveCurrentCity(lat = it.latitude, lng = it.longitude)
+                        .onSuccess("CityVM") { city -> emit(city) }
+                        .onFailure("CityVM") { _effects.tryEmit(AppEffect.ShowToast("Network failed")) }
                 }
             } ?: flowOf(null)
         }
