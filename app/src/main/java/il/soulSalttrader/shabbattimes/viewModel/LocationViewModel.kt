@@ -10,7 +10,9 @@ import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.location.LocationPermission
+import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.LocationUiState
+import il.soulSalttrader.shabbattimes.repository.CityRepository
 import il.soulSalttrader.shabbattimes.repository.LocationRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import jakarta.inject.Inject
@@ -23,13 +25,19 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(
+    cityRepository: CityRepository,
     private val locationRepository: LocationRepository,
     private val permissionRepository: PermissionRepository,
 ) : ViewModel() {
@@ -76,4 +84,14 @@ class LocationViewModel @Inject constructor(
             else -> Unit
         }
     }
+
+    private val currentCityObserver = cityRepository.cities
+        .map { cities -> cities.none { it.locationStatus == LocationStatus.Current } }
+        .distinctUntilChanged()
+        .filter { it }
+        .onEach {
+            dispatch(LocationEvent.CurrentLocationRemoved)
+            permissionRepository.updatePermissionState(LocationPermission.Denied)
+        }
+        .launchIn(scope = viewModelScope)
 }
