@@ -1,9 +1,9 @@
 package il.soulSalttrader.shabbattimes.repository
 
-import il.soulSalttrader.shabbattimes.permission.PermissionState
-import kotlinx.coroutines.flow.Flow
+import il.soulSalttrader.shabbattimes.location.LocationPermission
+import kotlinx.coroutines.flow.StateFlow
 
 interface PermissionRepository {
-    val permissionState: Flow<PermissionState>
-    fun updatePermissionState(state: PermissionState)
+    val permissionState: StateFlow<LocationPermission>
+    fun updatePermissionState(state: LocationPermission)
 }

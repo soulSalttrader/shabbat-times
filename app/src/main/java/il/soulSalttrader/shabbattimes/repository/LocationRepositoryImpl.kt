@@ -8,7 +8,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
-import il.soulSalttrader.shabbattimes.permission.PermissionState
+import il.soulSalttrader.shabbattimes.location.LocationPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -36,7 +36,7 @@ class LocationRepositoryImpl @Inject constructor(
     override val location: Flow<Location?> = permissionRepository.permissionState
         .flatMapLatest { permission ->
             when (permission) {
-                is PermissionState.Granted -> {
+                is LocationPermission.Granted -> {
                     callbackFlow<Location?> {
                         val request = LocationRequest.Builder(priority, interval)
                             .setMinUpdateDistanceMeters(minDistance)

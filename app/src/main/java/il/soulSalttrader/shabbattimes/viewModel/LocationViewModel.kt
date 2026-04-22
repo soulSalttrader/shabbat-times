@@ -9,10 +9,8 @@ import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
-import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.location.LocationPermission
 import il.soulSalttrader.shabbattimes.location.LocationUiState
-import il.soulSalttrader.shabbattimes.permission.PermissionState
-import il.soulSalttrader.shabbattimes.repository.CityRepository
 import il.soulSalttrader.shabbattimes.repository.LocationRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import jakarta.inject.Inject
@@ -25,19 +23,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(
-    cityRepository: CityRepository,
     private val locationRepository: LocationRepository,
     private val permissionRepository: PermissionRepository,
 ) : ViewModel() {
@@ -51,8 +43,8 @@ class LocationViewModel @Inject constructor(
     private val locationFlow: Flow<Location?> = permissionRepository.permissionState
         .flatMapLatest { permission ->
             when (permission) {
-                is PermissionState.Granted -> locationRepository.location
-                else -> flowOf(null)
+                is LocationPermission.Granted -> locationRepository.location
+                else                          -> flowOf(null)
             }
         }
 
@@ -77,18 +69,11 @@ class LocationViewModel @Inject constructor(
         }
 
         when (event) {
-            is PermissionEvent.AllGranted           -> permissionRepository.updatePermissionState(PermissionState.Granted)
-            is PermissionEvent.DeniedPermanently    -> permissionRepository.updatePermissionState(PermissionState.Denied)
-            is PermissionEvent.DeniedWithRationale  -> permissionRepository.updatePermissionState(PermissionState.Denied)
+            is PermissionEvent.AllGranted           -> permissionRepository.updatePermissionState(LocationPermission.Granted)
+            is PermissionEvent.DeniedPermanently    -> permissionRepository.updatePermissionState(LocationPermission.Denied)
+            is PermissionEvent.DeniedWithRationale  -> permissionRepository.updatePermissionState(LocationPermission.Denied)
             is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
             else -> Unit
         }
     }
-
-    private val currentCityObserver = cityRepository.cities
-        .map { cities -> cities.none { it.locationStatus == LocationStatus.Current } }
-        .distinctUntilChanged()
-        .filter { it }
-        .onEach { dispatch(LocationEvent.CurrentLocationRemoved) }
-        .launchIn(scope = viewModelScope)
 }
