@@ -10,7 +10,7 @@ import javax.inject.Singleton
 @Singleton
 class PermissionRepositoryImpl @Inject constructor() : PermissionRepository {
 
-    private val _permissionState = MutableStateFlow<LocationPermission>(LocationPermission.Denied)
+    private val _permissionState = MutableStateFlow<LocationPermission>(LocationPermission.Idle)
     override val permissionState: StateFlow<LocationPermission> = _permissionState
 
     override fun updatePermissionState(state: LocationPermission) {
