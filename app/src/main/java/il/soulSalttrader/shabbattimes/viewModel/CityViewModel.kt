@@ -50,7 +50,7 @@ class CityViewModel @Inject constructor(
         .flatMapLatest { location ->
             location?.let {
                 flow<City?> {
-                    resolveCurrentCity(lat = it.latitude, lng = it.longitude)
+                    resolveCurrentCity(location)
                         .onSuccess("CityVM") { city -> emit(city) }
                         .onFailure("CityVM") { _effects.tryEmit(AppEffect.ShowToast("Network failed")) }
                 }
