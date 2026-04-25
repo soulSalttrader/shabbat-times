@@ -1,6 +1,7 @@
 package il.soulSalttrader.shabbattimes.event
 
 import android.location.Location
+import il.soulSalttrader.shabbattimes.location.LocationPermission
 import il.soulSalttrader.shabbattimes.location.LocationState
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.LocationUiState
@@ -24,11 +25,17 @@ sealed interface LocationEvent : AppEvent, Reducible<LocationUiState> {
         }
     }
 
-    data object CurrentLocationRemoved : LocationEvent {
+    data class PermissionChanged(val permission: LocationPermission) : LocationEvent {
         override val reducer = LocationReducer { state ->
             state.copy(
-                permission = PermissionState.Idle,
-                location = LocationState.Idle,
+                permission = when (permission) {
+                    is LocationPermission.Idle              -> PermissionState.Idle
+                    is LocationPermission.Education         -> PermissionState.Education
+                    is LocationPermission.Requesting        -> PermissionState.Requesting
+                    is LocationPermission.Granted           -> PermissionState.Granted
+                    is LocationPermission.Denied            -> PermissionState.Denied
+                    is LocationPermission.DeniedPermanently -> PermissionState.DeniedPermanently
+                },
             )
         }
     }
