@@ -11,7 +11,7 @@ import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.CityRepository
-import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
+import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,15 +24,14 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    private val shabbatRepository: ShabbatRepository,
     cityRepository: CityRepository,
+    private val getHalachicTimes: GetHalachicTimesUseCase,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
@@ -40,24 +39,11 @@ class ShabbatViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val halachicTimesFlow: StateFlow<List<HalachicTimesDisplay>> = cityRepository.cities
             .flatMapLatest { cities ->
-                cities.takeUnless { it.isEmpty() }
-                    ?.let { nonEmptyCities ->
-                        flow {
-                            val results = shabbatRepository.getHalachicTimes(nonEmptyCities)
-                            val successes = mutableListOf<HalachicTimesDisplay>()
-
-                            results.forEach { result ->
-                                result
-                                    .onSuccess(tag = "ShabbatVM") { halachicTimesDisplay ->
-                                        successes.add(halachicTimesDisplay)
-                                    }
-                                    .onFailure(tag = "ShabbatVM") { e ->
-                                        _effects.tryEmit(value = AppEffect.ShowToast(message = "Network failed"))
-                                    }
-                            }
-                            emit(value = successes)
-                        }
-                    } ?: flowOf(emptyList())
+                flow {
+                    getHalachicTimes(cities)
+                        .onSuccess("ShabbatVM") { halachicTimes -> emit(halachicTimes) }
+                        .onFailure("ShabbatVM") { e -> _effects.tryEmit(value = AppEffect.ShowToast(message = "Network failed")) }
+                }
             }
             .catch {throwable ->
                 _effects.tryEmit(value = AppEffect.ShowToast(message = "Unexpected error: ${throwable.message}"))
