@@ -1,6 +1,7 @@
 package il.soulSalttrader.shabbattimes.event
 
 import il.soulSalttrader.shabbattimes.content.Selection
+import il.soulSalttrader.shabbattimes.content.city.CityStatus
 import il.soulSalttrader.shabbattimes.content.city.CityUiState
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.reducer.CityReducer
@@ -18,7 +19,9 @@ sealed interface CityEvent : AppEvent, Reducible<CityUiState> {
     data class CurrentCityLoaded(val city: City) : CityEvent {
         override val reducer = CityReducer { state ->
             state.copy(
-                selectedCity = Selection.Selected(city),
+                selectedCity = Selection.Selected(
+                    city.copy(status = CityStatus.Current)
+                ),
             )
         }
     }
