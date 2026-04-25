@@ -82,7 +82,7 @@ class CityViewModel @Inject constructor(
 
         when (event) {
             is CityEvent.CityDeleted -> handleDeleteCity(newState)
-            else                     -> Unit
+            else                     -> newState
         }
     }
 

@@ -98,7 +98,7 @@ class SearchViewModel @Inject constructor(
 
         when (event) {
             is SearchEvent.SuggestionSelected -> handleSuggestionSelected(newState)
-            else -> Unit
+            else -> newState
         }
     }
 
