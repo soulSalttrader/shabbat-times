@@ -32,12 +32,11 @@ import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 @Composable
 fun ShabbatCard(
     item: HalachicTimesDisplay,
-    cityStatus: CityStatus,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(16.dp),
     colors: CardColors = getDefaultCardColors(item.city.status),
     elevation: CardElevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-    cityLabel: String = cityStatus.getLocationLabels(),
+    cityLabel: String = item.city.status.getLocationLabels(),
     isDraggable: Boolean = false,
     onClick: () -> Unit = {},
 ) {
@@ -60,7 +59,7 @@ fun ShabbatCard(
             Column(modifier = Modifier.padding(16.dp).weight(1f)) {
                 CityTitle(item.city.name)
 
-                UiIconCityLabel(cityStatus, cityLabel)
+                UiIconCityLabel(item.city.status, cityLabel)
 
                 Spacer(Modifier.height(16.dp))
 
@@ -77,7 +76,7 @@ fun ShabbatCard(
                     modifier = modifier,
                     icon = UiIcon.Resource(R.drawable.drag_indicator),
                     contentDescription = "dragIndicator",
-                    contentColor = when (cityStatus) {
+                    contentColor = when (item.city.status) {
                         Current -> colors.contentColor
                         else    -> colors.contentColor
                     },
