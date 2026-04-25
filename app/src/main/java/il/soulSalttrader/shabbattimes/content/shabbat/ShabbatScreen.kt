@@ -13,11 +13,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.content.FailureScreen
 import il.soulSalttrader.shabbattimes.content.LoadingScreen
+import il.soulSalttrader.shabbattimes.content.normalizedOrNull
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.default
 import il.soulSalttrader.shabbattimes.effect.AppEffect
+import il.soulSalttrader.shabbattimes.event.CityEvent
 import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
@@ -25,6 +27,7 @@ import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.permission.openAppSettings
+import il.soulSalttrader.shabbattimes.viewModel.CityViewModel
 import il.soulSalttrader.shabbattimes.viewModel.LocationViewModel
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel
 import il.soulSalttrader.shabbattimes.viewModel.ShabbatViewModel
@@ -40,6 +43,9 @@ fun ShabbatScreen() {
 
     val locationViewModel: LocationViewModel = hiltViewModel()
     val locationUiState by locationViewModel.state.collectAsStateWithLifecycle()
+
+    val cityViewModel: CityViewModel = hiltViewModel()
+    val cityUiState by cityViewModel.state.collectAsStateWithLifecycle()
 
     HandlePermissions(
         permissions = listOf(
@@ -67,9 +73,6 @@ fun ShabbatScreen() {
                 ),
 
                 onClick = {
-                    when (shabbatState.permission) {
-                        PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.LocationLoaded)
-                        else                    -> shabbatViewModel.dispatch(PermissionEvent.ShowEducation)
                     when (locationUiState.permission) {
                         PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.LocationRequested)
                         else                    -> locationViewModel.dispatch(PermissionEvent.ShowEducation)
@@ -79,15 +82,23 @@ fun ShabbatScreen() {
         }
 
         is ShabbatResultState.Results   -> {
+            val city = cityUiState.selectedCity.normalizedOrNull() ?: return
             ShabbatContent(
                 items = halachicTimes.data,
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) {
-                    shabbatViewModel.dispatch(ShabbatDataEvent.TimeDeleted(it.city))
+                    cityViewModel.dispatch(CityEvent.CityDeleted(city))
                 },
                 searchConfig = SearchConfig(
                     state = searchUiState.default(),
                     action = searchViewModel.default(),
                 ),
+
+                onClick = {
+                    when (locationUiState.permission) {
+                        PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.LocationRequested)
+                        else                    -> locationViewModel.dispatch(PermissionEvent.ShowEducation)
+                    }
+                },
             )
         }
 
