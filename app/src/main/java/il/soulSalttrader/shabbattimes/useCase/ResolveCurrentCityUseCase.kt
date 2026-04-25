@@ -1,6 +1,6 @@
 package il.soulSalttrader.shabbattimes.useCase
 
-import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.content.city.CityStatus
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.onSuccess
@@ -14,7 +14,7 @@ class ResolveCurrentCityUseCase @Inject constructor(
         cityRepository.geocodeReverse(latitude = lat, longitude = lng)
             .also { result ->
                 result.onSuccess("UpdateCurrentCityUseCase") { city ->
-                    cityRepository.setCurrentCity(city.copy(locationStatus = LocationStatus.Current))
+                    cityRepository.setCurrentCity(city.copy(status = CityStatus.Current))
                 }
             }
 }

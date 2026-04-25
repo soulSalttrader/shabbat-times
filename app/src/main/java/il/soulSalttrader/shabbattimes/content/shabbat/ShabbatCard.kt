@@ -21,23 +21,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.content.city.CityStatus
+import il.soulSalttrader.shabbattimes.content.city.CityStatus.*
+import il.soulSalttrader.shabbattimes.content.city.getLocationLabels
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIcon
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconLabel
-import il.soulSalttrader.shabbattimes.location.LocationStatus
-import il.soulSalttrader.shabbattimes.location.LocationStatus.Current
-import il.soulSalttrader.shabbattimes.location.getLocationLabels
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
 @Composable
 fun ShabbatCard(
     item: HalachicTimesDisplay,
-    locationStatus: LocationStatus,
+    cityStatus: CityStatus,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(16.dp),
-    colors: CardColors = getDefaultCardColors(item.city.locationStatus),
+    colors: CardColors = getDefaultCardColors(item.city.status),
     elevation: CardElevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-    locationLabel: String = locationStatus.getLocationLabels(),
+    cityLabel: String = cityStatus.getLocationLabels(),
     isDraggable: Boolean = false,
     onClick: () -> Unit = {},
 ) {
@@ -60,7 +60,7 @@ fun ShabbatCard(
             Column(modifier = Modifier.padding(16.dp).weight(1f)) {
                 CityTitle(item.city.name)
 
-                UiIconLocationLabel(locationStatus, locationLabel)
+                UiIconCityLabel(cityStatus, cityLabel)
 
                 Spacer(Modifier.height(16.dp))
 
@@ -77,9 +77,9 @@ fun ShabbatCard(
                     modifier = modifier,
                     icon = UiIcon.Resource(R.drawable.drag_indicator),
                     contentDescription = "dragIndicator",
-                    contentColor = when (locationStatus) {
+                    contentColor = when (cityStatus) {
                         Current -> colors.contentColor
-                        else -> colors.contentColor
+                        else    -> colors.contentColor
                     },
                 )
             }
@@ -88,7 +88,7 @@ fun ShabbatCard(
 }
 
 @Composable
-private fun getDefaultCardColors(locationStatus: LocationStatus) = when (locationStatus) {
+private fun getDefaultCardColors(cityStatus: CityStatus) = when (cityStatus) {
     Current -> CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -129,18 +129,18 @@ private fun ShabbatKeyTimes(
 }
 
 @Composable
-private fun UiIconLocationLabel(
-    locationStatus: LocationStatus,
-    locationLabel: String,
+private fun UiIconCityLabel(
+    cityStatus: CityStatus,
+    cityLabel: String,
 ) {
     Row {
-        val icon = when (locationStatus is Current) {
+        val icon = when (cityStatus is Current) {
             true -> UiIcon.Resource(R.drawable.home_pin_24px)
             else -> null
         }
 
         UiIconLabel(
-            text = locationLabel,
+            text = cityLabel,
             icon = icon,
         )
     }

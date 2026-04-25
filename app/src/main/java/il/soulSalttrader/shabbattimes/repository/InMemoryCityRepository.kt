@@ -2,8 +2,8 @@ package il.soulSalttrader.shabbattimes.repository
 
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.content.city.CityStatus
 import il.soulSalttrader.shabbattimes.di.GeoapifyService
-import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.dto.toCityDomain
@@ -37,9 +37,9 @@ class InMemoryCityRepository @Inject constructor(
     }
 
     override suspend fun setCurrentCity(city: City) {
-        require(city.locationStatus == LocationStatus.Current) { "city '${city}' must have Current status" }
+        require(city.status == CityStatus.Current) { "city '${city}' must have Current status" }
         _cities.update { cities ->
-            listOf(city) + cities.filter { it.locationStatus != LocationStatus.Current }
+            listOf(city) + cities.filter { it.status != CityStatus.Current }
         }
     }
 
