@@ -29,6 +29,7 @@ import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.permission.openAppSettings
 import il.soulSalttrader.shabbattimes.viewModel.CityViewModel
 import il.soulSalttrader.shabbattimes.viewModel.LocationViewModel
+import il.soulSalttrader.shabbattimes.viewModel.PermissionViewModel
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel
 import il.soulSalttrader.shabbattimes.viewModel.ShabbatViewModel
 
@@ -47,13 +48,16 @@ fun ShabbatScreen() {
     val cityViewModel: CityViewModel = hiltViewModel()
     val cityUiState by cityViewModel.state.collectAsStateWithLifecycle()
 
+    val permissionViewModel: PermissionViewModel = hiltViewModel()
+    val permissionUiState by permissionViewModel.state.collectAsStateWithLifecycle()
+
     HandlePermissions(
         permissions = listOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
         ),
-        permissionState = locationUiState.permission,
-        dispatch = locationViewModel::dispatch,
+        permissionState = permissionUiState.permission,
+        dispatch = permissionViewModel::dispatch,
     )
 
     val context = LocalContext.current
@@ -73,9 +77,9 @@ fun ShabbatScreen() {
                 ),
 
                 onClick = {
-                    when (locationUiState.permission) {
+                    when (permissionUiState.permission) {
                         PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.LocationRequested)
-                        else                    -> locationViewModel.dispatch(PermissionEvent.ShowEducation)
+                        else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
                     }
                 },
             )
@@ -94,9 +98,9 @@ fun ShabbatScreen() {
                 ),
 
                 onClick = {
-                    when (locationUiState.permission) {
+                    when (permissionUiState.permission) {
                         PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.LocationRequested)
-                        else                    -> locationViewModel.dispatch(PermissionEvent.ShowEducation)
+                        else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
                     }
                 },
             )
@@ -124,11 +128,11 @@ fun ShabbatScreen() {
     }
 
     LaunchedEffect(Unit) {
-        locationViewModel.effects.collect { effect ->
+        permissionViewModel.effects.collect { effect ->
             when (effect) {
                 is AppEffect.OpenAppSettings -> {
                     if (Debug.enabled) {
-                        Log.d("ShabbatScreen", "OpenAppSettings: $locationUiState")
+                        Log.d("ShabbatScreen", "OpenAppSettings: $permissionUiState")
                     }
                     context.openAppSettings()
                 }

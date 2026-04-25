@@ -1,14 +1,12 @@
 package il.soulSalttrader.shabbattimes.viewModel
 
 import android.location.Location
-import android.os.Looper
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.LocationEvent
-import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.location.LocationPermission
 import il.soulSalttrader.shabbattimes.location.LocationUiState
 import il.soulSalttrader.shabbattimes.repository.LocationRepository
@@ -31,7 +29,7 @@ import kotlinx.coroutines.flow.updateAndGet
 @HiltViewModel
 class LocationViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
-    private val permissionRepository: PermissionRepository,
+    permissionRepository: PermissionRepository,
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<LocationUiState> = MutableStateFlow(LocationUiState())
@@ -51,10 +49,8 @@ class LocationViewModel @Inject constructor(
     val state: StateFlow<LocationUiState> = combine(
         _state,
         locationFlow,
-        permissionRepository.permissionState,
-    ) { state, location, permission ->
-        val withLocation = location?.let { LocationEvent.LocationLoaded(it).reducer reduce state } ?: state
-        LocationEvent.PermissionChanged(permission).reducer reduce withLocation
+    ) { state, location ->
+        location?.let { LocationEvent.LocationLoaded(it).reducer reduce state } ?: state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -64,21 +60,9 @@ class LocationViewModel @Inject constructor(
     fun dispatch(event: AppEvent) {
         _state.updateAndGet { current ->
             when (event) {
-                is PermissionEvent  -> event.reducer reduce current
+                is LocationEvent  -> event.reducer reduce current
                 else             -> current
             }
-        }
-
-        when (event) {
-            is PermissionEvent.AllGranted           -> permissionRepository.updatePermissionState(LocationPermission.Granted)
-            is PermissionEvent.DeniedPermanently    -> permissionRepository.updatePermissionState(LocationPermission.Denied)
-            is PermissionEvent.DeniedWithRationale  -> permissionRepository.updatePermissionState(LocationPermission.Denied)
-            is PermissionEvent.ShowEducation        -> permissionRepository.updatePermissionState(LocationPermission.Education)
-            is PermissionEvent.Request              -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
-            is PermissionEvent.DismissedRationale   -> permissionRepository.updatePermissionState(LocationPermission.Idle)
-            is PermissionEvent.AcceptedRationale    -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
-            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
-            else -> Unit
         }
     }
 }
