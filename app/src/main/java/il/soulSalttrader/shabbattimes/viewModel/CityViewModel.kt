@@ -11,8 +11,8 @@ import il.soulSalttrader.shabbattimes.event.CityEvent
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
-import il.soulSalttrader.shabbattimes.repository.CityRepository
 import il.soulSalttrader.shabbattimes.repository.LocationRepository
+import il.soulSalttrader.shabbattimes.useCase.RemoveCityUseCase
 import il.soulSalttrader.shabbattimes.useCase.ResolveCurrentCityUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,9 +35,9 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class CityViewModel @Inject constructor(
-    private val cityRepository: CityRepository,
     locationRepository: LocationRepository,
     private val resolveCurrentCity: ResolveCurrentCityUseCase,
+    private val removeCity: RemoveCityUseCase,
 ) : ViewModel() {
 
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
@@ -65,7 +65,7 @@ class CityViewModel @Inject constructor(
         _state,
         cityFlow,
     ) { state, city ->
-        city?.let { CityEvent.CurrentCityLoaded(city).reducer reduce state } ?: state
+        city?.let { CityEvent.CurrentCityLoaded(it).reducer reduce state } ?: state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -90,7 +90,7 @@ class CityViewModel @Inject constructor(
         val city = state.selectedCity.normalizedOrNull() ?: return
 
         viewModelScope.launch {
-            cityRepository.removeCity(city)
+            removeCity(city)
         }
     }
 }
