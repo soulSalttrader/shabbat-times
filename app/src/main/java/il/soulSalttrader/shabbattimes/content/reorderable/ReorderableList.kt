@@ -69,8 +69,8 @@ fun <T> mergeWithCurrentOrder(
 ): List<T> {
     val updatedKeys = updated.map { keyOf(it) }.toSet()
     return buildList {
-        addAll(current.filter { keyOf(it) in updatedKeys })
         addAll(updated.filter { new -> current.none { keyOf(it) == keyOf(new) } })
+        addAll(current.filter { keyOf(it) in updatedKeys })
     }
 }
 

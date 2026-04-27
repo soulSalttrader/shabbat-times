@@ -1,28 +1,25 @@
 package il.soulSalttrader.shabbattimes.event
 
-import il.soulSalttrader.shabbattimes.location.LocationData
+import android.location.Location
 import il.soulSalttrader.shabbattimes.location.LocationState
-import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
+import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.location.LocationUiState
+import il.soulSalttrader.shabbattimes.reducer.LocationReducer
 import il.soulSalttrader.shabbattimes.reducer.Reducible
-import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 
-sealed interface LocationEvent : AppEvent, Reducible<ShabbatUiState> {
-
-    data object Load : LocationEvent {
-        override val reducer = ShabbatReducer { state -> state.copy(location = LocationState.Loading) }
+sealed interface LocationEvent : AppEvent, Reducible<LocationUiState> {
+    data object LocationRequested : LocationEvent {
+        override val reducer = LocationReducer { state ->
+            state.copy(location = LocationState.Loading)
+        }
     }
 
-    sealed interface Loaded : LocationEvent {
-        data class Success(val location: LocationData) : Loaded {
-            override val reducer = ShabbatReducer { state ->
-                state.copy(location = LocationState.Current(location))
-            }
-        }
-
-        data class Failure(val message: String, val cause: Throwable? = null) : Loaded {
-            override val reducer = ShabbatReducer { state ->
-                state.copy(location = LocationState.Unavailable(message, cause))
-            }
+    data class LocationLoaded(val location: Location) : LocationEvent {
+        override val reducer = LocationReducer { state ->
+            state.copy(
+                location = LocationState.Result(location),
+                status = LocationStatus.Current,
+            )
         }
     }
 }

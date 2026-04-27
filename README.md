@@ -14,6 +14,7 @@ over-engineered solutions to showcase design trade-offs and scalability.
 4. [Permissions Management](#4--permissions-management)
 5. [Search Architecture](#5--search-architecture)
 6. [Reorderable cards](#6--reorderable-cards)
+7. [Current Location Feature](#7-current-location-feature)
 
 ---
 
@@ -1782,4 +1783,43 @@ fun ShabbatContent(
     //...
 ```
 
-Both draggable and swipeable can be toggled independently via parameters, making the container reusable across different screens with different interaction needs. 
+Both draggable and swipeable can be toggled independently via parameters, making the container reusable across different screens with different interaction needs.
+
+## 7. Current Location Feature
+
+Automatically detects the user's current city via GPS and displays it
+alongside manually added cities.
+
+### How it works
+1. User grants location permission
+2. GPS resolves coordinates → geocoded to a City
+3. City is marked as `CityStatus.Current` and saved
+4. Halachic times are fetched for all cities including current
+
+### ViewModels
+
+| ViewModel | Responsibility |
+|-----------|---------------|
+| `PermissionViewModel` | Permission UI flow (rationale, education, settings) |
+| `LocationViewModel` | GPS stream, location state |
+| `CityViewModel` | Current city resolution from GPS, city deletion |
+| `ShabbatViewModel` | Halachic times display, city list |
+| `SearchViewModel` | City search, autocomplete suggestions |
+
+### Key Components
+
+| Component | Responsibility |
+|-----------|---------------|
+| `LocationRepository` | GPS stream, single shared session via `@ApplicationScope` |
+| `PermissionRepository` | Permission state, gates GPS stream |
+| `ResolveCurrentCityUseCase` | Geocode coordinates → persist current city |
+| `RemoveCityUseCase` | Remove city, stop GPS if current city removed |
+
+### Design Decisions
+- **Per-feature ViewModels** — multiple ViewModels on same screen,
+  separated by concern not by screen
+- **`CityStatus` vs `LocationStatus`** — city proximity vs GPS system state,
+  kept distinct to avoid coupling
+- **`@ApplicationScope`** — single GPS session shared across all collectors
+- **`LocationPermission`** — mirrors UI permission states, gates GPS via
+  single `Granted` check, all other states stop GPS naturally

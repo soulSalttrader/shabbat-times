@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes.content.search
 
 sealed interface SearchMode {
-    object Autocomplete : SearchMode
-    object Forward : SearchMode
-    object Reverse : SearchMode
+    data object Autocomplete : SearchMode
+    data object Forward : SearchMode
+    data object Reverse : SearchMode
 }
