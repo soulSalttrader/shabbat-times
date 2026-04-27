@@ -13,7 +13,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.content.FailureScreen
 import il.soulSalttrader.shabbattimes.content.LoadingScreen
-import il.soulSalttrader.shabbattimes.content.normalizedOrNull
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.content.search.SearchConfig
@@ -86,11 +85,10 @@ fun ShabbatScreen() {
         }
 
         is ShabbatResultState.Results   -> {
-            val city = cityUiState.selectedCity.normalizedOrNull() ?: return
             ShabbatContent(
                 items = halachicTimes.data,
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) {
-                    cityViewModel.dispatch(CityEvent.CityDeleted(city))
+                    cityViewModel.dispatch(CityEvent.CityDeleted(it.city))
                 },
                 searchConfig = SearchConfig(
                     state = searchUiState.default(),

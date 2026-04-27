@@ -13,6 +13,7 @@ import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.CityRepository
+import il.soulSalttrader.shabbattimes.useCase.GetCitySuggestionsUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -29,7 +30,6 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val repository: CityRepository,
+    private val getSuggestions: GetCitySuggestionsUseCase,
 ) : ViewModel() {
     private val _state: MutableStateFlow<SearchUiState> = MutableStateFlow(value = SearchUiState())
 
@@ -52,20 +53,11 @@ class SearchViewModel @Inject constructor(
     private val suggestionsFlow: StateFlow<List<City>> = queryFlow
         .debounce(300)
         .flatMapLatest { query ->
-            query.takeUnless { it.isEmpty() }
-                ?.let { nonEmptyQuery ->
-                    flow {
-                        val result = repository.geocodeAutocomplete(nonEmptyQuery)
-
-                        result
-                            .onSuccess(tag = "SearchVM") { suggestions ->
-                                emit(suggestions)
-                            }
-                            .onFailure(tag = "SearchVM") {
-                                e -> _effects.tryEmit(AppEffect.ShowToast(message = "Network failed"))
-                            }
-                    }
-                } ?: flowOf(emptyList())
+            flow {
+                getSuggestions(query)
+                    .onSuccess(tag = "SearchVM") { suggestions -> emit(suggestions) }
+                    .onFailure(tag = "SearchVM") { _effects.tryEmit(AppEffect.ShowToast(message = "Network failed")) }
+            }
         }
         .catch {throwable ->
             _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
