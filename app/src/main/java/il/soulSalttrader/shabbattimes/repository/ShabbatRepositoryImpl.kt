@@ -9,12 +9,8 @@ import il.soulSalttrader.shabbattimes.common.toDisplayString
 import il.soulSalttrader.shabbattimes.common.upcomingCandleLightingDate
 import il.soulSalttrader.shabbattimes.common.upcomingHavdalahDate
 import il.soulSalttrader.shabbattimes.di.SolarTimesService
-import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.City
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
-import il.soulSalttrader.shabbattimes.repository.SeedCities.BRNO
-import il.soulSalttrader.shabbattimes.repository.SeedCities.JERUSALEM
-import il.soulSalttrader.shabbattimes.repository.SeedCities.NEW_YORK
 import il.soulSalttrader.shabbattimes.model.toDisplay
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.dto.asNetworkResult
@@ -65,16 +61,6 @@ class ShabbatRepositoryImpl @Inject constructor(
         val candleLightingOffsetMinutes = 18L
         val havdalahOffsetMinutes = 40L
 
-        val distanceJerusalemToNycKm = 9195
-        val distanceJerusalemToBrnoKm = 2319
-
-        val locationStatus = when (city) {
-            JERUSALEM -> LocationStatus.Current
-            NEW_YORK -> LocationStatus.Distance(distanceJerusalemToNycKm)
-            BRNO -> LocationStatus.Distance(distanceJerusalemToBrnoKm)
-            else -> LocationStatus.Unknown
-        }
-
         runCatching {
             awaitAll(
                 async { getSolarTimes(friday, city) },
@@ -89,7 +75,6 @@ class ShabbatRepositoryImpl @Inject constructor(
                         candleLightingDate = friday,
                         havdalahTime = saturdaySolar.sunset.plusMinutes(havdalahOffsetMinutes),
                         havdalahDate = saturday,
-                        locationStatus = locationStatus,
                     ).toDisplay(context)
                 )
             },
