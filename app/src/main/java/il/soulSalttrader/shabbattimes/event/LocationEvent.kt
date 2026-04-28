@@ -34,7 +34,9 @@ sealed interface LocationEvent : AppEvent, Reducible<LocationUiState> {
                             distanceKm < 0.1   -> LocationStatus.Current
                             else               -> LocationStatus.Nearby(distanceKm)
                         },
-                        times = HalachicTimesDisplay(),
+                        times = HalachicTimesDisplay(
+                            coordinates = location.coordinates
+                        ),
                     )
                 },
                 gpsState = currentLocation?.let { GpsState.Ready } ?: GpsState.Idle
