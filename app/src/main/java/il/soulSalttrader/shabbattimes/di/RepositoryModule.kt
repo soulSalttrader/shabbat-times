@@ -1,11 +1,9 @@
 package il.soulSalttrader.shabbattimes.di
 
-import android.content.Context
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import il.soulSalttrader.shabbattimes.repository.GeocodingRepository
 import il.soulSalttrader.shabbattimes.repository.GeocodingRepositoryImpl
@@ -15,8 +13,6 @@ import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepositoryInMemory
-import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
-import il.soulSalttrader.shabbattimes.repository.ShabbatRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.SolarTimesRepository
 import il.soulSalttrader.shabbattimes.repository.SolarTimesRepositoryImpl
 import jakarta.inject.Singleton
@@ -26,12 +22,6 @@ import kotlinx.coroutines.CoroutineScope
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
-    @Provides
-    @Singleton
-    fun provideShabbatRepository(
-        dispatcher: CoroutineDispatcher,
-        @ApplicationContext context: Context,
-    ): ShabbatRepository = ShabbatRepositoryImpl(dispatcher, context)
 
     @Provides
     @Singleton
