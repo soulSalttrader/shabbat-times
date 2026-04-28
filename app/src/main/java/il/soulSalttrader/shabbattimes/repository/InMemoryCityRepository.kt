@@ -1,12 +1,14 @@
 package il.soulSalttrader.shabbattimes.repository
 
+import android.location.Location
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
-import il.soulSalttrader.shabbattimes.content.city.CityStatus
 import il.soulSalttrader.shabbattimes.di.GeoapifyService
-import il.soulSalttrader.shabbattimes.model.City
+import il.soulSalttrader.shabbattimes.model.Coordinates
+import il.soulSalttrader.shabbattimes.model.SavedLocation
+import il.soulSalttrader.shabbattimes.model.normalize
+import il.soulSalttrader.shabbattimes.model.toResolvedLocation
 import il.soulSalttrader.shabbattimes.network.NetworkResult
-import il.soulSalttrader.shabbattimes.network.dto.toCityDomain
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,58 +22,43 @@ class InMemoryCityRepository @Inject constructor(
     private val geoapifyService: GeoapifyService,
     private val dispatcher: CoroutineDispatcher,
 ) : CityRepository {
-    private val _cities: MutableStateFlow<List<City>> = MutableStateFlow(emptyList())
-    override val cities: StateFlow<List<City>> = _cities
+    private val _locations: MutableStateFlow<List<SavedLocation>> = MutableStateFlow(emptyList())
+    override val locations: StateFlow<List<SavedLocation>> = _locations
 
-    override suspend fun addCity(city: City) {
-        _cities.update { current ->
-            if (current.any { it.id == city.id }) current
-            else current + city
+    override suspend fun save(location: SavedLocation) {
+        _locations.update { current ->
+            if (current.any { it.id == location.id }) current
+            else current + location
         }
     }
 
-    override suspend fun removeCity(city: City) {
-        _cities.update { cities ->
-            cities.filter { it.id != city.id }
-        }
-    }
-
-    override suspend fun setCurrentCity(city: City) {
-        require(city.status == CityStatus.Current) { "city '${city}' must have Current status" }
-        _cities.update { cities ->
-            listOf(city) + cities.filter { it.status != CityStatus.Current }
-        }
+    override suspend fun remove(location: SavedLocation) {
+        _locations.update { it.filter { loc -> loc.id != location.id } }
     }
 
     override suspend fun geocodeAutocomplete(query: String) = withContext(dispatcher) {
-            val normalized = query.trim()
-            if (normalized.length < 2) {
-                return@withContext NetworkResult.Success(emptyList())
-            }
-
-            runCatching {
-                val response = geoapifyService.api.autocomplete(queryText = normalized)
-                if (Debug.enabled) Log.d("InMemoryRepo", "$response")
-                response.results?.map { it.toCityDomain() } ?: emptyList()
-            }.fold(
-                onSuccess = { cities -> NetworkResult.Success(data = cities) },
-                onFailure = { e -> NetworkResult.Failure(message = "Autocomplete failed: ${e.message}", cause = e.cause) }
-            )
+        val normalized = query.trim()
+        if (normalized.length < 2) {
+            return@withContext NetworkResult.Success(emptyList())
         }
 
-    override suspend fun geocodeForward(query: String): NetworkResult<City?> {
-        TODO("Not yet implemented")
+        runCatching {
+            val response = geoapifyService.api.autocomplete(queryText = normalized)
+            if (Debug.enabled) Log.d("InMemoryRepo", "$response")
+            response.results?.map { it.toResolvedLocation() } ?: emptyList()
+        }.fold(
+            onSuccess = { cities -> NetworkResult.Success(data = cities) },
+            onFailure = { e -> NetworkResult.Failure(message = "Autocomplete failed: ${e.message}", cause = e.cause) }
+        )
     }
 
-    override suspend fun geocodeReverse(
-        latitude: Double,
-        longitude: Double,
-    ): NetworkResult<City> = withContext(dispatcher) {
+    override suspend fun geocodeReverse(location: Location) = withContext(dispatcher) {
         runCatching {
-            val response = geoapifyService.api.reverseGeocode(lat = latitude, lon = longitude)
-            response.results?.firstOrNull()?.toCityDomain() ?: SeedCities.NONE
+            val response = geoapifyService.api.reverseGeocode(location.latitude, location.longitude)
+            response.results?.firstOrNull()?.toResolvedLocation(requestCoordinates = Coordinates(location.latitude, location.longitude).normalize())
+                ?: return@withContext NetworkResult.Failure(message = "No results found")
         }.fold(
-            onSuccess = { city -> NetworkResult.Success(data = city) },
+            onSuccess = { resolved -> NetworkResult.Success(data = resolved) },
             onFailure = { e -> NetworkResult.Failure(message = "Reverse geocode failed: ${e.message}", cause = e.cause) }
         )
     }
