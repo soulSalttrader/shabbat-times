@@ -11,8 +11,8 @@ import il.soulSalttrader.shabbattimes.repository.GeocodingRepository
 import il.soulSalttrader.shabbattimes.repository.GeocodingRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepositoryInMemory
-import il.soulSalttrader.shabbattimes.repository.LocationRepository
-import il.soulSalttrader.shabbattimes.repository.LocationRepositoryImpl
+import il.soulSalttrader.shabbattimes.repository.GpsLocationRepository
+import il.soulSalttrader.shabbattimes.repository.GpsLocationRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
@@ -40,11 +40,11 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideLocationRepository(
+    fun provideGpsLocationRepository(
         fusedClient: FusedLocationProviderClient,
         @ApplicationScope scope: CoroutineScope,
         permissionRepository: PermissionRepository,
-    ): LocationRepository = LocationRepositoryImpl(fusedClient, scope, permissionRepository)
+    ): GpsLocationRepository = GpsLocationRepositoryImpl(fusedClient, scope, permissionRepository)
 
     @Provides
     @Singleton

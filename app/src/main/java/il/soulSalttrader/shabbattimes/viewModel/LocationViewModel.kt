@@ -9,7 +9,7 @@ import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.location.LocationPermission
 import il.soulSalttrader.shabbattimes.location.LocationUiState
-import il.soulSalttrader.shabbattimes.repository.LocationRepository
+import il.soulSalttrader.shabbattimes.repository.GpsLocationRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.updateAndGet
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(
-    private val locationRepository: LocationRepository,
+    private val gpsLocationRepository: GpsLocationRepository,
     permissionRepository: PermissionRepository,
 ) : ViewModel() {
 
@@ -41,7 +41,7 @@ class LocationViewModel @Inject constructor(
     private val locationFlow: Flow<Location?> = permissionRepository.permissionState
         .flatMapLatest { permission ->
             when (permission) {
-                is LocationPermission.Granted -> locationRepository.location
+                is LocationPermission.Granted -> gpsLocationRepository.location
                 else                          -> flowOf(null)
             }
         }
