@@ -3,6 +3,7 @@ package il.soulSalttrader.shabbattimes.location
 import il.soulSalttrader.shabbattimes.model.State
 
 data class LocationUiState(
-    val location: LocationState = LocationState.Idle,
-    val status: LocationStatus = LocationStatus.Unknown,
+    val currentLocation: LocationUiModel? = null,
+    val savedLocations: List<LocationUiModel> = emptyList(),
+    val gpsState: GpsState = GpsState.Idle,
 ) : State
