@@ -7,10 +7,9 @@ import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
-import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.network.onFailure
-import il.soulSalttrader.shabbattimes.network.onSuccess
-import il.soulSalttrader.shabbattimes.repository.CityRepository
+import il.soulSalttrader.shabbattimes.model.HalachicTimes
+import il.soulSalttrader.shabbattimes.network.NetworkResult
+import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,42 +26,47 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 
-
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    cityRepository: CityRepository,
+    savedLocationsRepository: SavedLocationsRepository,
     private val getHalachicTimes: GetHalachicTimesUseCase,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val halachicTimesFlow: StateFlow<List<HalachicTimesDisplay>> = cityRepository.cities
-            .flatMapLatest { cities ->
-                flow {
-                    getHalachicTimes(cities)
-                        .onSuccess("ShabbatVM") { halachicTimes -> emit(halachicTimes) }
-                        .onFailure("ShabbatVM") { e -> _effects.tryEmit(value = AppEffect.ShowToast(message = "Network failed")) }
-                }
-            }
-            .catch {throwable ->
-                _effects.tryEmit(value = AppEffect.ShowToast(message = "Unexpected error: ${throwable.message}"))
-                emit(value = emptyList())
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList(),
-            )
+    val halachicTimesFlow: StateFlow<List<HalachicTimes>> = savedLocationsRepository.locations
+        .flatMapLatest { savedLocations ->
+            flow {
+                val results = getHalachicTimes(savedLocations)
+                val successes = results.filterIsInstance<NetworkResult.Success<HalachicTimes>>()
+                    .map { it.data }
 
-    private val _state: MutableStateFlow<ShabbatUiState> =
-        MutableStateFlow(value = ShabbatUiState())
+                if (results.any { it is NetworkResult.Failure }) {
+                    _effects.tryEmit(AppEffect.ShowToast("Some times failed to load"))
+                }
+
+                emit(successes)
+            }
+        }
+        .catch { throwable ->
+            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+            emit(emptyList())
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
+
+    private val _state: MutableStateFlow<ShabbatUiState> = MutableStateFlow(value = ShabbatUiState())
 
     val state: StateFlow<ShabbatUiState> = combine(
-        flow = _state,
-        flow2 = halachicTimesFlow,
-    ) { state, halachicTimes ->
-        ShabbatDataEvent.TimesLoaded(halachicTimes).reducer reduce state
+        _state,
+        savedLocationsRepository.locations,
+        halachicTimesFlow,
+    ) { state, savedLocations, halachicTimes ->
+        ShabbatDataEvent.LocationWithTimesLoaded(savedLocations, halachicTimes).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

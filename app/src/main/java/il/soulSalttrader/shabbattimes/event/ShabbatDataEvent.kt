@@ -4,18 +4,35 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatResultState
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
+import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.LocationWithTimes
+import il.soulSalttrader.shabbattimes.model.SavedLocation
+import il.soulSalttrader.shabbattimes.model.toDisplay
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 
 sealed interface ShabbatDataEvent : AppEvent, Reducible<ShabbatUiState> {
-    data class LocationWithTimesLoaded(val locationWithTimes: List<LocationWithTimes>) : ShabbatDataEvent {
+    data class LocationWithTimesLoaded(
+        val savedLocations: List<SavedLocation>,
+        val halachicTimes: List<HalachicTimes>,
+    ) : ShabbatDataEvent {
         override val reducer = ShabbatReducer { state ->
-            if (Debug.enabled) Log.d("ShabbatEvent", "$locationWithTimes")
+            if (Debug.enabled) Log.d("ShabbatEvent", "$savedLocations")
+
+            val locationWithTimes = savedLocations.map { location ->
+                LocationWithTimes(
+                    location = location,
+                    times = halachicTimes
+                        .firstOrNull { it.coordinates == location.coordinates }
+                        ?.toDisplay()
+                )
+            }
+
             state.copy(
                 data = when {
-                    locationWithTimes.isEmpty() -> ShabbatResultState.NoResults
-                    else                        -> ShabbatResultState.Results(data = locationWithTimes)
+                    savedLocations.isEmpty() -> ShabbatResultState.NoResults
+                    halachicTimes.isEmpty()  -> ShabbatResultState.Loading
+                    else                     -> ShabbatResultState.Results(data = locationWithTimes)
                 },
             )
         }
