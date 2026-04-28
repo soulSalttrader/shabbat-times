@@ -6,9 +6,11 @@ import il.soulSalttrader.shabbattimes.model.normalize
 import il.soulSalttrader.shabbattimes.model.toResolvedLocation
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
+@Singleton
 class GeocodingRepositoryImpl @Inject constructor(
     private val geoapifyService: GeoapifyService,
     private val dispatcher: CoroutineDispatcher,

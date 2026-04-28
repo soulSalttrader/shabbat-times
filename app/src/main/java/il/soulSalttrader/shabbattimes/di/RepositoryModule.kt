@@ -7,6 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import il.soulSalttrader.shabbattimes.repository.GeocodingRepository
+import il.soulSalttrader.shabbattimes.repository.GeocodingRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepositoryInMemory
 import il.soulSalttrader.shabbattimes.repository.LocationRepository
@@ -47,4 +49,11 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun providePermissionRepository(): PermissionRepository = PermissionRepositoryImpl()
+
+    @Provides
+    @Singleton
+    fun provideGeocodingRepository(
+        geoapifyService: GeoapifyService,
+        dispatcher: CoroutineDispatcher,
+    ): GeocodingRepository = GeocodingRepositoryImpl(geoapifyService, dispatcher)
 }
