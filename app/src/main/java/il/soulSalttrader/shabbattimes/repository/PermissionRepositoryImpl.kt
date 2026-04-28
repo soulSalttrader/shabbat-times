@@ -14,6 +14,6 @@ class PermissionRepositoryImpl @Inject constructor() : PermissionRepository {
     override val permissionState: StateFlow<LocationPermission> = _permissionState
 
     override fun updatePermissionState(state: LocationPermission) {
-        _permissionState.update { it -> state }
+        _permissionState.value = state
     }
 }
