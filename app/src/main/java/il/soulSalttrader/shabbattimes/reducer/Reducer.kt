@@ -31,5 +31,4 @@ fun interface Reducer<S : State> {
 typealias ShabbatReducer = Reducer<ShabbatUiState>
 typealias SearchReducer = Reducer<SearchUiState>
 typealias LocationReducer = Reducer<LocationUiState>
-typealias CityReducer = Reducer<CityUiState>
 typealias PermissionReducer = Reducer<PermissionUiState>
