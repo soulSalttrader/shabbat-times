@@ -9,15 +9,16 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import il.soulSalttrader.shabbattimes.repository.GeocodingRepository
 import il.soulSalttrader.shabbattimes.repository.GeocodingRepositoryImpl
-import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
-import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepositoryInMemory
 import il.soulSalttrader.shabbattimes.repository.GpsLocationRepository
 import il.soulSalttrader.shabbattimes.repository.GpsLocationRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepositoryImpl
+import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
+import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepositoryInMemory
 import il.soulSalttrader.shabbattimes.repository.ShabbatRepository
 import il.soulSalttrader.shabbattimes.repository.ShabbatRepositoryImpl
-import il.soulSalttrader.shabbattimes.settings.UserPreferences
+import il.soulSalttrader.shabbattimes.repository.SolarTimesRepository
+import il.soulSalttrader.shabbattimes.repository.SolarTimesRepositoryImpl
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -28,11 +29,9 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideShabbatRepository(
-        apiService: SolarTimesService,
         dispatcher: CoroutineDispatcher,
-        userPreferences: UserPreferences,
         @ApplicationContext context: Context,
-    ): ShabbatRepository = ShabbatRepositoryImpl(apiService, dispatcher, userPreferences, context)
+    ): ShabbatRepository = ShabbatRepositoryImpl(dispatcher, context)
 
     @Provides
     @Singleton
@@ -56,4 +55,11 @@ object RepositoryModule {
         geoapifyService: GeoapifyService,
         dispatcher: CoroutineDispatcher,
     ): GeocodingRepository = GeocodingRepositoryImpl(geoapifyService, dispatcher)
+
+    @Provides
+    @Singleton
+    fun provideSolarTimesRepository(
+        apiService: SolarTimesService,
+        dispatcher: CoroutineDispatcher,
+    ): SolarTimesRepository = SolarTimesRepositoryImpl(apiService, dispatcher)
 }

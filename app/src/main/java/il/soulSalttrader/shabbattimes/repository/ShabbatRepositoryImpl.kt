@@ -27,33 +27,9 @@ import javax.inject.Singleton
 
 @Singleton
 class ShabbatRepositoryImpl @Inject constructor(
-    private val apiService: SolarTimesService,
     private val dispatcher: CoroutineDispatcher,
-    private val userPreferences: UserPreferences,
-    @param:ApplicationContext private val context: Context,
+    private val context: Context,
 ) : ShabbatRepository {
-
-    override suspend fun getSolarTimes(date: LocalDate, city: City) = withContext(context = dispatcher) {
-        val tag = "ShabbatRepositoryImpl.getSolarTimes"
-        runCatching {
-            apiService.api.getSolarTimes(
-                date = date.toDisplayString(),
-                lat = city.coordinates.latitude,
-                lng = city.coordinates.longitude,
-                timezone = city.timeZone.id,
-            )
-        }
-            .map { dto ->
-                if (Debug.enabled) Log.d(tag, dto.status)
-                dto.asNetworkResult(use24HourFormat = userPreferences.is24HourFormat())
-            }
-            .recover { exception ->
-                if (Debug.enabled) Log.d(tag, "API call failed", exception)
-                exception.asNetworkFailure()
-            }
-            .getOrElse { NetworkResult.Failure("Critical failure") }
-    }
-
     override suspend fun getHalachicTimes(city: City) = withContext(dispatcher) {
         val friday = upcomingCandleLightingDate()
         val saturday = upcomingHavdalahDate()
