@@ -1,24 +1,22 @@
 package il.soulSalttrader.shabbattimes.useCase
 
 import android.location.Location
-import il.soulSalttrader.shabbattimes.content.city.CityStatus
-import il.soulSalttrader.shabbattimes.model.City
+import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.onSuccess
-import il.soulSalttrader.shabbattimes.repository.CityRepository
-import javax.inject.Inject
+import il.soulSalttrader.shabbattimes.repository.GeocodingRepository
+import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
+import jakarta.inject.Inject
 
 class ResolveCurrentCityUseCase @Inject constructor(
-    private val cityRepository: CityRepository,
+    private val geocodingRepository: GeocodingRepository,
+    private val savedLocationsRepository: SavedLocationsRepository,
 ) {
-    suspend operator fun invoke(location: Location): NetworkResult<City> {
-        return cityRepository.geocodeReverse(
-            latitude = location.latitude,
-            longitude = location.longitude,
-        )
+    suspend operator fun invoke(location: Location): NetworkResult<ResolvedLocation> {
+        return geocodingRepository.reverseGeocode(location)
             .also { result ->
-                result.onSuccess("UpdateCurrentCityUseCase") { city ->
-                    cityRepository.setCurrentCity(city.copy(status = CityStatus.Current))
+                result.onSuccess("UpdateCurrentCityUseCase") { loc ->
+                    savedLocationsRepository.save(loc)
                 }
             }
     }
