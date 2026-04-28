@@ -11,6 +11,7 @@ import il.soulSalttrader.shabbattimes.location.LocationUiModel
 import il.soulSalttrader.shabbattimes.location.LocationUiState
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.SavedLocation
+import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.useCase.RemoveCityUseCase
 import il.soulSalttrader.shabbattimes.useCase.ResolveGpsLocationUseCase
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 class LocationViewModel @Inject constructor(
     savedLocationsRepository: SavedLocationsRepository,
     resolveGpsLocationUseCase: ResolveGpsLocationUseCase,
+    permissionRepository: PermissionRepository,
     private val removeLocation: RemoveCityUseCase,
 ) : ViewModel() {
 
@@ -68,8 +70,10 @@ class LocationViewModel @Inject constructor(
         _state,
         savedLocationsRepository.locations,
         gpsLocationFlow,
-    ) { state, savedLocations, gpsLocation ->
-        LocationEvent.LocationLoaded(currentLocation = gpsLocation, savedLocations = savedLocations).reducer reduce state
+        permissionRepository.permissionState,
+    ) { state, savedLocations, gpsLocation, permission ->
+        val withPermission = LocationEvent.GpsPermissionChanged(permission).reducer reduce state
+        LocationEvent.LocationLoaded(gpsLocation, savedLocations).reducer reduce withPermission
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

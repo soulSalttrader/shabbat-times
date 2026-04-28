@@ -1,6 +1,7 @@
 package il.soulSalttrader.shabbattimes.event
 
 import il.soulSalttrader.shabbattimes.location.GpsState
+import il.soulSalttrader.shabbattimes.location.LocationPermission
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.LocationUiModel
 import il.soulSalttrader.shabbattimes.location.LocationUiState
@@ -62,6 +63,20 @@ sealed interface LocationEvent : AppEvent, Reducible<LocationUiState> {
     data object GpsLocationIdle : LocationEvent {
         override val reducer = LocationReducer { state ->
             state.copy(gpsState = GpsState.Idle)
+        }
+    }
+
+    data class GpsPermissionChanged(val permission: LocationPermission) : LocationEvent {
+        override val reducer = LocationReducer { state ->
+            state.copy(
+                gpsState = when (permission) {
+                    is LocationPermission.Idle              -> GpsState.Idle
+                    is LocationPermission.Requesting        -> GpsState.Loading
+                    is LocationPermission.Denied,
+                    is LocationPermission.DeniedPermanently -> GpsState.NoPermission
+                    else                                    -> state.gpsState
+                }
+            )
         }
     }
 }
