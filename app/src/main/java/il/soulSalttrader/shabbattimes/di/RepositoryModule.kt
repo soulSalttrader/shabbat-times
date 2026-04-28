@@ -7,8 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import il.soulSalttrader.shabbattimes.repository.CityRepository
-import il.soulSalttrader.shabbattimes.repository.InMemoryCityRepository
+import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
+import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepositoryInMemory
 import il.soulSalttrader.shabbattimes.repository.LocationRepository
 import il.soulSalttrader.shabbattimes.repository.LocationRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
@@ -34,10 +34,7 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideCityRepository(
-        apiService: GeoapifyService,
-        dispatcher: CoroutineDispatcher,
-    ): CityRepository = InMemoryCityRepository(apiService, dispatcher)
+    fun provideSavedLocationsRepository(): SavedLocationsRepository = SavedLocationsRepositoryInMemory()
 
     @Provides
     @Singleton
