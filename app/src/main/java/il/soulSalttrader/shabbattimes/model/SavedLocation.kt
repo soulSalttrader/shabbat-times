@@ -1,0 +1,13 @@
+package il.soulSalttrader.shabbattimes.model
+
+import kotlinx.serialization.Serializable
+import java.time.ZoneId
+
+@Serializable
+data class SavedLocation(
+    val id: String,
+    val name: String,
+    val coordinates: Coordinates,
+    @Serializable(with = ZoneIdAsStringSerializer::class)
+    val timeZoneId: ZoneId,
+)
