@@ -12,12 +12,13 @@ data class SavedLocation(
     val timeZoneId: ZoneId,
 ) {
     companion object {
+        const val EMPTY_NAME = "Tap to use current location"
         const val GPS_ID = "gps"
         const val EMPTY_ID = "empty"
 
         fun empty() = SavedLocation(
             id = EMPTY_ID,
-            name = "",
+            name = EMPTY_NAME,
             coordinates = Coordinates(0.0, 0.0),
             timeZoneId = ZoneId.systemDefault(),
         )
