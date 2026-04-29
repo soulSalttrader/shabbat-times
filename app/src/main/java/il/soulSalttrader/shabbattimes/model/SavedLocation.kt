@@ -12,6 +12,7 @@ data class SavedLocation(
     val timeZoneId: ZoneId,
 ) {
     companion object {
+        const val GPS_ID = "gps"
         const val EMPTY_ID = "empty"
 
         fun empty() = SavedLocation(
