@@ -61,7 +61,6 @@ class LocationViewModel @Inject constructor(
                         timeZoneId = resolved.timeZoneId,
                     ),
                     status = LocationStatus.Current,
-                    times = HalachicTimesDisplay(resolved.coordinates),
                 )
             }
         }

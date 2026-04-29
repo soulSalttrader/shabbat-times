@@ -5,7 +5,6 @@ import il.soulSalttrader.shabbattimes.location.LocationPermission
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.LocationUiModel
 import il.soulSalttrader.shabbattimes.location.LocationUiState
-import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.model.distanceTo
 import il.soulSalttrader.shabbattimes.reducer.LocationReducer
@@ -34,9 +33,6 @@ sealed interface LocationEvent : AppEvent, Reducible<LocationUiState> {
                             distanceKm < 0.1   -> LocationStatus.Current
                             else               -> LocationStatus.Nearby(distanceKm)
                         },
-                        times = HalachicTimesDisplay(
-                            coordinates = location.coordinates
-                        ),
                     )
                 },
                 gpsState = currentLocation?.let { GpsState.Ready } ?: GpsState.Idle
