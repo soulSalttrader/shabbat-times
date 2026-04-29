@@ -17,7 +17,7 @@ import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 import kotlinx.coroutines.FlowPreview
 
 @Composable
-fun CitySearchBarInputField(
+fun LocationSearchBarInputField(
     state: TextFieldState,
     hasQuery: Boolean,
     onExpandedChange: (Boolean) -> Unit,
