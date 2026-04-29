@@ -18,15 +18,17 @@ import il.soulSalttrader.shabbattimes.content.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.default
 import il.soulSalttrader.shabbattimes.effect.AppEffect
-import il.soulSalttrader.shabbattimes.event.CityEvent
 import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
-import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
+import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.location.LocationWithTimesUi
+import il.soulSalttrader.shabbattimes.location.toLocationStatus
+import il.soulSalttrader.shabbattimes.model.LocationWithTimes
+import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.permission.openAppSettings
-import il.soulSalttrader.shabbattimes.viewModel.CityViewModel
 import il.soulSalttrader.shabbattimes.viewModel.LocationViewModel
 import il.soulSalttrader.shabbattimes.viewModel.PermissionViewModel
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel
@@ -44,9 +46,6 @@ fun ShabbatScreen() {
     val locationViewModel: LocationViewModel = hiltViewModel()
     val locationUiState by locationViewModel.state.collectAsStateWithLifecycle()
 
-    val cityViewModel: CityViewModel = hiltViewModel()
-    val cityUiState by cityViewModel.state.collectAsStateWithLifecycle()
-
     val permissionViewModel: PermissionViewModel = hiltViewModel()
     val permissionUiState by permissionViewModel.state.collectAsStateWithLifecycle()
 
@@ -61,14 +60,22 @@ fun ShabbatScreen() {
 
     val context = LocalContext.current
 
-    when (val halachicTimes = shabbatState.data) {
+    when (val locationWithTimes = shabbatState.data) {
         is ShabbatResultState.Idle      -> LoadingScreen()
 
         is ShabbatResultState.Loading   -> LoadingScreen()
 
         is ShabbatResultState.NoResults -> {
             ShabbatContent(
-                items = listOf(HalachicTimesDisplay()),
+                items = listOf(
+                    LocationWithTimesUi(
+                        locationWithTimes = LocationWithTimes(
+                            location = SavedLocation.empty(),
+                            times = null,
+                        ),
+                        status = locationUiState.gpsState.toLocationStatus(),
+                    )
+                ),
                 isDraggable = false,
                 searchConfig = SearchConfig(
                     state = searchUiState.default(),
@@ -77,7 +84,7 @@ fun ShabbatScreen() {
 
                 onClick = {
                     when (permissionUiState.permission) {
-                        PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.LocationRequested)
+                        PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.GpsLocationRequested)
                         else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
                     }
                 },
@@ -85,10 +92,25 @@ fun ShabbatScreen() {
         }
 
         is ShabbatResultState.Results   -> {
+            val items = locationWithTimes.data.map { lwt ->
+                LocationWithTimesUi(
+                    locationWithTimes = lwt,
+                    status = locationUiState.savedLocations
+                        .firstOrNull { it.location.id == lwt.location.id }
+                        ?.status
+                        ?: LocationStatus.Unknown,
+                )
+            }
+
             ShabbatContent(
-                items = halachicTimes.data,
-                swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) {
-                    cityViewModel.dispatch(CityEvent.CityDeleted(it.city))
+                items = items,
+                swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) { item ->
+                    locationViewModel.dispatch(
+                        LocationEvent.LocationDeleted(
+                            savedLocation = item.locationWithTimes.location,
+                            isCurrent = item.status == LocationStatus.Current,
+                        )
+                    )
                 },
                 searchConfig = SearchConfig(
                     state = searchUiState.default(),
@@ -97,7 +119,7 @@ fun ShabbatScreen() {
 
                 onClick = {
                     when (permissionUiState.permission) {
-                        PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.LocationRequested)
+                        PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.GpsLocationRequested)
                         else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
                     }
                 },
@@ -105,8 +127,8 @@ fun ShabbatScreen() {
         }
 
         is ShabbatResultState.Failure   -> FailureScreen(
-            message = halachicTimes.message,
-            onRetry = { shabbatViewModel.dispatch(ShabbatDataEvent.RetryLoadTimes) },
+            message = locationWithTimes.message,
+            onRetry = { shabbatViewModel.dispatch(ShabbatDataEvent.RetryLoadLocationWithTimes) },
         )
     }
 

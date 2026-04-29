@@ -21,22 +21,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
-import il.soulSalttrader.shabbattimes.content.city.CityStatus
-import il.soulSalttrader.shabbattimes.content.city.CityStatus.*
-import il.soulSalttrader.shabbattimes.content.city.getLocationLabels
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIcon
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconLabel
+import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.location.LocationWithTimesUi
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 
 @Composable
 fun ShabbatCard(
-    item: HalachicTimesDisplay,
+    item: LocationWithTimesUi,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(16.dp),
-    colors: CardColors = getDefaultCardColors(item.city.status),
+    colors: CardColors = getDefaultCardColors(item.status),
     elevation: CardElevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-    cityLabel: String = item.city.status.getLocationLabels(),
     isDraggable: Boolean = false,
     onClick: () -> Unit = {},
 ) {
@@ -57,17 +55,17 @@ fun ShabbatCard(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(modifier = Modifier.padding(16.dp).weight(1f)) {
-                CityTitle(item.city.name)
+                LocationTitle(item.locationWithTimes.location.name)
 
-                UiIconCityLabel(item.city.status, cityLabel)
+                UiIconLocationLabel(item.status, item.label)
 
                 Spacer(Modifier.height(16.dp))
 
                 ShabbatKeyTimes(
-                    candleLightingTime = item.candleLightingTime,
-                    candleLightingDate = item.candleLightingDate,
-                    havdalahTime = item.havdalahTime,
-                    havdalahDate = item.havdalahDate,
+                    candleLightingTime = item.locationWithTimes.times?.candleLightingTime ?: HalachicTimesDisplay.EMPTY_TIME,
+                    candleLightingDate = item.locationWithTimes.times?.candleLightingDate ?: HalachicTimesDisplay.EMPTY_DATE,
+                    havdalahTime = item.locationWithTimes.times?.havdalahTime ?: HalachicTimesDisplay.EMPTY_TIME,
+                    havdalahDate = item.locationWithTimes.times?.havdalahDate ?: HalachicTimesDisplay.EMPTY_DATE,
                 )
             }
 
@@ -76,9 +74,9 @@ fun ShabbatCard(
                     modifier = modifier,
                     icon = UiIcon.Resource(R.drawable.drag_indicator),
                     contentDescription = "dragIndicator",
-                    contentColor = when (item.city.status) {
-                        Current -> colors.contentColor
-                        else    -> colors.contentColor
+                    contentColor = when (item.status) {
+                        LocationStatus.Current -> colors.contentColor
+                        else                   -> colors.contentColor
                     },
                 )
             }
@@ -87,13 +85,12 @@ fun ShabbatCard(
 }
 
 @Composable
-private fun getDefaultCardColors(cityStatus: CityStatus) = when (cityStatus) {
-    Current -> CardDefaults.cardColors(
+private fun getDefaultCardColors(status: LocationStatus) = when (status) {
+    is LocationStatus.Current -> CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
-
-    else    -> CardDefaults.cardColors(
+    else -> CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -128,25 +125,25 @@ private fun ShabbatKeyTimes(
 }
 
 @Composable
-private fun UiIconCityLabel(
-    cityStatus: CityStatus,
-    cityLabel: String,
+private fun UiIconLocationLabel(
+    status: LocationStatus,
+    label: String,
 ) {
     Row {
-        val icon = when (cityStatus is Current) {
+        val icon = when (status is LocationStatus.Current) {
             true -> UiIcon.Resource(R.drawable.home_pin_24px)
             else -> null
         }
 
         UiIconLabel(
-            text = cityLabel,
+            text = label,
             icon = icon,
         )
     }
 }
 
 @Composable
-private fun CityTitle(
+private fun LocationTitle(
     name: String,
     modifier: Modifier = Modifier,
 ) {
