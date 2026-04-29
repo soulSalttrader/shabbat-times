@@ -19,7 +19,7 @@ data class SavedLocation(
         fun empty() = SavedLocation(
             id = EMPTY_ID,
             name = EMPTY_NAME,
-            coordinates = Coordinates(0.0, 0.0),
+            coordinates = Coordinates.EMPTY,
             timeZoneId = ZoneId.systemDefault(),
         )
 
