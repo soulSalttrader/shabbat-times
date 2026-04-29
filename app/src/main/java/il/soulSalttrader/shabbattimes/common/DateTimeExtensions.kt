@@ -21,8 +21,8 @@ fun LocalDate.nextOrTodayDayOfWeek(target: DayOfWeek): LocalDate {
     }
 }
 
-fun upcomingCandleLightingDate(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.FRIDAY)
-fun upcomingHavdalahDate(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.SATURDAY)
+fun upcomingFriday(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.FRIDAY)
+fun upcomingSaturday(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.SATURDAY)
 
 fun LocalTime.toDisplayString(context: Context): String {
     val use24 = DateFormat.is24HourFormat(context)
