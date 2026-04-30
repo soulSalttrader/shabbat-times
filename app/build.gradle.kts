@@ -120,4 +120,6 @@ dependencies {
     implementation(libs.reorderable)
 
     implementation(libs.play.services.location)
+
+    implementation(libs.kotlinx.collections.immutable)
 }
