@@ -55,6 +55,18 @@ fun ShabbatScreen() {
 
     val context = LocalContext.current
 
+    val onCardClick = {
+        when (permissionUiState.permission) {
+            PermissionState.Granted -> shabbatViewModel.dispatch(ShabbatDataEvent.GpsLocationRequested)
+            else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
+        }
+    }
+
+    val searchConfig = SearchConfig(
+        state = searchUiState.default(),
+        action = searchViewModel.default(),
+    )
+
     when (val locationWithTimes = shabbatState.data) {
         is ShabbatResultState.Idle      -> LoadingScreen()
 
@@ -70,17 +82,8 @@ fun ShabbatScreen() {
                     ),
                 ).toImmutableList(),
                 isDraggable = false,
-                searchConfig = SearchConfig(
-                    state = searchUiState.default(),
-                    action = searchViewModel.default(),
-                ),
-
-                onClick = {
-                    when (permissionUiState.permission) {
-                        PermissionState.Granted -> shabbatViewModel.dispatch(ShabbatDataEvent.GpsLocationRequested)
-                        else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
-                    }
-                },
+                searchConfig = searchConfig,
+                onClick = onCardClick,
             )
         }
 
@@ -95,17 +98,8 @@ fun ShabbatScreen() {
                         )
                     )
                 },
-                searchConfig = SearchConfig(
-                    state = searchUiState.default(),
-                    action = searchViewModel.default(),
-                ),
-
-                onClick = {
-                    when (permissionUiState.permission) {
-                        PermissionState.Granted -> shabbatViewModel.dispatch(ShabbatDataEvent.GpsLocationRequested)
-                        else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
-                    }
-                },
+                searchConfig = searchConfig,
+                onClick = onCardClick,
             )
         }
 
