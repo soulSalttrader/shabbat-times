@@ -7,7 +7,6 @@ import il.soulSalttrader.shabbattimes.Debug.formatStateTransition
 import il.soulSalttrader.shabbattimes.content.permission.PermissionUiState
 import il.soulSalttrader.shabbattimes.content.search.SearchUiState
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
-import il.soulSalttrader.shabbattimes.location.LocationUiState
 import il.soulSalttrader.shabbattimes.model.State
 
 fun interface Reducer<S : State> {
@@ -29,5 +28,4 @@ fun interface Reducer<S : State> {
 
 typealias ShabbatReducer = Reducer<ShabbatUiState>
 typealias SearchReducer = Reducer<SearchUiState>
-typealias LocationReducer = Reducer<LocationUiState>
 typealias PermissionReducer = Reducer<PermissionUiState>
