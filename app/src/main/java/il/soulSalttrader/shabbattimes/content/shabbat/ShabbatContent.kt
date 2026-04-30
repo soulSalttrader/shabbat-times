@@ -43,6 +43,7 @@ fun ShabbatContent(
 ) {
     val state = rememberReorderableState(items = items, keyOf = { it.location.id })
 
+    // TODO: remove when Room is implemented
     LaunchedEffect(items) {
         state.updateList(items)
     }
