@@ -30,6 +30,7 @@ import il.soulSalttrader.shabbattimes.permission.openAppSettings
 import il.soulSalttrader.shabbattimes.viewModel.PermissionViewModel
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel
 import il.soulSalttrader.shabbattimes.viewModel.ShabbatViewModel
+import kotlinx.collections.immutable.toImmutableList
 
 @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
 @Composable
@@ -67,7 +68,7 @@ fun ShabbatScreen() {
                         times = null,
                         status = shabbatState.gpsState.toLocationStatus(),
                     ),
-                ),
+                ).toImmutableList(),
                 isDraggable = false,
                 searchConfig = SearchConfig(
                     state = searchUiState.default(),
