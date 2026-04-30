@@ -4,7 +4,6 @@ import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import jakarta.inject.Inject
-import java.util.UUID
 
 class SaveLocationUseCase @Inject constructor(
     private val savedLocationsRepository: SavedLocationsRepository,
@@ -12,7 +11,7 @@ class SaveLocationUseCase @Inject constructor(
     suspend operator fun invoke(resolved: ResolvedLocation) {
         savedLocationsRepository.save(
             SavedLocation(
-                id = UUID.randomUUID().toString(),
+                id = resolved.id,
                 name = resolved.name,
                 coordinates = resolved.coordinates,
                 timeZoneId = resolved.timeZoneId,
