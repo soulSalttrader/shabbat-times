@@ -18,7 +18,6 @@ import il.soulSalttrader.shabbattimes.content.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.default
 import il.soulSalttrader.shabbattimes.effect.AppEffect
-import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.location.LocationStatus
@@ -28,7 +27,6 @@ import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.permission.openAppSettings
-import il.soulSalttrader.shabbattimes.viewModel.LocationViewModel
 import il.soulSalttrader.shabbattimes.viewModel.PermissionViewModel
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel
 import il.soulSalttrader.shabbattimes.viewModel.ShabbatViewModel
@@ -41,9 +39,6 @@ fun ShabbatScreen() {
 
     val searchViewModel: SearchViewModel = hiltViewModel()
     val searchUiState by searchViewModel.state.collectAsStateWithLifecycle()
-
-    val locationViewModel: LocationViewModel = hiltViewModel()
-    val locationUiState by locationViewModel.state.collectAsStateWithLifecycle()
 
     val permissionViewModel: PermissionViewModel = hiltViewModel()
     val permissionUiState by permissionViewModel.state.collectAsStateWithLifecycle()
@@ -81,7 +76,7 @@ fun ShabbatScreen() {
 
                 onClick = {
                     when (permissionUiState.permission) {
-                        PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.GpsLocationRequested)
+                        PermissionState.Granted -> shabbatViewModel.dispatch(ShabbatDataEvent.GpsLocationRequested)
                         else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
                     }
                 },
@@ -92,9 +87,8 @@ fun ShabbatScreen() {
             ShabbatContent(
                 items = locationWithTimes.data,
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) { item ->
-                    locationViewModel.dispatch(
-                        LocationEvent.LocationDeleted(
-                            savedLocation = item.locationWithTimes.location,
+                    shabbatViewModel.dispatch(
+                        ShabbatDataEvent.LocationDeleted(
                             savedLocation = item.location,
                             isCurrent = item.status == LocationStatus.Current,
                         )
@@ -107,7 +101,7 @@ fun ShabbatScreen() {
 
                 onClick = {
                     when (permissionUiState.permission) {
-                        PermissionState.Granted -> locationViewModel.dispatch(LocationEvent.GpsLocationRequested)
+                        PermissionState.Granted -> shabbatViewModel.dispatch(ShabbatDataEvent.GpsLocationRequested)
                         else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
                     }
                 },
