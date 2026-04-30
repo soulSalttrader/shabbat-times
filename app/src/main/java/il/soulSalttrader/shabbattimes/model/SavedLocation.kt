@@ -1,8 +1,10 @@
 package il.soulSalttrader.shabbattimes.model
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 import java.time.ZoneId
 
+@Immutable
 @Serializable
 data class SavedLocation(
     val id: String,

@@ -1,7 +1,9 @@
 package il.soulSalttrader.shabbattimes.model
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Serializable
 data class HalachicTimesDisplay(
     val coordinates: Coordinates,
