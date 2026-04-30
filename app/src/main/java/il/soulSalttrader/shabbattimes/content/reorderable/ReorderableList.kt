@@ -68,10 +68,14 @@ fun <T> mergeWithCurrentOrder(
     keyOf: (T) -> Any,
 ): List<T> {
     val updatedKeys = updated.map { keyOf(it) }.toSet()
+    val updatedMap = updated.associateBy { keyOf(it) }
     return buildList {
+        // new items not in current — add at top
         addAll(updated.filter { new -> current.none { keyOf(it) == keyOf(new) } })
         addAll(current.filter { keyOf(it) in updatedKeys })
     }
+        // existing items — preserve ORDER from current but DATA from updated
+        addAll(current.mapNotNull { updatedMap[keyOf(it)] })
 }
 
 @Composable
