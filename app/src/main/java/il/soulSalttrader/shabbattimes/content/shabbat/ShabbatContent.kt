@@ -40,7 +40,7 @@ fun ShabbatContent(
 
     onClick: () -> Unit = {},
 ) {
-    val state = rememberReorderableState(items = items, keyOf = { it.location.id })
+    val state = rememberReorderableState(items = items, keyOf = { "${it.location.id}_${it.times?.candleLightingTime}" })
 
     LaunchedEffect(items) {
         state.updateList(items)
@@ -58,7 +58,7 @@ fun ShabbatContent(
                 state = state.reorderableState,
                 header = "My locations",
                 items = state.list,
-                keyOf = { it.location.id },
+                keyOf = { "${it.location.id}_${it.times?.candleLightingTime}" },
                 swipeConfig = swipeConfig,
             ) { item, modifier ->
                 ShabbatCard(
