@@ -13,8 +13,11 @@ class SavedLocationsRepositoryInMemory : SavedLocationsRepository {
 
     override suspend fun save(location: SavedLocation) {
         _locations.update { current ->
-            if (current.any { it.id == location.id }) current
-            else current + location
+            if (current.any { it.id == location.id }) {
+                current.map { if (it.id == location.id) location else it }
+            } else {
+                current + location
+            }
         }
     }
 

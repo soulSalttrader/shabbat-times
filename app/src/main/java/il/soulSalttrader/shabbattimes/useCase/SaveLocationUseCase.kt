@@ -18,4 +18,8 @@ class SaveLocationUseCase @Inject constructor(
             )
         )
     }
+
+    suspend operator fun invoke(saved: SavedLocation) {
+        savedLocationsRepository.save(saved)
+    }
 }
