@@ -22,7 +22,6 @@ import il.soulSalttrader.shabbattimes.event.LocationEvent
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
 import il.soulSalttrader.shabbattimes.location.LocationStatus
-import il.soulSalttrader.shabbattimes.location.LocationWithTimesUi
 import il.soulSalttrader.shabbattimes.location.toLocationStatus
 import il.soulSalttrader.shabbattimes.model.LocationWithTimes
 import il.soulSalttrader.shabbattimes.model.SavedLocation
@@ -68,13 +67,11 @@ fun ShabbatScreen() {
         is ShabbatResultState.NoResults -> {
             ShabbatContent(
                 items = listOf(
-                    LocationWithTimesUi(
-                        locationWithTimes = LocationWithTimes(
-                            location = SavedLocation.empty(),
-                            times = null,
-                        ),
-                        status = locationUiState.gpsState.toLocationStatus(),
-                    )
+                    LocationWithTimes(
+                        location = SavedLocation.empty(),
+                        times = null,
+                        status = shabbatState.gpsState.toLocationStatus(),
+                    ),
                 ),
                 isDraggable = false,
                 searchConfig = SearchConfig(
@@ -92,22 +89,13 @@ fun ShabbatScreen() {
         }
 
         is ShabbatResultState.Results   -> {
-            val items = locationWithTimes.data.map { lwt ->
-                LocationWithTimesUi(
-                    locationWithTimes = lwt,
-                    status = locationUiState.savedLocations
-                        .firstOrNull { it.location.id == lwt.location.id }
-                        ?.status
-                        ?: LocationStatus.Unknown,
-                )
-            }
-
             ShabbatContent(
-                items = items,
+                items = locationWithTimes.data,
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) { item ->
                     locationViewModel.dispatch(
                         LocationEvent.LocationDeleted(
                             savedLocation = item.locationWithTimes.location,
+                            savedLocation = item.location,
                             isCurrent = item.status == LocationStatus.Current,
                         )
                     )

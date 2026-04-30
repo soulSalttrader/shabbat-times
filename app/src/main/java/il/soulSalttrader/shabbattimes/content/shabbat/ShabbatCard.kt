@@ -25,12 +25,12 @@ import il.soulSalttrader.shabbattimes.content.uiIcon.UiIcon
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconLabel
 import il.soulSalttrader.shabbattimes.location.LocationStatus
-import il.soulSalttrader.shabbattimes.location.LocationWithTimesUi
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
+import il.soulSalttrader.shabbattimes.model.LocationWithTimes
 
 @Composable
 fun ShabbatCard(
-    item: LocationWithTimesUi,
+    item: LocationWithTimes,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(16.dp),
     colors: CardColors = getDefaultCardColors(item.status),
@@ -55,17 +55,17 @@ fun ShabbatCard(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(modifier = Modifier.padding(16.dp).weight(1f)) {
-                LocationTitle(item.locationWithTimes.location.name)
+                LocationTitle(item.location.name)
 
                 UiIconLocationLabel(item.status, item.label)
 
                 Spacer(Modifier.height(16.dp))
 
                 ShabbatKeyTimes(
-                    candleLightingTime = item.locationWithTimes.times?.candleLightingTime ?: HalachicTimesDisplay.EMPTY_TIME,
-                    candleLightingDate = item.locationWithTimes.times?.candleLightingDate ?: HalachicTimesDisplay.EMPTY_DATE,
-                    havdalahTime = item.locationWithTimes.times?.havdalahTime ?: HalachicTimesDisplay.EMPTY_TIME,
-                    havdalahDate = item.locationWithTimes.times?.havdalahDate ?: HalachicTimesDisplay.EMPTY_DATE,
+                    candleLightingTime = item.times?.candleLightingTime ?: HalachicTimesDisplay.EMPTY_TIME,
+                    candleLightingDate = item.times?.candleLightingDate ?: HalachicTimesDisplay.EMPTY_DATE,
+                    havdalahTime = item.times?.havdalahTime ?: HalachicTimesDisplay.EMPTY_TIME,
+                    havdalahDate = item.times?.havdalahDate ?: HalachicTimesDisplay.EMPTY_DATE,
                 )
             }
 

@@ -29,18 +29,18 @@ import il.soulSalttrader.shabbattimes.content.search.LocationSearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
-import il.soulSalttrader.shabbattimes.location.LocationWithTimesUi
+import il.soulSalttrader.shabbattimes.model.LocationWithTimes
 
 @Composable
 fun ShabbatContent(
-    items: List<LocationWithTimesUi>,
-    swipeConfig: SwipeConfig<LocationWithTimesUi> = SwipeConfig(),
+    items: List<LocationWithTimes>,
+    swipeConfig: SwipeConfig<LocationWithTimes> = SwipeConfig(),
     searchConfig: SearchConfig,
     isDraggable: Boolean = true,
 
     onClick: () -> Unit = {},
 ) {
-    val state = rememberReorderableState(items = items, keyOf = { it.locationWithTimes.location.id })
+    val state = rememberReorderableState(items = items, keyOf = { it.location.id })
 
     LaunchedEffect(items) {
         state.updateList(items)
@@ -58,7 +58,7 @@ fun ShabbatContent(
                 state = state.reorderableState,
                 header = "My locations",
                 items = state.list,
-                keyOf = { it.locationWithTimes.location.id },
+                keyOf = { it.location.id },
                 swipeConfig = swipeConfig,
             ) { item, modifier ->
                 ShabbatCard(
