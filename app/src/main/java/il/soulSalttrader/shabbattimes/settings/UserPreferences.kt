@@ -1,14 +1,33 @@
 package il.soulSalttrader.shabbattimes.settings
 
-import android.content.Context
-import android.text.format.DateFormat
-import dagger.hilt.android.qualifiers.ApplicationContext
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.core.DataStore
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlinx.coroutines.flow.first
 
 @Singleton
 class UserPreferences @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    private val dataStore: DataStore<Preferences>,
 ) {
-    fun is24HourFormat(): Boolean = DateFormat.is24HourFormat(context)
+    companion object {
+        val CANDLE_LIGHTING_KEY = longPreferencesKey("candle_lighting_offset")
+        val HAVDALAH_KEY = longPreferencesKey("havdalah_offset")
+    }
+
+    suspend fun candleLightingOffsetMinutes(): Long =
+        dataStore.data.first()[CANDLE_LIGHTING_KEY] ?: 18L
+
+    suspend fun havdalahOffsetMinutes(): Long =
+        dataStore.data.first()[HAVDALAH_KEY] ?: 40L
+
+    suspend fun setCandleLightingOffset(minutes: Long) {
+        dataStore.edit { prefs -> prefs[CANDLE_LIGHTING_KEY] = minutes }
+    }
+
+    suspend fun setHavdalahOffset(minutes: Long) {
+        dataStore.edit { prefs -> prefs[HAVDALAH_KEY] = minutes }
+    }
 }
