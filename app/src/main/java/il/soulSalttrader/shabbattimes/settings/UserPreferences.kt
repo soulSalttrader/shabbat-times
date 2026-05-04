@@ -4,6 +4,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.core.DataStore
+import il.soulSalttrader.shabbattimes.constants.ShabbatOffsets.HILUCH_MIL_MINUTES
+import il.soulSalttrader.shabbattimes.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_MINUTES
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.first
@@ -18,10 +20,10 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun candleLightingOffsetMinutes(): Long =
-        dataStore.data.first()[CANDLE_LIGHTING_KEY] ?: 18L
+        dataStore.data.first()[CANDLE_LIGHTING_KEY] ?: HILUCH_MIL_MINUTES
 
     suspend fun havdalahOffsetMinutes(): Long =
-        dataStore.data.first()[HAVDALAH_KEY] ?: 40L
+        dataStore.data.first()[HAVDALAH_KEY] ?: TZEIT_HAKOCHAVIM_MINUTES
 
     suspend fun setCandleLightingOffset(minutes: Long) {
         dataStore.edit { prefs -> prefs[CANDLE_LIGHTING_KEY] = minutes }
