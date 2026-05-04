@@ -19,7 +19,7 @@ import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.default
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
-import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
+import il.soulSalttrader.shabbattimes.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.location.toLocationStatus
 import il.soulSalttrader.shabbattimes.model.LocationWithTimes
@@ -57,7 +57,7 @@ fun ShabbatScreen() {
 
     val onCardClick = {
         when (permissionUiState.permission) {
-            PermissionState.Granted -> shabbatViewModel.dispatch(ShabbatDataEvent.GpsLocationRequested)
+            PermissionState.Granted -> shabbatViewModel.dispatch(ShabbatEvent.GpsLocationRequested)
             else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
         }
     }
@@ -92,7 +92,7 @@ fun ShabbatScreen() {
                 items = locationWithTimes.data,
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) { item ->
                     shabbatViewModel.dispatch(
-                        ShabbatDataEvent.LocationDeleted(
+                        ShabbatEvent.LocationDeleted(
                             savedLocation = item.location,
                             isCurrent = item.status == LocationStatus.Current,
                         )
@@ -105,7 +105,7 @@ fun ShabbatScreen() {
 
         is ShabbatResultState.Failure   -> FailureScreen(
             message = locationWithTimes.message,
-            onRetry = { shabbatViewModel.dispatch(ShabbatDataEvent.RetryLoadLocationWithTimes) },
+            onRetry = { shabbatViewModel.dispatch(ShabbatEvent.RetryLoadLocationWithTimes) },
         )
     }
 

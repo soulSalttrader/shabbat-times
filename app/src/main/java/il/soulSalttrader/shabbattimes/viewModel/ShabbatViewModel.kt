@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
-import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
+import il.soulSalttrader.shabbattimes.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.network.NetworkResult
@@ -47,9 +47,9 @@ class ShabbatViewModel @Inject constructor(
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
     private val gpsLocationFlow: StateFlow<SavedLocation?> = resolveGpsLocationUseCase()
-        .onStart { dispatch(ShabbatDataEvent.GpsLocationRequested) }
+        .onStart { dispatch(ShabbatEvent.GpsLocationRequested) }
         .catch { e ->
-            dispatch(ShabbatDataEvent.GpsLocationError(e.message ?: "Unknown error"))
+            dispatch(ShabbatEvent.GpsLocationError(e.message ?: "Unknown error"))
             _effects.tryEmit(AppEffect.ShowToast(e.message ?: "Unknown error"))
         }
         .map { resolved ->
@@ -91,6 +91,7 @@ class ShabbatViewModel @Inject constructor(
         }
     }
         .catch { throwable ->
+            dispatch(ShabbatEvent.LocationWithTimesLoadFailed(throwable.message ?: "Unknown error", throwable))
             _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
             emit(emptyList())
         }
@@ -100,7 +101,8 @@ class ShabbatViewModel @Inject constructor(
             initialValue = emptyList(),
         )
 
-    private val _state: MutableStateFlow<ShabbatUiState> = MutableStateFlow(value = ShabbatUiState())
+    private val _state: MutableStateFlow<ShabbatUiState> =
+        MutableStateFlow(value = ShabbatUiState())
 
     val state: StateFlow<ShabbatUiState> = combine(
         _state,
@@ -109,8 +111,8 @@ class ShabbatViewModel @Inject constructor(
         savedLocationsRepository.locations,
         permissionRepository.permissionState,
     ) { state, gpsLocation, halachicTimes, savedLocations, permission ->
-        val withPermission = ShabbatDataEvent.GpsPermissionChanged(permission).reducer reduce state
-        ShabbatDataEvent.LocationWithTimesLoaded(savedLocations, halachicTimes, gpsLocation).reducer reduce withPermission
+        val withPermission = ShabbatEvent.GpsPermissionChanged(permission).reducer reduce state
+        ShabbatEvent.LocationWithTimesLoaded(savedLocations, halachicTimes, gpsLocation).reducer reduce withPermission
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -120,15 +122,15 @@ class ShabbatViewModel @Inject constructor(
     fun dispatch(event: AppEvent) {
         _state.updateAndGet { current ->
             when (event) {
-                is ShabbatDataEvent -> event.reducer reduce current
-                else                -> current
+                is ShabbatEvent -> event.reducer reduce current
+                else            -> current
             }
         }
 
         when (event) {
-            is ShabbatDataEvent.GpsLocationRequested -> handleGpsLocationRequested()
-            is ShabbatDataEvent.LocationDeleted      -> handleDeleteLocation(event)
-            else                                     -> Unit
+            is ShabbatEvent.GpsLocationRequested -> handleGpsLocationRequested()
+            is ShabbatEvent.LocationDeleted      -> handleDeleteLocation(event)
+            else                                 -> Unit
         }
     }
 
@@ -139,7 +141,7 @@ class ShabbatViewModel @Inject constructor(
         }
     }
 
-    private fun handleDeleteLocation(event: ShabbatDataEvent.LocationDeleted) {
+    private fun handleDeleteLocation(event: ShabbatEvent.LocationDeleted) {
         viewModelScope.launch {
             removeLocationUseCase(event.savedLocation, event.isCurrent)
         }
