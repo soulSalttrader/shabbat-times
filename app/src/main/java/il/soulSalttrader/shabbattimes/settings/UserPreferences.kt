@@ -9,7 +9,6 @@ import il.soulSalttrader.shabbattimes.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.first
-import java.time.ZoneId
 
 @Singleton
 class UserPreferences @Inject constructor(
