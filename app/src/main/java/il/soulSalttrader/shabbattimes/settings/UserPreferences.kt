@@ -9,6 +9,7 @@ import il.soulSalttrader.shabbattimes.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.first
+import java.time.ZoneId
 
 @Singleton
 class UserPreferences @Inject constructor(
@@ -17,6 +18,7 @@ class UserPreferences @Inject constructor(
     companion object {
         val CANDLE_LIGHTING_KEY = longPreferencesKey("candle_lighting_offset")
         val HAVDALAH_KEY = longPreferencesKey("havdalah_offset")
+        const val DEFAULT_TIME_FORMAT = 24
     }
 
     suspend fun candleLightingOffsetMinutes(): Long =
