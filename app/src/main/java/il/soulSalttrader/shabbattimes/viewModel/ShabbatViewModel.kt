@@ -48,10 +48,6 @@ class ShabbatViewModel @Inject constructor(
 
     private val gpsLocationFlow: StateFlow<SavedLocation?> = resolveGpsLocationUseCase()
         .onStart { dispatch(ShabbatEvent.GpsLocationRequested) }
-        .catch { e ->
-            dispatch(ShabbatEvent.GpsLocationError(e.message ?: "Unknown error"))
-            _effects.tryEmit(AppEffect.ShowToast(e.message ?: "Unknown error"))
-        }
         .map { resolved ->
             resolved?.let {
                 SavedLocation(
@@ -61,6 +57,10 @@ class ShabbatViewModel @Inject constructor(
                     timeZoneId = resolved.timeZoneId,
                 )
             }
+        }
+        .catch { e ->
+            dispatch(ShabbatEvent.GpsLocationError(e.message ?: "Unknown error"))
+            _effects.tryEmit(AppEffect.ShowToast(e.message ?: "Unknown error"))
         }
         .stateIn(
             scope = viewModelScope,
