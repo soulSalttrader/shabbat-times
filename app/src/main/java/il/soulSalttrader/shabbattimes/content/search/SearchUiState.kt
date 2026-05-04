@@ -10,5 +10,4 @@ data class SearchUiState(
     val selectedSuggestion: Selection<ResolvedLocation?> = Selection.Idle,
     val resultState: SearchResultState = SearchResultState.Idle,
     val visibility: SearchVisibility = SearchVisibility.Collapsed,
-    val searchMode: SearchMode = SearchMode.Autocomplete,
 ) : State

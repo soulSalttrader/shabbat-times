@@ -60,6 +60,7 @@ class SearchViewModel @Inject constructor(
             }
         }
         .catch { throwable ->
+            SearchEvent.SuggestionsLoadFailed(throwable.message ?: "Unknown error", throwable).reducer reduce _state.value
             _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
             emit(emptyList())
         }

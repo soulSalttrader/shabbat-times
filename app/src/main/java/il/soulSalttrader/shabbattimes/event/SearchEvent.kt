@@ -4,7 +4,6 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.content.Input
 import il.soulSalttrader.shabbattimes.content.Selection
-import il.soulSalttrader.shabbattimes.content.search.SearchMode
 import il.soulSalttrader.shabbattimes.content.search.SearchResultState
 import il.soulSalttrader.shabbattimes.content.search.SearchUiState
 import il.soulSalttrader.shabbattimes.content.search.SearchVisibility
@@ -33,12 +32,6 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
                 selectedSuggestion = Selection.Idle,
                 resultState = SearchResultState.Idle,
             )
-        }
-    }
-
-    data object LoadSuggestions : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(resultState = SearchResultState.Loading)
         }
     }
 
@@ -80,19 +73,6 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
                 }
             )
         }
-    }
-
-    data class SearchModeChanged(val mode: SearchMode) : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(
-                searchMode = mode,
-                resultState = SearchResultState.Idle
-            )
-        }
-    }
-
-    data object RetrySearch : SearchEvent {
-        override val reducer = SearchReducer { state -> state }
     }
 
     object SearchCommitted : SearchEvent {
