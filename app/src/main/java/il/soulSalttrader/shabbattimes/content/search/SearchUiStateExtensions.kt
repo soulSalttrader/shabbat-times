@@ -4,11 +4,6 @@ import il.soulSalttrader.shabbattimes.content.Input
 import il.soulSalttrader.shabbattimes.content.normalizedOrEmpty
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 
-fun SearchUiState.isSearchActive(): Boolean =
-    visibility == SearchVisibility.Expanded
-
-fun SearchUiState.suggestionsOrEmpty(): List<ResolvedLocation> =
-    (resultState as? SearchResultState.Results)?.suggestions.orEmpty()
-
-fun SearchUiState.hasQuery(): Boolean =
-    query is Input.Value && query.normalizedOrEmpty().isNotEmpty()
+fun SearchUiState.isSearchActive(): Boolean = visibility == SearchVisibility.Expanded
+fun SearchUiState.suggestionsOrEmpty(): List<ResolvedLocation> = (suggestionResults as? SearchResultState.Suggestions)?.suggestions.orEmpty()
+fun SearchUiState.hasQuery(): Boolean = query is Input.Value && query.normalizedOrEmpty().isNotEmpty()
