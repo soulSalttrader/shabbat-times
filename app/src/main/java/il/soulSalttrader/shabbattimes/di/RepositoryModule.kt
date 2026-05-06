@@ -5,6 +5,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
+import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.GeocodingRepository
 import il.soulSalttrader.shabbattimes.repository.GeocodingRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.GpsLocationRepository
@@ -52,4 +54,8 @@ object RepositoryModule {
         apiService: SolarTimesService,
         dispatcher: CoroutineDispatcher,
     ): SolarTimesRepository = SolarTimesRepositoryImpl(apiService, dispatcher)
+
+    @Provides
+    @Singleton
+    fun provideCurrentLocationRepository(): CurrentLocationRepository = CurrentLocationRepositoryImpl()
 }
