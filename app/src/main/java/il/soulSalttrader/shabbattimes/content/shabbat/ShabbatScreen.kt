@@ -17,11 +17,12 @@ import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.default
+import il.soulSalttrader.shabbattimes.content.search.toLocationStatus
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.PermissionEvent
+import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.location.LocationStatus
-import il.soulSalttrader.shabbattimes.location.toLocationStatus
 import il.soulSalttrader.shabbattimes.model.LocationWithTimes
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
@@ -57,7 +58,7 @@ fun ShabbatScreen() {
 
     val onCardClick = {
         when (permissionUiState.permission) {
-            PermissionState.Granted -> shabbatViewModel.dispatch(ShabbatEvent.GpsLocationRequested)
+            PermissionState.Granted -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
             else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
         }
     }
@@ -78,7 +79,7 @@ fun ShabbatScreen() {
                     LocationWithTimes(
                         location = SavedLocation.empty(),
                         times = null,
-                        status = shabbatState.gpsState.toLocationStatus(),
+                        status = searchUiState.gpsResult.toLocationStatus(),
                     ),
                 ).toImmutableList(),
                 isDraggable = false,
