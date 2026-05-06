@@ -12,8 +12,11 @@ import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
+import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.useCase.GetLocationSuggestionsUseCase
+import il.soulSalttrader.shabbattimes.useCase.ResolveGpsLocationUseCase
 import il.soulSalttrader.shabbattimes.useCase.SaveLocationUseCase
+import il.soulSalttrader.shabbattimes.useCase.UpdateCurrentLocationUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -31,14 +34,19 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val saveLocation: SaveLocationUseCase,
+    private val saveLocationUseCase: SaveLocationUseCase,
+    private val updateCurrentLocationUseCase: UpdateCurrentLocationUseCase,
     private val getLocationSuggestion: GetLocationSuggestionsUseCase,
+    resolveGpsLocationUseCase: ResolveGpsLocationUseCase,
+    permissionRepository: PermissionRepository,
 ) : ViewModel() {
     private val _state: MutableStateFlow<SearchUiState> = MutableStateFlow(value = SearchUiState())
 
@@ -50,7 +58,7 @@ class SearchViewModel @Inject constructor(
         .distinctUntilChanged()
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    private val locationSuggestionsFlow: StateFlow<List<ResolvedLocation>> = queryFlow
+    private val suggestionsLocationFlow: StateFlow<List<ResolvedLocation>> = queryFlow
         .debounce(300)
         .flatMapLatest { query ->
             flow {
@@ -70,11 +78,31 @@ class SearchViewModel @Inject constructor(
             initialValue = emptyList(),
         )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val gpsLocationFlow: StateFlow<ResolvedLocation?> = resolveGpsLocationUseCase()
+        .onStart { dispatch(SearchEvent.GpsLocationRequested) }
+        .onEach { resolved -> updateCurrentLocationUseCase(resolved) }
+        .catch { e ->
+            dispatch(SearchEvent.GpsLocationError(e.message ?: "Unknown error"))
+            _effects.tryEmit(AppEffect.ShowToast(e.message ?: "Unknown error"))
+            emit(null)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null,
+        )
+
     val state: StateFlow<SearchUiState> = combine(
         _state,
-        locationSuggestionsFlow,
-    ) { state, suggestions ->
-        SearchEvent.SuggestionsLoaded(suggestions).reducer reduce state
+        suggestionsLocationFlow,
+        permissionRepository.permissionState,
+        gpsLocationFlow,
+    ) { state, suggestions, permission, gpsLocation ->
+        val withGpsLocation = gpsLocation?.let { SearchEvent.GpsLocationLoaded(it).reducer reduce state } ?: state
+        val withPermission = SearchEvent.GpsPermissionChanged(permission).reducer reduce withGpsLocation
+
+        SearchEvent.SuggestionsLoaded(suggestions).reducer reduce withPermission
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -99,7 +127,7 @@ class SearchViewModel @Inject constructor(
         val resolved = state.selectedSuggestion.normalizedOrNull() ?: return
 
         viewModelScope.launch {
-            saveLocation(resolved)
+            saveLocationUseCase(resolved)
         }
     }
 }

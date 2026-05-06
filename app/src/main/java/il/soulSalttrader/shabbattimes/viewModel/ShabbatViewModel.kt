@@ -8,14 +8,11 @@ import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
-import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.network.NetworkResult
-import il.soulSalttrader.shabbattimes.repository.PermissionRepository
+import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
 import il.soulSalttrader.shabbattimes.useCase.RemoveCityUseCase
-import il.soulSalttrader.shabbattimes.useCase.ResolveGpsLocationUseCase
-import il.soulSalttrader.shabbattimes.useCase.SaveLocationUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,49 +25,23 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    private val savedLocationsRepository: SavedLocationsRepository,
-    private val permissionRepository: PermissionRepository,
-    private val saveGpsLocationUseCase: SaveLocationUseCase,
-    private val resolveGpsLocationUseCase: ResolveGpsLocationUseCase,
+    savedLocationsRepository: SavedLocationsRepository,
+    currentLocationRepository: CurrentLocationRepository,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
     private val removeLocationUseCase: RemoveCityUseCase,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
-    private val gpsLocationFlow: StateFlow<SavedLocation?> = resolveGpsLocationUseCase()
-        .onStart { dispatch(ShabbatEvent.GpsLocationRequested) }
-        .map { resolved ->
-            resolved?.let {
-                SavedLocation(
-                    id = SavedLocation.GPS_ID,
-                    name = resolved.name,
-                    coordinates = resolved.coordinates,
-                    timeZoneId = resolved.timeZoneId,
-                )
-            }
-        }
-        .catch { e ->
-            dispatch(ShabbatEvent.GpsLocationError(e.message ?: "Unknown error"))
-            _effects.tryEmit(AppEffect.ShowToast(e.message ?: "Unknown error"))
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null,
-        )
-
     @OptIn(ExperimentalCoroutinesApi::class)
     val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
-        gpsLocationFlow,
+        currentLocationRepository.location,
         savedLocationsRepository.locations,
     ) { gpsLocation, savedLocations ->
         buildList {
@@ -101,18 +72,15 @@ class ShabbatViewModel @Inject constructor(
             initialValue = emptyList(),
         )
 
-    private val _state: MutableStateFlow<ShabbatUiState> =
-        MutableStateFlow(value = ShabbatUiState())
+    private val _state: MutableStateFlow<ShabbatUiState> = MutableStateFlow(value = ShabbatUiState())
 
     val state: StateFlow<ShabbatUiState> = combine(
         _state,
-        gpsLocationFlow,
         halachicTimesFlow,
+        currentLocationRepository.location,
         savedLocationsRepository.locations,
-        permissionRepository.permissionState,
-    ) { state, gpsLocation, halachicTimes, savedLocations, permission ->
-        val withPermission = ShabbatEvent.GpsPermissionChanged(permission).reducer reduce state
-        ShabbatEvent.LocationWithTimesLoaded(savedLocations, halachicTimes, gpsLocation).reducer reduce withPermission
+    ) { state, halachicTimes, currentLocation, savedLocations ->
+        ShabbatEvent.LocationWithTimesLoaded(savedLocations, currentLocation, halachicTimes).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -128,16 +96,8 @@ class ShabbatViewModel @Inject constructor(
         }
 
         when (event) {
-            is ShabbatEvent.GpsLocationRequested -> handleGpsLocationRequested()
-            is ShabbatEvent.LocationDeleted      -> handleDeleteLocation(event)
-            else                                 -> Unit
-        }
-    }
-
-    private fun handleGpsLocationRequested() {
-        viewModelScope.launch {
-            val gpsLocation = gpsLocationFlow.value ?: return@launch
-            saveGpsLocationUseCase(gpsLocation)
+            is ShabbatEvent.LocationDeleted -> handleDeleteLocation(event)
+            else                            -> Unit
         }
     }
 
