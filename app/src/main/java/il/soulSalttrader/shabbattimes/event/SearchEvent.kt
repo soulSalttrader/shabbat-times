@@ -4,11 +4,11 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.content.Input
 import il.soulSalttrader.shabbattimes.content.Selection
-import il.soulSalttrader.shabbattimes.content.search.SearchMode
 import il.soulSalttrader.shabbattimes.content.search.SearchResultState
 import il.soulSalttrader.shabbattimes.content.search.SearchUiState
 import il.soulSalttrader.shabbattimes.content.search.SearchVisibility
-import il.soulSalttrader.shabbattimes.model.City
+import il.soulSalttrader.shabbattimes.location.LocationPermission
+import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.reducer.Reducible
 import il.soulSalttrader.shabbattimes.reducer.SearchReducer
 
@@ -17,7 +17,7 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
         override val reducer = SearchReducer { state ->
             state.copy(
                 query = Input.Value(value = newQuery),
-                resultState =
+                suggestionResults =
                     when (newQuery.trim().length >= 2) {
                         true -> SearchResultState.Loading
                         else -> SearchResultState.Idle
@@ -31,42 +31,36 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
             state.copy(
                 query = Input.Idle,
                 selectedSuggestion = Selection.Idle,
-                resultState = SearchResultState.Idle,
+                suggestionResults = SearchResultState.Idle,
             )
         }
     }
 
-    data object LoadCities : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(resultState = SearchResultState.Loading)
-        }
-    }
-
-    data class CitiesLoaded(val cities: List<City>) : SearchEvent {
+    data class SuggestionsLoaded(val resolvedLocations: List<ResolvedLocation>) : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(
-                resultState = when {
-                    state.query is Input.Idle  -> SearchResultState.Idle
-                    state.query is Input.Empty -> SearchResultState.Idle
-                    cities.isEmpty()           -> SearchResultState.NoResults
-                    else                       -> SearchResultState.Results(cities)
+                suggestionResults = when {
+                    state.query is Input.Idle   -> SearchResultState.Idle
+                    state.query is Input.Empty  -> SearchResultState.Idle
+                    resolvedLocations.isEmpty() -> SearchResultState.Empty
+                    else                        -> SearchResultState.Suggestions(resolvedLocations)
                 }
             )
         }
     }
 
-    class CitiesLoadFailed(val message: String, val cause: Throwable?) : SearchEvent {
+    class SuggestionsLoadFailed(val message: String, val cause: Throwable?) : SearchEvent {
         override val reducer = SearchReducer { state ->
             if (Debug.enabled) Log.d("ShabbatEvent", "message: $message, cause: $cause")
-            state.copy(resultState = SearchResultState.Failure(message, cause))
+            state.copy(suggestionResults = SearchResultState.Failure(message, cause))
         }
     }
 
-    data class SuggestionSelected(val city: City) : SearchEvent {
+    data class SuggestionSelected(val resolvedLocation: ResolvedLocation) : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(
-                query = Input.Value(value = city.name),
-                selectedSuggestion = Selection.Selected(value = city),
+                query = Input.Value(value = resolvedLocation.name),
+                selectedSuggestion = Selection.Selected(value = resolvedLocation),
             )
         }
     }
@@ -82,22 +76,42 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
         }
     }
 
-    data class SearchModeChanged(val mode: SearchMode) : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(
-                searchMode = mode,
-                resultState = SearchResultState.Idle
-            )
-        }
-    }
-
-    data object RetrySearch : SearchEvent {
-        override val reducer = SearchReducer { state -> state }
-    }
-
     object SearchCommitted : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(visibility = SearchVisibility.Collapsed)
+        }
+    }
+
+    data class GpsLocationLoaded(val location: ResolvedLocation) : SearchEvent {
+        override val reducer = SearchReducer { state ->
+            state.copy(gpsResult = SearchResultState.GpsResolved(location))
+        }
+    }
+
+    data class GpsLocationError(val message: String) : SearchEvent {
+        override val reducer = SearchReducer { state ->
+            state.copy(gpsResult = SearchResultState.Failure(message))
+        }
+    }
+
+    data object GpsLocationRequested : SearchEvent {
+        override val reducer = SearchReducer { state ->
+            state.copy(gpsResult = SearchResultState.Loading)
+        }
+    }
+
+    data class GpsPermissionChanged(val permission: LocationPermission) : SearchEvent {
+        override val reducer = SearchReducer { state ->
+            state.copy(
+                gpsResult = when (permission) {
+                    is LocationPermission.Idle              -> SearchResultState.Idle
+                    is LocationPermission.Requesting        -> SearchResultState.Loading
+                    is LocationPermission.Denied            -> SearchResultState.Idle
+                    is LocationPermission.DeniedPermanently -> SearchResultState.Idle
+
+                    else -> state.gpsResult
+                }
+            )
         }
     }
 }

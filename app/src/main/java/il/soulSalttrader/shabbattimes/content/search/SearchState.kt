@@ -1,9 +1,9 @@
 package il.soulSalttrader.shabbattimes.content.search
 
-import il.soulSalttrader.shabbattimes.model.City
+import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 
 data class SearchState(
-    val suggestions: List<City>,
+    val suggestions: List<ResolvedLocation>,
     val hasQuery: Boolean,
     val searchActive: Boolean,
 )

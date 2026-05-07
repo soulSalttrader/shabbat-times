@@ -19,14 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import il.soulSalttrader.shabbattimes.model.City
+import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 
 @Composable
-fun ColumnScope.CitySearchSuggestionPanel(
+fun ColumnScope.LocationSearchSuggestionPanel(
     query: String,
     expanded: Boolean,
-    suggestions: List<City>,
-    onSuggestionSelected: (City) -> Unit,
+    suggestions: List<ResolvedLocation>,
+    onSuggestionSelected: (ResolvedLocation) -> Unit,
 
     modifier: Modifier = Modifier,
 
@@ -66,13 +66,13 @@ fun ColumnScope.CitySearchSuggestionPanel(
 }
 
 private fun LazyListScope.suggestionList(
-    suggestions: List<City>,
-    onSuggestionSelected: (City) -> Unit,
+    suggestions: List<ResolvedLocation>,
+    onSuggestionSelected: (ResolvedLocation) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     itemsIndexed(
         items = suggestions,
-        key = { _, city -> city.id }
+        key = { index, _ -> index }
     ) { index, suggestion ->
         SuggestionListItem(
             suggestion = suggestion,
@@ -90,13 +90,13 @@ private fun LazyListScope.suggestionList(
 
 @Composable
 private fun SuggestionListItem(
-    suggestion: City,
+    suggestion: ResolvedLocation,
     modifier: Modifier,
-    onSuggestionSelected: (City) -> Unit,
+    onSuggestionSelected: (ResolvedLocation) -> Unit,
 ) {
     ListItem(
         headlineContent = { Text(suggestion.name) },
-        supportingContent = { Text("${suggestion.timeZone}") },
+        supportingContent = { Text("${suggestion.timeZoneId}") },
         modifier = modifier
             .fillMaxWidth()
             .clickable {

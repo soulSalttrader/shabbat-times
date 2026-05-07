@@ -120,4 +120,7 @@ dependencies {
     implementation(libs.reorderable)
 
     implementation(libs.play.services.location)
+
+    implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.androidx.datastore.preferences)
 }

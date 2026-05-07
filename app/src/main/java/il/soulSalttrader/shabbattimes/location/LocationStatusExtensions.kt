@@ -1,13 +1,11 @@
 package il.soulSalttrader.shabbattimes.location
 
-fun LocationStatus.getLocationLabels() = when (this) {
-    is LocationStatus.Current -> "Your current location"
-    is LocationStatus.Nearby  -> "(${km.formatWithSpaces()} km away)"
-    is LocationStatus.Unknown -> "Unknown distance"
-}
+import il.soulSalttrader.shabbattimes.common.roundToDecimalPlaces
 
-private fun Int.formatWithSpaces() = toString()
-        .reversed()
-        .chunked(3)
-        .joinToString(" ")
-        .reversed()
+fun LocationStatus.toLabel() = when (this) {
+    is LocationStatus.Current      -> "Your current location"
+    is LocationStatus.Nearby       -> "(${distanceKm.roundToDecimalPlaces(1)} km away)"
+    is LocationStatus.Locating     -> "Getting your location..."
+    is LocationStatus.Unknown      -> "Unknown distance"
+    is LocationStatus.NoPermission -> "Tap to use current location"
+}

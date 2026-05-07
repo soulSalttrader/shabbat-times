@@ -4,11 +4,9 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.Debug.formatEventName
 import il.soulSalttrader.shabbattimes.Debug.formatStateTransition
-import il.soulSalttrader.shabbattimes.content.city.CityUiState
 import il.soulSalttrader.shabbattimes.content.permission.PermissionUiState
 import il.soulSalttrader.shabbattimes.content.search.SearchUiState
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
-import il.soulSalttrader.shabbattimes.location.LocationUiState
 import il.soulSalttrader.shabbattimes.model.State
 
 fun interface Reducer<S : State> {
@@ -30,6 +28,4 @@ fun interface Reducer<S : State> {
 
 typealias ShabbatReducer = Reducer<ShabbatUiState>
 typealias SearchReducer = Reducer<SearchUiState>
-typealias LocationReducer = Reducer<LocationUiState>
-typealias CityReducer = Reducer<CityUiState>
 typealias PermissionReducer = Reducer<PermissionUiState>

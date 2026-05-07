@@ -5,13 +5,13 @@ import il.soulSalttrader.shabbattimes.event.SearchEvent.QueryCleared
 import il.soulSalttrader.shabbattimes.event.SearchEvent.SearchCommitted
 import il.soulSalttrader.shabbattimes.event.SearchEvent.SearchVisibilityChanged
 import il.soulSalttrader.shabbattimes.event.SearchEvent.SuggestionSelected
-import il.soulSalttrader.shabbattimes.model.City
+import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.viewModel.SearchViewModel
 
 data class SearchAction(
     val onChangeVisibility: (Boolean) -> Unit,
     val onSearchCommitted: () -> Unit,
-    val onSuggestionSelected: (City) -> Unit,
+    val onSuggestionSelected: (ResolvedLocation) -> Unit,
     val onQueryChanged: (String) -> Unit,
     val onQueryCleared: () -> Unit,
 )
