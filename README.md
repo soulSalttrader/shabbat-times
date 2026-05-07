@@ -29,8 +29,7 @@ applies the appropriate halachic offsets (+42 min / −18 min).
 
 ### 📸 Screenshots
 
-- Screenshots reflect the current UI direction.
-- Some interactions and data flows are still under active development.
+- Screenshots reflect the current UI state at the time of capture.
 
 <p align="start">
   <img src="docs/init01.png" width="180" />
@@ -65,88 +64,74 @@ fun ShabbatScreen() {
     val searchViewModel: SearchViewModel = hiltViewModel()
     val searchUiState by searchViewModel.state.collectAsStateWithLifecycle()
 
+    val permissionViewModel: PermissionViewModel = hiltViewModel()
+    val permissionUiState by permissionViewModel.state.collectAsStateWithLifecycle()
+
     HandlePermissions(
         permissions = listOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
         ),
-        permissionState = shabbatState.permission,
-        dispatch = shabbatViewModel::dispatch,
+        permissionState = permissionUiState.permission,
+        dispatch = permissionViewModel::dispatch,
     )
 
     val context = LocalContext.current
 
-    when (val halachicTimes = shabbatState.data) {
-        is ShabbatResultState.Idle      -> LoadingScreen()
+    val onCardClick = {
+        when (permissionUiState.permission) {
+            PermissionState.Granted -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
+            else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
+        }
+    }
 
-        is ShabbatResultState.Loading   -> LoadingScreen()
+    val searchConfig = SearchConfig(
+        state = searchUiState.default(),
+        action = searchViewModel.default(),
+    )
 
-        is ShabbatResultState.NoResults -> {
+    when (val entries = shabbatState.shabbat) {
+        is ShabbatResultState.Idle    -> LoadingScreen()
+
+        is ShabbatResultState.Loading -> LoadingScreen()
+
+        is ShabbatResultState.Empty   -> {
             ShabbatContent(
-                items = listOf(HalachicTimesDisplay()),
+                items = listOf(
+                    ShabbatEntry(
+                        location = SavedLocation.empty(),
+                        times = null,
+                        status = searchUiState.gpsResult.toLocationStatus(),
+                    ),
+                ).toImmutableList(),
                 isDraggable = false,
-                searchConfig = SearchConfig(
-                    state = searchUiState.default(),
-                    action = searchViewModel.default(),
-                ),
-
-                onClick = {
-                    when (shabbatState.permission) {
-                        PermissionState.Granted -> shabbatViewModel.dispatch(PermissionEvent.Request)
-                        else                    -> shabbatViewModel.dispatch(PermissionEvent.ShowEducation)
-                    }
-                },
+                searchConfig = searchConfig,
+                onClick = onCardClick,
             )
         }
 
-        is ShabbatResultState.Results   -> {
+        is ShabbatResultState.Ready   -> {
             ShabbatContent(
-                items = halachicTimes.data,
-                swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) {
-                    shabbatViewModel.dispatch(ShabbatDataEvent.TimeDeleted(it.city))
+                items = entries.entries,
+                swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) { item ->
+                    shabbatViewModel.dispatch(
+                        ShabbatEvent.LocationDeleted(
+                            savedLocation = item.location,
+                            isCurrent = item.status == LocationStatus.Current,
+                        )
+                    )
                 },
-                searchConfig = SearchConfig(
-                    state = searchUiState.default(),
-                    action = searchViewModel.default(),
-                ),
+                searchConfig = searchConfig,
+                onClick = onCardClick,
             )
         }
 
-        is ShabbatResultState.Failure   -> FailureScreen(
-            message = halachicTimes.message,
-            onRetry = { shabbatViewModel.dispatch(ShabbatDataEvent.RetryLoadTimes) },
+        is ShabbatResultState.Failure -> FailureScreen(
+            message = entries.message,
+            onRetry = { shabbatViewModel.dispatch(ShabbatEvent.RetryLoadLocationWithTimes) },
         )
     }
-
-    LaunchedEffect(Unit) {
-        searchViewModel.effects.collect { effect ->
-            when (effect) {
-                is AppEffect.ShowToast -> {
-                    if (Debug.enabled) {
-                        Log.d("ShabbatScreen", "Toast: $effect ${effect.message}")
-                    }
-                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
-                }
-
-                else                   -> Unit
-            }
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        shabbatViewModel.effects.collect { effect ->
-            when (effect) {
-                is AppEffect.OpenAppSettings -> {
-                    if (Debug.enabled) {
-                        Log.d("ShabbatScreen", "OpenAppSettings: $shabbatState")
-                    }
-                    context.openAppSettings()
-                }
-
-                else                         -> Unit
-            }
-        }
-    }
+    //...
 }
 ```
 
@@ -159,82 +144,81 @@ fun ShabbatScreen() {
 ```kotlin
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    private val shabbatRepository: ShabbatRepository,
-    private val cityRepository: CityRepository,
+    savedLocationsRepository: SavedLocationsRepository,
+    currentLocationRepository: CurrentLocationRepository,
+    permissionRepository: PermissionRepository,
+    private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
+    private val removeLocationUseCase: RemoveCityUseCase,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val halachicTimesFlow: StateFlow<List<HalachicTimesDisplay>> =
-        cityRepository.cities
-            .flatMapLatest { cities ->
-                cities.takeUnless { it.isEmpty() }
-                    ?.let { nonEmptyCities ->
-                        flow {
-                            val results = shabbatRepository.getHalachicTimes(nonEmptyCities)
-                            val successes = mutableListOf<HalachicTimesDisplay>()
+    val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
+        currentLocationRepository.location,
+        savedLocationsRepository.locations,
+    ) { gpsLocation, savedLocations ->
+        buildList {
+            gpsLocation?.let { add(it) }
+            addAll(savedLocations)
+        }
+    }.flatMapLatest { savedLocations ->
+        flow {
+            val results = getHalachicTimesUseCase(savedLocations)
+            val successes = results.filterIsInstance<NetworkResult.Success<HalachicTimes>>()
+                .map { it.data }
 
-                            results.forEach { result ->
-                                result
-                                    .onSuccess(tag = "ShabbatVM") { halachicTimesDisplay ->
-                                        successes.add(halachicTimesDisplay)
-                                    }
-                                    .onFailure(tag = "ShabbatVM") { e ->
-                                        _effects.tryEmit(value = AppEffect.ShowToast(message = "Network failed"))
-                                    }
-                            }
-                            emit(value = successes)
-                        }
-                    } ?: flowOf(emptyList())
+            if (results.any { it is NetworkResult.Failure }) {
+                _effects.tryEmit(AppEffect.ShowToast("Some times failed to load"))
             }
-            .catch {throwable ->
-                _effects.tryEmit(value = AppEffect.ShowToast(message = "Unexpected error: ${throwable.message}"))
-                emit(value = emptyList())
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList(),
-            )
 
-    private val _state: MutableStateFlow<ShabbatUiState> =
-        MutableStateFlow(value = ShabbatUiState())
-
-    val state: StateFlow<ShabbatUiState> = combine(
-        flow = _state,
-        flow2 = halachicTimesFlow,
-    ) { state, halachicTimes ->
-        ShabbatDataEvent.TimesLoaded(halachicTimes).reducer reduce state
+            emit(successes)
+        }
     }
+        .catch { throwable ->
+            dispatch(ShabbatEvent.LocationWithTimesLoadFailed(throwable.message ?: "Unknown error", throwable))
+            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+            emit(emptyList())
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ShabbatUiState(),
+            initialValue = emptyList(),
         )
 
+    private val _state: MutableStateFlow<ShabbatUiState> = MutableStateFlow(value = ShabbatUiState())
+
+    val state: StateFlow<ShabbatUiState> = combine(
+        _state,
+        halachicTimesFlow,
+        currentLocationRepository.location,
+        savedLocationsRepository.locations,
+        permissionRepository.permissionState,
+    ) { state, halachicTimes, currentLocation, savedLocations, permission ->
+        ShabbatEvent.LocationWithTimesLoaded(savedLocations, currentLocation, halachicTimes, permission).reducer reduce state
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ShabbatUiState(),
+    )
+
     fun dispatch(event: AppEvent) {
-        val newState = _state.updateAndGet { current ->
+        _state.updateAndGet { current ->
             when (event) {
-                is ShabbatDataEvent -> event.reducer reduce current
-                is PermissionEvent  -> event.reducer reduce current
-                is LocationEvent    -> event.reducer reduce current
-                else                -> current
+                is ShabbatEvent -> event.reducer reduce current
+                else            -> current
             }
         }
 
         when (event) {
-            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
-            is ShabbatDataEvent.TimeDeleted         -> handleDeleteTime(newState)
-            else                                    -> Unit
+            is ShabbatEvent.LocationDeleted -> handleDeleteLocation(event)
+            else                            -> Unit
         }
     }
 
-    private fun handleDeleteTime(state: ShabbatUiState) {
-        val city = state.selectedCity.normalizedOrNull() ?: return
-
+    private fun handleDeleteLocation(event: ShabbatEvent.LocationDeleted) {
         viewModelScope.launch {
-            cityRepository.removeCity(city)
+            removeLocationUseCase(event.savedLocation, event.isCurrent)
         }
     }
 }
@@ -260,29 +244,37 @@ class ShabbatViewModel @Inject constructor(
 
 #### 🔵 5. Data Layer — Clean architecture with repository abstraction
 
-```kotlin
-interface ShabbatRepository {
-    suspend fun getSolarTimes(date: LocalDate, city: City): NetworkResult<SolarTimes>
-    suspend fun getHalachicTimes(city: City): NetworkResult<HalachicTimesDisplay>
-    suspend fun getHalachicTimes(cities: List<City>): List<NetworkResult<HalachicTimesDisplay>>
-}
-```
-
-```kotlin
-interface CityRepository {
-    val cities: Flow<List<City>>
-    suspend fun addCity(city: City)
-    suspend fun removeCity(city: City)
-
-    suspend fun geocodeAutocomplete(query: String): NetworkResult<List<City>>
-    suspend fun geocodeForward(query: String): NetworkResult<City?>
-    suspend fun geocodeReverse(latitude: Double, longitude: Double): NetworkResult<City?>
-}
-```
+| Repository | Responsibility |
+|------------|----------------|
+| `GpsLocationRepository` | Live device GPS, emits raw `Flow<Location?>` — never persisted |
+| `CurrentLocationRepository` | Shared GPS-resolved location between ViewModels. `SearchViewModel` writes via `UpdateCurrentLocationUseCase`, `ShabbatViewModel` reads |
+| `SavedLocationsRepository` | User-saved locations CRUD (in-memory, Room coming soon) |
+| `GeocodingRepository` | Reverse geocode + autocomplete via Geoapify |
+| `SolarTimesRepository` | Fetches solar times per `SolarTimesRequest` via HebCal API |
 
 #### 🔵 6. KotlinX Serialization — For DTO parsing
 
-#### 🔵 7. Domain Layer — Strongly typed models (LocalDate, LocalTime)
+#### 🔵 7. Domain Layer
+
+| Model               | Description |
+|---------------------|-------------|
+| `SavedLocation`     | User-saved location with coordinates and timezone. Persisted (Room coming soon) |
+| `ResolvedLocation`  | Geocoding API result. Never persisted — converted to `SavedLocation` on user save |
+| `SolarTimesRequest` | Entry point for times domain. Contains coordinates, timezone and date only — no city concept |
+| `HalachicTimes`     | Raw Shabbat times (LocalTime) — candle lighting and havdalah |
+| `ShabbatEntry`      | UI model combining `SavedLocation` with `HalachicTimesDisplay` and `LocationStatus` |
+| `Coordinates`       | Latitude/longitude pair, always normalized to 4 decimal places for reliable matching |
+
+#### 🔵 8. Use Cases
+
+| Use Case | Responsibility |
+|----------|----------------|
+| `GetHalachicTimesUseCase` | Computes candle lighting and havdalah times from solar times |
+| `SaveLocationUseCase` | Converts `ResolvedLocation` → `SavedLocation` and persists |
+| `RemoveLocationUseCase` | Removes saved location |
+| `ResolveGpsLocationUseCase` | Combines GPS permission + location + reverse geocoding into single `Flow<ResolvedLocation?>` |
+| `ObserveGpsLocationUseCase` | Observes GPS permission state, emits raw `Location?` when granted |
+| `UpdateCurrentLocationUseCase` | Converts `ResolvedLocation?` → `SavedLocation?` and updates `CurrentLocationRepository` |
 
 ### 🌅 Solar Times API
 
@@ -305,14 +297,16 @@ The default location is currently Jerusalem, but dynamic user location is on the
 #### 🟢 2. Retrofit endpoint definition:
 
 ```kotlin
-@GET("json")
-suspend fun getSolarTimes(
-    @Query("lat") lat: Double = Cities.JERUSALEM.lat,
-    @Query("lng") lng: Double = Cities.JERUSALEM.lng,
-    @Query("timezone") timezone: String = Cities.JERUSALEM.timezone,
-    @Query("time_format") timeFormat: Int = 24,
-    @Query("date") date: String? = null,
-): SolarTimesDto
+interface SolarTimesApi {
+    @GET("json")
+    suspend fun getSolarTimes(
+        @Query("lat") lat: Double = Coordinates.EMPTY.latitude,
+        @Query("lng") lng: Double = Coordinates.EMPTY.longitude,
+        @Query("timezone") timezone: String = ZoneId.systemDefault().id,
+        @Query("time_format") timeFormat: Int = UserPreferences.DEFAULT_TIME_FORMAT,
+        @Query("date") date: String? = null,
+    ): SolarTimesResponseDto
+}
 ```
 
 ```kotlin
@@ -360,16 +354,20 @@ data class GeoapifyResultDto(
 )
 ```
 
-#### 🟢 4. The repository fetches specific solar times for:
+#### 🟢 4. `GetHalachicTimesUseCase` fetches specific solar times for:
 
-- upcoming Friday → used to compute candle lighting.
-- upcoming Saturday → used to compute Havdalah.
-  ```kotlin
-  fun upcomingCandleLightingDate(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.FRIDAY)
-  fun upcomingHavdalahDate(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.SATURDAY)
-  
-  fun LocalDate.nextOrTodayDayOfWeek(target: DayOfWeek): LocalDate { ... }
-  ```
+- upcoming Friday → used to compute candle lighting
+- upcoming Saturday → used to compute Havdalah
+
+Dates are provided by `ShabbatCalendar` — injected and testable:
+```kotlin
+interface ShabbatCalendar {
+    fun upcomingCandleLightingDate(): LocalDate
+    fun upcomingHavdalahDate(): LocalDate
+}
+```
+
+`SolarTimesRepository` only fetches solar times for a given `SolarTimesRequest` — it has no knowledge of Shabbat, candle lighting, or havdalah concepts.
 
 ### 🕒 Halachic Times
 
@@ -390,6 +388,7 @@ These represent widely used halachic opinions, but other variants may be introdu
 
 ```kotlin
 data class HalachicTimes(
+    val coordinates: Coordinates,
     val candleLightingTime: LocalTime,
     val candleLightingDate: LocalDate,
     val havdalahTime: LocalTime,
@@ -400,34 +399,25 @@ data class HalachicTimes(
 #### 🟡 3. Display model (used only by UI):
 
 ```kotlin
-@Serializable
 data class HalachicTimesDisplay(
-    val city: City = SeedCities.NONE,
-    val candleLightingTime: String = "--:--",
-    val candleLightingDate: String = "",
-    val havdalahTime: String = "--:--",
-    val havdalahDate: String = "",
-    val locationStatus: LocationStatus = LocationStatus.Unknown,
-)
+    val coordinates: Coordinates,
+    val candleLightingTime: String = EMPTY_TIME,
+    val candleLightingDate: String = EMPTY_DATE,
+    val havdalahTime: String = EMPTY_TIME,
+    val havdalahDate: String = EMPTY_DATE,
+) {
+    companion object {
+        const val EMPTY_TIME = "--:--"
+        const val EMPTY_DATE = "dd/mm/yyyy"
+    }
+}
 ```
 
 #### 🟡 4. Conversions are done via extensions:
 
 ```kotlin
-fun HalachicTimes.toDisplay(context: Context): HalachicTimesDisplay
+fun HalachicTimes.toDisplay(): HalachicTimesDisplay
 ```
-
-### 👤 User Preferences
-
-#### 🔴 1. Current version uses a hard-coded Jerusalem location, but the architecture anticipates:
-
-- dynamic device location
-- user-selectable city presets
-- multiple zmanim opinions
-
-#### 🔴 2. User preferences include:
-
-- 12/24-hour clock awareness, via UserPreferences.is24HourFormat().
 
 ### 📅 Date & Time Handling
 
@@ -449,9 +439,10 @@ val HEBREW_DATE_FORMATTER = DateTimeFormatter.ofPattern(HEBREW_DATE_PATTERN)
 
 ```kotlin
 fun LocalDate.nextOrTodayDayOfWeek(target: DayOfWeek): LocalDate
-fun upcomingCandleLightingDate(): LocalDate
-fun upcomingHavdalahDate(): LocalDate
-fun LocalTime.toDisplayString(context: Context): String
+fun upcomingFriday(): LocalDate
+fun upcomingSaturday(): LocalDate
+fun String.toLocalDate(): LocalDate
+fun String.toLocalTime(): LocalTime
 fun LocalDate.toDisplayString(): String
 ```
 
@@ -459,22 +450,32 @@ fun LocalDate.toDisplayString(): String
 
 #### 🟠 1. The app currently includes:
 
-- Initial Shabbat screen with:
-    - Candle lighting date & time
-    - Havdalah date & time
-    - Fully functional REST API integration
-    - Domain-accurate halachic time calculations
-    - Strong type-safety with Kotlin time models
-    - First stable working implementation
-    - City Autocomplete search
+- Shabbat times screen with:
+  - Candle lighting date & time
+  - Havdalah date & time
+  - Fully functional REST API integration
+  - Domain-accurate halachic time calculations
+  - Strong type-safety with Kotlin time models
+  - City autocomplete search
+  - Dynamic GPS location with permission handling
+  - User-saved locations with drag-to-reorder (order persisted in-memory, Room coming soon)
+  - Dynamic location labels (current location, distance in km, locating, no permission)
+  - Swipe-to-delete saved locations
+  - Decoupled times and location domains — times fetched per coordinates, not per city
 
 ### 🔜 Future Work
 
-#### ⚫ 1. Planned improvements:
+#### 🔴 1. Planned improvements:
 
-- Dynamic user location.
-- Multiple halachic opinions (e.g., 40/72 minutes).
-- Offline caching of zmanim.
+- Room persistence for saved locations and drag order
+- User-customizable candle lighting and havdalah offsets (architecture prepared via `UserPreferences` + DataStore)
+- Multiple zmanim opinions
+
+#### 🔴 2. Recently resolved:
+
+- ~~Hard-coded Jerusalem location~~ → dynamic GPS location + user-saved locations
+- ~~Hard-coded 12/24h preference~~ → API always requests 24h format, display formatting in UI layer
+- ~~City-coupled times domain~~ → times domain decoupled, uses `Coordinates` + `ZoneId` only
 
 ---
 
@@ -510,77 +511,83 @@ confusion (e.g., "Event" instead of "Intent").
 ### Pure MVI Cycle (Concise)
 
 ```kotlin
-cityRepository.cities → halachicTimesFlow
-→ repository called reactively
-→ results mapped to Events (TimesLoaded / TimesLoadFailed)
-→ combined with _state → new ShabbatUiState
+savedLocationsRepository.locations + gpsLocationFlow
+savedLocationsRepository.locations + currentLocationRepository.location
+→ halachicTimesFlow fetches times per Coordinates (not per city)
+→ combine merges savedLocations + currentLocation + halachicTimes + permissionState
+→ reducer maps to ShabbatEvent.LocationWithTimesLoaded
+→ computes LocationStatus per entry (Current/Nearby/Locating/NoPermission/Unknown)
+→ produces ShabbatUiState with ImmutableList
 → UI observes StateFlow → renders automatically
 ```
 
+### Data sources in combine
+
+| Flow | Source | Written by |
+|------|--------|------------|
+| `savedLocationsRepository.locations` | In-memory / Room (soon) | `SaveLocationUseCase`, `RemoveLocationUseCase` |
+| `currentLocationRepository.location` | In-memory shared state | `UpdateCurrentLocationUseCase` via `SearchViewModel` |
+| `halachicTimesFlow` | HebCal API | `GetHalachicTimesUseCase` |
+| `permissionRepository.permissionState` | In-memory shared state | `PermissionViewModel` |
+
 ### Step-by-Step
 
-1. User Interaction
+1. **User Interaction**
+  - UI calls `viewModel.dispatch(event)` (e.g. `GpsLocationRequested`, `LocationDeleted`)
 
-- UI calls viewModel.dispatch(event) (e.g. RetryLoadTimes)
+2. **Pure State Reduction**
+  - The event's reducer produces a new immutable `UiState`
+  - No direct state mutation — reducers are pure functions
 
-2. Pure State Reduction
+3. **Reactive Triggers**
+  - `savedLocationsRepository.locations` — emits on every save/remove
+  - `gpsLocationFlow` — emits when GPS resolves via `ResolveGpsLocationUseCase`
+  - `permissionRepository.permissionState` — emits on permission changes
+  - All combined via `combine` + `flatMapLatest`
 
-- The event’s reducer produces a new immutable UiState
-- The ViewModel updates its internal StateFlow
+4. **Asynchronous Work**
+  - `halachicTimesFlow` observes all locations (saved + GPS)
+  - For each new list, `GetHalachicTimesUseCase` fetches solar times per `Coordinates`
+  - Times domain has zero knowledge of cities — only `Coordinates` + `ZoneId`
+  - Partial failures show toast, full failures dispatch `ShabbatEntryLoadFailed`
 
-3. Reactive Triggers
+5. **State Feedback**
+  - Results transformed into Events (`ShabbatEntryLoaded`, `GpsPermissionChanged`)
+  - Reducers compute `LocationStatus` (Current/Nearby/Unknown) dynamically
+  - `ShabbatEntry` built by matching times to locations via normalized coordinates
 
-- One or more Flows (combine, flatMapLatest, etc.) observe relevant parts of the state
-- These Flows automatically react to the new state
-
-4. Asynchronous Work
-
-- Repository calls are triggered reactively inside Flows
-- Results are mapped to domain/UI models
-
-
-- halachicTimesFlow observes cityRepository.cities.
-- For each new list of cities, the repository is called automatically.
-- Success/failure results are dispatched to _state via events (TimesLoaded, TimesLoadFailed).
-- The final state is a combination of _state + halachicTimesFlow.
-- UI observes state directly — no explicit effect collection coroutine is required.
-
-5. State Feedback
-
-- Repository results are transformed into new Events (e.g. TimesLoaded, TimesLoadFailed)
-- Reducers update the state again
-
-6. UI Update
-- Compose observes the new state and recomposes automatically
+6. **UI Update**
+  - Compose observes `ShabbatUiState` — single source of truth
+  - `ImmutableList` + `@Immutable` annotations ensure correct recomposition
 
   ```kotlin
   fun dispatch(event: AppEvent) {
-      val newState = _state.updateAndGet { current ->
-          when (event) {
-              is ShabbatDataEvent -> event.reducer reduce current
-              is PermissionEvent  -> event.reducer reduce current
-              is LocationEvent    -> event.reducer reduce current
-              else                -> current
-          }
-      }
+        _state.update { current ->
+            when (event) {
+                is ShabbatEvent -> event.reducer reduce current
+                else            -> current
+            }
+        }
 
-      when (event) {
-          is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
-          is ShabbatDataEvent.TimeDeleted         -> handleDeleteTime(newState)
-          else                                    -> Unit
-      }
+        when (event) {
+            is ShabbatEvent.LocationDeleted      -> handleDeleteLocation(event)
+            else                                 -> Unit
+        }
   }
   ```
 
 ### In Plain English
 
-- The user does something → an Event is created and sent to the ViewModel.
+- The user does something → an Event is created and sent to the ViewModel (e.g. `GpsLocationRequested`, `LocationDeleted`, `SuggestionSelected`)
 - The Event knows exactly how to calculate the new State (pure, no side effects).
 - The ViewModel updates the State → the UI refreshes automatically.
-- If something “real” needs to happen (load data, show a toast), the ViewModel sends an Effect.
-- One permanent listener in the ViewModel catches all Effects and performs the actual work.
-- That work can create new Events, keeping everything flowing in one direction.
-- This unidirectional, pure MVI flow ensures predictability, testability, and easy reasoning about application behavior.
+- If something "real" needs to happen (fetch times, save location, show a toast), the ViewModel handles it reactively via Flows or sends an Effect.
+- Flows (`halachicTimesFlow`, `currentLocationRepository.location`) observe data sources and feed into `combine` — state is always derived, never manually assembled.
+- ViewModels communicate via shared repositories, not directly: `SearchViewModel` resolves GPS → writes to `CurrentLocationRepository` → `ShabbatViewModel` reads and reacts automatically.
+- Same pattern for permissions: `PermissionViewModel` writes to `PermissionRepository` →`ShabbatViewModel` reads and computes `LocationStatus` per entry.
+- Results flow back as new Events (`ShabbatEventLoaded`, `GpsPermissionChanged`), keeping everything in one direction.
+- This unidirectional, pure MVI flow ensures predictability, testability,
+  and easy reasoning about application behavior.
 
 ### MVI Terminology Mapping
 
@@ -611,38 +618,43 @@ cityRepository.cities → halachicTimesFlow
 - No hidden behavior: everything reacts to explicit state changes
 - Scales naturally as new Flows are added (data, permissions, location, analytics)
 
-### Example: Shabbat loading
+### Example: Shabbat times loading
 
-1. ViewModel observes cities (cityRepository.cities) as a Flow.
-2. For each change in cities, halachicTimesFlow triggers:
-   - If cities are empty → emits emptyList().
-   - If cities are present → calls shabbatRepository.getHalachicTimes(cities).
-   - Maps each result to a NetworkResult and dispatches TimesLoaded or TimesLoadFailed events to _state.
-3. halachicTimesFlow emits a list of successful HalachicTimesDisplay.
-4. State is derived by combining _state + halachicTimesFlow:
+1. `ShabbatViewModel` observes four data sources via `combine`:
+  - `savedLocationsRepository.locations` — user-saved locations
+  - `currentLocationRepository.location` — GPS-resolved location (written by `SearchViewModel`)
+  - `halachicTimesFlow` — fetched times per `Coordinates`
+  - `permissionRepository.permissionState` — for `LocationStatus` computation
 
-```kotlin
-val state: StateFlow<ShabbatUiState> = combine(
-        flow = _state,
-        flow2 = halachicTimesFlow,
-    ) { state, halachicTimes ->
-        ShabbatDataEvent.TimesLoaded(halachicTimes).reducer reduce state
-    }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ShabbatUiState(),
-        )
-```
+2. `halachicTimesFlow` reacts to any change in locations (saved or GPS):
+  - Combines saved locations + current GPS location into one list
+  - Calls `GetHalachicTimesUseCase(allLocations)` — fetches solar times per `Coordinates`
+  - Partial failures show a toast, full failure dispatches `ShabbatEntryLoadFailed`
+  - Emits `List<HalachicTimes>` with raw `LocalTime` values
 
-- This means the final ShabbatUiState always contains the latest halachic times, automatically updated when either _state or halachicTimesFlow changes.
+3. `ShabbatEntryLoaded` reducer:
+  - Matches times to locations via normalized `Coordinates`
+  - Computes `LocationStatus` per entry from permission + GPS distance:
+    - `NoPermission` — permission denied
+    - `Locating` — permission requesting
+    - `Current` — distance < 0.1km
+    - `Nearby(distanceKm)` — distance ≥ 0.1km
+    - `Unknown` — no GPS available
+  - Builds `ImmutableList<ShabbatEntry>` for UI
 
-5. UI observes state with collectAsStateWithLifecycle() and updates automatically — no explicit effect collector needed.
+4. `ShabbatResultState` transitions:
+  - `Empty` — no saved locations and no GPS location
+  - `Loading` — locations exist but times not yet fetched (per-card spinner)
+  - `Ready(entries)` — locations and times both present
+  - `Failure` — unrecoverable error
 
-Notes:
-- No explicit “LoadData” effect is required.
-- The state is fully reactive: adding/removing cities automatically triggers new repository calls and UI updates.
-- Failures are propagated via the same reactive flow and can be handled in the UI.
+5. Empty card (no locations yet) — `LocationStatus` derived from `SearchResultState.gpsResult`:
+  - `Idle/Empty` → `Unknown` → "Unknown distance"
+  - `Loading` → `Locating` → "Getting your location..."
+  - `GpsResolved` → `Current` → "Your current location"
+
+6. UI observes single `ShabbatUiState` — cards render immediately with spinner,
+   times fill in per-card when fetched
 
 ---
 
@@ -1185,14 +1197,9 @@ fun HandlePermissions(
             val result = permissionHandler.request(permissions)
 
             when (result) {
-                is PermissionResult.Granted ->
-                    dispatch(PermissionEvent.AllGranted)
-
-                is PermissionResult.Explain ->
-                    dispatch(PermissionEvent.DeniedWithRationale)
-
-                is PermissionResult.Blocked ->
-                    dispatch(PermissionEvent.DeniedPermanently)
+                is PermissionResult.Granted -> dispatch(PermissionEvent.AllGranted)
+                is PermissionResult.Explain -> dispatch(PermissionEvent.DeniedWithRationale)
+                is PermissionResult.Blocked -> dispatch(PermissionEvent.DeniedPermanently)
             }
         }
     }
@@ -1261,23 +1268,21 @@ The search functionality is designed as a reactive, modular system that bridges 
 
 ### Core Components
 
-| Component               | Role                                                                                                                                                            | Type       |
-|-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| SearchBarInputField     | A generic, private composable that wraps SearchBarDefaults.InputField and provides a standard setup for text state, expansion, and search actions.              | Composable | 
-| CitySearchBarInputField | A specialized, public composable that configures SearchBarInputField with specific defaults for city searching (placeholder text, icons, etc.).                 | Composable | 
-| CitySearchScreen        | The main screen composable that orchestrates the search UI, manages state, and handles user events.                                                             | Composable |
-| onTrailingIconClick     | A private helper function that determines the action for the trailing icon: clear the query if it exists, or toggle the search bar's expansion state otherwise. | Function   |
+| Component                  | Role                                                                                                                                                            | Type       |
+|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| SearchBarInputField        | A generic, private composable that wraps SearchBarDefaults.InputField and provides a standard setup for text state, expansion, and search actions.              | Composable | 
+| LocationSearchBarInputField | A specialized, public composable that configures SearchBarInputField with specific defaults for city searching (placeholder text, icons, etc.).                 | Composable | 
+| LocationSearchScreen        | The main screen composable that orchestrates the search UI, manages state, and handles user events.                                                             | Composable |
+| onTrailingIconClick        | A private helper function that determines the action for the trailing icon: clear the query if it exists, or toggle the search bar's expansion state otherwise. | Function   |
 
 ### High-Level Flow
 
-This feature operates on a unidirectional data flow that spans from UI interactions to asynchronous network results:
-1. Intent: The user types; the UI dispatches SearchEvent.QueryChanged.
-2. State Reduction: The event’s reducer immediately updates the Input value in the ViewModel's private state.
-3. Throttling: A reactive queryFlow observes the state, applying a 300ms debounce and filtering for distinctUntilChanged to prevent redundant API pressure.
-4. Async Fetch: The suggestionsFlow uses flatMapLatest to trigger the CityRepository. If the query is < 2 characters, it short-circuits to an idle state.
-5. Network Resilience: The Repository executes the geocoding request on Dispatchers.IO using runCatching, returning a NetworkResult.
-6. State Synthesis: The UI state is a combine of the base UI state and the suggestionsFlow. Results are "reduced" back into the state via CitiesLoaded to maintain MVI purity.
-7. Recomposition: CitySearchScreen observes the synthesized StateFlow and re-renders the suggestions panel automatically.
+See [5.1 Search State Management](#51--search-state-management-searchviewmodel) for detailed autocomplete and GPS resolution flows.
+
+In brief:
+- User types → debounced query → `GeocodingRepository.autocomplete()` → suggestions
+- User taps card → GPS resolves → `CurrentLocationRepository` + `SavedLocationsRepository` updated
+- `ShabbatViewModel` reacts to repository changes automatically
 
 ### Structured Components
 
@@ -1316,7 +1321,7 @@ private fun SearchBarInputField(
 }
 ```
 
-#### 🔵 2. CitySearchBarInputField
+#### 🔵 2. LocationSearchBarInputField
 
 A domain-specific specialization of SearchBarInputField pre-configured for geographic lookups.
 - Purpose: Provides a specialized search entry point with pre-defined city-related icons and localized strings.
@@ -1324,7 +1329,7 @@ A domain-specific specialization of SearchBarInputField pre-configured for geogr
 
 ```kotlin
 @Composable
-fun CitySearchBarInputField(
+fun LocationSearchBarInputField(
     state: TextFieldState,
     hasQuery: Boolean,
     onExpandedChange: (Boolean) -> Unit,
@@ -1350,18 +1355,16 @@ fun CitySearchBarInputField(
 }
 ```
 
-#### 🔵 3. CitySearchScreen (The Orchestrator)
+#### 🔵 3. LocationSearchScreen (The Orchestrator)
 
 The top-level screen container that bridges the MVI state with the UI components.
 - Role: A stateless orchestrator that observes the SearchUiState and maps UI callbacks to the dispatch function.
 - Composition: Manages the vertical layout between the input field and the CitySearchSuggestionPanel, ensuring smooth transitions between expanded and collapsed states.
 
 ```kotlin
-fun CitySearchScreen(
-    hasQuery: Boolean,
-    suggestions: List<City>,
-    searchDispatch: (AppEvent) -> Unit,
-    expanded: Boolean,
+@Composable
+fun LocationSearchScreen(
+    searchConfig: SearchConfig,
     modifier: Modifier = Modifier,
 ) {
     //...
@@ -1376,31 +1379,27 @@ fun CitySearchScreen(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            CitySearchBarInputField(
+            LocationSearchBarInputField(
                 state = state,
-                hasQuery = hasQuery,
-                expanded = expanded,
-                onExpandedChange = { expanded ->
-                    searchDispatch(
-                        SearchEvent.SearchVisibilityChanged(expanded = !expanded)
-                    )
-                },
+                hasQuery = searchConfig.state.hasQuery,
+                expanded = searchConfig.state.searchActive,
+                onExpandedChange = { expanded -> searchConfig.action.onChangeVisibility(!expanded) },
                 onSearch = { query ->
-                    searchDispatch(SearchEvent.QueryChanged(newQuery = query))
-                    searchDispatch(SearchEvent.SearchCommitted)
+                    searchConfig.action.onQueryChanged(query)
+                    searchConfig.action.onSearchCommitted()
                 },
                 onClear = {
-                    searchDispatch(SearchEvent.QueryCleared)
+                    searchConfig.action.onQueryCleared()
                     state.clearText()
                 },
             )
 
-            CitySearchSuggestionPanel(
+            LocationSearchSuggestionPanel(
                 query = state.text.toString(),
-                expanded = expanded,
-                suggestions = suggestions,
+                expanded = searchConfig.state.searchActive,
+                suggestions = searchConfig.state.suggestions,
                 onSuggestionSelected = { suggestion ->
-                    searchDispatch(SearchEvent.SuggestionSelected(suggestion))
+                    searchConfig.action.onSuggestionSelected(suggestion)
                     state.setTextAndPlaceCursorAtEnd(suggestion.name)
                 },
             )
@@ -1409,39 +1408,21 @@ fun CitySearchScreen(
 }
 ```
 
-#### 🔵 4. onTrailingIconClick Helper
-
-A logic-unit helper that decouples UI behavior from the Composable’s declaration.
-- Context-Awareness: Evaluates the hasQuery state to determine whether the user intends to clear the current search or exit the search mode entirely.
-- Benefit: Keeps the UI code clean and ensures consistent "Smart Clear" behavior across all search entry points.
-
-```kotlin
-private fun onTrailingIconClick(
-    hasQuery: Boolean,
-    onClear: () -> Unit,
-    onExpandedChange: (Boolean) -> Unit,
-    expanded: Boolean,
-) = {
-    when {
-        hasQuery -> onClear()
-        else     -> onExpandedChange(expanded)
-    }
-}
-```
-
 ## 5.1 🧠 Search State Management (SearchViewModel)
 
 ### The SearchViewModel
 
-- The SearchViewModel is the architectural bridge between user interactions in the CitySearchScreen and the CityRepository. It leverages a Reactive Stream approach to transform raw input into a filtered list of city suggestions while maintaining a single source of truth.
+The `SearchViewModel` manages two distinct search modes — text-based autocomplete and GPS reverse geocoding — while acting as the writer of `CurrentLocationRepository` for cross-ViewModel GPS state sharing.
 
 ### Key Responsibilities
 
-- Reactive State Exposure: Exposes a synthesized SearchUiState via StateFlow. This state is a combination of the base UI state (query, visibility) and the asynchronous results stream.
-- Unidirectional Event Dispatch: Provides a single dispatch(AppEvent) entry point. It utilizes Self-Reducing Events, where each SearchEvent contains the logic (reducer) to transition the state.
-- Declarative Pipeline: Instead of manual logic blocks, it uses a declarative pipeline (queryFlow → debounce → flatMapLatest) to process suggestions. This ensures that the UI logic remains side-effect-free.
-- Lifecycle-Aware Streaming: Manages the search lifecycle using stateIn(viewModelScope). It ensures that network-heavy flows are only active while the UI is subscribed, with a 5-second timeout to handle configuration changes.
-- Side-Effect Management: Separates state updates from one-shot actions (like showing a Toast for network errors) using a SharedFlow of AppEffects.
+- **Autocomplete Search:** Reactive pipeline (`queryFlow` → debounce 300ms → `flatMapLatest`) transforms user input into `List<ResolvedLocation>` suggestions via `GeocodingRepository.autocomplete()`
+- **GPS Resolution:** Observes `ResolveGpsLocationUseCase` flow — when GPS resolves, writes `SavedLocation` to `CurrentLocationRepository` via `UpdateCurrentLocationUseCase`
+- **Reactive State Exposure:** Exposes `SearchUiState` via `StateFlow` — combines base state + `suggestionResults` + `gpsResult`
+- **Unidirectional Event Dispatch:** Single `dispatch(AppEvent)` entry point with  self-reducing events — each `SearchEvent` contains its own reducer
+- **Cross-ViewModel Communication:** Writes GPS-resolved location to `CurrentLocationRepository` — `ShabbatViewModel` observes without knowing about `SearchViewModel`
+- **Lifecycle-Aware Streaming:** `stateIn(viewModelScope, WhileSubscribed(5000))` — flows only active while UI is subscribed
+- **Side-Effect Management:** One-shot actions (toasts, navigation) via `SharedFlow<AppEffect>`, separate from state updates
 
 | Component      | Role                                                                                                                                                             | Type             |
 |----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|
@@ -1455,271 +1436,159 @@ private fun onTrailingIconClick(
 ```kotlin
 data class SearchUiState(
     val query: Input<String> = Input.Idle,
-    val selectedSuggestion: Selection<City?> = Selection.Idle,
-    val resultState: SearchResultState = SearchResultState.Idle,
+    val suggestionResults: SearchResultState = SearchResultState.Idle, // autocomplete
+    val gpsResult: SearchResultState = SearchResultState.Idle,         // reverse geocoding
+    val selectedSuggestion: Selection<ResolvedLocation?> = Selection.Idle,
     val visibility: SearchVisibility = SearchVisibility.Collapsed,
-    val searchMode: SearchMode = SearchMode.Autocomplete,
 ) : State
-```
-
-#### SearchEvent
-
-```kotlin
-sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
-    data class QueryChanged(val newQuery: String) : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(
-                query = Input.Value(value = newQuery),
-                resultState =
-                    when (newQuery.trim().length >= 2) {
-                        true -> SearchResultState.Loading
-                        else -> SearchResultState.Idle
-                    }
-            )
-        }
-    }
-
-    data object QueryCleared : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(
-                query = Input.Idle,
-                selectedSuggestion = Selection.Idle,
-                resultState = SearchResultState.Idle,
-            )
-        }
-    }
-
-    data class CitiesLoaded(val cities: List<City>) : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(
-                resultState = when {
-                    state.query is Input.Idle  -> SearchResultState.Idle
-                    state.query is Input.Empty -> SearchResultState.Idle
-                    cities.isEmpty()           -> SearchResultState.NoResults
-                    else                       -> SearchResultState.Results(cities)
-                }
-            )
-        }
-    }
-    // ...
-}
-```
-
-#### searchDispatch
-
-```kotlin
-fun dispatch(event: AppEvent) {
-        val newState = _state.updateAndGet { current ->
-            when (event) {
-                is SearchEvent -> event.reducer reduce current
-                else -> current
-            }
-        }
-
-        when (event) {
-            is SearchEvent.SuggestionSelected -> handleSuggestionSelected(newState)
-            else -> Unit
-        }
-}
 ```
 
 ### High-Level Flow
 
-1. State Observation: CitySearchScreen observes the state StateFlow, which is a combined result of local UI state and a reactive suggestions stream.
-2. Event Dispatch: When the user types, the UI dispatches SearchEvent.QueryChanged. The reducer immediately updates the local _state.
-3. Reactive Query Stream: A internal queryFlow extracts the normalized string from the state, using distinctUntilChanged to ignore redundant updates.
-4. Debounced Transformation: The suggestionsFlow listens to the query stream, applying a 300ms debounce to prevent API spamming.
-5. Reactive Fetching: Using flatMapLatest, the query is transformed into a network request. If the query is empty, it short-circuits to an empty list.
-6. Resilient Execution: The repository is called; successes emit suggestions to the stream, while failures are caught and piped to a SharedFlow of Effects (to show Toasts) without breaking the stream.
-7. State Synthesis: The final UI state is created by combining the base _state with the latest suggestionsFlow. Every time the suggestions change, they are pushed through SearchEvent.CitiesLoaded.reducer to update the results display.
-8. UI Recomposition: The UI observes this synthesized state and automatically updates the CitySearchSuggestionPanel.
+#### Autocomplete
+1. **State Observation:** `ShabbatScreen` observes `SearchUiState` — combined result of local UI state, suggestions stream and GPS result.
+2. **Event Dispatch:** User types → `SearchEvent.QueryChanged` dispatched → reducer immediately updates `Input` state and `SearchResultState.Loading`.
+3. **Reactive Query Stream:** `queryFlow` extracts normalized string via `.map { it.query.normalizedOrEmpty() }.distinctUntilChanged()` — ignores redundant updates.
+4. **Debounced Transformation:** `locationSuggestionsFlow` listens to `queryFlow` with 300ms debounce — prevents API spam.
+5. **Reactive Fetching:** `flatMapLatest` → `GeocodingRepository.autocomplete(query)`. Queries shorter than 2 characters short-circuit to `Empty`.
+6. **Resilient Execution:**
+  - Success → `SearchResultState.Suggestions(locations)`
+  - No results → `SearchResultState.Empty`
+  - Failure → `SearchResultState.Failure` + `AppEffect.ShowToast`
+7. **State Synthesis:** `combine(_state, locationSuggestionsFlow)` → `SearchEvent.SuggestionsLoaded` reducer → `suggestionResults` updated.
+8. **UI Recomposition:** `LocationSearchSuggestionPanel` recomposes automatically.
+9. **Selection:** User taps suggestion → `SearchEvent.SuggestionSelected` → `SaveLocationUseCase(resolved)` → `SavedLocationsRepository.save()` → `savedLocationsRepository.locations` emits → `ShabbatViewModel` reacts → new card appears.
 
-### Code Structure
+#### Reverse Geocoding
+1. **User taps card** → `SearchEvent.GpsLocationRequested` dispatched → `gpsResult = SearchResultState.Loading`
+2. **`gpsLocationFlow`** observes `ResolveGpsLocationUseCase()` — permission-gated GPS + reverse geocode
+3. **GPS resolves** → `ResolvedLocation` emitted:
+  - `UpdateCurrentLocationUseCase(resolved)` → `CurrentLocationRepository.update()` → `ShabbatViewModel` reacts
+  - `SaveLocationUseCase(resolved)` → `SavedLocationsRepository.save()` → new card appears
+  - `gpsResult = SearchResultState.GpsResolved(resolved)`
+4. **Failure** → `SearchResultState.Failure` + `AppEffect.ShowToast`
+5. **`ShabbatScreen` empty card** maps `gpsResult` → `LocationStatus` → label updates reactively
 
-```kotlin
-@HiltViewModel
-class SearchViewModel @Inject constructor(
-    private val repository: CityRepository,
-) : ViewModel() {
-    private val _state: MutableStateFlow<SearchUiState> = MutableStateFlow(value = SearchUiState())
+### 5.2 💾 Data Layer
 
-    private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
-    val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
+Responsibilities are now split across focused repositories — each with a single concern:
 
-    private val queryFlow: Flow<String> = _state
-        .map { it.query.normalizedOrEmpty() }
-        .distinctUntilChanged()
+#### `SavedLocationsRepositoryImpl`
+Single source of truth for user-saved locations. In-memory implementation (`MutableStateFlow<List<SavedLocation>>`), Room coming soon.
 
-    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    private val suggestionsFlow: StateFlow<List<City>> = queryFlow
-        .debounce(300)
-        .flatMapLatest { query ->
-            query.takeUnless { it.isEmpty() }
-                ?.let { nonEmptyQuery ->
-                    flow {
-                        val result = repository.geocodeAutocomplete(nonEmptyQuery)
+#### `CurrentLocationRepositoryImpl`
+Shared in-memory state bridge between `SearchViewModel` and `ShabbatViewModel`.
+- `SearchViewModel` writes via `UpdateCurrentLocationUseCase` when GPS resolves
+- `ShabbatViewModel` reads `StateFlow<SavedLocation?>` — reacts automatically
+- Same pattern as `PermissionRepository` — one VM writes, others read
+- No persistence — GPS location is always live, never stored between sessions
 
-                        result
-                            .onSuccess(tag = "SearchVM") { suggestions ->
-                                emit(suggestions)
-                            }
-                            .onFailure(tag = "SearchVM") {
-                                e -> _effects.tryEmit(AppEffect.ShowToast(message = "Network failed"))
-                            }
-                    }
-                } ?: flowOf(emptyList())
-        }
-        .catch {throwable ->
-            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
-            emit(emptyList())
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList(),
-        )
+#### `GeocodingRepositoryImpl`
+Abstracts Geoapify API for geocoding services. Decouples business logic from network infrastructure.
 
-    val state: StateFlow<SearchUiState> = combine(
-        _state,
-        suggestionsFlow,
-    ) { state, suggestions ->
-        SearchEvent.CitiesLoaded(suggestions).reducer reduce state
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = SearchUiState()
-    )
+**Key responsibilities:**
+- Autocomplete — query normalization, short-circuit for queries < 2 characters, returns `List<ResolvedLocation>`
+- Reverse geocode — converts `Location` → `ResolvedLocation`, echoes request coordinates to avoid API precision mismatch
+- Resilient network calls via `runCatching` + `NetworkResult` wrapper
+- Thread safety via `withContext(dispatcher)`
 
-    fun dispatch(event: AppEvent) {
-        val newState = _state.updateAndGet { current ->
-            when (event) {
-                is SearchEvent -> event.reducer reduce current
-                else -> current
-            }
-        }
+#### `GpsLocationRepositoryImpl`
+Observes device GPS via `Flow<Location?>`. Permission-gated — emits only when `LocationPermission.Granted`.
 
-        when (event) {
-            is SearchEvent.SuggestionSelected -> handleSuggestionSelected(newState)
-            else -> Unit
-        }
-    }
-
-    private fun handleSuggestionSelected(state: SearchUiState) {
-        val city = state.selectedSuggestion.normalizedOrNull() ?: return
-
-        viewModelScope.launch {
-            repository.addCity(city)
-        }
-    }
-}
-```
-
-> The Reactive Bridge: Note that the SearchViewModel never communicates with the ShabbatViewModel directly. It simply updates the CityRepository, which the ShabbatViewModel observes reactively. This decoupling ensures that adding a city from any part of the app (Search, Location Services, or Defaults) automatically updates the Shabbat times globally.
-
-### 5.2 💾 Data Layer (InMemoryCityRepository)
-
-The InMemoryCityRepository is the default implementation of the CityRepository interface. It acts as
-the single source of truth for city data, handling both the persistence of selected cities and
-communication with the external Geoapify API for geocoding services.
-
-#### Key Responsibilities
-
-- Data Storage: Maintains an in-memory StateFlow<List<City>> as the single source of truth for the user's saved locations. The list is initialized with a default seed (JERUSALEM) and updated reactively.
-- API Abstraction: Decouples the business logic from infrastructure details by abstracting the Geoapify REST API. The ViewModel interacts only with domain models, unaware of the underlying Retrofit implementation.
-- Autocomplete Logic: Encapsulates query normalization (trimming) and validation logic. It prevents unnecessary network traffic by short-circuiting requests for queries shorter than two characters.
-- Resilient Network Calls: Utilizes runCatching and a specialized NetworkResult wrapper to handle API exceptions. This ensures that failures (like timeouts or lack of connectivity) are caught at the source and returned as state rather than crashing the application.
-- Thread Safety & Concurrency: Explicitly manages execution context using withContext(dispatcher). By offloading network requests to Dispatchers.IO, it guarantees that the main thread remains responsive during heavy I/O operations.
+#### `SolarTimesRepositoryImpl`
+Fetches solar times from https://sunrisesunset.io/  per `SolarTimesRequest` (coordinates + timezone + date). Always requests 24h format — display formatting handled in UI layer.
 
 #### Core Components
 
-| Component           | Role                                                                                                                                           | Type                  |
-|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
-| cities / cities     | A MutableStateFlow and its public StateFlow counterpart that hold the current list of saved cities, providing a reactive stream for observers. | StateFlow<List<City>> | 
-| geoapifyService     | The Retrofit service class used to make API calls to Geoapify. It's injected via Hilt.                                                         | Retrofit Service      | 
-| dispatcher          | The CoroutineDispatcher used to specify the execution context for the flow (e.g., Dispatchers.IO).                                             | CoroutineDispatcher   |
-| geocodeAutocomplete | The primary function for fetching search suggestions. It returns a Flow<List<City>>.                                                           | suspend fun           |
+| Component | Role | Type |
+|-----------|------|------|
+| `savedLocationsRepository.locations` | Reactive stream of user-saved locations | `Flow<List<SavedLocation>>` |
+| `currentLocationRepository.location` | Shared GPS-resolved location between ViewModels | `StateFlow<SavedLocation?>` |
+| `GeocodingRepository` | Autocomplete + reverse geocode via Geoapify | Retrofit Service |
+| `GpsLocationRepository` | Live device GPS location | `Flow<Location?>` |
+| `SolarTimesRepository` | Solar times per coordinates | Retrofit Service |
+| `dispatcher` | IO dispatcher for network calls | `CoroutineDispatcher` |
 
-#### High-Level Flow
+#### Autocomplete Flow
 
-1. User Input: The user types into the search field, triggering SearchEvent.QueryChanged, which updates the Input state in _state.
-2. Reactive Stream: The queryFlow observes changes to the normalized query string. 
-3. Throttling: queryFlow is debounced (300ms) and filtered for distinct changes to prevent redundant API pressure.
-4. Data Fetching: The suggestionsFlow uses flatMapLatest to call repository.geocodeAutocomplete(query).
-5. Repository Execution: The repository:
-   - Normalizes the query and short-circuits if length < 2.
-   - Performs the network call on the IO dispatcher using runCatching.
-   - Returns a NetworkResult<List<City>>.
-6. State Synthesis: The suggestionsFlow extracts the data from the NetworkResult. If it's a failure, it emits an AppEffect.ShowToast side-effect.
-7. The MVI Bridge: The final state is produced by combining _state and suggestionsFlow. Every time new suggestions arrive, they are piped through SearchEvent.CitiesLoaded(suggestions).reducer to update the resultState.
-8. UI Update: The UI observes the StateFlow<SearchUiState> and re-renders the CitySearchSuggestionPanel automatically.
+1. User types → `SearchEvent.QueryChanged` → `Input` state updated
+2. `queryFlow` observes normalized query string
+3. Debounced (300ms) + `distinctUntilChanged` — prevents redundant API calls
+4. `locationSuggestionsFlow` uses `flatMapLatest` → calls `GeocodingRepository.autocomplete(query)`
+5. Repository normalizes query, short-circuits if length < 2, returns `NetworkResult<List<ResolvedLocation>>`
+6. Failures → `SearchResultState.Failure` + `AppEffect.ShowToast`
+7. `combine(_state, locationSuggestionsFlow)` → `SearchEvent.SuggestionsLoaded` reducer → updates `suggestionResults`
+8. UI observes `SearchUiState` → `CitySearchSuggestionPanel` recomposes automatically
+9. User selects suggestion → `SearchEvent.SuggestionSelected` → `SaveLocationUseCase` → `SavedLocationsRepository.save()`
+
+#### GPS Flow
+
+1. User taps card → `SearchEvent.GpsLocationRequested` → `gpsResult = SearchResultState.Loading`
+2. `gpsLocationFlow` observes `ResolveGpsLocationUseCase()` — permission-gated
+3. GPS resolves → `ResolvedLocation` emitted via `onEach`:
+  - `UpdateCurrentLocationUseCase(resolved)` → `CurrentLocationRepository.update()`
+  - `SaveLocationUseCase(resolved)` → `SavedLocationsRepository.save()`
+  - `gpsResult = SearchResultState.GpsResolved(resolved)`
+4. `ShabbatViewModel` reacts to both repository emissions automatically
+5. Failures → `SearchResultState.Failure` + `AppEffect.ShowToast`
 
 #### Code Structure
 
 ```kotlin
 @Singleton
-class InMemoryCityRepository @Inject constructor(
-    private val geoapifyService: GeoapifyService,
-    private val dispatcher: CoroutineDispatcher,
-) : CityRepository {
-    private val _cities: MutableStateFlow<List<City>> = MutableStateFlow(listOf(JERUSALEM))
-    override val cities: StateFlow<List<City>> = _cities
+class SavedLocationsRepositoryInMemory : SavedLocationsRepository {
+    private val _locations: MutableStateFlow<List<SavedLocation>> = MutableStateFlow(emptyList())
+    override val locations: StateFlow<List<SavedLocation>> = _locations
 
-    override suspend fun addCity(city: City) {
-        _cities.update { current ->
-            if (current.any { it.id == city.id }) current
-            else current + city
-        }
-    }
-
-    override suspend fun removeCity(city: City) {
-        _cities.update { cities ->
-            cities.filter { it.id != city.id }
-        }
-    }
-
-    override suspend fun geocodeAutocomplete(query: String) = withContext(dispatcher) {
-        val normalized = query.trim()
-        if (normalized.length < 2) {
-            return@withContext NetworkResult.Success(emptyList())
-        }
-
-        runCatching {
-            val response = geoapifyService.api.autocomplete(queryText = normalized)
-            if (Debug.enabled) Log.d("InMemoryRepo", "$response")
-            response.results?.map { it.toCityDomain() } ?: emptyList()
-        }.fold(
-            onSuccess = { cities -> NetworkResult.Success(data = cities) },
-            onFailure = { e ->
-                NetworkResult.Failure(
-                    message = "Autocomplete failed: ${e.message}",
-                    cause = e.cause
-                )
+    override suspend fun save(location: SavedLocation) {
+        _locations.update { current ->
+            if (current.any { it.id == location.id }) {
+                current.map { if (it.id == location.id) location else it }
+            } else {
+                current + location
             }
-        )
+        }
+    }
+
+    override suspend fun remove(location: SavedLocation) {
+        _locations.update { it.filter { loc -> loc.id != location.id } }
     }
 }
 ```
 
 ## 6. 🔀 Reorderable Cards
-Cards support both drag-to-reorder and swipe-to-delete, implemented as a generic, self-contained container that wraps any card type.
+
+Cards support drag-to-reorder and swipe-to-delete, implemented as a generic, self-contained container wrapping any card.
 
 ### Drag & Drop
-Long-press the drag handle icon (visible on draggable card) to enter drag mode and reorder cards freely.
+Long-press the drag handle icon to enter drag mode and reorder cards freely.
+
+> **Note:** Drag order is currently maintained in-memory via `mergeWithCurrentOrder` —
+> preserves user's drag order across ViewModel emissions while Room persistence
+> is not yet implemented. Order will be persisted to DB in a future update.
 
 ### Swipe to Delete
-Swipe a card left to trigger deletion. A confirmation dialog appears before the card is removed, preventing accidental deletes.
+Swipe a card left to trigger deletion via `LocationDeleted` event.
+
+### Implementation Notes
+
+- `ReorderableState<T>` — generic state holder for drag + list management
+- `rememberReorderableState()` — composable that wires `ReorderableLazyListState` with haptic feedback
+- `ItemContent<T>` — `@Stable` functional interface for item content, prevents unnecessary recomposition
+- `ImmutableList<T>` — required for Compose stability, ensures `LazyColumn` items recompose correctly
+- `mergeWithCurrentOrder()` — merges ViewModel-emitted list with current drag order, preserving position but always using latest item data
 
 ### Usage
 The reorderable container is generic and composable — it works with any item type and plugs into an existing LazyColumn:
 
 ```kotlin
-fun <T> LazyListScope.reorderableSection(
+fun <T> LazyListScope.reorderableList(
     state: ReorderableLazyListState,
-    items: List<T>,
+    items: ImmutableList<T>,
     header: String,
     keyOf: (T) -> Any,
     swipeConfig: SwipeConfig<T>,
-    content: @Composable (T, Modifier) -> Unit,
+    content: ItemContent<T>,
 ) {
     item(header) {
         Text(
@@ -1737,7 +1606,7 @@ fun <T> LazyListScope.reorderableSection(
                 item = item,
                 swipeConfig = swipeConfig,
             ) {
-                content(item, Modifier.draggableHandle())
+                content.Content(item, Modifier.draggableHandle())
             }
         }
     }
@@ -1749,77 +1618,103 @@ then
 ```kotlin
 @Composable
 fun ShabbatContent(
-  items: List<HalachicTimesDisplay>,
-  swipeConfig: SwipeConfig<HalachicTimesDisplay> = SwipeConfig(),
-  searchConfig: SearchConfig,
-  isDraggable: Boolean = true,
+    items: ImmutableList<ShabbatEntry>,
+    swipeConfig: SwipeConfig<ShabbatEntry> = SwipeConfig(),
+    searchConfig: SearchConfig,
+    isDraggable: Boolean = true,
 
-  onClick: () -> Unit = {},
+    onClick: () -> Unit = {},
 ) {
-    val state = rememberReorderableState(items = items, keyOf = { it.city.id })
-    
-    //... 
-    LazyColumn(
-          state = state.lazyListState,
-          contentPadding = PaddingValues(vertical = 8.dp),
-          verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        reorderableSection(
-            state = state.reorderableState,
-            header = "My locations",
-            items = state.list,
-            keyOf = { it.city.id },
-            swipeConfig = swipeConfig,
-        ) { item, modifier ->
-            ShabbatCard(
-                modifier = modifier,
-                item = item,
-                isDraggable = isDraggable,
-                locationStatus = item.locationStatus,
-                onClick = { onClick() }
-            )
-        }
+    val state = rememberReorderableState(items = items, keyOf = { it.location.id })
+  
+    LaunchedEffect(items) {
+        state.updateList(items)
     }
-    //...
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        LazyColumn(
+            state = state.lazyListState,
+            contentPadding = PaddingValues(vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            reorderableList(
+                state = state.reorderableState,
+                header = "My locations",
+                items = state.list,
+                keyOf = { it.location.id },
+                swipeConfig = swipeConfig,
+            ) { item, modifier ->
+                ShabbatCard(
+                    modifier = modifier,
+                    item = item,
+                    isDraggable = isDraggable,
+                    onClick = { onClick() }
+                )
+            }
+        }
+        //...
+    }
+}
 ```
 
 Both draggable and swipeable can be toggled independently via parameters, making the container reusable across different screens with different interaction needs.
 
-## 7. Current Location Feature
+## 📌 7. Current Location Feature
 
-Automatically detects the user's current city via GPS and displays it
-alongside manually added cities.
+Detects the user's current location via GPS, reverse geocodes it to a named location, and displays it alongside manually saved locations with dynamic distance labels.
 
 ### How it works
-1. User grants location permission
-2. GPS resolves coordinates → geocoded to a City
-3. City is marked as `CityStatus.Current` and saved
-4. Halachic times are fetched for all cities including current
+1. User taps placeholder card → `SearchEvent.GpsLocationRequested` dispatched to `SearchViewModel`
+2. Permission flow handled by `PermissionViewModel` → `LocationPermission.Granted`
+3. `ResolveGpsLocationUseCase` — permission-gated GPS + reverse geocode → `ResolvedLocation`
+4. `SearchViewModel` writes to two repositories via `onEach`:
+  - `UpdateCurrentLocationUseCase` → `CurrentLocationRepository` (for display)
+  - `SaveLocationUseCase` → `SavedLocationsRepository` (for times fetching)
+5. `ShabbatViewModel` reacts to both repository emissions automatically:
+  - `currentLocationRepository.location` → distance/status computation
+  - `savedLocationsRepository.locations` → `halachicTimesFlow` refetches
+6. Times fetched per `Coordinates` — GPS location treated same as saved locations
+7. `LocationStatus` computed dynamically per entry from permission + GPS distance
 
 ### ViewModels
 
 | ViewModel | Responsibility |
 |-----------|---------------|
 | `PermissionViewModel` | Permission UI flow (rationale, education, settings) |
-| `LocationViewModel` | GPS stream, location state |
-| `CityViewModel` | Current city resolution from GPS, city deletion |
-| `ShabbatViewModel` | Halachic times display, city list |
-| `SearchViewModel` | City search, autocomplete suggestions |
+| `SearchViewModel` | Autocomplete search + GPS resolution + writes to `CurrentLocationRepository` |
+| `ShabbatViewModel` | Pure observer — combines locations + times + permission → `ShabbatUiState` |
 
 ### Key Components
 
 | Component | Responsibility |
 |-----------|---------------|
-| `LocationRepository` | GPS stream, single shared session via `@ApplicationScope` |
+| `GpsLocationRepository` | Live device GPS, emits `Flow<Location?>` |
+| `CurrentLocationRepository` | Shared GPS state bridge — `SearchViewModel` writes, `ShabbatViewModel` reads |
 | `PermissionRepository` | Permission state, gates GPS stream |
-| `ResolveCurrentCityUseCase` | Geocode coordinates → persist current city |
-| `RemoveCityUseCase` | Remove city, stop GPS if current city removed |
+| `ResolveGpsLocationUseCase` | Combines permission + GPS + reverse geocode → `Flow<ResolvedLocation?>` |
+| `UpdateCurrentLocationUseCase` | Converts `ResolvedLocation?` → `SavedLocation?`, updates `CurrentLocationRepository` |
+| `SaveLocationUseCase` | Converts `ResolvedLocation` → `SavedLocation`, persists to `SavedLocationsRepository` |
+| `RemoveLocationUseCase` | Removes saved location from `SavedLocationsRepository` |
+| `ShabbatCalendar` | Provides upcoming Friday/Saturday dates, injectable and testable |
+
+### Location Status
+
+Computed dynamically in `LocationWithTimesLoaded` reducer — never stored:
+
+| Status | Condition | Label |
+|--------|-----------|-------|
+| `Current` | GPS coordinates match saved location (< 0.1km) | "Your current location" |
+| `Nearby(distanceKm)` | GPS available, distance ≥ 0.1km | "123.4 km away" |
+| `Locating` | `LocationPermission.Requesting` | "Getting your location..." |
+| `NoPermission` | `LocationPermission.Denied/DeniedPermanently` | "Tap to use current location" |
+| `Unknown` | No GPS available | "Unknown distance" |
 
 ### Design Decisions
-- **Per-feature ViewModels** — multiple ViewModels on same screen,
-  separated by concern not by screen
-- **`CityStatus` vs `LocationStatus`** — city proximity vs GPS system state,
-  kept distinct to avoid coupling
-- **`@ApplicationScope`** — single GPS session shared across all collectors
-- **`LocationPermission`** — mirrors UI permission states, gates GPS via
-  single `Granted` check, all other states stop GPS naturally
+- **GPS resolution owned by `SearchViewModel`** — geocoding is a search concern
+- **`CurrentLocationRepository` as shared state bridge** — same pattern as `PermissionRepository`
+- **`ShabbatViewModel` is a pure observer** — never resolves GPS, never writes to repositories
+- **GPS location saved with fixed `GPS_ID`** — upserted on every update, never duplicates
+- **Times fetched per `Coordinates`** — GPS and saved locations treated identically by times domain
+- **`LocationStatus` computed from permission + distance** — never stored, always derived
