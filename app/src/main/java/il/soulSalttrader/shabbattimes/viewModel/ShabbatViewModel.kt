@@ -10,6 +10,7 @@ import il.soulSalttrader.shabbattimes.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
+import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
 import il.soulSalttrader.shabbattimes.useCase.RemoveCityUseCase
@@ -33,6 +34,7 @@ import kotlinx.coroutines.launch
 class ShabbatViewModel @Inject constructor(
     savedLocationsRepository: SavedLocationsRepository,
     currentLocationRepository: CurrentLocationRepository,
+    permissionRepository: PermissionRepository,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
     private val removeLocationUseCase: RemoveCityUseCase,
 ) : ViewModel() {
@@ -79,8 +81,9 @@ class ShabbatViewModel @Inject constructor(
         halachicTimesFlow,
         currentLocationRepository.location,
         savedLocationsRepository.locations,
-    ) { state, halachicTimes, currentLocation, savedLocations ->
-        ShabbatEvent.LocationWithTimesLoaded(savedLocations, currentLocation, halachicTimes).reducer reduce state
+        permissionRepository.permissionState,
+    ) { state, halachicTimes, currentLocation, savedLocations, permission ->
+        ShabbatEvent.LocationWithTimesLoaded(savedLocations, currentLocation, halachicTimes, permission).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

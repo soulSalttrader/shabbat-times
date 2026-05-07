@@ -4,6 +4,8 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatResultState
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
+import il.soulSalttrader.shabbattimes.location.LocationPermission
+import il.soulSalttrader.shabbattimes.location.LocationPermission.*
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.LocationWithTimes
@@ -19,6 +21,7 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
         val savedLocations: List<SavedLocation>,
         val currentLocation: SavedLocation?,
         val halachicTimes: List<HalachicTimes>,
+        val permission: LocationPermission,
     ) : ShabbatEvent {
         override val reducer = ShabbatReducer { state ->
             val availableLocations = buildList {
@@ -34,9 +37,12 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
                         .firstOrNull { it.coordinates == location.coordinates }
                         ?.toDisplay(),
                     status = when {
-                        distanceKm == null -> LocationStatus.Unknown
-                        distanceKm < 0.1   -> LocationStatus.Current
-                        else               -> LocationStatus.Nearby(distanceKm)
+                        permission is Denied            -> LocationStatus.NoPermission
+                        permission is DeniedPermanently -> LocationStatus.NoPermission
+                        permission is Requesting        -> LocationStatus.Locating
+                        distanceKm == null              -> LocationStatus.Unknown
+                        distanceKm < 0.1                -> LocationStatus.Current
+                        else                            -> LocationStatus.Nearby(distanceKm)
                     },
                 )
             }.toImmutableList()
