@@ -26,11 +26,11 @@ import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.content.uiIcon.UiIconLabel
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.model.LocationWithTimes
+import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 
 @Composable
 fun ShabbatCard(
-    item: LocationWithTimes,
+    item: ShabbatEntry,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(16.dp),
     colors: CardColors = getDefaultCardColors(item.status),

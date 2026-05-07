@@ -23,7 +23,7 @@ import il.soulSalttrader.shabbattimes.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.event.SearchEvent
 import il.soulSalttrader.shabbattimes.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.location.LocationStatus
-import il.soulSalttrader.shabbattimes.model.LocationWithTimes
+import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.PermissionState
@@ -76,7 +76,7 @@ fun ShabbatScreen() {
         is ShabbatResultState.Empty -> {
             ShabbatContent(
                 items = listOf(
-                    LocationWithTimes(
+                    ShabbatEntry(
                         location = SavedLocation.empty(),
                         times = null,
                         status = searchUiState.gpsResult.toLocationStatus(),
@@ -106,7 +106,7 @@ fun ShabbatScreen() {
 
         is ShabbatResultState.Failure   -> FailureScreen(
             message = entries.message,
-            onRetry = { shabbatViewModel.dispatch(ShabbatEvent.RetryLoadLocationWithTimes) },
+            onRetry = { shabbatViewModel.dispatch(ShabbatEvent.RetryLoadShabbatEntry) },
         )
     }
 

@@ -8,7 +8,7 @@ import il.soulSalttrader.shabbattimes.location.LocationPermission
 import il.soulSalttrader.shabbattimes.location.LocationPermission.*
 import il.soulSalttrader.shabbattimes.location.LocationStatus
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
-import il.soulSalttrader.shabbattimes.model.LocationWithTimes
+import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.model.distanceTo
 import il.soulSalttrader.shabbattimes.model.toDisplay
@@ -17,7 +17,7 @@ import il.soulSalttrader.shabbattimes.reducer.ShabbatReducer
 import kotlinx.collections.immutable.toImmutableList
 
 sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
-    data class LocationWithTimesLoaded(
+    data class ShabbatEntryLoaded(
         val savedLocations: List<SavedLocation>,
         val currentLocation: SavedLocation?,
         val halachicTimes: List<HalachicTimes>,
@@ -29,9 +29,9 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
                 addAll(savedLocations)
             }.toImmutableList()
 
-            val savedLocationWithTimes = availableLocations.map { location ->
+            val shabbatEntries = availableLocations.map { location ->
                 val distanceKm = currentLocation?.coordinates?.distanceTo(location.coordinates)
-                LocationWithTimes(
+                ShabbatEntry(
                     location = location,
                     times = halachicTimes
                         .firstOrNull { it.coordinates == location.coordinates }
@@ -50,17 +50,17 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
             state.copy(
                 shabbat = when {
                     availableLocations.isEmpty() -> ShabbatResultState.Empty
-                    else                         -> ShabbatResultState.Ready(savedLocationWithTimes)
+                    else                         -> ShabbatResultState.Ready(shabbatEntries)
                 }
             )
         }
     }
 
-    data object RetryLoadLocationWithTimes : ShabbatEvent {
+    data object RetryLoadShabbatEntry : ShabbatEvent {
         override val reducer = ShabbatReducer { state -> state }
     }
 
-    class LocationWithTimesLoadFailed(val message: String, val cause: Throwable?) : ShabbatEvent {
+    class ShabbatEntryLoadFailed(val message: String, val cause: Throwable?) : ShabbatEvent {
         override val reducer = ShabbatReducer { state ->
             if (Debug.enabled) Log.d("ShabbatEvent", "message: $message, cause: $cause")
             state.copy(shabbat = ShabbatResultState.Failure(message, cause))

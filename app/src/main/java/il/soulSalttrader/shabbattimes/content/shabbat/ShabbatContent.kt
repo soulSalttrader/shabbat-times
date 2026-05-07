@@ -29,13 +29,13 @@ import il.soulSalttrader.shabbattimes.content.search.LocationSearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
-import il.soulSalttrader.shabbattimes.model.LocationWithTimes
+import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun ShabbatContent(
-    items: ImmutableList<LocationWithTimes>,
-    swipeConfig: SwipeConfig<LocationWithTimes> = SwipeConfig(),
+    items: ImmutableList<ShabbatEntry>,
+    swipeConfig: SwipeConfig<ShabbatEntry> = SwipeConfig(),
     searchConfig: SearchConfig,
     isDraggable: Boolean = true,
 

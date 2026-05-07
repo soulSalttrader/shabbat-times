@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Immutable
 @Serializable
-data class LocationWithTimes(
+data class ShabbatEntry(
     val location: SavedLocation,
     val times: HalachicTimesDisplay?,
     val status: LocationStatus,

@@ -64,7 +64,7 @@ class ShabbatViewModel @Inject constructor(
         }
     }
         .catch { throwable ->
-            dispatch(ShabbatEvent.LocationWithTimesLoadFailed(throwable.message ?: "Unknown error", throwable))
+            dispatch(ShabbatEvent.ShabbatEntryLoadFailed(throwable.message ?: "Unknown error", throwable))
             _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
             emit(emptyList())
         }
@@ -83,7 +83,7 @@ class ShabbatViewModel @Inject constructor(
         savedLocationsRepository.locations,
         permissionRepository.permissionState,
     ) { state, halachicTimes, currentLocation, savedLocations, permission ->
-        ShabbatEvent.LocationWithTimesLoaded(savedLocations, currentLocation, halachicTimes, permission).reducer reduce state
+        ShabbatEvent.ShabbatEntryLoaded(savedLocations, currentLocation, halachicTimes, permission).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
