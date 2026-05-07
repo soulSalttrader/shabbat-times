@@ -1,13 +1,12 @@
 package il.soulSalttrader.shabbattimes.model
 
-import android.content.Context
 import il.soulSalttrader.shabbattimes.common.toDisplayString
+import java.time.format.DateTimeFormatter
 
-fun HalachicTimes.toDisplay(context: Context): HalachicTimesDisplay =
-    HalachicTimesDisplay(
-        city = city,
-        candleLightingTime = candleLightingTime.toDisplayString(context),
-        candleLightingDate = candleLightingDate.toDisplayString(),
-        havdalahTime = havdalahTime.toDisplayString(context),
-        havdalahDate = havdalahDate.toDisplayString(),
-    )
+fun HalachicTimes.toDisplay(): HalachicTimesDisplay = HalachicTimesDisplay(
+    coordinates = coordinates,
+    candleLightingTime = candleLightingTime.format(DateTimeFormatter.ofPattern("HH:mm")),
+    candleLightingDate = candleLightingDate.toDisplayString(),
+    havdalahTime = havdalahTime.format(DateTimeFormatter.ofPattern("HH:mm")),
+    havdalahDate = havdalahDate.toDisplayString(),
+)

@@ -6,12 +6,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.effect.AppEffect
 import il.soulSalttrader.shabbattimes.event.AppEvent
-import il.soulSalttrader.shabbattimes.event.ShabbatDataEvent
-import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.network.onFailure
-import il.soulSalttrader.shabbattimes.network.onSuccess
-import il.soulSalttrader.shabbattimes.repository.CityRepository
+import il.soulSalttrader.shabbattimes.event.ShabbatEvent
+import il.soulSalttrader.shabbattimes.model.HalachicTimes
+import il.soulSalttrader.shabbattimes.network.NetworkResult
+import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
+import il.soulSalttrader.shabbattimes.repository.PermissionRepository
+import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
+import il.soulSalttrader.shabbattimes.useCase.RemoveCityUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,43 +28,62 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
-
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    cityRepository: CityRepository,
-    private val getHalachicTimes: GetHalachicTimesUseCase,
+    savedLocationsRepository: SavedLocationsRepository,
+    currentLocationRepository: CurrentLocationRepository,
+    permissionRepository: PermissionRepository,
+    private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
+    private val removeLocationUseCase: RemoveCityUseCase,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val halachicTimesFlow: StateFlow<List<HalachicTimesDisplay>> = cityRepository.cities
-            .flatMapLatest { cities ->
-                flow {
-                    getHalachicTimes(cities)
-                        .onSuccess("ShabbatVM") { halachicTimes -> emit(halachicTimes) }
-                        .onFailure("ShabbatVM") { e -> _effects.tryEmit(value = AppEffect.ShowToast(message = "Network failed")) }
-                }
-            }
-            .catch {throwable ->
-                _effects.tryEmit(value = AppEffect.ShowToast(message = "Unexpected error: ${throwable.message}"))
-                emit(value = emptyList())
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList(),
-            )
+    val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
+        currentLocationRepository.location,
+        savedLocationsRepository.locations,
+    ) { gpsLocation, savedLocations ->
+        buildList {
+            gpsLocation?.let { add(it) }
+            addAll(savedLocations)
+        }
+    }.flatMapLatest { savedLocations ->
+        flow {
+            val results = getHalachicTimesUseCase(savedLocations)
+            val successes = results.filterIsInstance<NetworkResult.Success<HalachicTimes>>()
+                .map { it.data }
 
-    private val _state: MutableStateFlow<ShabbatUiState> =
-        MutableStateFlow(value = ShabbatUiState())
+            if (results.any { it is NetworkResult.Failure }) {
+                _effects.tryEmit(AppEffect.ShowToast("Some times failed to load"))
+            }
+
+            emit(successes)
+        }
+    }
+        .catch { throwable ->
+            dispatch(ShabbatEvent.ShabbatEntryLoadFailed(throwable.message ?: "Unknown error", throwable))
+            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+            emit(emptyList())
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
+
+    private val _state: MutableStateFlow<ShabbatUiState> = MutableStateFlow(value = ShabbatUiState())
 
     val state: StateFlow<ShabbatUiState> = combine(
-        flow = _state,
-        flow2 = halachicTimesFlow,
-    ) { state, halachicTimes ->
-        ShabbatDataEvent.TimesLoaded(halachicTimes).reducer reduce state
+        _state,
+        halachicTimesFlow,
+        currentLocationRepository.location,
+        savedLocationsRepository.locations,
+        permissionRepository.permissionState,
+    ) { state, halachicTimes, currentLocation, savedLocations, permission ->
+        ShabbatEvent.ShabbatEntryLoaded(savedLocations, currentLocation, halachicTimes, permission).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -72,9 +93,20 @@ class ShabbatViewModel @Inject constructor(
     fun dispatch(event: AppEvent) {
         _state.updateAndGet { current ->
             when (event) {
-                is ShabbatDataEvent -> event.reducer reduce current
-                else                -> current
+                is ShabbatEvent -> event.reducer reduce current
+                else            -> current
             }
+        }
+
+        when (event) {
+            is ShabbatEvent.LocationDeleted -> handleDeleteLocation(event)
+            else                            -> Unit
+        }
+    }
+
+    private fun handleDeleteLocation(event: ShabbatEvent.LocationDeleted) {
+        viewModelScope.launch {
+            removeLocationUseCase(event.savedLocation, event.isCurrent)
         }
     }
 }

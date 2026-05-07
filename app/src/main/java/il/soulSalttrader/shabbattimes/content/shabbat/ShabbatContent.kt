@@ -25,23 +25,25 @@ import il.soulSalttrader.shabbattimes.content.FabMenu
 import il.soulSalttrader.shabbattimes.content.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.content.reorderable.rememberReorderableState
 import il.soulSalttrader.shabbattimes.content.reorderable.reorderableList
-import il.soulSalttrader.shabbattimes.content.search.CitySearchScreen
+import il.soulSalttrader.shabbattimes.content.search.LocationSearchScreen
 import il.soulSalttrader.shabbattimes.content.search.SearchConfig
 import il.soulSalttrader.shabbattimes.content.search.SearchItem
 import il.soulSalttrader.shabbattimes.content.search.SearchItems.Add
-import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
+import il.soulSalttrader.shabbattimes.model.ShabbatEntry
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun ShabbatContent(
-    items: List<HalachicTimesDisplay>,
-    swipeConfig: SwipeConfig<HalachicTimesDisplay> = SwipeConfig(),
+    items: ImmutableList<ShabbatEntry>,
+    swipeConfig: SwipeConfig<ShabbatEntry> = SwipeConfig(),
     searchConfig: SearchConfig,
     isDraggable: Boolean = true,
 
     onClick: () -> Unit = {},
 ) {
-    val state = rememberReorderableState(items = items, keyOf = { it.city.id })
+    val state = rememberReorderableState(items = items, keyOf = { it.location.id })
 
+    // TODO: remove when Room is implemented
     LaunchedEffect(items) {
         state.updateList(items)
     }
@@ -58,7 +60,7 @@ fun ShabbatContent(
                 state = state.reorderableState,
                 header = "My locations",
                 items = state.list,
-                keyOf = { it.city.id },
+                keyOf = { it.location.id },
                 swipeConfig = swipeConfig,
             ) { item, modifier ->
                 ShabbatCard(
@@ -101,7 +103,7 @@ private fun BoxScope.AnimatedSearchOverlay(
         enter = slideInVertically { -it / 2 } + fadeIn(),
         exit = slideOutVertically { -it / 2 } + fadeOut()
     ) {
-        CitySearchScreen(
+        LocationSearchScreen(
             searchConfig = searchConfig,
             modifier = modifier
                 .align(Alignment.TopCenter)

@@ -22,14 +22,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LocationRepositoryImpl @Inject constructor(
+class GpsLocationRepositoryImpl @Inject constructor(
     private val fusedClient: FusedLocationProviderClient,
     private val scope: CoroutineScope,
     permissionRepository: PermissionRepository,
     private val priority: Int = Priority.PRIORITY_HIGH_ACCURACY,
     private val interval: Long = 1L,
     private val minDistance: Float = 1000f,
-) : LocationRepository {
+) : GpsLocationRepository {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @SuppressLint("MissingPermission")

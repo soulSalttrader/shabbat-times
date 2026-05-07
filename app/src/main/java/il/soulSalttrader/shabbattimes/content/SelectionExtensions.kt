@@ -1,10 +1,10 @@
 package il.soulSalttrader.shabbattimes.content
 
-import il.soulSalttrader.shabbattimes.model.City
+import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 
-fun Selection<City?>.normalizedOrNull(): City? =
+fun Selection<ResolvedLocation?>.normalizedOrNull(): ResolvedLocation? =
     when (this) {
         is Selection.Idle            -> null
-        is Selection.None            -> null
-        is Selection.Selected<City?> -> value
+        is Selection.None                        -> null
+        is Selection.Selected<ResolvedLocation?> -> value
     }
