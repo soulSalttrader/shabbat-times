@@ -42,9 +42,9 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
             }.toImmutableList()
 
             state.copy(
-                data = when {
-                    availableLocations.isEmpty() -> ShabbatResultState.NoResults
-                    else                         -> ShabbatResultState.Results(savedLocationWithTimes)
+                shabbat = when {
+                    availableLocations.isEmpty() -> ShabbatResultState.Empty
+                    else                         -> ShabbatResultState.Ready(savedLocationWithTimes)
                 }
             )
         }
@@ -57,7 +57,7 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
     class LocationWithTimesLoadFailed(val message: String, val cause: Throwable?) : ShabbatEvent {
         override val reducer = ShabbatReducer { state ->
             if (Debug.enabled) Log.d("ShabbatEvent", "message: $message, cause: $cause")
-            state.copy(data = ShabbatResultState.Failure(message, cause))
+            state.copy(shabbat = ShabbatResultState.Failure(message, cause))
         }
     }
 

@@ -68,12 +68,12 @@ fun ShabbatScreen() {
         action = searchViewModel.default(),
     )
 
-    when (val locationWithTimes = shabbatState.data) {
+    when (val entries = shabbatState.shabbat) {
         is ShabbatResultState.Idle      -> LoadingScreen()
 
         is ShabbatResultState.Loading   -> LoadingScreen()
 
-        is ShabbatResultState.NoResults -> {
+        is ShabbatResultState.Empty -> {
             ShabbatContent(
                 items = listOf(
                     LocationWithTimes(
@@ -88,9 +88,9 @@ fun ShabbatScreen() {
             )
         }
 
-        is ShabbatResultState.Results   -> {
+        is ShabbatResultState.Ready -> {
             ShabbatContent(
-                items = locationWithTimes.data,
+                items = entries.entries,
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) { item ->
                     shabbatViewModel.dispatch(
                         ShabbatEvent.LocationDeleted(
@@ -105,7 +105,7 @@ fun ShabbatScreen() {
         }
 
         is ShabbatResultState.Failure   -> FailureScreen(
-            message = locationWithTimes.message,
+            message = entries.message,
             onRetry = { shabbatViewModel.dispatch(ShabbatEvent.RetryLoadLocationWithTimes) },
         )
     }

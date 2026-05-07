@@ -19,7 +19,7 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
                 query = Input.Value(value = newQuery),
                 suggestionResults =
                     when (newQuery.trim().length >= 2) {
-                        true -> SearchResultState.Requesting
+                        true -> SearchResultState.Loading
                         else -> SearchResultState.Idle
                     }
             )
@@ -42,7 +42,7 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
                 suggestionResults = when {
                     state.query is Input.Idle   -> SearchResultState.Idle
                     state.query is Input.Empty  -> SearchResultState.Idle
-                    resolvedLocations.isEmpty() -> SearchResultState.NoResults
+                    resolvedLocations.isEmpty() -> SearchResultState.Empty
                     else                        -> SearchResultState.Suggestions(resolvedLocations)
                 }
             )
@@ -84,7 +84,7 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
 
     data class GpsLocationLoaded(val location: ResolvedLocation) : SearchEvent {
         override val reducer = SearchReducer { state ->
-            state.copy(gpsResult = SearchResultState.GpsLocation(location))
+            state.copy(gpsResult = SearchResultState.GpsResolved(location))
         }
     }
 
@@ -96,7 +96,7 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
 
     data object GpsLocationRequested : SearchEvent {
         override val reducer = SearchReducer { state ->
-            state.copy(gpsResult = SearchResultState.Requesting)
+            state.copy(gpsResult = SearchResultState.Loading)
         }
     }
 
@@ -104,10 +104,10 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
         override val reducer = SearchReducer { state ->
             state.copy(
                 gpsResult = when (permission) {
-                    is LocationPermission.Idle -> SearchResultState.Idle
-                    is LocationPermission.Requesting -> SearchResultState.Requesting
-                    is LocationPermission.Denied -> SearchResultState.NoPermission
-                    is LocationPermission.DeniedPermanently -> SearchResultState.NoPermission
+                    is LocationPermission.Idle              -> SearchResultState.Idle
+                    is LocationPermission.Requesting        -> SearchResultState.Loading
+                    is LocationPermission.Denied            -> SearchResultState.Idle
+                    is LocationPermission.DeniedPermanently -> SearchResultState.Idle
 
                     else -> state.gpsResult
                 }

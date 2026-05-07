@@ -12,9 +12,9 @@ sealed interface ShabbatResultState : State {
     @Immutable
     data object Loading : ShabbatResultState
     @Immutable
-    data object NoResults : ShabbatResultState
+    data object Empty : ShabbatResultState
     @Immutable
-    data class Results(val data: ImmutableList<LocationWithTimes>) : ShabbatResultState
+    data class Ready(val entries: ImmutableList<LocationWithTimes>) : ShabbatResultState
     @Immutable
     data class Failure(val message: String, val cause: Throwable? = null) : ShabbatResultState
 }
