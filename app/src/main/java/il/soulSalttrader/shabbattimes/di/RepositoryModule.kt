@@ -1,6 +1,7 @@
 package il.soulSalttrader.shabbattimes.di
 
 import com.google.android.gms.location.FusedLocationProviderClient
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,39 +24,41 @@ import kotlinx.coroutines.CoroutineScope
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RepositoryModule {
-
-    @Provides
+abstract class RepositoryModule {
+    @Binds
     @Singleton
-    fun provideSavedLocationsRepository(): SavedLocationsRepository = SavedLocationsRepositoryInMemory()
+    abstract fun bindSavedLocationsRepository(impl: SavedLocationsRepositoryInMemory): SavedLocationsRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideGpsLocationRepository(
-        fusedClient: FusedLocationProviderClient,
-        @ApplicationScope scope: CoroutineScope,
-        permissionRepository: PermissionRepository,
-    ): GpsLocationRepository = GpsLocationRepositoryImpl(fusedClient, scope, permissionRepository)
+    abstract fun bindPermissionRepository(impl: PermissionRepositoryImpl): PermissionRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun providePermissionRepository(): PermissionRepository = PermissionRepositoryImpl()
+    abstract fun bindCurrentLocationRepository(impl: CurrentLocationRepositoryImpl): CurrentLocationRepository
 
-    @Provides
-    @Singleton
-    fun provideGeocodingRepository(
-        geoapifyService: GeoapifyService,
-        dispatcher: CoroutineDispatcher,
-    ): GeocodingRepository = GeocodingRepositoryImpl(geoapifyService, dispatcher)
+    companion object {
+        @Provides
+        @Singleton
+        fun provideGpsLocationRepository(
+            fusedClient: FusedLocationProviderClient,
+            @ApplicationScope scope: CoroutineScope,
+            permissionRepository: PermissionRepository,
+        ): GpsLocationRepository =
+            GpsLocationRepositoryImpl(fusedClient, scope, permissionRepository)
 
-    @Provides
-    @Singleton
-    fun provideSolarTimesRepository(
-        apiService: SolarTimesService,
-        dispatcher: CoroutineDispatcher,
-    ): SolarTimesRepository = SolarTimesRepositoryImpl(apiService, dispatcher)
+        @Provides
+        @Singleton
+        fun provideGeocodingRepository(
+            geoapifyService: GeoapifyService,
+            dispatcher: CoroutineDispatcher,
+        ): GeocodingRepository = GeocodingRepositoryImpl(geoapifyService, dispatcher)
 
-    @Provides
-    @Singleton
-    fun provideCurrentLocationRepository(): CurrentLocationRepository = CurrentLocationRepositoryImpl()
+        @Provides
+        @Singleton
+        fun provideSolarTimesRepository(
+            apiService: SolarTimesService,
+            dispatcher: CoroutineDispatcher,
+        ): SolarTimesRepository = SolarTimesRepositoryImpl(apiService, dispatcher)
+    }
 }
