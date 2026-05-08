@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.constants
+package il.soulSalttrader.shabbattimes.common.constants
 
 object ShabbatOffsets {
     const val HILUCH_MIL_MINUTES = 18L

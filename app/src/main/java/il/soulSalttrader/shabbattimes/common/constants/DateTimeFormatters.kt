@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.constants
+package il.soulSalttrader.shabbattimes.common.constants
 
 import java.time.format.DateTimeFormatter
 
