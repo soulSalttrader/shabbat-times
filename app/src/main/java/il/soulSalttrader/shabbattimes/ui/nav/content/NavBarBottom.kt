@@ -1,14 +1,14 @@
-package il.soulSalttrader.shabbattimes.ui.nav
+package il.soulSalttrader.shabbattimes.ui.nav.content
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import il.soulSalttrader.shabbattimes.nav.NavItem
-import il.soulSalttrader.shabbattimes.nav.NavTarget
-import il.soulSalttrader.shabbattimes.nav.Navigator
-import il.soulSalttrader.shabbattimes.nav.common.titleOr
+import il.soulSalttrader.shabbattimes.ui.nav.NavItem
+import il.soulSalttrader.shabbattimes.ui.nav.NavTarget
+import il.soulSalttrader.shabbattimes.ui.nav.Navigator
+import il.soulSalttrader.shabbattimes.ui.nav.titleOr
 
 @Composable
 fun NavBarBottom(

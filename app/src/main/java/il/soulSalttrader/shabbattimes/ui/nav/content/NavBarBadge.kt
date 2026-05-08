@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.ui.nav
+package il.soulSalttrader.shabbattimes.ui.nav.content
 
 import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme

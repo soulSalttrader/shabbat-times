@@ -1,7 +1,4 @@
-package il.soulSalttrader.shabbattimes.nav.common
-
-import il.soulSalttrader.shabbattimes.nav.NavItem
-import il.soulSalttrader.shabbattimes.nav.NavRole
+package il.soulSalttrader.shabbattimes.ui.nav
 
 fun List<NavItem>.extractTopBarItems(): Pair<NavItem?, List<NavItem>> {
     val topNavigationItem = this.find { it.role == NavRole.TOP_NAVIGATION }

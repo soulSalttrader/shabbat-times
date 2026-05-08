@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.ui.nav
+package il.soulSalttrader.shabbattimes.ui.nav.content
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -10,12 +10,12 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import il.soulSalttrader.shabbattimes.nav.NavItem
-import il.soulSalttrader.shabbattimes.nav.NavTarget
-import il.soulSalttrader.shabbattimes.nav.NavTargetBottom
-import il.soulSalttrader.shabbattimes.nav.Navigator
-import il.soulSalttrader.shabbattimes.nav.common.extractTopBarItems
-import il.soulSalttrader.shabbattimes.nav.common.titleOr
+import il.soulSalttrader.shabbattimes.ui.nav.NavItem
+import il.soulSalttrader.shabbattimes.ui.nav.NavTarget
+import il.soulSalttrader.shabbattimes.ui.nav.NavTargetBottom
+import il.soulSalttrader.shabbattimes.ui.nav.Navigator
+import il.soulSalttrader.shabbattimes.ui.nav.extractTopBarItems
+import il.soulSalttrader.shabbattimes.ui.nav.titleOr
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

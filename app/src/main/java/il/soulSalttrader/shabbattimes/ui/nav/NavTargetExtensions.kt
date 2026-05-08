@@ -1,7 +1,6 @@
-package il.soulSalttrader.shabbattimes.nav.common
+package il.soulSalttrader.shabbattimes.ui.nav
 
-import il.soulSalttrader.shabbattimes.nav.NavItems.navItemsByTarget
-import il.soulSalttrader.shabbattimes.nav.NavTarget
+import il.soulSalttrader.shabbattimes.ui.nav.NavItems.navItemsByTarget
 
 fun NavTarget.route(): String =
     requireNotNull(this::class.qualifiedName) {

@@ -1,10 +1,9 @@
-package il.soulSalttrader.shabbattimes.nav.common
+package il.soulSalttrader.shabbattimes.ui.nav
 
 import android.util.Log
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import il.soulSalttrader.shabbattimes.Debug
-import il.soulSalttrader.shabbattimes.nav.NavAction
 
 fun NavHostController.handleTo(action: NavAction.To) {
     val targetRoute = action.target.route()

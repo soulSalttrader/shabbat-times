@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.nav
+package il.soulSalttrader.shabbattimes.ui.nav
 
 import android.util.Log
 import androidx.compose.runtime.Composable
@@ -9,11 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import il.soulSalttrader.shabbattimes.Debug
-import il.soulSalttrader.shabbattimes.nav.common.collectNavigationCommands
-import il.soulSalttrader.shabbattimes.nav.common.currentDestinationName
-import il.soulSalttrader.shabbattimes.nav.common.syncBackStackWithNavigator
-import il.soulSalttrader.shabbattimes.nav.graph.mainNavGraph
-
+import il.soulSalttrader.shabbattimes.ui.nav.graph.mainNavGraph
 
 @Composable
 fun NavApp(

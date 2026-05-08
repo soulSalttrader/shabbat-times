@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.nav
+package il.soulSalttrader.shabbattimes.ui.nav
 
 enum class NavRole {
     BOTTOM_TAB,

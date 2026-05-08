@@ -1,12 +1,10 @@
-package il.soulSalttrader.shabbattimes.nav.common
+package il.soulSalttrader.shabbattimes.ui.nav
 
 import android.util.Log
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import il.soulSalttrader.shabbattimes.Debug
-import il.soulSalttrader.shabbattimes.nav.NavAction
-import il.soulSalttrader.shabbattimes.nav.NavTarget.Companion.fromBackStackEntry
-import il.soulSalttrader.shabbattimes.nav.Navigator
+import il.soulSalttrader.shabbattimes.ui.nav.NavTarget.Companion.fromBackStackEntry
 
 fun Navigator.syncBackStackWithNavigator(currentBackStackEntry: NavBackStackEntry?) {
     val target = currentBackStackEntry.fromBackStackEntry()

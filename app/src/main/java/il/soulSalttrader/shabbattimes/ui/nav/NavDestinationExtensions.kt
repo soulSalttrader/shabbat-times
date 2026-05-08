@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.nav.common
+package il.soulSalttrader.shabbattimes.ui.nav
 
 import androidx.navigation.NavDestination
 

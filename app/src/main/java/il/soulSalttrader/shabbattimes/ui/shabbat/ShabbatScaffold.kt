@@ -12,11 +12,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import il.soulSalttrader.shabbattimes.ui.nav.NavBarTop
-import il.soulSalttrader.shabbattimes.nav.NavItem
-import il.soulSalttrader.shabbattimes.nav.NavItems.Previous
-import il.soulSalttrader.shabbattimes.nav.NavItems.Settings
-import il.soulSalttrader.shabbattimes.nav.Navigator
+import il.soulSalttrader.shabbattimes.ui.nav.content.NavBarTop
+import il.soulSalttrader.shabbattimes.ui.nav.NavItem
+import il.soulSalttrader.shabbattimes.ui.nav.NavItems.Previous
+import il.soulSalttrader.shabbattimes.ui.nav.NavItems.Settings
+import il.soulSalttrader.shabbattimes.ui.nav.Navigator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
