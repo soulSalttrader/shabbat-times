@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
-import il.soulSalttrader.shabbattimes.content.shabbat.ShabbatScaffold
+import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatScaffold
 import il.soulSalttrader.shabbattimes.nav.NavApp
 import il.soulSalttrader.shabbattimes.nav.Navigator
 import il.soulSalttrader.shabbattimes.ui.theme.ShabbatTheme

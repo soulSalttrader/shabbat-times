@@ -1,11 +1,9 @@
-package il.soulSalttrader.shabbattimes.nav
+package il.soulSalttrader.shabbattimes.ui.search
 
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
 
-data class NavItem(
-    val target: NavTarget,
+data class SearchItem(
     val title: String?,
     val selectedIcon: UiIcon,
     val unselectedIcon: UiIcon,
-    val role: NavRole,
 )

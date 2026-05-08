@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes
 
 import il.soulSalttrader.shabbattimes.model.State
-import il.soulSalttrader.shabbattimes.reducer.Reducer
+import il.soulSalttrader.shabbattimes.ui.reducer.Reducer
 
 object Debug {
     val enabled: Boolean = runCatching {
