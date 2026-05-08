@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.location
+package il.soulSalttrader.shabbattimes.model
 
 import il.soulSalttrader.shabbattimes.common.roundToDecimalPlaces
 

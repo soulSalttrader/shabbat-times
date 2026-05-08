@@ -4,9 +4,9 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatResultState
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
-import il.soulSalttrader.shabbattimes.location.LocationPermission
-import il.soulSalttrader.shabbattimes.location.LocationPermission.*
-import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.model.LocationPermission
+import il.soulSalttrader.shabbattimes.model.LocationPermission.*
+import il.soulSalttrader.shabbattimes.model.LocationStatus
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 import il.soulSalttrader.shabbattimes.model.SavedLocation

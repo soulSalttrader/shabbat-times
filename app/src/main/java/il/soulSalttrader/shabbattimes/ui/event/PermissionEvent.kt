@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes.ui.event
 
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
-import il.soulSalttrader.shabbattimes.location.LocationPermission
+import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.reducer.PermissionReducer
 import il.soulSalttrader.shabbattimes.ui.reducer.Reducible

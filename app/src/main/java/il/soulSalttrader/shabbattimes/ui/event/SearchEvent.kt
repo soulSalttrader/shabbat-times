@@ -7,7 +7,7 @@ import il.soulSalttrader.shabbattimes.ui.Selection
 import il.soulSalttrader.shabbattimes.ui.search.SearchResultState
 import il.soulSalttrader.shabbattimes.ui.search.SearchUiState
 import il.soulSalttrader.shabbattimes.ui.search.SearchVisibility
-import il.soulSalttrader.shabbattimes.location.LocationPermission
+import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
 import il.soulSalttrader.shabbattimes.ui.reducer.SearchReducer

@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.location
+package il.soulSalttrader.shabbattimes.model
 
 sealed interface LocationPermission {
     data object Idle : LocationPermission

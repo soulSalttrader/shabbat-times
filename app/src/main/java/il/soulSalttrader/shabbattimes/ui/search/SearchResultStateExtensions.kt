@@ -1,6 +1,6 @@
 package il.soulSalttrader.shabbattimes.ui.search
 
-import il.soulSalttrader.shabbattimes.location.LocationStatus
+import il.soulSalttrader.shabbattimes.model.LocationStatus
 
 fun SearchResultState.toLocationStatus() = when (this) {
     is SearchResultState.GpsResolved -> LocationStatus.Current
