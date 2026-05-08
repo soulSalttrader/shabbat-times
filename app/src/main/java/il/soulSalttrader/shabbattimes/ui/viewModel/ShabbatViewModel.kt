@@ -3,6 +3,7 @@ package il.soulSalttrader.shabbattimes.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.shabbattimes.di.InMemory
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
 import il.soulSalttrader.shabbattimes.ui.event.AppEvent
@@ -32,8 +33,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    savedLocationsRepository: SavedLocationsRepository,
-    currentLocationRepository: CurrentLocationRepository,
+    @InMemory savedLocationsRepository: SavedLocationsRepository,
+    @InMemory currentLocationRepository: CurrentLocationRepository,
     permissionRepository: PermissionRepository,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
     private val removeLocationUseCase: RemoveCityUseCase,

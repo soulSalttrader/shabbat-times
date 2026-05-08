@@ -25,4 +25,8 @@ class SavedLocationsRepositoryInMemory @Inject constructor() : SavedLocationsRep
     override suspend fun remove(location: SavedLocation) {
         _locations.update { it.filter { loc -> loc.id != location.id } }
     }
+
+    override suspend fun reorder(locations: List<SavedLocation>) {
+        _locations.update { locations }
+    }
 }

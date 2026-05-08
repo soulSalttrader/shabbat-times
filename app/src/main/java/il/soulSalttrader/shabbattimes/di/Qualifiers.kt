@@ -13,3 +13,11 @@ annotation class GeoapifyRetrofit
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ApplicationScope
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class InMemory
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class Persisted

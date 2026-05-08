@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 abstract class RepositoryModule {
     @Binds
     @Singleton
+    @InMemory
     abstract fun bindSavedLocationsRepository(impl: SavedLocationsRepositoryInMemory): SavedLocationsRepository
 
     @Binds
@@ -35,6 +36,7 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    @InMemory
     abstract fun bindCurrentLocationRepository(impl: CurrentLocationRepositoryImpl): CurrentLocationRepository
 
     companion object {
