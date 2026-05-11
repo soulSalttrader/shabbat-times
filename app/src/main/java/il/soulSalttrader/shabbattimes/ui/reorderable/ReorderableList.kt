@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,7 +24,7 @@ import sh.calvin.reorderable.ReorderableLazyListState
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 fun <T> LazyListScope.reorderableList(
-    state: ReorderableLazyListState,
+    state: ReorderableState<T>,
     items: ImmutableList<T>,
     header: String,
     keyOf: (T) -> Any,
@@ -39,14 +40,24 @@ fun <T> LazyListScope.reorderableList(
 
     items(items, key = { keyOf(it) }) { item ->
         ReorderableItem(
-            state = state,
+            state = state.reorderableState,
             key = keyOf(item),
         ) {
             SwipeableItem(
                 item = item,
                 swipeConfig = swipeConfig,
             ) {
-                content.Content(item, Modifier.draggableHandle())
+                content.Content(item, Modifier.draggableHandle(
+                    onDragStopped = {
+                        val from = state.pendingFrom
+                        val to = state.pendingTo
+                        if (from != -1 && to != -1 && from != to) {
+                            state.onReorder(from, to)
+                        }
+                        state.pendingFrom = -1
+                        state.pendingTo = -1
+                    }
+                ))
             }
         }
     }
@@ -55,46 +66,38 @@ fun <T> LazyListScope.reorderableList(
 class ReorderableState<T>(
     items: ImmutableList<T>,
     val lazyListState: LazyListState,
-    val keyOf: (T) -> Any,
 ) {
     var list by mutableStateOf(items)
     lateinit var reorderableState: ReorderableLazyListState
-
-    fun updateList(updated: ImmutableList<T>) {
-        list = mergeWithCurrentOrder(current = list, updated = updated, keyOf = keyOf)
-    }
-}
-
-// TODO: remove when Room is implemented — order will be persisted in DB
-// temporarily preserves drag order across ViewModel emissions
-fun <T> mergeWithCurrentOrder(
-    current: ImmutableList<T>,
-    updated: ImmutableList<T>,
-    keyOf: (T) -> Any,
-): ImmutableList<T> {
-    val updatedMap = updated.associateBy { keyOf(it) }
-    return buildList {
-        // new items not in current — add at top
-        addAll(updated.filter { new -> current.none { keyOf(it) == keyOf(new) } })
-        // existing items — preserve ORDER from current but DATA from updated
-        addAll(current.mapNotNull { updatedMap[keyOf(it)] })
-    }.toImmutableList()
+    var onReorder: (from: Int, to: Int) -> Unit = { _, _ -> }
+    var pendingFrom: Int = -1
+    var pendingTo: Int = -1
 }
 
 @Composable
 fun <T> rememberReorderableState(
     items: ImmutableList<T>,
-    keyOf: (T) -> Any,
+    onReorder: (from: Int, to: Int) -> Unit,
 ): ReorderableState<T> {
     val lazyListState = rememberLazyListState()
     val hapticFeedback = LocalHapticFeedback.current
-    val state = remember { ReorderableState(items, lazyListState, keyOf) }
+    val state = remember { ReorderableState(items, lazyListState) }
+
+    LaunchedEffect(items) {
+        state.list = items
+    }
 
     state.reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
         state.list = state.list.toMutableList()
-            .apply { add(to.index - 1, removeAt(from.index - 1)) }.toImmutableList()
+            .apply { add(to.index - 1, removeAt(from.index - 1)) }
+            .toImmutableList()
+
+        if (state.pendingFrom == -1) state.pendingFrom = from.index - 1
+        state.pendingTo = to.index - 1
         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
     }
+
+    state.onReorder = onReorder
 
     return state
 }
