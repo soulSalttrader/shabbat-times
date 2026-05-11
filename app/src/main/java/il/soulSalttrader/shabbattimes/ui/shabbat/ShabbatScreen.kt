@@ -11,23 +11,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.model.LocationStatus
+import il.soulSalttrader.shabbattimes.model.SavedLocation
+import il.soulSalttrader.shabbattimes.model.ShabbatEntry
+import il.soulSalttrader.shabbattimes.permission.HandlePermissions
+import il.soulSalttrader.shabbattimes.permission.PermissionState
+import il.soulSalttrader.shabbattimes.permission.openAppSettings
 import il.soulSalttrader.shabbattimes.ui.FailureScreen
 import il.soulSalttrader.shabbattimes.ui.LoadingScreen
+import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
+import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
+import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
+import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.ui.search.SearchConfig
 import il.soulSalttrader.shabbattimes.ui.search.default
 import il.soulSalttrader.shabbattimes.ui.search.toLocationStatus
-import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
-import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
-import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
-import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
-import il.soulSalttrader.shabbattimes.model.LocationStatus
-import il.soulSalttrader.shabbattimes.model.ShabbatEntry
-import il.soulSalttrader.shabbattimes.model.SavedLocation
-import il.soulSalttrader.shabbattimes.permission.HandlePermissions
-import il.soulSalttrader.shabbattimes.permission.PermissionState
-import il.soulSalttrader.shabbattimes.permission.openAppSettings
 import il.soulSalttrader.shabbattimes.ui.viewModel.PermissionViewModel
 import il.soulSalttrader.shabbattimes.ui.viewModel.SearchViewModel
 import il.soulSalttrader.shabbattimes.ui.viewModel.ShabbatViewModel
@@ -101,6 +101,11 @@ fun ShabbatScreen() {
                 },
                 searchConfig = searchConfig,
                 onClick = onCardClick,
+                onReorder = { from, to ->
+                    shabbatViewModel.dispatch(
+                        ShabbatEvent.ReorderLocations(from = from, to = to,)
+                    )
+                },
             )
         }
 
