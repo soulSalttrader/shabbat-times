@@ -3,16 +3,21 @@ package il.soulSalttrader.shabbattimes.useCase
 import il.soulSalttrader.shabbattimes.di.InMemory
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.SavedLocation
+import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import javax.inject.Inject
 
 class RemoveSavedLocationUseCase @Inject constructor(
     @param:InMemory private val savedLocationsRepository: SavedLocationsRepository,
+    @param:InMemory private val currentLocationRepository: CurrentLocationRepository,
     private val permissionRepository: PermissionRepository,
 ) {
     suspend operator fun invoke(location: SavedLocation, isCurrent: Boolean) {
         savedLocationsRepository.remove(location)
-        if (isCurrent) { permissionRepository.updatePermissionState(LocationPermission.Idle) }
+        if (isCurrent) {
+            currentLocationRepository.update(null)
+            permissionRepository.updatePermissionState(LocationPermission.Idle)
+        }
     }
 }
