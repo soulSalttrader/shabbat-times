@@ -4,18 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.di.InMemory
-import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
-import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
-import il.soulSalttrader.shabbattimes.ui.event.AppEvent
-import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
+import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
+import il.soulSalttrader.shabbattimes.ui.event.AppEvent
+import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
+import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatResultState
+import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
-import il.soulSalttrader.shabbattimes.useCase.RemoveCityUseCase
 import il.soulSalttrader.shabbattimes.useCase.RemoveSavedLocationUseCase
+import il.soulSalttrader.shabbattimes.useCase.ReorderLocationsUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,11 +35,12 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    @InMemory savedLocationsRepository: SavedLocationsRepository,
-    @InMemory currentLocationRepository: CurrentLocationRepository,
-    permissionRepository: PermissionRepository,
+    @param:InMemory private val savedLocationsRepository: SavedLocationsRepository,
+    @param:InMemory private val currentLocationRepository: CurrentLocationRepository,
+    private val reorderLocationsUseCase: ReorderLocationsUseCase,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
     private val removeLocationUseCase: RemoveSavedLocationUseCase,
+    permissionRepository: PermissionRepository,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
@@ -101,8 +103,16 @@ class ShabbatViewModel @Inject constructor(
         }
 
         when (event) {
-            is ShabbatEvent.LocationDeleted -> handleDeleteLocation(event)
-            else                            -> Unit
+            is ShabbatEvent.LocationDeleted  -> handleDeleteLocation(event)
+            is ShabbatEvent.ReorderLocations -> handleReorderLocations(event)
+            else                             -> Unit
+        }
+    }
+
+    private fun handleReorderLocations(event: ShabbatEvent.ReorderLocations) {
+        viewModelScope.launch {
+            val entries = (state.value.shabbat as? ShabbatResultState.Ready)?.entries ?: return@launch
+            reorderLocationsUseCase(entries, event.from, event.to)
         }
     }
 
