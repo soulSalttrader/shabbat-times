@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -40,13 +39,9 @@ fun ShabbatContent(
     isDraggable: Boolean = true,
 
     onClick: () -> Unit = {},
+    onReorder: (from: Int, to: Int) -> Unit = {_, _ ->},
 ) {
-    val state = rememberReorderableState(items = items, keyOf = { it.location.id })
-
-    // TODO: remove when Room is implemented
-    LaunchedEffect(items) {
-        state.updateList(items)
-    }
+    val state = rememberReorderableState(items = items, onReorder = onReorder)
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -57,7 +52,7 @@ fun ShabbatContent(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             reorderableList(
-                state = state.reorderableState,
+                state = state,
                 header = "My locations",
                 items = state.list,
                 keyOf = { it.location.id },
