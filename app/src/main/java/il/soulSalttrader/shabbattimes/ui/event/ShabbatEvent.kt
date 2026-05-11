@@ -24,12 +24,7 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
         val permission: LocationPermission,
     ) : ShabbatEvent {
         override val reducer = ShabbatReducer { state ->
-            val availableLocations = buildList {
-                currentLocation?.let { add(it) }
-                addAll(savedLocations)
-            }.toImmutableList()
-
-            val shabbatEntries = availableLocations.map { location ->
+            val shabbatEntries = savedLocations.map { location ->
                 val distanceKm = currentLocation?.coordinates?.distanceTo(location.coordinates)
                 ShabbatEntry(
                     location = location,
@@ -49,7 +44,7 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
 
             state.copy(
                 shabbat = when {
-                    availableLocations.isEmpty() -> ShabbatResultState.Empty
+                    savedLocations.isEmpty() -> ShabbatResultState.Empty
                     else                         -> ShabbatResultState.Ready(shabbatEntries)
                 }
             )
@@ -69,5 +64,9 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
 
     data class LocationDeleted(val savedLocation: SavedLocation, val isCurrent: Boolean) : ShabbatEvent {
         override val reducer = ShabbatReducer { state -> state } // The reducer is a no-op because the repository flow handles the UI update reactively
+    }
+
+    data class ReorderLocations(val from: Int, val to: Int) : ShabbatEvent {
+        override val reducer = ShabbatReducer { state -> state } // The reducer is a no-op because order is persisted to the repository, which triggers ShabbatEntryLoaded to rebuild entries in the correct order reactively
     }
 }
