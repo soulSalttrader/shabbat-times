@@ -15,6 +15,7 @@ import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
 import il.soulSalttrader.shabbattimes.useCase.RemoveCityUseCase
+import il.soulSalttrader.shabbattimes.useCase.RemoveSavedLocationUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -37,7 +38,7 @@ class ShabbatViewModel @Inject constructor(
     @InMemory currentLocationRepository: CurrentLocationRepository,
     permissionRepository: PermissionRepository,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
-    private val removeLocationUseCase: RemoveCityUseCase,
+    private val removeLocationUseCase: RemoveSavedLocationUseCase,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()

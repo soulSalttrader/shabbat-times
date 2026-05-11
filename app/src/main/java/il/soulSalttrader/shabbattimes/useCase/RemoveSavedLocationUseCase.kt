@@ -7,7 +7,7 @@ import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import javax.inject.Inject
 
-class RemoveCityUseCase @Inject constructor(
+class RemoveSavedLocationUseCase @Inject constructor(
     @param:InMemory private val savedLocationsRepository: SavedLocationsRepository,
     private val permissionRepository: PermissionRepository,
 ) {
