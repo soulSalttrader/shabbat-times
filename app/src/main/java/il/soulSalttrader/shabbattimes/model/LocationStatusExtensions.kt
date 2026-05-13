@@ -8,4 +8,5 @@ fun LocationStatus.toLabel() = when (this) {
     is LocationStatus.Locating     -> "Getting your location..."
     is LocationStatus.Unknown      -> "Unknown distance"
     is LocationStatus.NoPermission -> "Tap to use current location"
+    is LocationStatus.LastKnownLocation -> "Last known location"
 }

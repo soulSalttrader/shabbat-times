@@ -13,5 +13,7 @@ sealed interface LocationStatus {
     @Immutable
     data object Locating : LocationStatus
     @Immutable
+    data object LastKnownLocation : LocationStatus
+    @Immutable
     data class Nearby(val distanceKm: Double) : LocationStatus
 }
