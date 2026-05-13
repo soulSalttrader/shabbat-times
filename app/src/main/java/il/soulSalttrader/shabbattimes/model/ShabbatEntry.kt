@@ -9,6 +9,4 @@ data class ShabbatEntry(
     val location: SavedLocation,
     val times: HalachicTimesDisplay?,
     val status: LocationStatus,
-) {
-    val label: String = status.toLabel()
-}
+)

@@ -27,6 +27,7 @@ import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconLabel
 import il.soulSalttrader.shabbattimes.model.LocationStatus
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
+import il.soulSalttrader.shabbattimes.model.toLabel
 
 @Composable
 fun ShabbatCard(
@@ -57,7 +58,7 @@ fun ShabbatCard(
             Column(modifier = Modifier.padding(16.dp).weight(1f)) {
                 LocationTitle(item.location.name)
 
-                UiIconLocationLabel(item.status, item.label)
+                UiIconLocationLabel(item.status, item.status.toLabel())
 
                 Spacer(Modifier.height(16.dp))
 
