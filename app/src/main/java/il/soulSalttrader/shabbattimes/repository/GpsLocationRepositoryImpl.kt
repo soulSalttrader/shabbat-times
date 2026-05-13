@@ -7,7 +7,9 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.Priority
+import il.soulSalttrader.shabbattimes.common.constants.GpsConfig.INTERVAL_MS
+import il.soulSalttrader.shabbattimes.common.constants.GpsConfig.MIN_DISTANCE_METERS
+import il.soulSalttrader.shabbattimes.common.constants.GpsConfig.PRIORITY
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,9 +28,6 @@ class GpsLocationRepositoryImpl @Inject constructor(
     private val fusedClient: FusedLocationProviderClient,
     private val scope: CoroutineScope,
     permissionRepository: PermissionRepository,
-    private val priority: Int = Priority.PRIORITY_HIGH_ACCURACY,
-    private val interval: Long = 1L,
-    private val minDistance: Float = 1000f,
 ) : GpsLocationRepository {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -38,8 +37,8 @@ class GpsLocationRepositoryImpl @Inject constructor(
             when (permission) {
                 is LocationPermission.Granted -> {
                     callbackFlow<Location?> {
-                        val request = LocationRequest.Builder(priority, interval)
-                            .setMinUpdateDistanceMeters(minDistance)
+                        val request = LocationRequest.Builder(PRIORITY, INTERVAL_MS)
+                            .setMinUpdateDistanceMeters(MIN_DISTANCE_METERS)
                             .build()
 
                         val callback = object : LocationCallback() {
