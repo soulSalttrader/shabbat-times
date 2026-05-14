@@ -35,6 +35,8 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
                         permission is Denied            -> LocationStatus.NoPermission
                         permission is DeniedPermanently -> LocationStatus.NoPermission
                         permission is Requesting        -> LocationStatus.Locating
+                        location.id == SavedLocation.GPS_ID && currentLocation == null -> LocationStatus.LastKnownLocation
+                        location.id == SavedLocation.GPS_ID -> LocationStatus.Current
                         distanceKm == null              -> LocationStatus.Unknown
                         distanceKm < 0.1                -> LocationStatus.Current
                         else                            -> LocationStatus.Nearby(distanceKm)
