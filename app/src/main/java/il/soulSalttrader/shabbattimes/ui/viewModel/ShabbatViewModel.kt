@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.di.InMemory
+import il.soulSalttrader.shabbattimes.di.Persisted
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
@@ -35,8 +36,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    @param:InMemory private val savedLocationsRepository: SavedLocationsRepository,
     @param:InMemory private val currentLocationRepository: CurrentLocationRepository,
+    @param:Persisted private val savedLocationsRepository: SavedLocationsRepository,
     private val reorderLocationsUseCase: ReorderLocationsUseCase,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
     private val removeLocationUseCase: RemoveSavedLocationUseCase,
