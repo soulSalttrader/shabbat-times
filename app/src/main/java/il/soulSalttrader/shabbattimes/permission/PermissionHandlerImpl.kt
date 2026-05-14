@@ -6,17 +6,18 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 class PermissionHandlerImpl(
-    private val isGranted: (String) -> Boolean,
+    private val checkPermission: (String) -> Boolean,
     private val shouldShowRationale: (String) -> Boolean,
     private val launch: (Array<String>) -> Unit,
 ) : PermissionHandler {
+    override fun isGranted(permission: String): Boolean = checkPermission(permission)
     private var continuation: CancellableContinuation<PermissionResult>? = null
 
     override suspend fun request(permissions: List<String>): PermissionResult =
         suspendCancellableCoroutine { cont ->
             check(continuation == null) { "Permission request already in progress" }
 
-            val missing = permissions.filterNot(isGranted)
+            val missing = permissions.filterNot { isGranted(it) }
 
             if (missing.isEmpty()) {
                 cont.resume(PermissionResult.Granted)
@@ -34,10 +35,7 @@ class PermissionHandlerImpl(
     fun onResult(result: Map<String, Boolean>) {
         val cont = continuation ?: return
 
-        Log.d("onResult", "granted: $result")
-
         try {
-            val granted = result.filterValues { it }.keys.toList()
             val denied = result.filterValues { !it }.keys.toList()
             Log.d("onResult", "denied: $denied")
             val permanentlyDenied = denied.filterNot(shouldShowRationale)

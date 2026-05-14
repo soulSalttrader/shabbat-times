@@ -23,7 +23,7 @@ fun rememberPermissionHandler(): PermissionHandler {
 
     handler = remember(context, launcher) {
         PermissionHandlerImpl(
-            isGranted = { perm ->
+            checkPermission = { perm ->
                 ContextCompat.checkSelfPermission(
                     context,
                     perm
