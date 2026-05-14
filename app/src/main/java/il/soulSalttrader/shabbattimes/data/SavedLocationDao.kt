@@ -23,9 +23,20 @@ interface SavedLocationDao {
     @Query("SELECT MAX(sortOrder) FROM saved_locations")
     suspend fun getMaxSortOrder(): Int?
 
+    @Query("SELECT * FROM saved_locations WHERE id = :id")
+    suspend fun getById(id: String): SavedLocationEntity?
+
     @Transaction
     suspend fun insertWithOrder(entity: SavedLocationEntity) {
-        val currentMax = getMaxSortOrder() ?: -1
-        upsert(entity.copy(sortOrder = currentMax + 1))
+        val existing = getById(entity.id)
+        when (existing != null) {
+            true -> {
+                upsert(entity.copy(sortOrder = existing.sortOrder))
+            }
+            false -> {
+                val currentMax = getMaxSortOrder() ?: -1
+                upsert(entity.copy(sortOrder = currentMax + 1))
+            }
+        }
     }
 }
