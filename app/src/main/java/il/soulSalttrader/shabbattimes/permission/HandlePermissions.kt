@@ -10,11 +10,12 @@ import androidx.core.content.ContextCompat
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.ui.ExplanatoryDialog
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
+import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 
 @Composable
 fun HandlePermissions(
     permissions: List<String>,
-    permissionState: PermissionState,
+    permissionState: PermissionUiState,
     dispatch: (PermissionEvent) -> Unit,
 ) {
     val permissionHandler = rememberPermissionHandler()
@@ -25,8 +26,8 @@ fun HandlePermissions(
         if (isGranted) dispatch(PermissionEvent.AllGranted)
     }
 
-    LaunchedEffect(permissionState) {
-        if (permissionState == PermissionState.Requesting) {
+    LaunchedEffect(permissionState.permission) {
+        if (permissionState.permission == PermissionState.Requesting) {
             val result = permissionHandler.request(permissions)
 
             when (result) {
@@ -37,36 +38,39 @@ fun HandlePermissions(
         }
     }
 
-    when (permissionState) {
-        PermissionState.Education -> {
-            ExplanatoryDialog(
-                message = "To show candle lightning and havdalah time for your current position, " +
-                        "the app needs access to your location.\n" +
-                        "\n" +
-                        "Your location is only used locally — never stored or shared.",
-                title = "Times, wherever you are",
-                onConfirmText = "Continue",
-                onConfirm = { dispatch(PermissionEvent.Request) },
-                onDismissText = "Add manually instead",
-                onDismiss = { dispatch(PermissionEvent.DismissedRationale) },
-            )
-        }
-        PermissionState.Denied            -> {
-            ExplanatoryDialog(
-                message = "We need location to show accurate zmanim times.",
-                onConfirmText = "Allow",
-                onConfirm = { dispatch(PermissionEvent.AcceptedRationale) },
-                onDismiss = { dispatch(PermissionEvent.DismissedRationale) }
-            )
-        }
-        PermissionState.DeniedPermanently -> {
-            ExplanatoryDialog(
-                message = "Location access was permanently denied. Please enable it in settings.",
-                onConfirmText = "Open Settings",
-                onConfirm = { dispatch(PermissionEvent.RequestedAppSettings) },
-                onDismiss = { dispatch(PermissionEvent.DismissedRationale) }
-            )
-        }
+    if (permissionState.isDialogVisible) {
+        when (permissionState.permission) {
+            PermissionState.Education -> {
+                ExplanatoryDialog(
+                    message = "To show candle lightning and havdalah time for your current position, " +
+                            "the app needs access to your location.\n" +
+                            "\n" +
+                            "Your location is only used locally — never stored or shared.",
+                    title = "Times, wherever you are",
+                    onConfirmText = "Continue",
+                    onConfirm = { dispatch(PermissionEvent.Request) },
+                    onDismissText = "Add manually instead",
+                    onDismiss = { dispatch(PermissionEvent.DismissedRationale) },
+                )
+            }
+
+            PermissionState.Denied -> {
+                ExplanatoryDialog(
+                    message = "We need location to show accurate zmanim times.",
+                    onConfirmText = "Allow",
+                    onConfirm = { dispatch(PermissionEvent.AcceptedRationale) },
+                    onDismiss = { dispatch(PermissionEvent.DismissedRationale) }
+                )
+            }
+
+            PermissionState.DeniedPermanently -> {
+                ExplanatoryDialog(
+                    message = "Location access was permanently denied. Please enable it in settings.",
+                    onConfirmText = "Open Settings",
+                    onConfirm = { dispatch(PermissionEvent.RequestedAppSettings) },
+                    onDismiss = { dispatch(PermissionEvent.DismissedRationale) }
+                )
+            }
 
         else -> Unit
     }

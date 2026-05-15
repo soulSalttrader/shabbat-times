@@ -5,4 +5,5 @@ import il.soulSalttrader.shabbattimes.model.State
 
 data class PermissionUiState(
     val permission: PermissionState = PermissionState.Idle,
+    val isDialogVisible: Boolean = false,
 ) : State

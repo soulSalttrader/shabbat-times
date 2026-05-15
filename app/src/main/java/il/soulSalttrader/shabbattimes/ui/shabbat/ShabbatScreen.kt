@@ -50,7 +50,7 @@ fun ShabbatScreen() {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
         ),
-        permissionState = permissionUiState.permission,
+        permissionState = permissionUiState,
         dispatch = permissionViewModel::dispatch,
     )
 
