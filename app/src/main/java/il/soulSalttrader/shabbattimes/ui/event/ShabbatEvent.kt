@@ -26,20 +26,26 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
         override val reducer = ShabbatReducer { state ->
             val shabbatEntries = savedLocations.map { location ->
                 val distanceKm = currentLocation?.coordinates?.distanceTo(location.coordinates)
+
+                val isGps = location.id == SavedLocation.GPS_ID
+                val hasCurrentLocation = currentLocation != null
+                val hasPermission = permission is Granted
+
                 ShabbatEntry(
                     location = location,
                     times = halachicTimes
                         .firstOrNull { it.coordinates == location.coordinates }
                         ?.toDisplay(),
                     status = when {
-                        permission is Denied            -> LocationStatus.NoPermission
-                        permission is DeniedPermanently -> LocationStatus.NoPermission
-                        permission is Requesting        -> LocationStatus.Locating
-                        location.id == SavedLocation.GPS_ID && currentLocation == null -> LocationStatus.LastKnownLocation
-                        location.id == SavedLocation.GPS_ID -> LocationStatus.Current
-                        distanceKm == null              -> LocationStatus.Unknown
-                        distanceKm < 0.1                -> LocationStatus.Current
-                        else                            -> LocationStatus.Nearby(distanceKm)
+                        isGps && !hasCurrentLocation        -> LocationStatus.LastKnownLocation
+                        isGps && !hasPermission             -> LocationStatus.LastKnownLocation
+                        permission is Denied                -> LocationStatus.NoPermission
+                        permission is DeniedPermanently     -> LocationStatus.NoPermission
+                        permission is Requesting            -> LocationStatus.Locating
+                        isGps                               -> LocationStatus.Current
+                        distanceKm == null                  -> LocationStatus.Unknown
+                        distanceKm < 0.1                    -> LocationStatus.Current
+                        else                                -> LocationStatus.Nearby(distanceKm)
                     },
                 )
             }.toImmutableList()
