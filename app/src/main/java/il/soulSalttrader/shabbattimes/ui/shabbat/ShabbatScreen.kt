@@ -54,6 +54,11 @@ fun ShabbatScreen() {
         dispatch = permissionViewModel::dispatch,
     )
 
+    PermissionDialogs(
+        permissionState = permissionUiState,
+        dispatch = permissionViewModel::dispatch,
+    )
+
     val context = LocalContext.current
 
     val onCardClick = {
