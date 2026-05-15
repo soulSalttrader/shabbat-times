@@ -16,9 +16,9 @@ import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.model.LocationStatus
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
-import il.soulSalttrader.shabbattimes.permission.HandlePermissions
+import il.soulSalttrader.shabbattimes.ui.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.PermissionState
-import il.soulSalttrader.shabbattimes.permission.openAppSettings
+import il.soulSalttrader.shabbattimes.common.openAppSettings
 import il.soulSalttrader.shabbattimes.ui.FailureScreen
 import il.soulSalttrader.shabbattimes.ui.LoadingScreen
 import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
