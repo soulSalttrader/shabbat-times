@@ -51,7 +51,7 @@ fun ShabbatScreen() {
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         if (permissionUiState.permission == PermissionState.DeniedPermanently) {
-            permissionViewModel.dispatch(PermissionEvent.Request)
+            permissionViewModel.dispatch(PermissionEvent.ReturnedFromAppSettings)
         }
     }
 

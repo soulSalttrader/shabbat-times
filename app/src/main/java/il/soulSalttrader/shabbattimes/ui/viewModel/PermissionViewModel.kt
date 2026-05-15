@@ -43,18 +43,19 @@ class PermissionViewModel @Inject constructor(
         _state.update { current ->
             when (event) {
                 is PermissionEvent  -> event.reducer reduce current
-                else             -> current
+                else                -> current
             }
         }
 
         when (event) {
-            is PermissionEvent.AllGranted           -> permissionRepository.updatePermissionState(LocationPermission.Granted)
-            is PermissionEvent.DeniedPermanently    -> permissionRepository.updatePermissionState(LocationPermission.DeniedPermanently)
-            is PermissionEvent.DeniedWithRationale  -> permissionRepository.updatePermissionState(LocationPermission.Denied)
-            is PermissionEvent.ShowEducation        -> permissionRepository.updatePermissionState(LocationPermission.Education)
-            is PermissionEvent.Request              -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
-            is PermissionEvent.AcceptedRationale    -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
-            is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
+            is PermissionEvent.AllGranted               -> permissionRepository.updatePermissionState(LocationPermission.Granted)
+            is PermissionEvent.DeniedPermanently        -> permissionRepository.updatePermissionState(LocationPermission.DeniedPermanently)
+            is PermissionEvent.DeniedWithRationale      -> permissionRepository.updatePermissionState(LocationPermission.Denied)
+            is PermissionEvent.ShowEducation            -> permissionRepository.updatePermissionState(LocationPermission.Education)
+            is PermissionEvent.Request                  -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
+            is PermissionEvent.AcceptedRationale        -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
+            is PermissionEvent.ReturnedFromAppSettings  -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
+            is PermissionEvent.RequestedAppSettings     -> _effects.tryEmit(AppEffect.OpenAppSettings)
 
             else -> Unit
         }
