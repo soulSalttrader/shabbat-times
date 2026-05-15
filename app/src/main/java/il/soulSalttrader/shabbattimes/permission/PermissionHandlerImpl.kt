@@ -1,16 +1,17 @@
 package il.soulSalttrader.shabbattimes.permission
 
-import android.util.Log
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 class PermissionHandlerImpl(
     private val checkPermission: (String) -> Boolean,
-    private val shouldShowRationale: (String) -> Boolean,
+    private val checkShouldShowRationale: (String) -> Boolean,
     private val launch: (Array<String>) -> Unit,
 ) : PermissionHandler {
     override fun isGranted(permission: String): Boolean = checkPermission(permission)
+    override fun shouldShowRationale(permission: String): Boolean = checkShouldShowRationale(permission)
+
     private var continuation: CancellableContinuation<PermissionResult>? = null
 
     override suspend fun request(permissions: List<String>): PermissionResult =
@@ -34,12 +35,9 @@ class PermissionHandlerImpl(
 
     fun onResult(result: Map<String, Boolean>) {
         val cont = continuation ?: return
-
         try {
             val denied = result.filterValues { !it }.keys.toList()
-            Log.d("onResult", "denied: $denied")
-            val permanentlyDenied = denied.filterNot(shouldShowRationale)
-            Log.d("onResult", "permanently: $permanentlyDenied")
+            val permanentlyDenied = denied.filterNot(checkShouldShowRationale)
 
             when {
                 denied.isEmpty() -> {

@@ -29,7 +29,7 @@ fun rememberPermissionHandler(): PermissionHandler {
                     perm
                 ) == PackageManager.PERMISSION_GRANTED
             },
-            shouldShowRationale = { perm ->
+            checkShouldShowRationale = { perm ->
                 val activity = context as Activity
                 ActivityCompat.shouldShowRequestPermissionRationale(activity, perm)
             },
