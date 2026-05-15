@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import il.soulSalttrader.shabbattimes.permission.PermissionResult
 import il.soulSalttrader.shabbattimes.permission.PermissionState
+import il.soulSalttrader.shabbattimes.permission.resolvePermissionEvent
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
 
 @Composable
@@ -15,19 +16,7 @@ fun HandlePermissions(
     val permissionHandler = rememberPermissionHandler()
 
     LaunchedEffect(Unit) {
-        val allGranted = permissions.all { permissionHandler.isGranted(it) }
-        val anyPermanentlyDenied = permissions.any {
-            !permissionHandler.isGranted(it) && !permissionHandler.shouldShowRationale(it)
-        }
-        val anyDenied = permissions.any {
-            !permissionHandler.isGranted(it) && permissionHandler.shouldShowRationale(it)
-        }
-
-        when {
-            allGranted -> dispatch(PermissionEvent.AllGranted)
-            anyPermanentlyDenied -> dispatch(PermissionEvent.DeniedPermanently)
-            anyDenied -> dispatch(PermissionEvent.DeniedWithRationale)
-        }
+        permissionHandler.resolvePermissionEvent(permissions)?.let(dispatch)
     }
 
     LaunchedEffect(permissionState.permission) {
