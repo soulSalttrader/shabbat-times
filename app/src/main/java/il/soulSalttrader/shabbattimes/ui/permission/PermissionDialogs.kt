@@ -15,7 +15,10 @@ fun PermissionDialogs(
     when (permissionState.permission) {
         PermissionState.Education -> ExplanatoryDialog(
             title = "Times, wherever you are",
-            message = "To show candle lightning and havdalah time for your current position...",
+            message = "To show candle lightning and havdalah time for your current position, " +
+                    "the app needs access to your location.\n" +
+                    "\n" +
+                    "Your location is only used locally — never stored or shared.",
             onConfirmText = "Continue",
             onConfirm = { dispatch(PermissionEvent.Request) },
             onDismissText = "Add manually instead",
