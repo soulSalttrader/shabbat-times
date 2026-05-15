@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.permission
+package il.soulSalttrader.shabbattimes.common
 
 import android.content.ActivityNotFoundException
 import android.content.Context

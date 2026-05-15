@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.permission
+package il.soulSalttrader.shabbattimes.ui.permission
 
 import android.app.Activity
 import android.content.pm.PackageManager
@@ -9,6 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import il.soulSalttrader.shabbattimes.permission.PermissionHandler
+import il.soulSalttrader.shabbattimes.permission.PermissionHandlerImpl
 
 @Composable
 fun rememberPermissionHandler(): PermissionHandler {

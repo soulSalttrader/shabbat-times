@@ -1,9 +1,10 @@
-package il.soulSalttrader.shabbattimes.permission
+package il.soulSalttrader.shabbattimes.ui.permission
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import il.soulSalttrader.shabbattimes.permission.PermissionResult
+import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
-import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 
 @Composable
 fun HandlePermissions(
