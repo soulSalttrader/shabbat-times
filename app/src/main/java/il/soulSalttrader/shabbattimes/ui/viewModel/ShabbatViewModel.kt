@@ -13,7 +13,7 @@ import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
 import il.soulSalttrader.shabbattimes.ui.event.AppEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
-import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatResultState
+import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
 import il.soulSalttrader.shabbattimes.useCase.RemoveSavedLocationUseCase

@@ -11,7 +11,7 @@ import il.soulSalttrader.shabbattimes.model.resolveLocationStatus
 import il.soulSalttrader.shabbattimes.model.toDisplay
 import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
 import il.soulSalttrader.shabbattimes.ui.reducer.ShabbatReducer
-import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatResultState
+import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import kotlinx.collections.immutable.toImmutableList
 

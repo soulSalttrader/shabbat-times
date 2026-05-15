@@ -1,5 +1,6 @@
 package il.soulSalttrader.shabbattimes.ui.shabbat
 
+import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.model.State
 
 data class ShabbatUiState(

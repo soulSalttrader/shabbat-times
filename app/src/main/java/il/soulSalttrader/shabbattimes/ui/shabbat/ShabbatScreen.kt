@@ -19,6 +19,7 @@ import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 import il.soulSalttrader.shabbattimes.ui.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.common.openAppSettings
+import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.ui.FailureScreen
 import il.soulSalttrader.shabbattimes.ui.LoadingScreen
 import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
@@ -85,11 +86,11 @@ fun ShabbatScreen() {
     )
 
     when (val entries = shabbatState.shabbat) {
-        is ShabbatResultState.Idle      -> LoadingScreen()
+        is ShabbatResultState.Idle    -> LoadingScreen()
 
-        is ShabbatResultState.Loading   -> LoadingScreen()
+        is ShabbatResultState.Loading -> LoadingScreen()
 
-        is ShabbatResultState.Empty -> {
+        is ShabbatResultState.Empty   -> {
             ShabbatContent(
                 items = listOf(
                     ShabbatEntry(
@@ -104,7 +105,7 @@ fun ShabbatScreen() {
             )
         }
 
-        is ShabbatResultState.Ready -> {
+        is ShabbatResultState.Ready   -> {
             ShabbatContent(
                 items = entries.entries,
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) { item ->
@@ -125,7 +126,7 @@ fun ShabbatScreen() {
             )
         }
 
-        is ShabbatResultState.Failure   -> FailureScreen(
+        is ShabbatResultState.Failure -> FailureScreen(
             message = entries.message,
             onRetry = { shabbatViewModel.dispatch(ShabbatEvent.RetryLoadShabbatEntry) },
         )
