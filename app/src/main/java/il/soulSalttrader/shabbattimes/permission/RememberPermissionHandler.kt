@@ -17,22 +17,19 @@ fun rememberPermissionHandler(): PermissionHandler {
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { result ->
-        handler.onResult(result)
-    }
+    ) { result -> handler.onResult(result) }
+
+
+    fun checkPermission(perm: String) =
+        ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
+
+    fun checkShouldShowRationale(perm: String) =
+        ActivityCompat.shouldShowRequestPermissionRationale(context as Activity, perm)
 
     handler = remember(context, launcher) {
         PermissionHandlerImpl(
-            checkPermission = { perm ->
-                ContextCompat.checkSelfPermission(
-                    context,
-                    perm
-                ) == PackageManager.PERMISSION_GRANTED
-            },
-            checkShouldShowRationale = { perm ->
-                val activity = context as Activity
-                ActivityCompat.shouldShowRequestPermissionRationale(activity, perm)
-            },
+            checkPermission = ::checkPermission,
+            checkShouldShowRationale = ::checkShouldShowRationale,
             launch = launcher::launch
         )
     }
