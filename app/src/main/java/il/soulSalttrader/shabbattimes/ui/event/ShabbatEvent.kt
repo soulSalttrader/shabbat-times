@@ -2,18 +2,17 @@ package il.soulSalttrader.shabbattimes.ui.event
 
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
-import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatResultState
-import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
-import il.soulSalttrader.shabbattimes.model.LocationPermission
-import il.soulSalttrader.shabbattimes.model.LocationPermission.*
-import il.soulSalttrader.shabbattimes.model.LocationStatus
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
-import il.soulSalttrader.shabbattimes.model.ShabbatEntry
+import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.SavedLocation
-import il.soulSalttrader.shabbattimes.model.distanceTo
+import il.soulSalttrader.shabbattimes.model.ShabbatEntry
+import il.soulSalttrader.shabbattimes.model.findForLocation
+import il.soulSalttrader.shabbattimes.model.resolveLocationStatus
 import il.soulSalttrader.shabbattimes.model.toDisplay
 import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
 import il.soulSalttrader.shabbattimes.ui.reducer.ShabbatReducer
+import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatResultState
+import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import kotlinx.collections.immutable.toImmutableList
 
 sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
@@ -25,28 +24,14 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
     ) : ShabbatEvent {
         override val reducer = ShabbatReducer { state ->
             val shabbatEntries = savedLocations.map { location ->
-                val distanceKm = currentLocation?.coordinates?.distanceTo(location.coordinates)
-
-                val isGps = location.id == SavedLocation.GPS_ID
-                val hasCurrentLocation = currentLocation != null
-                val hasPermission = permission is Granted
-
                 ShabbatEntry(
                     location = location,
-                    times = halachicTimes
-                        .firstOrNull { it.coordinates == location.coordinates }
-                        ?.toDisplay(),
-                    status = when {
-                        isGps && !hasCurrentLocation        -> LocationStatus.LastKnownLocation
-                        isGps && !hasPermission             -> LocationStatus.LastKnownLocation
-                        permission is Denied                -> LocationStatus.NoPermission
-                        permission is DeniedPermanently     -> LocationStatus.NoPermission
-                        permission is Requesting            -> LocationStatus.Locating
-                        isGps                               -> LocationStatus.Current
-                        distanceKm == null                  -> LocationStatus.Unknown
-                        distanceKm < 0.1                    -> LocationStatus.Current
-                        else                                -> LocationStatus.Nearby(distanceKm)
-                    },
+                    times = halachicTimes.findForLocation(location)?.toDisplay(),
+                    status = resolveLocationStatus(
+                        location = location,
+                        currentLocation = currentLocation,
+                        permission = permission,
+                    ),
                 )
             }.toImmutableList()
 
