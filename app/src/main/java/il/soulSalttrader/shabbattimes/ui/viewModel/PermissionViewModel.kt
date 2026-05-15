@@ -3,12 +3,12 @@ package il.soulSalttrader.shabbattimes.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
+import il.soulSalttrader.shabbattimes.model.LocationPermission
+import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
 import il.soulSalttrader.shabbattimes.ui.event.AppEvent
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
-import il.soulSalttrader.shabbattimes.model.LocationPermission
-import il.soulSalttrader.shabbattimes.repository.PermissionRepository
+import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,13 +49,13 @@ class PermissionViewModel @Inject constructor(
 
         when (event) {
             is PermissionEvent.AllGranted           -> permissionRepository.updatePermissionState(LocationPermission.Granted)
-            is PermissionEvent.DeniedPermanently    -> permissionRepository.updatePermissionState(LocationPermission.Denied)
+            is PermissionEvent.DeniedPermanently    -> permissionRepository.updatePermissionState(LocationPermission.DeniedPermanently)
             is PermissionEvent.DeniedWithRationale  -> permissionRepository.updatePermissionState(LocationPermission.Denied)
             is PermissionEvent.ShowEducation        -> permissionRepository.updatePermissionState(LocationPermission.Education)
             is PermissionEvent.Request              -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
-            is PermissionEvent.DismissedRationale   -> permissionRepository.updatePermissionState(LocationPermission.Idle)
             is PermissionEvent.AcceptedRationale    -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
             is PermissionEvent.RequestedAppSettings -> _effects.tryEmit(AppEffect.OpenAppSettings)
+
             else -> Unit
         }
     }
