@@ -18,11 +18,14 @@
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
-    <string name="settings_community_tradition">Community tradition</string>
+    <string name="settings_my_tradition">My tradition</string>
     <string name="settings_candle_lighting_summary">Candle lighting: %1$d min before sunset</string>
     <string name="settings_havdalah_summary">Havdalah: %1$d min after sunset</string>
+    <string name="settings_preset_summary">%1$d min before sunset · %2$d min after sunset</string>
     <string name="settings_about">About</string>
     <string name="settings_version">Version</string>
     <string name="settings_developer">Developer</string>
+    <string name="settings_developer_name">Soul Salttrader</string>
+    <string name="settings_contact_email">soul.salttrader@gmail.com</string>
     <string name="settings_contact">Contact</string>
 </resources>
