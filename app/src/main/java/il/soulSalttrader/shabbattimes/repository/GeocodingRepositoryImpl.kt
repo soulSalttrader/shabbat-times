@@ -3,8 +3,8 @@ package il.soulSalttrader.shabbattimes.repository
 import android.location.Location
 import il.soulSalttrader.shabbattimes.di.GeoapifyService
 import il.soulSalttrader.shabbattimes.model.normalize
-import il.soulSalttrader.shabbattimes.model.toResolvedLocation
 import il.soulSalttrader.shabbattimes.network.NetworkResult
+import il.soulSalttrader.shabbattimes.network.dto.toResolvedLocation
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher

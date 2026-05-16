@@ -4,8 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import il.soulSalttrader.shabbattimes.nav.NavManager
-import il.soulSalttrader.shabbattimes.nav.Navigator
+import il.soulSalttrader.shabbattimes.ui.nav.NavManager
+import il.soulSalttrader.shabbattimes.ui.nav.Navigator
 @Module
 @InstallIn(SingletonComponent::class)
 interface NavigationModule {

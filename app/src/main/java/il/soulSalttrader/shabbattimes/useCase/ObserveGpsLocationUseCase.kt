@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes.useCase
 
 import android.location.Location
-import il.soulSalttrader.shabbattimes.location.LocationPermission
+import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.repository.GpsLocationRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import jakarta.inject.Inject

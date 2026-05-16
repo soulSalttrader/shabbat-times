@@ -1,13 +1,14 @@
 package il.soulSalttrader.shabbattimes.repository
 
 import il.soulSalttrader.shabbattimes.model.SavedLocation
+import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
 @Singleton
-class SavedLocationsRepositoryInMemory : SavedLocationsRepository {
+class SavedLocationsRepositoryInMemory @Inject constructor() : SavedLocationsRepository {
     private val _locations: MutableStateFlow<List<SavedLocation>> = MutableStateFlow(emptyList())
     override val locations: StateFlow<List<SavedLocation>> = _locations
 
@@ -23,5 +24,9 @@ class SavedLocationsRepositoryInMemory : SavedLocationsRepository {
 
     override suspend fun remove(location: SavedLocation) {
         _locations.update { it.filter { loc -> loc.id != location.id } }
+    }
+
+    override suspend fun reorder(locations: List<SavedLocation>) {
+        _locations.update { locations }
     }
 }

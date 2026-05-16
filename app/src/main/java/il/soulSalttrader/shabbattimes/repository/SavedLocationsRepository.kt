@@ -7,4 +7,5 @@ interface SavedLocationsRepository {
     val locations: StateFlow<List<SavedLocation>>
     suspend fun save(location: SavedLocation)
     suspend fun remove(location: SavedLocation)
+    suspend fun reorder(locations: List<SavedLocation>)
 }
