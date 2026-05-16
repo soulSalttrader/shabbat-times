@@ -1,8 +1,8 @@
 package il.soulSalttrader.shabbattimes.common
 
-import il.soulSalttrader.shabbattimes.constants.DateTimeFormatters.API_DATE_PARSER
-import il.soulSalttrader.shabbattimes.constants.DateTimeFormatters.API_TIME_PARSER_24
-import il.soulSalttrader.shabbattimes.constants.DateTimeFormatters.HEBREW_DATE_FORMATTER
+import il.soulSalttrader.shabbattimes.common.constants.DateTimeFormatters.API_DATE_PARSER
+import il.soulSalttrader.shabbattimes.common.constants.DateTimeFormatters.API_TIME_PARSER_24
+import il.soulSalttrader.shabbattimes.common.constants.DateTimeFormatters.HEBREW_DATE_FORMATTER
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDate.now

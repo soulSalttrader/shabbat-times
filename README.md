@@ -15,6 +15,7 @@ over-engineered solutions to showcase design trade-offs and scalability.
 5. [Search Architecture](#5--search-architecture)
 6. [Reorderable cards](#6--reorderable-cards)
 7. [Current Location Feature](#7-current-location-feature)
+8. [Persistence](#-8-persistence)
 
 ---
 
@@ -67,12 +68,23 @@ fun ShabbatScreen() {
     val permissionViewModel: PermissionViewModel = hiltViewModel()
     val permissionUiState by permissionViewModel.state.collectAsStateWithLifecycle()
 
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (permissionUiState.permission == PermissionState.DeniedPermanently) {
+            permissionViewModel.dispatch(PermissionEvent.Request)
+        }
+    }
+
     HandlePermissions(
         permissions = listOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
         ),
-        permissionState = permissionUiState.permission,
+        permissionState = permissionUiState,
+        dispatch = permissionViewModel::dispatch,
+    )
+
+    PermissionDialogs(
+        permissionState = permissionUiState,
         dispatch = permissionViewModel::dispatch,
     )
 
@@ -80,8 +92,10 @@ fun ShabbatScreen() {
 
     val onCardClick = {
         when (permissionUiState.permission) {
-            PermissionState.Granted -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
-            else                    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
+            PermissionState.Granted           -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
+            PermissionState.Denied            -> permissionViewModel.dispatch(PermissionEvent.AcceptedRationale)
+            PermissionState.DeniedPermanently -> permissionViewModel.dispatch(PermissionEvent.ShowDeniedPermanentlyDialog)
+            else                              -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
         }
     }
 
@@ -123,15 +137,20 @@ fun ShabbatScreen() {
                 },
                 searchConfig = searchConfig,
                 onClick = onCardClick,
+                onReorder = { from, to ->
+                    shabbatViewModel.dispatch(
+                        ShabbatEvent.ReorderLocations(from = from, to = to,)
+                    )
+                },
             )
         }
 
         is ShabbatResultState.Failure -> FailureScreen(
             message = entries.message,
-            onRetry = { shabbatViewModel.dispatch(ShabbatEvent.RetryLoadLocationWithTimes) },
+            onRetry = { shabbatViewModel.dispatch(ShabbatEvent.RetryLoadShabbatEntry) },
         )
     }
-    //...
+    //..
 }
 ```
 
@@ -456,23 +475,27 @@ fun LocalDate.toDisplayString(): String
   - Fully functional REST API integration
   - Domain-accurate halachic time calculations
   - Strong type-safety with Kotlin time models
-  - City autocomplete search
+  - Location autocomplete search
   - Dynamic GPS location with permission handling
-  - User-saved locations with drag-to-reorder (order persisted in-memory, Room coming soon)
+  - User-saved locations with drag-to-reorder (order persisted via Room)
   - Dynamic location labels (current location, distance in km, locating, no permission)
   - Swipe-to-delete saved locations
-  - Decoupled times and location domains — times fetched per coordinates, not per city
+  - Auto-refresh current location on app restart if permission granted
 
 ### 🔜 Future Work
 
 #### 🔴 1. Planned improvements:
 
-- Room persistence for saved locations and drag order
+- Adopt UiText for all hardcoded strings
+- Add real Room migrations before removing `fallbackToDestructiveMigration`
 - User-customizable candle lighting and havdalah offsets (architecture prepared via `UserPreferences` + DataStore)
 - Multiple zmanim opinions
 
 #### 🔴 2. Recently resolved:
 
+- ~~Permission state always Idle on restart~~ → synced on app start, GPS auto-refreshes if granted
+- ~~Drag order lost on app restart~~ → persisted via Room with `sortOrder` column
+- ~~Drag order lost during session~~ → preserved via `LaunchedEffect(items.size)` on recomposition
 - ~~Hard-coded Jerusalem location~~ → dynamic GPS location + user-saved locations
 - ~~Hard-coded 12/24h preference~~ → API always requests 24h format, display formatting in UI layer
 - ~~City-coupled times domain~~ → times domain decoupled, uses `Coordinates` + `ZoneId` only
@@ -521,11 +544,25 @@ savedLocationsRepository.locations + currentLocationRepository.location
 → UI observes StateFlow → renders automatically
 ```
 
+```kotlin
+savedLocationsRepository.locations (includes GPS entry with SavedLocation.GPS_ID)
+currentLocationRepository.location (in-memory, resets on restart)
+→ gpsLocationFlow in SearchViewModel resolves GPS via ResolveGpsLocationUseCase
+→ updateCurrentLocationUseCase saves result to both currentLocationRepository and savedLocationsRepository
+→ halachicTimesFlow fetches times per Coordinates (not per city)
+→ combine merges savedLocations + currentLocation + halachicTimes + permissionState
+→ reducer maps to ShabbatEvent.ShabbatEntryLoaded
+→ computes LocationStatus per entry (Current/LastKnownLocation/Nearby/Locating/NoPermission/Unknown)
+→ order determined by sortOrder from savedLocationsRepository (Room) or in-memory list
+→ produces ShabbatUiState with ImmutableList
+→ UI observes StateFlow → renders automatically
+```
+
 ### Data sources in combine
 
 | Flow | Source | Written by |
 |------|--------|------------|
-| `savedLocationsRepository.locations` | In-memory / Room (soon) | `SaveLocationUseCase`, `RemoveLocationUseCase` |
+| `savedLocationsRepository.locations` | In-memory / Room | `SaveLocationUseCase`, `RemoveLocationUseCase` |
 | `currentLocationRepository.location` | In-memory shared state | `UpdateCurrentLocationUseCase` via `SearchViewModel` |
 | `halachicTimesFlow` | HebCal API | `GetHalachicTimesUseCase` |
 | `permissionRepository.permissionState` | In-memory shared state | `PermissionViewModel` |
@@ -972,44 +1009,47 @@ fun NavBarTop(
 
 ## 4. 🚦 Permissions Management
 
-- The code implements a robust permission system for requesting and managing Android permissions, specifically fine and coarse location access.
-- This is crucial for the app to fetch the user's location and calculate accurate Shabbat times.
+- Implements a robust permission system for requesting and managing Android location permissions.
+- Crucial for fetching the user's location and calculating accurate Shabbat times.
+- Permission state is synced with real device state on app start — correctly restores `Granted`, `Denied`, or `DeniedPermanently` after restart.
 
 ### Key Features
 
-- Checks whether required permissions are already granted (avoids unnecessary requests)
+- Syncs real device permission state on app start — no stale `Idle` state after restart
+- Checks whether required permissions are already granted — avoids unnecessary requests
 - Launches the native Android permission dialog only when needed
-
 - Correctly distinguishes between:
-    - temporary denials (shows rationale dialog)
-    - permanent denials ("Don't ask again" / multiple denials → guides to app settings)
-
-- Fully asynchronous using Kotlin coroutines (`suspend` functions) — no UI blocking
-- Clean state management with sealed interfaces (`PermissionState`, `PermissionResult`, `PermissionEvent`) + reducers
-
-- Provides user-friendly in-app explanations and retry / settings navigation flows
-- Reusable abstraction (`PermissionHandler` interface) — easy to adapt for camera, storage, notifications, etc.
-- Built-in debug logging and permission status checks
+  - temporary denials — shows rationale dialog
+  - permanent denials — guides to app settings
+- Separates dialog visibility (`isDialogVisible`) from permission state — dismissing a dialog never resets underlying permission
+- Re-checks permission when user returns from system settings (`ReturnedFromAppSettings`)
+- Fully asynchronous using Kotlin coroutines — no UI blocking
+- Clean state management with sealed interfaces + reducers
+- User-friendly in-app explanations and retry/settings navigation flows
+- Reusable abstraction (`PermissionHandler` interface) — easy to adapt for camera, storage, notifications
 
 ### Core Components
 
-| Component                 | Role                                                                       | Type               |
-|---------------------------|----------------------------------------------------------------------------|--------------------|
-| PermissionHandler         | Suspendable API to request permissions and handle result callbacks         | Interface + Impl   |
-| PermissionResult          | Domain-level outcome of a permission request (what happened)               | Sealed interface   |
-| PermissionState           | UI/presentation state (what to show right now: dialog, nothing, etc.)      | Sealed interface   |
-| PermissionEvent           | User/system intents and results that drive state transitions               | Sealed interface   |
-| HandlePermissions         | Composable orchestrator: reacts to state, shows dialogs, triggers requests | Composable         |
-| rememberPermissionHandler | Creates and remembers the handler + ActivityResultLauncher                 | Composable factory |
+| Component | Role | Type |
+|---|---|---|
+| `PermissionHandler` | Suspendable API to request, check, and handle permission results | Interface + Impl |
+| `PermissionResult` | Domain-level outcome of a permission request | Sealed interface |
+| `PermissionState` | Underlying permission state (Granted, Denied, DeniedPermanently...) | Sealed interface |
+| `PermissionUiState` | UI state — combines `PermissionState` + `isDialogVisible` | Data class |
+| `PermissionEvent` | User/system intents that drive state transitions, each with a reducer | Sealed interface |
+| `HandlePermissions` | Orchestrator — syncs state on start, reacts to lifecycle, triggers requests | Composable |
+| `PermissionDialogs` | Renders appropriate dialog based on `PermissionUiState` | Composable |
+| `rememberPermissionHandler` | Creates and remembers handler + `ActivityResultLauncher` | Composable factory |
 
 ### High-Level Flow
 
-1. User triggers a request in Composable (`ShabbatScreen`)
-2. The app checks the current permission state. (`HandlePermissions`)
-3. If not granted, it triggers a dialog. (`ExplanatoryDialog`)
-4. Based on the user's response, it updates the state (granted, denied with rationale, or permanently denied).
-5. Dialogs guide the user on next steps.
-6. Events are dispatched to a ViewModel, which updates the app's state and may trigger effects (e.g., loading data or opening settings).
+1. App starts → `HandlePermissions` syncs real device permission via `resolvePermissionEvent()`
+2. If already granted → GPS starts automatically
+3. If not granted → user taps GPS card → appropriate dialog shown based on permission state
+4. User responds → event dispatched → state updated via reducer
+5. System permission dialog shown if needed (`Requesting` state)
+6. Based on result → `Granted`, `DeniedWithRationale`, or `DeniedPermanently`
+7. `DeniedPermanently` → settings dialog → user opens settings → `ReturnedFromAppSettings` re-checks on resume
 
 ### Visualized Flow
 
@@ -1057,49 +1097,63 @@ Start
 
 #### 🟢 1. PermissionHandler Interface
 
-- Definition: A simple interface for requesting permissions asynchronously.
-- Key Method: suspend fun request(permissions: List<String>): PermissionResult
-- Takes a list of permission strings (e.g., Manifest.permission.ACCESS_FINE_LOCATION).
-- Returns a PermissionResult (sealed interface: Granted, Explain, or Blocked).
-
-- This acts as the entry point for permission requests.
+- Definition: Interface for requesting and checking permissions asynchronously.
+- Methods:
+  - `suspend fun request(permissions: List<String>): PermissionResult`
+  - `fun isGranted(permission: String): Boolean`
+  - `fun shouldShowRationale(permission: String): Boolean`
+- `request()` takes a list of permission strings and returns a `PermissionResult` (sealed interface: `Granted`, `Explain`, or `Blocked`).
+- `isGranted()` and `shouldShowRationale()` allow checking permission state without triggering a request — used for syncing state on app start.
 
 #### 🟢 2. PermissionHandlerImpl Class
 
 - Dependencies:
-    - isGranted: Lambda to check if a permission is already granted (uses ContextCompat.checkSelfPermission).
-    - shouldShowRationale: Lambda to check if a rationale should be shown (uses ActivityCompat.shouldShowRequestPermissionRationale).
-    - launch: Lambda to start the permission request dialog (via ActivityResultLauncher).
+  - `checkPermission`: Lambda to check if a permission is already granted (`ContextCompat.checkSelfPermission`).
+  - `checkShouldShowRationale`: Lambda to check if rationale should be shown (`ActivityCompat.shouldShowRequestPermissionRationale`).
+  - `launch`: Lambda to start the permission request dialog (via `ActivityResultLauncher`).
 
-- Internal State: A CancellableContinuation to handle coroutine suspension and resumption.
+- Internal State: A `CancellableContinuation` to handle coroutine suspension and resumption.
 
-- request() Function:
-    - Uses suspendCancellableCoroutine to pause until the result is available.
-    - Filters out already granted permissions.
-    - If all are granted, resumes immediately with Granted.
-    - Otherwise, launches the request and waits.
+- `request()` Function:
+  - Uses `suspendCancellableCoroutine` to pause until the result is available.
+  - Filters out already granted permissions.
+  - If all are granted, resumes immediately with `Granted`.
+  - Otherwise, launches the request and waits.
 
-- onResult() Function:
-    - Called when the system returns permission results (a map of permission to boolean granted status).
-    - Categorizes results: granted, denied, permanently denied.
-    - Resumes the coroutine with the appropriate PermissionResult.
-    - Clears the continuation to allow future requests.
+- `onResult()` Function:
+  - Called when the system returns permission results (map of permission to boolean).
+  - Categorizes results: granted, denied, permanently denied.
+  - Resumes the coroutine with the appropriate `PermissionResult`.
+  - Clears the continuation to allow future requests.
+
+- `isGranted()` / `shouldShowRationale()` delegate to constructor lambdas.
 
 - This class bridges the Android permission API with coroutines.
 
+#### 🟢 3. Permission State Management
+
+- `PermissionUiState` contains both `permission: PermissionState` and `isDialogVisible: Boolean` — separating dialog visibility from underlying permission state.
+- Dismissing a dialog sets `isDialogVisible = false` without resetting `permission` — prevents state loss on dismiss.
+- `PermissionState.Idle` — never asked. `PermissionState.Hidden` removed in favor of `isDialogVisible`.
+- On app start, `resolvePermissionEvent()` extension on `PermissionHandler` checks real device permission and syncs repository state — ensures `Granted`/`Denied`/`DeniedPermanently` are correctly restored after restart.
+- `ReturnedFromAppSettings` event re-triggers permission request when user returns from system settings.
+
 ```kotlin
 class PermissionHandlerImpl(
-    private val isGranted: (String) -> Boolean,
-    private val shouldShowRationale: (String) -> Boolean,
+    private val checkPermission: (String) -> Boolean,
+    private val checkShouldShowRationale: (String) -> Boolean,
     private val launch: (Array<String>) -> Unit,
 ) : PermissionHandler {
+    override fun isGranted(permission: String): Boolean = checkPermission(permission)
+    override fun shouldShowRationale(permission: String): Boolean = checkShouldShowRationale(permission)
+
     private var continuation: CancellableContinuation<PermissionResult>? = null
 
     override suspend fun request(permissions: List<String>): PermissionResult =
         suspendCancellableCoroutine { cont ->
             check(continuation == null) { "Permission request already in progress" }
 
-            val missing = permissions.filterNot(isGranted)
+            val missing = permissions.filterNot { isGranted(it) }
 
             if (missing.isEmpty()) {
                 cont.resume(PermissionResult.Granted)
@@ -1115,72 +1169,51 @@ class PermissionHandlerImpl(
         }
 
     fun onResult(result: Map<String, Boolean>) {
-// ...
+        val cont = continuation ?: return
+        try {
+            val denied = result.filterValues { !it }.keys.toList()
+            val permanentlyDenied = denied.filterNot(checkShouldShowRationale)
+
+            when {
+                denied.isEmpty() -> {
+                    cont.resume(PermissionResult.Granted)
+                }
+
+                permanentlyDenied.isNotEmpty() -> {
+                    cont.resume(PermissionResult.Blocked(permissions = permanentlyDenied))
+                }
+
+                else -> {
+                    cont.resume(PermissionResult.Explain(permissions = denied))
+                }
+            }
+        } finally {
+            continuation = null
+        }
     }
-}
-```
-
-#### 🟢 3. rememberPermissionHandler Composable
-
-- Purpose: Creates and remembers a PermissionHandlerImpl instance in Compose.
-- Key Elements:
-    - Uses rememberLauncherForActivityResult with RequestMultiplePermissions contract to handle permission callbacks.
-    - Initializes the handler with context-specific lambdas for checking grants and rationale.
-
-- Returns: The PermissionHandler instance, memoized for recomposition efficiency.
-
-- This makes the handler Compose-aware and lifecycle-safe.
-
-```kotlin
-@Composable
-fun rememberPermissionHandler(): PermissionHandler {
-    val context = LocalContext.current
-    lateinit var handler: PermissionHandlerImpl
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { result ->
-        handler.onResult(result)
-    }
-
-    handler = remember(context, launcher) {
-        PermissionHandlerImpl(
-            isGranted = { perm ->
-                ContextCompat.checkSelfPermission(
-                    context,
-                    perm
-                ) == PackageManager.PERMISSION_GRANTED
-            },
-            shouldShowRationale = { perm ->
-                val activity = context as Activity
-                ActivityCompat.shouldShowRequestPermissionRationale(activity, perm)
-            },
-            launch = launcher::launch
-        )
-    }
-
-    return handler
 }
 ```
 
 #### 🟢 4. HandlePermissions Composable
 
 - Parameters:
-    - permissions: List of permissions to request.
-    - permissionState: Current PermissionState (from ViewModel).
-    - dispatch: Function to send PermissionEvents to the ViewModel.
+  - `permissions`: List of permissions to request.
+  - `permissionState: PermissionUiState` — full UI state including `isDialogVisible`.
+  - `dispatch`: Function to send `PermissionEvent`s to the ViewModel.
 
 - Behavior:
-    - Uses LaunchedEffect to request permissions when state is Requesting.
-    - Based on result, dispatches events like AllGranted, DeniedWithRationale, or DeniedPermanently.
+  - `LaunchedEffect(Unit)` — syncs real device permission on first composition via `resolvePermissionEvent()`:
+    - Restores `Granted`, `Denied`, or `DeniedPermanently` correctly on app restart.
+  - `LaunchedEffect(permissionState.permission)` — triggers system permission dialog when state is `Requesting`.
+  - `LifecycleEventEffect(ON_RESUME)` — re-checks permission when user returns from app settings.
+  - Uses `rememberUpdatedState` to avoid stale state in lifecycle callbacks.
 
-- Renders dialogs:
-    - For Denied: Explains need for location and offers "Allow" (triggers re-request) or dismiss.
-    - For DeniedPermanently: Prompts to open settings.
-
-- Debug logging for permission status.
-
-- This composable integrates the handler with UI feedback.
+- Dialog rendering extracted to `PermissionDialogs` composable:
+  - Only shown when `isDialogVisible = true`.
+  - `Education` — explains location need, offers "Continue" or "Add manually".
+  - `Denied` — offers "Allow" (re-request) or dismiss.
+  - `DeniedPermanently` — prompts to open system settings.
+  - Dismissing any dialog sets `isDialogVisible = false` without resetting permission state.
 
 ```kotlin
 @Composable
@@ -1191,6 +1224,10 @@ fun HandlePermissions(
 ) {
     val permissionHandler = rememberPermissionHandler()
     val context = LocalContext.current
+
+  LaunchedEffect(Unit) {
+    permissionHandler.resolvePermissionEvent(permissions)?.let(dispatch)
+  }
 
     LaunchedEffect(permissionState) {
         if (permissionState == PermissionState.Requesting) {
@@ -1207,38 +1244,48 @@ fun HandlePermissions(
 }
 ```
 
+
 #### 🟢 5. Sealed Interfaces
 
-- PermissionState:
-    - Idle: Init state.
-    - Requesting: In progress.
-    - Granted: All permissions approved.
-    - Denied: Denied but can show rationale.
-    - DeniedPermanently: User selected "Don't ask again" or denied multiple times.
+- `PermissionState`:
+  - `Idle` — never asked.
+  - `Education` — showing initial explanation dialog.
+  - `Requesting` — system permission dialog in progress.
+  - `Granted` — all permissions approved.
+  - `Denied` — denied once, rationale can be shown.
+  - `DeniedPermanently` — denied permanently, requires settings.
 
-- PermissionResult:
-    - Granted: Success.
-    - Explain(permissions): Denied, show why it's needed.
-    - Blocked(permissions): Permanently denied.
+- `PermissionResult`:
+  - `Granted` — success.
+  - `Explain(permissions)` — denied, show rationale.
+  - `Blocked(permissions)` — permanently denied.
 
-- PermissionEvent:
-    - Request: Start requesting.
-    - AllGranted/DeniedWithRationale/DeniedPermanently: Update state based on result.
-    - AcceptedRationale: User agrees after explanation, re-request.
-    - DismissedRationale: User cancels, back to idle.
-    - RequestedAppSettings: Open settings.
-    - ReturnedFromAppSettings: Re-check after settings (triggers request).
+- `PermissionEvent`:
+  - `ShowEducation` — show initial education dialog.
+  - `Request` — start system permission request.
+  - `AllGranted` / `DeniedWithRationale` / `DeniedPermanently` — update state based on result.
+  - `AcceptedRationale` — user agrees after explanation, re-request.
+  - `DismissedRationale` — hides dialog, preserves underlying permission state.
+  - `RequestedAppSettings` — open system app settings.
+  - `ReturnedFromAppSettings` — re-triggers permission request on return from settings.
+  - `ShowDeniedPermanentlyDialog` — shows settings dialog when tapping GPS card while permanently denied.
+  - Each event carries a reducer lambda to update `PermissionUiState` immutably.
 
-- Each event includes a reducer lambda to update the app state immutably.
+- `PermissionUiState`:
+  - `permission: PermissionState` — underlying permission state.
+  - `isDialogVisible: Boolean` — controls dialog visibility independently of permission state.
 
 #### 🟢 6. Usage in ShabbatScreen Composable
 
-- Injects ShabbatViewModel via Hilt.
-- Collects state with collectAsStateWithLifecycle.
-- Calls HandlePermissions with location permissions, current state, and dispatch function.
-- Renders UI based on data state (e.g., loading screen).
-
-- This shows integration in a real screen.
+- Injects `PermissionViewModel` and `ShabbatViewModel` via Hilt.
+- Collects state with `collectAsStateWithLifecycle`.
+- Calls `HandlePermissions` with location permissions, current `PermissionUiState`, and dispatch.
+- Calls `PermissionDialogs` separately — clean separation of system handling and UI.
+- `onCardClick` handles all permission states:
+  - `Granted` → trigger GPS search
+  - `Denied` → show rationale dialog
+  - `DeniedPermanently` → show settings dialog
+  - `Idle/Education` → show education dialog
 
 - See: [1. UI — Jetpack Compose](#-1-ui--jetpack-compose)
 
@@ -1583,7 +1630,7 @@ The reorderable container is generic and composable — it works with any item t
 
 ```kotlin
 fun <T> LazyListScope.reorderableList(
-    state: ReorderableLazyListState,
+    state: ReorderableState<T>,
     items: ImmutableList<T>,
     header: String,
     keyOf: (T) -> Any,
@@ -1599,14 +1646,24 @@ fun <T> LazyListScope.reorderableList(
 
     items(items, key = { keyOf(it) }) { item ->
         ReorderableItem(
-            state = state,
+            state = state.reorderableState,
             key = keyOf(item),
         ) {
             SwipeableItem(
                 item = item,
                 swipeConfig = swipeConfig,
             ) {
-                content.Content(item, Modifier.draggableHandle())
+                content.Content(item, Modifier.draggableHandle(
+                    onDragStopped = {
+                        val from = state.pendingFrom
+                        val to = state.pendingTo
+                        if (from != -1 && to != -1 && from != to) {
+                            state.onReorder(from, to)
+                        }
+                        state.pendingFrom = -1
+                        state.pendingTo = -1
+                    }
+                ))
             }
         }
     }
@@ -1624,12 +1681,9 @@ fun ShabbatContent(
     isDraggable: Boolean = true,
 
     onClick: () -> Unit = {},
+    onReorder: (from: Int, to: Int) -> Unit = {_, _ ->},
 ) {
-    val state = rememberReorderableState(items = items, keyOf = { it.location.id })
-  
-    LaunchedEffect(items) {
-        state.updateList(items)
-    }
+    val state = rememberReorderableState(items = items, onReorder = onReorder)
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -1640,7 +1694,7 @@ fun ShabbatContent(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             reorderableList(
-                state = state.reorderableState,
+                state = state,
                 header = "My locations",
                 items = state.list,
                 keyOf = { it.location.id },
@@ -1654,7 +1708,7 @@ fun ShabbatContent(
                 )
             }
         }
-        //...
+        //..
     }
 }
 ```
@@ -1718,3 +1772,29 @@ Computed dynamically in `LocationWithTimesLoaded` reducer — never stored:
 - **GPS location saved with fixed `GPS_ID`** — upserted on every update, never duplicates
 - **Times fetched per `Coordinates`** — GPS and saved locations treated identically by times domain
 - **`LocationStatus` computed from permission + distance** — never stored, always derived
+
+### 🗄️ 8. Persistence
+
+The app uses **Room** for local persistence:
+
+- **`saved_locations`** table — stores user-saved locations including GPS entry
+  - `sortOrder` column preserves drag-to-reorder position across restarts
+  - GPS location (`SavedLocation.GPS_ID`) upserted on each resolve — position preserved
+- **`current_location`** table — single-row table (in-memory by default, Room available via `@Persisted`)
+  - Resets on app restart by design — GPS always re-fetches fresh location
+
+### 🔀 Repository Strategy
+
+Two implementations exist for `SavedLocationsRepository` and `CurrentLocationRepository`:
+
+| Qualifier | Implementation | Use case |
+|---|---|---|
+| `@InMemory` | In-memory `StateFlow` | Testing, debugging |
+| `@Persisted` | Room-backed | Production |
+
+Switch between them via qualifier at injection site — no other code changes needed.
+
+### ⚠️ Known Limitations
+
+- `fallbackToDestructiveMigration(true)` active — schema changes wipe data
+- Real migrations needed before production release

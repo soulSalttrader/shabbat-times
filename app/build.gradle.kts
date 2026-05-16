@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
 }
 
 kotlin {
@@ -82,6 +83,8 @@ android {
     }
 }
 
+room { schemaDirectory("$projectDir/schemas") }
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -123,4 +126,8 @@ dependencies {
 
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }

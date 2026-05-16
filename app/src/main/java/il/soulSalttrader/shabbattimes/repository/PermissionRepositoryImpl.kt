@@ -1,9 +1,8 @@
 package il.soulSalttrader.shabbattimes.repository
 
-import il.soulSalttrader.shabbattimes.location.LocationPermission
+import il.soulSalttrader.shabbattimes.model.LocationPermission
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 

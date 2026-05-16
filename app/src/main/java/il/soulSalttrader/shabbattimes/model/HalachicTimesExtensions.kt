@@ -10,3 +10,6 @@ fun HalachicTimes.toDisplay(): HalachicTimesDisplay = HalachicTimesDisplay(
     havdalahTime = havdalahTime.format(DateTimeFormatter.ofPattern("HH:mm")),
     havdalahDate = havdalahDate.toDisplayString(),
 )
+
+fun List<HalachicTimes>.findForLocation(location: SavedLocation): HalachicTimes? =
+    firstOrNull { it.coordinates == location.coordinates }

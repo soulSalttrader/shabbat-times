@@ -4,8 +4,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.core.DataStore
-import il.soulSalttrader.shabbattimes.constants.ShabbatOffsets.HILUCH_MIL_MINUTES
-import il.soulSalttrader.shabbattimes.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_MINUTES
+import il.soulSalttrader.shabbattimes.common.constants.ShabbatOffsets.HILUCH_MIL_MINUTES
+import il.soulSalttrader.shabbattimes.common.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_MINUTES
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.first
