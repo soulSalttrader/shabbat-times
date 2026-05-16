@@ -2,6 +2,7 @@ package il.soulSalttrader.shabbattimes.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.ui.event.AppEvent
 import il.soulSalttrader.shabbattimes.ui.event.SettingsEvent
 import il.soulSalttrader.shabbattimes.ui.settings.SettingsUiState
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
+@HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val getShabbatPreset: GetShabbatPresetUseCase,
     private val saveShabbatPreset: SaveShabbatPresetUseCase,
