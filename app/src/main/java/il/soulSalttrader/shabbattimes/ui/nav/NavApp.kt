@@ -34,7 +34,7 @@ fun NavApp(
         navController = navController,
         startDestination = startDestination,
     ) {
-        mainNavGraph(navigator = navigator)
+        mainNavGraph()
     }
 
     if (Debug.enabled) {
