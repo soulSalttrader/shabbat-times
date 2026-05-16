@@ -1,11 +1,9 @@
 package il.soulSalttrader.shabbattimes.settings
 
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.longPreferencesKey
-import androidx.datastore.core.DataStore
-import il.soulSalttrader.shabbattimes.common.constants.ShabbatOffsets.HILUCH_MIL_MINUTES
-import il.soulSalttrader.shabbattimes.common.constants.ShabbatOffsets.TZEIT_HAKOCHAVIM_MINUTES
+import androidx.datastore.preferences.core.stringPreferencesKey
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.first
@@ -15,22 +13,17 @@ class UserPreferences @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) {
     companion object {
-        val CANDLE_LIGHTING_KEY = longPreferencesKey("candle_lighting_offset")
-        val HAVDALAH_KEY = longPreferencesKey("havdalah_offset")
+        val SHABBAT_PRESET_KEY = stringPreferencesKey("shabbat_preset")
         const val DEFAULT_TIME_FORMAT = 24
     }
 
-    suspend fun candleLightingOffsetMinutes(): Long =
-        dataStore.data.first()[CANDLE_LIGHTING_KEY] ?: HILUCH_MIL_MINUTES
+    suspend fun shabbatPreset(): ShabbatPreset =
+        dataStore.data.first()[SHABBAT_PRESET_KEY]
+            ?.let { runCatching { JewishCommunity.valueOf(it) }.getOrNull() }
+            ?.let { ShabbatPreset.fromKey(it) }
+            ?: ShabbatPreset.Ashkenazi
 
-    suspend fun havdalahOffsetMinutes(): Long =
-        dataStore.data.first()[HAVDALAH_KEY] ?: TZEIT_HAKOCHAVIM_MINUTES
-
-    suspend fun setCandleLightingOffset(minutes: Long) {
-        dataStore.edit { prefs -> prefs[CANDLE_LIGHTING_KEY] = minutes }
-    }
-
-    suspend fun setHavdalahOffset(minutes: Long) {
-        dataStore.edit { prefs -> prefs[HAVDALAH_KEY] = minutes }
+    suspend fun setShabbatPreset(preset: ShabbatPreset) {
+        dataStore.edit { prefs -> prefs[SHABBAT_PRESET_KEY] = preset.key.name }
     }
 }

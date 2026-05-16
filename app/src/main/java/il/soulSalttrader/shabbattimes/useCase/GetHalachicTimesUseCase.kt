@@ -54,9 +54,9 @@ class GetHalachicTimesUseCase @Inject constructor(
                 NetworkResult.Success(
                     HalachicTimes(
                         coordinates = startEvent.coordinates,
-                        candleLightingTime = startSolar.sunset.minusMinutes(userPreferences.candleLightingOffsetMinutes()),
+                        candleLightingTime = startSolar.sunset.minusMinutes(userPreferences.shabbatPreset().candleLightingOffsetMinutes),
                         candleLightingDate = startEvent.date,
-                        havdalahTime = endSolar.sunset.plusMinutes(userPreferences.havdalahOffsetMinutes()),
+                        havdalahTime = endSolar.sunset.plusMinutes(userPreferences.shabbatPreset().havdalahOffsetMinutes),
                         havdalahDate = endEvent.date,
                     )
                 )
