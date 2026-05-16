@@ -1,10 +1,18 @@
 <resources>
     <string name="app_name">shabbattimes</string>
 
+    <!-- Location -->
     <string name="location_status_current">Your current location</string>
     <string name="location_status_nearby">%1$s km away</string>
     <string name="location_status_locating">Getting your location…</string>
     <string name="location_status_unknown">Unknown distance</string>
     <string name="location_status_no_permission">Tap to use current location</string>
     <string name="location_status_last_known">Last known location</string>
+
+    <!-- Presets -->
+    <string name="preset_ashkenazi">Ashkenazi</string>
+    <string name="preset_mizrahi">Mizrahi</string>
+    <string name="preset_sephardic">Sephardic</string>
+    <string name="preset_hasidic">Hasidic</string>
+    <string name="preset_jerusalem">Jerusalem</string>
 </resources>
