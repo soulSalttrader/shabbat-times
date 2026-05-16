@@ -1,11 +1,9 @@
 package il.soulSalttrader.shabbattimes.ui.reorderable
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,8 +13,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.ui.ItemContent
+import il.soulSalttrader.shabbattimes.ui.SectionHeader
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import sh.calvin.reorderable.ReorderableItem
@@ -32,10 +30,7 @@ fun <T> LazyListScope.reorderableList(
     content: ItemContent<T>,
 ) {
     item(header) {
-        Text(
-            text = header,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        )
+        SectionHeader(header)
     }
 
     items(items, key = { keyOf(it) }) { item ->
