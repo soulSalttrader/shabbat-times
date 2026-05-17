@@ -12,6 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.BuildConfig
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.settings.AboutItemDisplay
+import il.soulSalttrader.shabbattimes.settings.ShabbatPreset
 import il.soulSalttrader.shabbattimes.ui.event.SettingsEvent
 import il.soulSalttrader.shabbattimes.ui.viewModel.SettingsViewModel
 
@@ -39,7 +40,8 @@ fun SettingsScreen() {
     SettingsContent(
         modifier = Modifier.fillMaxSize().padding(vertical = 8.dp),
         items = items,
-        preset = settingsUiState.preset,
+        presets = ShabbatPreset.all,
+        selected = settingsUiState.preset,
         onPresetSelected = { preset ->  settingsViewModel.dispatch(SettingsEvent.PresetSelected(preset)) },
     )
 }

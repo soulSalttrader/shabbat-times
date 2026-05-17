@@ -12,7 +12,8 @@ import il.soulSalttrader.shabbattimes.settings.ShabbatPreset
 @Composable
 fun SettingsContent(
     items: List<AboutItemDisplay>,
-    preset: ShabbatPreset,
+    presets: List<ShabbatPreset>,
+    selected: ShabbatPreset,
     onPresetSelected: (ShabbatPreset) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -20,7 +21,7 @@ fun SettingsContent(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(32.dp),
     ) {
-        ShabbatPresetsSection(selected = preset, onPresetSelected = onPresetSelected)
+        ShabbatPresetsSection(presets, selected, onPresetSelected)
         HorizontalDivider()
         AboutSection(items = items)
     }

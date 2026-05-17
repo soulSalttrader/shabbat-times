@@ -12,22 +12,24 @@ import il.soulSalttrader.shabbattimes.ui.SectionHeader
 
 @Composable
 fun ShabbatPresetsSection(
-    header: String = stringResource(R.string.settings_my_tradition),
+    presets: List<ShabbatPreset>,
     selected: ShabbatPreset,
     onPresetSelected: (ShabbatPreset) -> Unit,
+    header: String = stringResource(R.string.settings_my_tradition),
 ) {
     SettingsSection {
         SectionHeader(header)
-        TraditionRadioGroup(onPresetSelected, selected)
+        TraditionRadioGroup(presets, selected, onPresetSelected)
     }
 }
 
 @Composable
 private fun TraditionRadioGroup(
-    onPresetSelected: (ShabbatPreset) -> Unit,
+    presets: List<ShabbatPreset>,
     selected: ShabbatPreset,
+    onPresetSelected: (ShabbatPreset) -> Unit,
 ) {
-    ShabbatPreset.all.forEach { preset ->
+    presets.forEach { preset ->
         SettingsRow(onClick = { onPresetSelected(preset) }) {
             TraditionLabel(preset)
 
