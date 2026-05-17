@@ -7,15 +7,17 @@ import il.soulSalttrader.shabbattimes.model.SolarTimesRequest
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.getOrThrow
 import il.soulSalttrader.shabbattimes.repository.SolarTimesRepository
-import il.soulSalttrader.shabbattimes.settings.UserPreferences
+import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
+import il.soulSalttrader.shabbattimes.settings.ShabbatPreset
 import jakarta.inject.Inject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
 
 class GetHalachicTimesUseCase @Inject constructor(
     private val solarTimesRepository: SolarTimesRepository,
-    private val userPreferences: UserPreferences,
+    private val userPreferenceRepository: UserPreferencesRepository,
     private val shabbatCalendar: ShabbatCalendar,
 ) {
     suspend operator fun invoke(locations: List<SavedLocation>): List<NetworkResult<HalachicTimes>> =
@@ -23,6 +25,7 @@ class GetHalachicTimesUseCase @Inject constructor(
             locations.map { location ->
                 async {
                     getHalachicTimes(
+                        preset = userPreferenceRepository.shabbatPreset.first(),
                         startEvent = SolarTimesRequest(
                             date = shabbatCalendar.upcomingCandleLightingDate(),
                             coordinates = location.coordinates,
@@ -39,6 +42,7 @@ class GetHalachicTimesUseCase @Inject constructor(
         }
 
     private suspend fun getHalachicTimes(
+        preset: ShabbatPreset,
         startEvent: SolarTimesRequest,
         endEvent: SolarTimesRequest,
     ): NetworkResult<HalachicTimes> {
@@ -54,9 +58,9 @@ class GetHalachicTimesUseCase @Inject constructor(
                 NetworkResult.Success(
                     HalachicTimes(
                         coordinates = startEvent.coordinates,
-                        candleLightingTime = startSolar.sunset.minusMinutes(userPreferences.shabbatPreset().candleLightingOffsetMinutes),
+                        candleLightingTime = startSolar.sunset.minusMinutes(preset.candleLightingOffsetMinutes),
                         candleLightingDate = startEvent.date,
-                        havdalahTime = endSolar.sunset.plusMinutes(userPreferences.shabbatPreset().havdalahOffsetMinutes),
+                        havdalahTime = endSolar.sunset.plusMinutes(preset.havdalahOffsetMinutes),
                         havdalahDate = endEvent.date,
                     )
                 )
