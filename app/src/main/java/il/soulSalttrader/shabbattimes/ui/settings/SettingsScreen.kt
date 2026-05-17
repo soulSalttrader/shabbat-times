@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.BuildConfig
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.common.openEmail
 import il.soulSalttrader.shabbattimes.settings.AboutItemDisplay
 import il.soulSalttrader.shabbattimes.settings.ShabbatPreset
 import il.soulSalttrader.shabbattimes.ui.event.SettingsEvent
@@ -20,6 +22,10 @@ import il.soulSalttrader.shabbattimes.ui.viewModel.SettingsViewModel
 fun SettingsScreen() {
     val settingsViewModel: SettingsViewModel = hiltViewModel()
     val settingsUiState by settingsViewModel.state.collectAsStateWithLifecycle()
+
+    val contactEmail = stringResource(R.string.settings_contact_email)
+    val appName = stringResource(R.string.app_name)
+    val context = LocalContext.current
 
     val items = listOf(
         AboutItemDisplay(
@@ -33,15 +39,25 @@ fun SettingsScreen() {
         AboutItemDisplay(
             label = stringResource(R.string.settings_contact),
             value = stringResource(R.string.settings_contact_email),
-            onClick = { TODO("Add email intent") },
+            onClick = {
+                context.openEmail(email = contactEmail, subject = appName)
+            },
         ),
     )
 
     SettingsContent(
-        modifier = Modifier.fillMaxSize().padding(vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 8.dp),
         items = items,
         presets = ShabbatPreset.all,
         selected = settingsUiState.preset,
-        onPresetSelected = { preset ->  settingsViewModel.dispatch(SettingsEvent.PresetSelected(preset)) },
+        onPresetSelected = { preset ->
+            settingsViewModel.dispatch(
+                SettingsEvent.PresetSelected(
+                    preset
+                )
+            )
+        },
     )
 }
