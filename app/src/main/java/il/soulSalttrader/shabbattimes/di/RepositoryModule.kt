@@ -18,6 +18,9 @@ import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepositoryInMemory
 import il.soulSalttrader.shabbattimes.repository.SolarTimesRepository
 import il.soulSalttrader.shabbattimes.repository.SolarTimesRepositoryImpl
+import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
+import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepositoryImpl
+import il.soulSalttrader.shabbattimes.settings.UserPreferences
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +41,8 @@ abstract class RepositoryModule {
     @Singleton
     @InMemory
     abstract fun bindCurrentLocationRepository(impl: CurrentLocationRepositoryImpl): CurrentLocationRepository
+
+
 
     companion object {
         @Provides
@@ -62,5 +67,11 @@ abstract class RepositoryModule {
             apiService: SolarTimesService,
             dispatcher: CoroutineDispatcher,
         ): SolarTimesRepository = SolarTimesRepositoryImpl(apiService, dispatcher)
+
+        @Provides
+        @Singleton
+        fun providePreferencesRepository(
+            userPreferences: UserPreferences,
+        ): UserPreferencesRepository = UserPreferencesRepositoryImpl(userPreferences)
     }
 }
