@@ -2,7 +2,6 @@ package il.soulSalttrader.shabbattimes.ui.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -32,11 +31,7 @@ private fun TraditionRadioGroup(
     presets.forEach { preset ->
         SettingsRow(onClick = { onPresetSelected(preset) }) {
             TraditionLabel(preset)
-
-            RadioButton(
-                selected = selected == preset,
-                onClick = { onPresetSelected(preset) },
-            )
+            SquareCheckmark(selected = selected == preset)
         }
     }
 }
