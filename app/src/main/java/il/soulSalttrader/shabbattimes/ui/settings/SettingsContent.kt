@@ -21,7 +21,7 @@ fun SettingsContent(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(32.dp),
     ) {
-        ShabbatPresetsSection(presets, selected, onPresetSelected)
+        TraditionSection(presets, selected, onPresetSelected)
         HorizontalDivider()
         AboutSection(items = items)
     }

@@ -11,7 +11,7 @@ import il.soulSalttrader.shabbattimes.settings.ShabbatPreset
 import il.soulSalttrader.shabbattimes.ui.SectionHeader
 
 @Composable
-fun ShabbatPresetsSection(
+fun TraditionSection(
     presets: List<ShabbatPreset>,
     selected: ShabbatPreset,
     onPresetSelected: (ShabbatPreset) -> Unit,
