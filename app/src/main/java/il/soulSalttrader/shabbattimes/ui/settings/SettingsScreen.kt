@@ -1,8 +1,12 @@
 package il.soulSalttrader.shabbattimes.ui.settings
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.BuildConfig
@@ -33,8 +37,9 @@ fun SettingsScreen() {
     )
 
     SettingsContent(
+        modifier = Modifier.fillMaxSize().padding(vertical = 8.dp),
         items = items,
-        state = settingsUiState,
+        preset = settingsUiState.preset,
         onPresetSelected = { preset ->  settingsViewModel.dispatch(SettingsEvent.PresetSelected(preset)) },
     )
 }
