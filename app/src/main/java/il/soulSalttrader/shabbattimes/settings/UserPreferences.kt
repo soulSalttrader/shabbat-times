@@ -6,7 +6,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @Singleton
 class UserPreferences @Inject constructor(
@@ -17,11 +18,13 @@ class UserPreferences @Inject constructor(
         const val DEFAULT_TIME_FORMAT = 24
     }
 
-    suspend fun shabbatPreset(): ShabbatPreset =
-        dataStore.data.first()[SHABBAT_PRESET_KEY]
-            ?.let { runCatching { JewishCommunity.valueOf(it) }.getOrNull() }
-            ?.let { ShabbatPreset.fromKey(it) }
-            ?: ShabbatPreset.Ashkenazi
+    fun shabbatPreset(): Flow<ShabbatPreset> =
+        dataStore.data.map { prefs ->
+            prefs[SHABBAT_PRESET_KEY]
+                ?.let { runCatching { JewishCommunity.valueOf(it) }.getOrNull() }
+                ?.let { ShabbatPreset.fromKey(it) }
+                ?: ShabbatPreset.Ashkenazi
+        }
 
     suspend fun setShabbatPreset(preset: ShabbatPreset) {
         dataStore.edit { prefs -> prefs[SHABBAT_PRESET_KEY] = preset.key.name }
