@@ -14,6 +14,7 @@ import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
 import il.soulSalttrader.shabbattimes.ui.event.AppEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.model.ShabbatResultState
+import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
 import il.soulSalttrader.shabbattimes.useCase.RemoveSavedLocationUseCase
@@ -41,6 +42,7 @@ class ShabbatViewModel @Inject constructor(
     private val reorderLocationsUseCase: ReorderLocationsUseCase,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
     private val removeLocationUseCase: RemoveSavedLocationUseCase,
+    userPreferencesRepository: UserPreferencesRepository,
     permissionRepository: PermissionRepository,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
@@ -50,14 +52,17 @@ class ShabbatViewModel @Inject constructor(
     val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
         currentLocationRepository.location,
         savedLocationsRepository.locations,
-    ) { gpsLocation, savedLocations ->
-        buildList {
+        userPreferencesRepository.shabbatPreset,
+    ) { gpsLocation, savedLocations, preset ->
+        val locations = buildList {
             gpsLocation?.let { add(it) }
             addAll(savedLocations)
         }
-    }.flatMapLatest { savedLocations ->
+
+        locations to preset
+    }.flatMapLatest { (savedLocations, preset) ->
         flow {
-            val results = getHalachicTimesUseCase(savedLocations)
+            val results = getHalachicTimesUseCase(savedLocations, preset)
             val successes = results.filterIsInstance<NetworkResult.Success<HalachicTimes>>()
                 .map { it.data }
 
