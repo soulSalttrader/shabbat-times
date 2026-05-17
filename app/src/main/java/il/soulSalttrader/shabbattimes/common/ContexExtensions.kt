@@ -28,3 +28,8 @@ fun Context.openEmail(email: String, subject: String? = null) {
     }
     runCatching { startActivity(intent) }
 }
+
+fun Context.openUrl(url: String) {
+    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+    runCatching { startActivity(intent) }
+}

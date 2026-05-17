@@ -24,5 +24,7 @@ fun SettingsContent(
         TraditionSection(presets, selected, onPresetSelected)
         HorizontalDivider()
         AboutSection(items = items)
+        HorizontalDivider()
+        SupportSection()
     }
 }

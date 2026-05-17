@@ -28,4 +28,8 @@
     <string name="settings_developer_name">Soul Salttrader</string>
     <string name="settings_contact_email">soul.salttrader@gmail.com</string>
     <string name="settings_contact">Contact</string>
+    <string name="settings_support">Support</string>
+    <string name="settings_ko_fi_url">https://ko-fi.com/soulsalttrader</string>
+    <string name="settings_support_title">Buy me a coffee!</string>
+    <string name="settings_support_subtitle">Enjoying the app? Keep it alive on Ko-fi!</string>
 </resources>
