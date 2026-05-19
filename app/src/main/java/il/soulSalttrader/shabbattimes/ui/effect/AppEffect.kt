@@ -1,14 +1,13 @@
 package il.soulSalttrader.shabbattimes.ui.effect
 
-import androidx.annotation.StringRes
+import il.soulSalttrader.shabbattimes.ui.UiText
 
 sealed interface AppEffect {
     data class ShowToast(val message: String) : AppEffect
 
     data class ShowSnackBar(
-        @param:StringRes val messageRes: Int,
-        val messageArgs: List<Any> = emptyList(),
-        @param:StringRes val actionLabelRes: Int? = null,
+        val message: UiText,
+        val actionLabel: UiText? = null,
         val onAction: (() -> Unit)? = null,
     ) : AppEffect
 
