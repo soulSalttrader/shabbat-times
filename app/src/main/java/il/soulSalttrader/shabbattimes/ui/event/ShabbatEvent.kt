@@ -38,7 +38,7 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
             state.copy(
                 shabbat = when {
                     savedLocations.isEmpty() -> ShabbatResultState.Empty
-                    else                         -> ShabbatResultState.Ready(shabbatEntries)
+                    else                     -> ShabbatResultState.Ready(shabbatEntries)
                 }
             )
         }
