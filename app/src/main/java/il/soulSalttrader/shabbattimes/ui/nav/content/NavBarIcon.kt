@@ -14,7 +14,7 @@ fun NavBarIcon(
     BadgedBox(badge = { NavBarBadge(badgeCount) }) {
         UiIconImage(
             icon = if (isSelected) item.selectedIcon else item.unselectedIcon,
-            contentDescription = item.title,
+            contentDescription = item.title?.asString(),
         )
     }
 }

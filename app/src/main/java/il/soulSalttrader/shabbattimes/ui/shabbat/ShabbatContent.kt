@@ -19,7 +19,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.ui.FabMenu
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.ui.reorderable.rememberReorderableState
@@ -42,6 +44,7 @@ fun ShabbatContent(
     onReorder: (from: Int, to: Int) -> Unit = {_, _ ->},
 ) {
     val state = rememberReorderableState(items = items, onReorder = onReorder)
+    val header = stringResource(R.string.shabbat_my_locations)
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -53,7 +56,7 @@ fun ShabbatContent(
         ) {
             reorderableList(
                 state = state,
-                header = "My locations",
+                header = header,
                 items = state.list,
                 keyOf = { it.location.id },
                 swipeConfig = swipeConfig,

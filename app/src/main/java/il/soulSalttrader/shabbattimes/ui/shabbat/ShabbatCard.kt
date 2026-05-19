@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
@@ -108,7 +109,7 @@ private fun ShabbatKeyTimes(
     Row {
         Column(modifier = Modifier.weight(1f)) {
             ShabbatDateTime(
-                label = "Candle Lighting",
+                label = stringResource(R.string.shabbat_candle_lighting),
                 time = candleLightingTime,
                 date = candleLightingDate,
                 modifier = modifier.padding(vertical = 4.dp)
@@ -116,7 +117,7 @@ private fun ShabbatKeyTimes(
         }
         Column(modifier = Modifier.weight(1f)) {
             ShabbatDateTime(
-                label = "Havdalah Time",
+                label = stringResource(R.string.shabbat_havdalah_time),
                 time = havdalahTime,
                 date = havdalahDate,
                 modifier = modifier.padding(vertical = 4.dp)

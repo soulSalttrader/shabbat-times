@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">shabbattimes</string>
 
+    <!-- Shabbat Times -->
+    <string name="shabbat_my_locations">My locations</string>
+    <string name="shabbat_candle_lighting">Candle Lighting</string>
+    <string name="shabbat_havdalah_time">Havdalah Time</string>
+
     <!-- Location -->
     <string name="location_status_current">Your current location</string>
     <string name="location_status_nearby">%1$s km away</string>
@@ -36,6 +41,41 @@
     <!-- Search -->
     <string name="search_limit_reached">Maximum of %1$d locations reached</string>
     <string name="search_limit_action">Manage locations</string>
+    <string name="search_placeholder">City, address or zip code</string>
+    <string name="search_no_results">No results for &quot;%1$s&quot;</string>
+    <string name="search_new_location">New Location</string>
+
+    <!-- Swipeable -->
+    <string name="swipe_delete_title">Delete item?</string>
+    <string name="swipe_delete_message">This action cannot be undone.</string>
+    <string name="swipe_delete_confirm">Delete</string>
+    <string name="swipe_delete_dismiss">Undo</string>
+
+    <!-- Permission -->
+    <string name="permission_education_title">Times, wherever you are</string>
+    <string name="permission_education_message">To show candle lighting and havdalah time for your current position, the app needs access to your location.\n\nYour location is only used locally — never stored or shared.</string>
+    <string name="permission_education_confirm">Continue</string>
+    <string name="permission_education_dismiss">Add manually instead</string>
+    <string name="permission_denied_message">We need location to show accurate zmanim times.</string>
+    <string name="permission_denied_confirm">Allow</string>
+    <string name="permission_denied_permanently_message">Location access was permanently denied. Please enable it in settings.</string>
+    <string name="permission_denied_permanently_confirm">Open Settings</string>
+    <string name="permission_dismiss">Cancel</string>
+
+    <!-- Dialog -->
+    <string name="dialog_default_title">Permission required</string>
+    <string name="dialog_default_message">We need your location to show nearby data.</string>
+    <string name="dialog_default_confirm">Allow</string>
+    <string name="dialog_default_dismiss">Cancel</string>
+
+    <!-- Navigation -->
+    <string name="nav_go_back">Go Back</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_shabbat_times">Shabbat Times</string>
+    <string name="nav_no_title">No title</string>
+
+    <!-- Misc -->
+    <string name="display_count_max">99+</string>
 
     <!-- Error Handling -->
     <string name="error_unknown">Unknown error</string>

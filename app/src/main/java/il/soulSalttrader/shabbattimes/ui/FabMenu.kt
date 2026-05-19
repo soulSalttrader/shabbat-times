@@ -59,8 +59,8 @@ private fun FloatingActionButtonMenuScope.FabMenuItems(
                 onClick()
                 toggleExpanded()
             },
-            text = { item.title?.let { Text(it) } },
-            icon = { UiIconImage(icon = item.unselectedIcon, contentDescription = item.title) }
+            text = { item.title?.let { Text(it.asString()) } },
+            icon = { UiIconImage(icon = item.unselectedIcon, contentDescription = item.title?.asString()) }
         )
     }
 }

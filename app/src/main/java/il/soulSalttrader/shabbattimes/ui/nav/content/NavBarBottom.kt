@@ -35,7 +35,7 @@ fun NavBarBottom(
                 },
                 label = {
                     Text(
-                        text = item.target.titleOr("No title"),
+                        text = item.target.titleOr().asString(),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
