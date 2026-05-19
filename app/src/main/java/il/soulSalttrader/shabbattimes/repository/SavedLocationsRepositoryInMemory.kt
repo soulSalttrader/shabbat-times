@@ -1,5 +1,6 @@
 package il.soulSalttrader.shabbattimes.repository
 
+import il.soulSalttrader.shabbattimes.common.constants.LocationConfig.MAX_SAVED_LOCATIONS
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -14,10 +15,10 @@ class SavedLocationsRepositoryInMemory @Inject constructor() : SavedLocationsRep
 
     override suspend fun save(location: SavedLocation) {
         _locations.update { current ->
-            if (current.any { it.id == location.id }) {
-                current.map { if (it.id == location.id) location else it }
-            } else {
-                current + location
+            when {
+                current.size >= MAX_SAVED_LOCATIONS -> current
+                current.any { it.id == location.id } -> current.map { if (it.id == location.id) location else it }
+                else -> current + location
             }
         }
     }
