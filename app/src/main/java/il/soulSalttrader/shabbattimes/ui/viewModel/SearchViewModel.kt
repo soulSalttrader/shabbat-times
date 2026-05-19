@@ -3,16 +3,19 @@ package il.soulSalttrader.shabbattimes.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import il.soulSalttrader.shabbattimes.ui.normalizedOrEmpty
-import il.soulSalttrader.shabbattimes.ui.normalizedOrNull
-import il.soulSalttrader.shabbattimes.ui.search.SearchUiState
-import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
-import il.soulSalttrader.shabbattimes.ui.event.AppEvent
-import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
+import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
+import il.soulSalttrader.shabbattimes.model.SaveLocationResult
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
+import il.soulSalttrader.shabbattimes.ui.UiText
+import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
+import il.soulSalttrader.shabbattimes.ui.event.AppEvent
+import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
+import il.soulSalttrader.shabbattimes.ui.normalizedOrEmpty
+import il.soulSalttrader.shabbattimes.ui.normalizedOrNull
+import il.soulSalttrader.shabbattimes.ui.search.SearchUiState
 import il.soulSalttrader.shabbattimes.useCase.GetLocationSuggestionsUseCase
 import il.soulSalttrader.shabbattimes.useCase.ResolveGpsLocationUseCase
 import il.soulSalttrader.shabbattimes.useCase.SaveLocationUseCase
@@ -127,6 +130,16 @@ class SearchViewModel @Inject constructor(
         val resolved = state.selectedSuggestion.normalizedOrNull() ?: return
 
         viewModelScope.launch {
+            when (saveLocationUseCase(resolved)) {
+                SaveLocationResult.LimitReached -> _effects.tryEmit(
+                    AppEffect.ShowSnackBar(
+                        message = UiText.Resource(R.string.search_limit_reached),
+                        actionLabel = UiText.Resource(R.string.search_limit_action),
+                        onAction = { dispatch(SearchEvent.SearchVisibilityChanged(false)) },
+                    )
+                )
+                SaveLocationResult.Success -> Unit
+            }
             saveLocationUseCase(resolved)
         }
     }
