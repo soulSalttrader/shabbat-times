@@ -1,9 +1,11 @@
 package il.soulSalttrader.shabbattimes.ui.shabbat
 
 import android.Manifest
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresPermission
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -12,20 +14,19 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.common.openAppSettings
 import il.soulSalttrader.shabbattimes.model.LocationStatus
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
-import il.soulSalttrader.shabbattimes.ui.permission.HandlePermissions
-import il.soulSalttrader.shabbattimes.permission.PermissionState
-import il.soulSalttrader.shabbattimes.common.openAppSettings
 import il.soulSalttrader.shabbattimes.model.ShabbatResultState
+import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.FailureScreen
 import il.soulSalttrader.shabbattimes.ui.LoadingScreen
 import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
+import il.soulSalttrader.shabbattimes.ui.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionDialogs
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeState
@@ -39,7 +40,7 @@ import kotlinx.collections.immutable.toImmutableList
 
 @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
 @Composable
-fun ShabbatScreen() {
+fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
     val shabbatViewModel: ShabbatViewModel = hiltViewModel()
     val shabbatState by shabbatViewModel.state.collectAsStateWithLifecycle()
 
@@ -73,10 +74,10 @@ fun ShabbatScreen() {
 
     val onCardClick = {
         when (permissionUiState.permission) {
-            PermissionState.Granted -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
-            PermissionState.Denied -> permissionViewModel.dispatch(PermissionEvent.AcceptedRationale)
+            PermissionState.Granted           -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
+            PermissionState.Denied            -> permissionViewModel.dispatch(PermissionEvent.AcceptedRationale)
             PermissionState.DeniedPermanently -> permissionViewModel.dispatch(PermissionEvent.ShowDeniedPermanentlyDialog)
-            else -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
+            else                              -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
         }
     }
 
@@ -120,7 +121,7 @@ fun ShabbatScreen() {
                 onClick = onCardClick,
                 onReorder = { from, to ->
                     shabbatViewModel.dispatch(
-                        ShabbatEvent.ReorderLocations(from = from, to = to,)
+                        ShabbatEvent.ReorderLocations(from = from, to = to)
                     )
                 },
             )
@@ -135,14 +136,22 @@ fun ShabbatScreen() {
     LaunchedEffect(Unit) {
         searchViewModel.effects.collect { effect ->
             when (effect) {
-                is AppEffect.ShowToast -> {
-                    if (Debug.enabled) {
-                        Log.d("ShabbatScreen", "Toast: $effect ${effect.message}")
+                is AppEffect.ShowToast    -> {
+                    Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
+                }
+                is AppEffect.ShowSnackBar -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = effect.message.resolve(context),
+                        actionLabel = effect.actionLabel?.resolve(context),
+                        duration = SnackbarDuration.Long,
+                    )
+
+                    if (result == SnackbarResult.ActionPerformed) {
+                        effect.onAction?.invoke()
                     }
-                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
 
-                else                   -> Unit
+                else                      -> Unit
             }
         }
     }
@@ -150,13 +159,7 @@ fun ShabbatScreen() {
     LaunchedEffect(Unit) {
         permissionViewModel.effects.collect { effect ->
             when (effect) {
-                is AppEffect.OpenAppSettings -> {
-                    if (Debug.enabled) {
-                        Log.d("ShabbatScreen", "OpenAppSettings: $permissionUiState")
-                    }
-                    context.openAppSettings()
-                }
-
+                is AppEffect.OpenAppSettings -> { context.openAppSettings() }
                 else                         -> Unit
             }
         }

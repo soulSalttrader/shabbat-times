@@ -1,6 +1,7 @@
 package il.soulSalttrader.shabbattimes.ui.nav
 
 import android.util.Log
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,6 +16,7 @@ import il.soulSalttrader.shabbattimes.ui.nav.graph.mainNavGraph
 fun NavApp(
     modifier: Modifier,
     navigator: Navigator,
+    snackbarHostState: SnackbarHostState,
 ) {
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -34,7 +36,7 @@ fun NavApp(
         navController = navController,
         startDestination = startDestination,
     ) {
-        mainNavGraph()
+        mainNavGraph(snackbarHostState)
     }
 
     if (Debug.enabled) {
