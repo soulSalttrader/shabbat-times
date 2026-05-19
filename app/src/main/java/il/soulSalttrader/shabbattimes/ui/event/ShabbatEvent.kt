@@ -48,10 +48,10 @@ sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
         override val reducer = ShabbatReducer { state -> state }
     }
 
-    class ShabbatEntryLoadFailed(val message: String, val cause: Throwable?) : ShabbatEvent {
+    class ShabbatEntryLoadFailed(val cause: Throwable?) : ShabbatEvent {
         override val reducer = ShabbatReducer { state ->
-            if (Debug.enabled) Log.d("ShabbatEvent", "message: $message, cause: $cause")
-            state.copy(shabbat = ShabbatResultState.Failure(message, cause))
+            if (Debug.enabled) Log.d("ShabbatEvent", "cause: $cause")
+            state.copy(shabbat = ShabbatResultState.Failure(cause))
         }
     }
 

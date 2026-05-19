@@ -3,6 +3,7 @@ package il.soulSalttrader.shabbattimes.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.di.InMemory
 import il.soulSalttrader.shabbattimes.di.Persisted
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
@@ -15,6 +16,7 @@ import il.soulSalttrader.shabbattimes.ui.event.AppEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
+import il.soulSalttrader.shabbattimes.ui.UiText
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
 import il.soulSalttrader.shabbattimes.useCase.RemoveSavedLocationUseCase
@@ -67,15 +69,15 @@ class ShabbatViewModel @Inject constructor(
                 .map { it.data }
 
             if (results.any { it is NetworkResult.Failure }) {
-                _effects.tryEmit(AppEffect.ShowToast("Some times failed to load"))
+                _effects.tryEmit(AppEffect.ShowToast(UiText.Resource(R.string.error_times_failed)))
             }
 
             emit(successes)
         }
     }
-        .catch { throwable ->
-            dispatch(ShabbatEvent.ShabbatEntryLoadFailed(throwable.message ?: "Unknown error", throwable))
-            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+        .catch { cause ->
+            dispatch(ShabbatEvent.ShabbatEntryLoadFailed(cause))
+            _effects.tryEmit(AppEffect.ShowToast(UiText.Resource(R.string.error_unexpected)))
             emit(emptyList())
         }
         .stateIn(

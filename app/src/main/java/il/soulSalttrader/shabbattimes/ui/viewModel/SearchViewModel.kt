@@ -1,9 +1,12 @@
 package il.soulSalttrader.shabbattimes.ui.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.common.constants.LocationConfig.MAX_SAVED_LOCATIONS
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.model.SaveLocationResult
 import il.soulSalttrader.shabbattimes.network.onFailure
@@ -67,12 +70,13 @@ class SearchViewModel @Inject constructor(
             flow {
                 getLocationSuggestion(query)
                     .onSuccess("SearchVM") { suggestions -> emit(suggestions) }
-                    .onFailure("SearchVM") { e -> _effects.tryEmit(AppEffect.ShowToast(e.message)) }
+                    .onFailure("SearchVM") { e -> _effects.tryEmit(AppEffect.ShowToast(UiText.Resource(R.string.error_unknown))) }
             }
         }
-        .catch { throwable ->
-            SearchEvent.SuggestionsLoadFailed(throwable.message ?: "Unknown error", throwable).reducer reduce _state.value
-            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+        .catch { cause ->
+            if (Debug.enabled) Log.e("ShabbatViewModel", "Unexpected error", cause)
+            SearchEvent.SuggestionsLoadFailed(cause).reducer reduce _state.value
+            _effects.tryEmit(AppEffect.ShowToast(UiText.Resource(R.string.error_unexpected)))
             emit(emptyList())
         }
         .stateIn(
@@ -85,9 +89,10 @@ class SearchViewModel @Inject constructor(
     private val gpsLocationFlow: StateFlow<ResolvedLocation?> = resolveGpsLocationUseCase()
         .onStart { dispatch(SearchEvent.GpsLocationRequested) }
         .onEach { resolved -> updateCurrentLocationUseCase(resolved) }
-        .catch { e ->
-            dispatch(SearchEvent.GpsLocationError(e.message ?: "Unknown error"))
-            _effects.tryEmit(AppEffect.ShowToast(e.message ?: "Unknown error"))
+        .catch { cause ->
+            if (Debug.enabled) Log.e("SearchViewModel", "GPS error", cause)
+            dispatch(SearchEvent.GpsLocationError(cause))
+            _effects.tryEmit(AppEffect.ShowToast(UiText.Resource(R.string.error_unknown)))
             emit(null)
         }
         .stateIn(
@@ -133,7 +138,10 @@ class SearchViewModel @Inject constructor(
             when (saveLocationUseCase(resolved)) {
                 SaveLocationResult.LimitReached -> _effects.tryEmit(
                     AppEffect.ShowSnackBar(
-                        message = UiText.Resource(R.string.search_limit_reached),
+                        message = UiText.Resource(
+                            id = R.string.search_limit_reached,
+                            args = listOf(MAX_SAVED_LOCATIONS),
+                        ),
                         actionLabel = UiText.Resource(R.string.search_limit_action),
                         onAction = { dispatch(SearchEvent.SearchVisibilityChanged(false)) },
                     )

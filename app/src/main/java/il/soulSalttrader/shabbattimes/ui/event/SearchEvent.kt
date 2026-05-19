@@ -49,10 +49,10 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
         }
     }
 
-    class SuggestionsLoadFailed(val message: String, val cause: Throwable?) : SearchEvent {
+    class SuggestionsLoadFailed(val cause: Throwable?) : SearchEvent {
         override val reducer = SearchReducer { state ->
-            if (Debug.enabled) Log.d("ShabbatEvent", "message: $message, cause: $cause")
-            state.copy(suggestionResults = SearchResultState.Failure(message, cause))
+            if (Debug.enabled) Log.d("ShabbatEvent", "cause: $cause")
+            state.copy(suggestionResults = SearchResultState.Failure(cause))
         }
     }
 
@@ -88,9 +88,9 @@ sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
         }
     }
 
-    data class GpsLocationError(val message: String) : SearchEvent {
+    data class GpsLocationError(val cause: Throwable) : SearchEvent {
         override val reducer = SearchReducer { state ->
-            state.copy(gpsResult = SearchResultState.Failure(message))
+            state.copy(gpsResult = SearchResultState.Failure(cause))
         }
     }
 

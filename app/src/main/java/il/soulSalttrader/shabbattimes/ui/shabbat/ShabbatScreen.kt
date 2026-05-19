@@ -128,7 +128,7 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
         }
 
         is ShabbatResultState.Failure -> FailureScreen(
-            message = entries.message,
+            cause = entries.cause,
             onRetry = { shabbatViewModel.dispatch(ShabbatEvent.RetryLoadShabbatEntry) },
         )
     }
@@ -137,7 +137,7 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
         searchViewModel.effects.collect { effect ->
             when (effect) {
                 is AppEffect.ShowToast    -> {
-                    Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, effect.message.resolve(context), Toast.LENGTH_LONG).show()
                 }
                 is AppEffect.ShowSnackBar -> {
                     val result = snackbarHostState.showSnackbar(

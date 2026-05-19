@@ -36,4 +36,9 @@
     <!-- Search -->
     <string name="search_limit_reached">Maximum of %1$d locations reached</string>
     <string name="search_limit_action">Manage locations</string>
+
+    <!-- Error Handling -->
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_unexpected">Unexpected error</string>
+    <string name="error_times_failed">Some times failed to load</string>
 </resources>

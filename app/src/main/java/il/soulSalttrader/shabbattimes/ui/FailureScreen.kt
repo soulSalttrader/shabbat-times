@@ -23,7 +23,7 @@ import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconImage
 @Composable
 fun FailureScreen(
     modifier: Modifier = Modifier,
-    message: String,
+    cause: Throwable? = null,
     onRetry: () -> Unit,
 ) {
     Box(
@@ -52,7 +52,7 @@ fun FailureScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = message,
+                text = cause?.message ?: "Unknown error",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.tertiary,
@@ -74,7 +74,7 @@ fun FailureScreen(
 fun Preview(modifier: Modifier = Modifier) {
     FailureScreen(
         modifier = Modifier,
-        message = "Unable to load data. Check your connection and retry.",
+        cause = null,
         onRetry = { /* no op */ }
     )
 }
