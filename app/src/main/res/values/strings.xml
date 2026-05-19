@@ -32,4 +32,8 @@
     <string name="settings_ko_fi_url">https://ko-fi.com/soulsalttrader</string>
     <string name="settings_support_title">Buy me a coffee!</string>
     <string name="settings_support_subtitle">Enjoying the app? Keep it alive on Ko-fi!</string>
+
+    <!-- Search -->
+    <string name="search_limit_reached">Maximum of %1$d locations reached</string>
+    <string name="search_limit_action">Manage locations</string>
 </resources>
