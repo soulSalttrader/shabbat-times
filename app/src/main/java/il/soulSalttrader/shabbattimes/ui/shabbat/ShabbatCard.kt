@@ -92,6 +92,10 @@ private fun getDefaultCardColors(status: LocationStatus) = when (status) {
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
+    is LocationStatus.LastKnownLocation -> CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    )
     else -> CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
