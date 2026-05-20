@@ -1,12 +1,11 @@
 package il.soulSalttrader.shabbattimes.ui.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.common.constants.LocationConfig.MAX_SAVED_LOCATIONS
+import il.soulSalttrader.shabbattimes.common.userMessage
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.model.SaveLocationResult
 import il.soulSalttrader.shabbattimes.network.onFailure
@@ -69,14 +68,13 @@ class SearchViewModel @Inject constructor(
         .flatMapLatest { query ->
             flow {
                 getLocationSuggestion(query)
-                    .onSuccess("SearchVM") { suggestions -> emit(suggestions) }
-                    .onFailure("SearchVM") { e -> _effects.tryEmit(AppEffect.ShowToast(UiText.Resource(R.string.error_unknown))) }
+                    .onSuccess { suggestions -> emit(suggestions) }
+                    .onFailure { e -> _effects.tryEmit(AppEffect.ShowToast(e.cause.userMessage())) }
             }
         }
         .catch { cause ->
-            if (Debug.enabled) Log.e("ShabbatViewModel", "Unexpected error", cause)
             SearchEvent.SuggestionsLoadFailed(cause).reducer reduce _state.value
-            _effects.tryEmit(AppEffect.ShowToast(UiText.Resource(R.string.error_unexpected)))
+            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
             emit(emptyList())
         }
         .stateIn(
@@ -90,9 +88,8 @@ class SearchViewModel @Inject constructor(
         .onStart { dispatch(SearchEvent.GpsLocationRequested) }
         .onEach { resolved -> updateCurrentLocationUseCase(resolved) }
         .catch { cause ->
-            if (Debug.enabled) Log.e("SearchViewModel", "GPS error", cause)
             dispatch(SearchEvent.GpsLocationError(cause))
-            _effects.tryEmit(AppEffect.ShowToast(UiText.Resource(R.string.error_unknown)))
+            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
             emit(null)
         }
         .stateIn(

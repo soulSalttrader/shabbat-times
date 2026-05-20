@@ -21,8 +21,8 @@ class ResolveGpsLocationUseCase @Inject constructor(
             location?.let {
                 flow {
                     geocodingRepository.reverseGeocode(location)
-                        .onSuccess("ResolveGpsLocationUseCase") { emit(it) }
-                        .onFailure("ResolveGpsLocationUseCase") { emit(null) }
+                        .onSuccess { emit(it) }
+                        .onFailure { emit(null) }
                 }
             } ?: flowOf(null)
         }

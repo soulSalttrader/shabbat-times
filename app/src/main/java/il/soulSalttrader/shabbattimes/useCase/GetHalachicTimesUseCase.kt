@@ -62,12 +62,7 @@ class GetHalachicTimesUseCase @Inject constructor(
                     )
                 )
             },
-            onFailure = { e ->
-                NetworkResult.Failure(
-                    message = "Failed to calculate Shabbat times for ${startEvent.coordinates}",
-                    cause = e,
-                )
-            }
+            onFailure = { cause -> NetworkResult.Failure(cause) }
         )
     }
 }
