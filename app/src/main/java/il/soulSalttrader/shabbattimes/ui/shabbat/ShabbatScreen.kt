@@ -1,11 +1,8 @@
 package il.soulSalttrader.shabbattimes.ui.shabbat
 
 import android.Manifest
-import android.widget.Toast
 import androidx.annotation.RequiresPermission
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,7 +11,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import il.soulSalttrader.shabbattimes.common.openAppSettings
 import il.soulSalttrader.shabbattimes.model.LocationStatus
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
@@ -22,7 +18,7 @@ import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.FailureScreen
 import il.soulSalttrader.shabbattimes.ui.LoadingScreen
-import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
+import il.soulSalttrader.shabbattimes.ui.effect.handleAppEffect
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
@@ -37,6 +33,7 @@ import il.soulSalttrader.shabbattimes.ui.viewModel.PermissionViewModel
 import il.soulSalttrader.shabbattimes.ui.viewModel.SearchViewModel
 import il.soulSalttrader.shabbattimes.ui.viewModel.ShabbatViewModel
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.merge
 
 @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
 @Composable
@@ -134,34 +131,10 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
     }
 
     LaunchedEffect(Unit) {
-        searchViewModel.effects.collect { effect ->
-            when (effect) {
-                is AppEffect.ShowToast    -> {
-                    Toast.makeText(context, effect.message.resolve(context), Toast.LENGTH_LONG).show()
-                }
-                is AppEffect.ShowSnackBar -> {
-                    val result = snackbarHostState.showSnackbar(
-                        message = effect.message.resolve(context),
-                        actionLabel = effect.actionLabel?.resolve(context),
-                        duration = SnackbarDuration.Long,
-                    )
-
-                    if (result == SnackbarResult.ActionPerformed) {
-                        effect.onAction?.invoke()
-                    }
-                }
-
-                else                      -> Unit
-            }
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        permissionViewModel.effects.collect { effect ->
-            when (effect) {
-                is AppEffect.OpenAppSettings -> { context.openAppSettings() }
-                else                         -> Unit
-            }
-        }
+        merge(
+            shabbatViewModel.effects,
+            searchViewModel.effects,
+            permissionViewModel.effects,
+        ).collect { effect -> handleAppEffect(effect, context, snackbarHostState) }
     }
 }
