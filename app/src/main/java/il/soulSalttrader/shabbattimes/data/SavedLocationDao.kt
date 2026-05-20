@@ -5,6 +5,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import il.soulSalttrader.shabbattimes.common.constants.LocationConfig.MAX_SAVED_LOCATIONS
+import il.soulSalttrader.shabbattimes.model.SavedLocation.Companion.GPS_ID
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -34,6 +35,7 @@ interface SavedLocationDao {
     suspend fun insertWithOrder(entity: SavedLocationEntity) {
         val existing = getById(entity.id)
         when {
+            entity.id == GPS_ID -> upsert(entity)
             existing != null -> upsert(entity.copy(sortOrder = existing.sortOrder))
             getCount() >= MAX_SAVED_LOCATIONS -> return
             else -> {

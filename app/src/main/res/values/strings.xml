@@ -39,7 +39,7 @@
     <string name="settings_support_subtitle">Enjoying the app? Keep it alive on Ko-fi!</string>
 
     <!-- Search -->
-    <string name="search_limit_reached">Maximum of %1$d locations reached</string>
+    <string name="search_limit_reached">Maximum of %1$d saved locations reached</string>
     <string name="search_limit_action">Manage locations</string>
     <string name="search_placeholder">City, address or zip code</string>
     <string name="search_no_results">No results for &quot;%1$s&quot;</string>
