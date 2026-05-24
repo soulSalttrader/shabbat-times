@@ -1,42 +1,22 @@
-An Android app built with Jetpack Compose, Kotlin Coroutines, and MVI, focused on demonstrating
-modern Android architecture and state management.
-The app explores different architectural patterns for educational purposes, and intentionally applies some
-over-engineered solutions to showcase design trade-offs and scalability.
-
-## Table of Contents
-
-1. [shabbat times app](#1--shabbat-app)
-    1. [Current State of the App](#-current-state-of-the-app)
-    2. [Future Work](#-future-work)
-2. [MVI Architecture Overview](#2--mvi-architecture-overview)
-    1. [MVI Terminology Mapping](#mvi-terminology-mapping)
-3. [Navigation](#3--navigation)
-4. [Permissions Management](#4--permissions-management)
-5. [Search Architecture](#5--search-architecture)
-6. [Reorderable cards](#6--reorderable-cards)
-7. [Current Location Feature](#7-current-location-feature)
-8. [Persistence](#-8-persistence)
-
----
-
-## 1. 🕯 shabbat times app
+# 🕯 shabbat times app
 
 ### 📖 Overview
 
-The Shabbat App is a lightweight, single-screen application that displays the upcoming
-candle-lighting time and Havdalah time based on accurate solar data.
-It automatically computes these times using real-world sunset data fetched via a public REST API and
-applies the appropriate halachic offsets (+42 min / −18 min).
+Shabbat Times is a calendar app that displays accurate candle lighting and Havdalah times for multiple 
+locations worldwide.
+
+The app fetches real-time sunset data and applies halachic offsets based on your community tradition — 
+Ashkenazi, Sephardic, Mizrahi, Hasidic, or Jerusalem.
 
 ### 📸 Screenshots
 
 - Screenshots reflect the current UI state at the time of capture.
 
 <p align="start">
+  <img src="docs/settings_screen.png" width="180" />
   <img src="docs/init01.png" width="180" />
   <img src="docs/init02%20(edu).png" width="180" />
   <img src="docs/init03%20(perm).png" width="180" />
-  <img src="docs/init04%20(manually).png" width="180" />
 </p>
 
 <p align="start">
@@ -45,6 +25,21 @@ applies the appropriate halachic offsets (+42 min / −18 min).
   <img src="docs/list03%20(swipe).png" width="180" />
   <img src="docs/list04%20(current).png" width="180" />
 </p>
+
+---
+
+## Table of Contents
+
+1. [Current State of the App](#-current-state-of-the-app)
+2. [Future Work](#-future-work)
+3. [MVI Architecture Overview](#2--mvi-architecture-overview)
+  1. [MVI Terminology Mapping](#mvi-terminology-mapping)
+4. [Navigation](#3--navigation)
+5. [Permissions Management](#4--permissions-management)
+6. [Search Architecture](#5--search-architecture)
+7. [Reorderable cards](#6--reorderable-cards)
+8. [Current Location Feature](#7-current-location-feature)
+9. [Persistence](#-8-persistence)
 
 ---
 
@@ -394,14 +389,19 @@ Halachic times (zmanim) represent meaningful moments defined in Jewish law.
 
 #### 🟡 1. Two key calculations are implemented:
 
-These represent widely used halachic opinions, but other variants may be introduced later:
+Shabbat times are calculated based on your selected community tradition,
+applied as offsets to the local sunset time:
 
-- Candle Lighting — 18 minutes before Friday sunset.
-- Offset constant: HILUCH_MIL_MINUTES = 18L.
+| Community  | Candle Lighting | Havdalah  |
+|------------|----------------|-----------|
+| Sephardic  | 15 min before  | 25 min after |
+| Mizrahi    | 15 min before  | 25 min after |
+| Ashkenazi  | 18 min before  | 40 min after |
+| Hasidic    | 20 min before  | 72 min after |
+| Jerusalem  | 40 min before  | 40 min after |
 
-
-- Havdalah — 42 minutes after Saturday sunset.
-- Offset constant: TZEIT_HAKOCHAVIM_MINUTES = 42L.
+The default tradition is Ashkenazi. Community preference is persisted
+locally via DataStore and can be changed at any time in Settings.
 
 #### 🟡 2. Domain model
 
@@ -481,15 +481,16 @@ fun LocalDate.toDisplayString(): String
   - Dynamic location labels (current location, distance in km, locating, no permission)
   - Swipe-to-delete saved locations
   - Auto-refresh current location on app restart if permission granted
+- Settings screen with:
+  - Community tradition selector (Sephardic, Mizrahi, Ashkenazi, Hasidic, Jerusalem)
+  - About section (version, contact, developer)
+  - Ko-fi support link
 
 ### 🔜 Future Work
 
 #### 🔴 1. Planned improvements:
 
-- Adopt UiText for all hardcoded strings
 - Add real Room migrations before removing `fallbackToDestructiveMigration`
-- User-customizable candle lighting and havdalah offsets (architecture prepared via `UserPreferences` + DataStore)
-- Multiple zmanim opinions
 
 #### 🔴 2. Recently resolved:
 
@@ -499,10 +500,12 @@ fun LocalDate.toDisplayString(): String
 - ~~Hard-coded Jerusalem location~~ → dynamic GPS location + user-saved locations
 - ~~Hard-coded 12/24h preference~~ → API always requests 24h format, display formatting in UI layer
 - ~~City-coupled times domain~~ → times domain decoupled, uses `Coordinates` + `ZoneId` only
+- ~~Adopt UiText for all hardcoded strings~~ → all user-facing strings use `UiText` / `strings.xml`
+- ~~User-customizable candle lighting and havdalah offsets~~ → replaced with community tradition presets
 
 ---
 
-## 2. 🔄 MVI Architecture Overview
+## 🔄 MVI Architecture Overview
 
 This project follows pure unidirectional MVI with a few naming choices that avoid Android-specific
 confusion (e.g., "Event" instead of "Intent").
@@ -695,7 +698,7 @@ currentLocationRepository.location (in-memory, resets on restart)
 
 ---
 
-## 3. 🧭 Navigation
+## 🧭 Navigation
 
 A **type-safe, scalable, testable, and production-proven** navigation system built for modern
 Android apps using Jetpack
@@ -1007,7 +1010,7 @@ fun NavBarTop(
 
 ---
 
-## 4. 🚦 Permissions Management
+## 🚦 Permissions Management
 
 - Implements a robust permission system for requesting and managing Android location permissions.
 - Crucial for fetching the user's location and calculating accurate Shabbat times.
@@ -1244,7 +1247,6 @@ fun HandlePermissions(
 }
 ```
 
-
 #### 🟢 5. Sealed Interfaces
 
 - `PermissionState`:
@@ -1300,7 +1302,7 @@ fun HandlePermissions(
 
 ---
 
-## 5. 🔍︎ Search Architecture
+## 🔍︎ Search Architecture
 
 The search functionality is designed as a reactive, modular system that bridges user input with the core calculation engine. It demonstrates a clean separation between generic UI components, domain-specific state wrappers, and optimized data fetching.
 
@@ -1455,7 +1457,7 @@ fun LocationSearchScreen(
 }
 ```
 
-## 5.1 🧠 Search State Management (SearchViewModel)
+## 🧠 Search State Management (SearchViewModel)
 
 ### The SearchViewModel
 
@@ -1516,7 +1518,7 @@ data class SearchUiState(
 4. **Failure** → `SearchResultState.Failure` + `AppEffect.ShowToast`
 5. **`ShabbatScreen` empty card** maps `gpsResult` → `LocationStatus` → label updates reactively
 
-### 5.2 💾 Data Layer
+### 💾 Data Layer
 
 Responsibilities are now split across focused repositories — each with a single concern:
 
@@ -1603,7 +1605,7 @@ class SavedLocationsRepositoryInMemory : SavedLocationsRepository {
 }
 ```
 
-## 6. 🔀 Reorderable Cards
+## 🔀 Reorderable Cards
 
 Cards support drag-to-reorder and swipe-to-delete, implemented as a generic, self-contained container wrapping any card.
 
@@ -1715,7 +1717,7 @@ fun ShabbatContent(
 
 Both draggable and swipeable can be toggled independently via parameters, making the container reusable across different screens with different interaction needs.
 
-## 📌 7. Current Location Feature
+## 📌 Current Location Feature
 
 Detects the user's current location via GPS, reverse geocodes it to a named location, and displays it alongside manually saved locations with dynamic distance labels.
 
@@ -1773,7 +1775,7 @@ Computed dynamically in `LocationWithTimesLoaded` reducer — never stored:
 - **Times fetched per `Coordinates`** — GPS and saved locations treated identically by times domain
 - **`LocationStatus` computed from permission + distance** — never stored, always derived
 
-### 🗄️ 8. Persistence
+### 🗄️ Persistence
 
 The app uses **Room** for local persistence:
 
