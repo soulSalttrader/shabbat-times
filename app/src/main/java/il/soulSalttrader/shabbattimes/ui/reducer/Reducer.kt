@@ -8,6 +8,7 @@ import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import il.soulSalttrader.shabbattimes.ui.search.SearchUiState
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.model.State
+import il.soulSalttrader.shabbattimes.ui.settings.SettingsUiState
 
 fun interface Reducer<S : State> {
     infix fun reduce(state: S): S
@@ -29,3 +30,4 @@ fun interface Reducer<S : State> {
 typealias ShabbatReducer = Reducer<ShabbatUiState>
 typealias SearchReducer = Reducer<SearchUiState>
 typealias PermissionReducer = Reducer<PermissionUiState>
+typealias SettingsReducer = Reducer<SettingsUiState>

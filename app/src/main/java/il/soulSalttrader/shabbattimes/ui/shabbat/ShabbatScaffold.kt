@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,12 +24,13 @@ import il.soulSalttrader.shabbattimes.ui.nav.Navigator
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShabbatScaffold(
-    topNavItems: List<NavItem> = listOf(Settings, Previous),
     navigator: Navigator,
+    topNavItems: List<NavItem> = listOf(Settings, Previous),
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
-    content: @Composable (PaddingValues) -> Unit,
+    content: @Composable (PaddingValues, SnackbarHostState) -> Unit,
 ) {
     val currentNavTarget by navigator.currentTarget.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
@@ -42,5 +46,6 @@ fun ShabbatScaffold(
                 scrollBehavior = scrollBehavior,
             )
         },
-    ) { innerPadding -> content(innerPadding) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { innerPadding -> content(innerPadding, snackbarHostState) }
 }

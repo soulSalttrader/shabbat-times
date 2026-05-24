@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,7 +24,7 @@ import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconImage
 @Composable
 fun FailureScreen(
     modifier: Modifier = Modifier,
-    message: String,
+    cause: Throwable? = null,
     onRetry: () -> Unit,
 ) {
     Box(
@@ -43,7 +44,7 @@ fun FailureScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Oops! Something went wrong",
+                text = stringResource(R.string.error_something_went_wrong),
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -52,7 +53,7 @@ fun FailureScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = message,
+                text = cause?.message ?: "Unknown error",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.tertiary,
@@ -74,7 +75,7 @@ fun FailureScreen(
 fun Preview(modifier: Modifier = Modifier) {
     FailureScreen(
         modifier = Modifier,
-        message = "Unable to load data. Check your connection and retry.",
+        cause = null,
         onRetry = { /* no op */ }
     )
 }

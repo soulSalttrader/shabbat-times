@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.em
 fun UiIconLabel(
     icon: UiIcon?,
     iconId: String = "currentLocationIcon",
-    text: String = "Your current location",
+    text: String,
     contentDescription: String = "Current location icon",
     iconSize: TextUnit = 1.1.em,
 ) {

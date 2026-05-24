@@ -8,5 +8,5 @@ sealed interface SearchResultState {
     data object Empty : SearchResultState
     data class Suggestions(val suggestions: List<ResolvedLocation>) : SearchResultState
     data class GpsResolved(val location: ResolvedLocation) : SearchResultState
-    data class Failure(val message: String, val cause: Throwable? = null) : SearchResultState
+    data class Failure(val cause: Throwable? = null) : SearchResultState
 }

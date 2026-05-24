@@ -1,7 +1,5 @@
 package il.soulSalttrader.shabbattimes.repository
 
-import android.util.Log
-import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.common.asNetworkFailure
 import il.soulSalttrader.shabbattimes.common.toDisplayString
 import il.soulSalttrader.shabbattimes.di.SolarTimesService
@@ -21,7 +19,6 @@ class SolarTimesRepositoryImpl @Inject constructor(
 
     override suspend fun getSolarTimes(request: SolarTimesRequest) =
         withContext(context = dispatcher) {
-            val tag = "ShabbatRepositoryImpl.getSolarTimes"
             runCatching {
                 apiService.api.getSolarTimes(
                     date = request.date.toDisplayString(),
@@ -31,14 +28,10 @@ class SolarTimesRepositoryImpl @Inject constructor(
                     timeFormat = 24,
                 )
             }
-                .map { dto ->
-                    if (Debug.enabled) Log.d(tag, dto.status)
-                    dto.asNetworkResult()
+                .map { dto -> dto.asNetworkResult()
                 }
-                .recover { exception ->
-                    if (Debug.enabled) Log.d(tag, "API call failed", exception)
-                    exception.asNetworkFailure()
+                .recover { cause -> cause.asNetworkFailure()
                 }
-                .getOrElse { NetworkResult.Failure("Critical failure") }
+                .getOrElse { cause -> NetworkResult.Failure(cause) }
         }
 }

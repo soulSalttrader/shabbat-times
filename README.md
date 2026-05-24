@@ -1,42 +1,22 @@
-An Android app built with Jetpack Compose, Kotlin Coroutines, and MVI, focused on demonstrating
-modern Android architecture and state management.
-The app explores different architectural patterns for educational purposes, and intentionally applies some
-over-engineered solutions to showcase design trade-offs and scalability.
-
-## Table of Contents
-
-1. [shabbat times app](#1--shabbat-app)
-    1. [Current State of the App](#-current-state-of-the-app)
-    2. [Future Work](#-future-work)
-2. [MVI Architecture Overview](#2--mvi-architecture-overview)
-    1. [MVI Terminology Mapping](#mvi-terminology-mapping)
-3. [Navigation](#3--navigation)
-4. [Permissions Management](#4--permissions-management)
-5. [Search Architecture](#5--search-architecture)
-6. [Reorderable cards](#6--reorderable-cards)
-7. [Current Location Feature](#7-current-location-feature)
-8. [Persistence](#-8-persistence)
-
----
-
-## 1. 🕯 shabbat times app
+# 🕯 shabbat times app
 
 ### 📖 Overview
 
-The Shabbat App is a lightweight, single-screen application that displays the upcoming
-candle-lighting time and Havdalah time based on accurate solar data.
-It automatically computes these times using real-world sunset data fetched via a public REST API and
-applies the appropriate halachic offsets (+42 min / −18 min).
+Shabbat Times is a calendar app that displays accurate candle lighting and Havdalah times for multiple 
+locations worldwide.
+
+The app fetches real-time sunset data and applies halachic offsets based on your community tradition — 
+Ashkenazi, Sephardic, Mizrahi, Hasidic, or Jerusalem.
 
 ### 📸 Screenshots
 
 - Screenshots reflect the current UI state at the time of capture.
 
 <p align="start">
+  <img src="docs/settings_screen.png" width="180" />
   <img src="docs/init01.png" width="180" />
   <img src="docs/init02%20(edu).png" width="180" />
   <img src="docs/init03%20(perm).png" width="180" />
-  <img src="docs/init04%20(manually).png" width="180" />
 </p>
 
 <p align="start">
@@ -45,6 +25,21 @@ applies the appropriate halachic offsets (+42 min / −18 min).
   <img src="docs/list03%20(swipe).png" width="180" />
   <img src="docs/list04%20(current).png" width="180" />
 </p>
+
+---
+
+## Table of Contents
+
+1. [Current State of the App](#-current-state-of-the-app)
+2. [Future Work](#-future-work)
+3. [MVI Architecture Overview](#2--mvi-architecture-overview)
+  1. [MVI Terminology Mapping](#mvi-terminology-mapping)
+4. [Navigation](#3--navigation)
+5. [Permissions Management](#4--permissions-management)
+6. [Search Architecture](#5--search-architecture)
+7. [Reorderable cards](#6--reorderable-cards)
+8. [Current Location Feature](#7-current-location-feature)
+9. [Persistence](#-8-persistence)
 
 ---
 
@@ -163,11 +158,13 @@ fun ShabbatScreen() {
 ```kotlin
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    savedLocationsRepository: SavedLocationsRepository,
-    currentLocationRepository: CurrentLocationRepository,
-    permissionRepository: PermissionRepository,
+    @param:InMemory private val currentLocationRepository: CurrentLocationRepository,
+    @param:Persisted private val savedLocationsRepository: SavedLocationsRepository,
+    private val reorderLocationsUseCase: ReorderLocationsUseCase,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
-    private val removeLocationUseCase: RemoveCityUseCase,
+    private val removeLocationUseCase: RemoveSavedLocationUseCase,
+    userPreferencesRepository: UserPreferencesRepository,
+    permissionRepository: PermissionRepository,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
@@ -176,27 +173,35 @@ class ShabbatViewModel @Inject constructor(
     val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
         currentLocationRepository.location,
         savedLocationsRepository.locations,
-    ) { gpsLocation, savedLocations ->
-        buildList {
+        userPreferencesRepository.shabbatPreset,
+    ) { gpsLocation, savedLocations, preset ->
+        val locations = buildList {
             gpsLocation?.let { add(it) }
             addAll(savedLocations)
         }
-    }.flatMapLatest { savedLocations ->
+
+        locations to preset
+    }.flatMapLatest { (savedLocations, preset) ->
         flow {
-            val results = getHalachicTimesUseCase(savedLocations)
+            val results = getHalachicTimesUseCase(savedLocations, preset)
             val successes = results.filterIsInstance<NetworkResult.Success<HalachicTimes>>()
                 .map { it.data }
 
-            if (results.any { it is NetworkResult.Failure }) {
-                _effects.tryEmit(AppEffect.ShowToast("Some times failed to load"))
+            results.forEach { result ->
+                when (result) {
+                    is NetworkResult.Failure -> _effects.tryEmit(
+                        AppEffect.ShowToast(result.cause.userMessage())
+                    )
+                    is NetworkResult.Success -> Unit
+                }
             }
 
             emit(successes)
         }
     }
-        .catch { throwable ->
-            dispatch(ShabbatEvent.LocationWithTimesLoadFailed(throwable.message ?: "Unknown error", throwable))
-            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+        .catch { cause ->
+            dispatch(ShabbatEvent.ShabbatEntryLoadFailed(cause))
+            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
             emit(emptyList())
         }
         .stateIn(
@@ -214,7 +219,7 @@ class ShabbatViewModel @Inject constructor(
         savedLocationsRepository.locations,
         permissionRepository.permissionState,
     ) { state, halachicTimes, currentLocation, savedLocations, permission ->
-        ShabbatEvent.LocationWithTimesLoaded(savedLocations, currentLocation, halachicTimes, permission).reducer reduce state
+        ShabbatEvent.ShabbatEntryLoaded(savedLocations, currentLocation, halachicTimes, permission).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -230,8 +235,16 @@ class ShabbatViewModel @Inject constructor(
         }
 
         when (event) {
-            is ShabbatEvent.LocationDeleted -> handleDeleteLocation(event)
-            else                            -> Unit
+            is ShabbatEvent.LocationDeleted  -> handleDeleteLocation(event)
+            is ShabbatEvent.ReorderLocations -> handleReorderLocations(event)
+            else                             -> Unit
+        }
+    }
+
+    private fun handleReorderLocations(event: ShabbatEvent.ReorderLocations) {
+        viewModelScope.launch {
+            val entries = (state.value.shabbat as? ShabbatResultState.Ready)?.entries ?: return@launch
+            reorderLocationsUseCase(entries, event.from, event.to)
         }
     }
 
@@ -394,14 +407,19 @@ Halachic times (zmanim) represent meaningful moments defined in Jewish law.
 
 #### 🟡 1. Two key calculations are implemented:
 
-These represent widely used halachic opinions, but other variants may be introduced later:
+Shabbat times are calculated based on your selected community tradition,
+applied as offsets to the local sunset time:
 
-- Candle Lighting — 18 minutes before Friday sunset.
-- Offset constant: HILUCH_MIL_MINUTES = 18L.
+| Community  | Candle Lighting | Havdalah  |
+|------------|----------------|-----------|
+| Sephardic  | 15 min before  | 25 min after |
+| Mizrahi    | 15 min before  | 25 min after |
+| Ashkenazi  | 18 min before  | 40 min after |
+| Hasidic    | 20 min before  | 72 min after |
+| Jerusalem  | 40 min before  | 40 min after |
 
-
-- Havdalah — 42 minutes after Saturday sunset.
-- Offset constant: TZEIT_HAKOCHAVIM_MINUTES = 42L.
+The default tradition is Ashkenazi. Community preference is persisted
+locally via DataStore and can be changed at any time in Settings.
 
 #### 🟡 2. Domain model
 
@@ -481,15 +499,16 @@ fun LocalDate.toDisplayString(): String
   - Dynamic location labels (current location, distance in km, locating, no permission)
   - Swipe-to-delete saved locations
   - Auto-refresh current location on app restart if permission granted
+- Settings screen with:
+  - Community tradition selector (Sephardic, Mizrahi, Ashkenazi, Hasidic, Jerusalem)
+  - About section (version, contact, developer)
+  - Ko-fi support link
 
 ### 🔜 Future Work
 
 #### 🔴 1. Planned improvements:
 
-- Adopt UiText for all hardcoded strings
 - Add real Room migrations before removing `fallbackToDestructiveMigration`
-- User-customizable candle lighting and havdalah offsets (architecture prepared via `UserPreferences` + DataStore)
-- Multiple zmanim opinions
 
 #### 🔴 2. Recently resolved:
 
@@ -499,10 +518,12 @@ fun LocalDate.toDisplayString(): String
 - ~~Hard-coded Jerusalem location~~ → dynamic GPS location + user-saved locations
 - ~~Hard-coded 12/24h preference~~ → API always requests 24h format, display formatting in UI layer
 - ~~City-coupled times domain~~ → times domain decoupled, uses `Coordinates` + `ZoneId` only
+- ~~Adopt UiText for all hardcoded strings~~ → all user-facing strings use `UiText` / `strings.xml`
+- ~~User-customizable candle lighting and havdalah offsets~~ → replaced with community tradition presets
 
 ---
 
-## 2. 🔄 MVI Architecture Overview
+## 🔄 MVI Architecture Overview
 
 This project follows pure unidirectional MVI with a few naming choices that avoid Android-specific
 confusion (e.g., "Event" instead of "Intent").
@@ -599,17 +620,18 @@ currentLocationRepository.location (in-memory, resets on restart)
 
   ```kotlin
   fun dispatch(event: AppEvent) {
-        _state.update { current ->
-            when (event) {
-                is ShabbatEvent -> event.reducer reduce current
-                else            -> current
-            }
-        }
+      _state.updateAndGet { current ->
+          when (event) {
+              is ShabbatEvent -> event.reducer reduce current
+              else            -> current
+          }
+      }
 
-        when (event) {
-            is ShabbatEvent.LocationDeleted      -> handleDeleteLocation(event)
-            else                                 -> Unit
-        }
+      when (event) {
+          is ShabbatEvent.LocationDeleted  -> handleDeleteLocation(event)
+          is ShabbatEvent.ReorderLocations -> handleReorderLocations(event)
+          else                             -> Unit
+      }
   }
   ```
 
@@ -695,7 +717,7 @@ currentLocationRepository.location (in-memory, resets on restart)
 
 ---
 
-## 3. 🧭 Navigation
+## 🧭 Navigation
 
 A **type-safe, scalable, testable, and production-proven** navigation system built for modern
 Android apps using Jetpack
@@ -771,7 +793,7 @@ object NavItems {
 
     val Settings = NavItem(
         target = NavTargetTop.Settings,
-        title = "Settings",
+        title = UiText.Resource(R.string.nav_settings),
         selectedIcon = UiIcon.Resource(R.drawable.settings_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.settings_outlined_24),
         role = NavRole.TOP_ACTION,
@@ -862,16 +884,9 @@ class NavManager @Inject constructor() {
 - Navigation graphs are pure functions — no @Composable, no navController passed around.
 
 ```kotlin
-fun NavGraphBuilder.mainNavGraph(navigator: Navigator) {
-    composable<NavTargetBottom.Shabbat> {
-        ShabbatScreen()
-    }
-
-    composable<NavTargetTop.Settings> {
-        FailureScreen(message = "Coming Soon") {
-            navigator.navigateUp()
-        }
-    }
+fun NavGraphBuilder.mainNavGraph(snackbarHostState: SnackbarHostState) {
+    composable<NavTargetBottom.Shabbat> { ShabbatScreen(snackbarHostState) }
+    composable<NavTargetTop.Settings> { SettingsScreen() }
 }
 ```
 
@@ -884,9 +899,8 @@ fun NavGraphBuilder.mainNavGraph(navigator: Navigator) {
 @Composable
 fun NavApp(
     modifier: Modifier,
-    state: AppModel,
-    onEvent: (AppEvent) -> Unit,
     navigator: Navigator,
+    snackbarHostState: SnackbarHostState,
 ) {
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -899,29 +913,16 @@ fun NavApp(
         navigator.collectNavigationCommands(navController)
     }
 
-    val startDestination = NavTargetBottom.Home
+    val startDestination = NavTargetBottom.Shabbat
 
     NavHost(
         modifier = modifier,
         navController = navController,
         startDestination = startDestination,
     ) {
-        mainNavGraph(
-            state = state,
-            onEvent = onEvent,
-        )
+        mainNavGraph(snackbarHostState)
     }
-
-    if (Debug.enabled) {
-        LaunchedEffect(navController) {
-            navController.addOnDestinationChangedListener { controller, destination, arguments ->
-                Log.d(
-                    "navController",
-                    "Current destination: ${navController.currentDestinationName()}"
-                )
-            }
-        }
-    }
+    //...
 }
 ```
 
@@ -943,7 +944,9 @@ fun NavBarIcon(
         )
     }
 }
+```
 
+```kotlin
 @Composable
 fun NavBarBadge(count: Int? = null) {
     val displayCount = count?.takeIf { it > 0 } ?: return
@@ -952,17 +955,19 @@ fun NavBarBadge(count: Int? = null) {
         containerColor = MaterialTheme.colorScheme.tertiary,
         contentColor = MaterialTheme.colorScheme.onTertiary,
     ) {
-        Text(text = if (displayCount > 99) "99+" else displayCount.toString())
+        Text(text = if (displayCount > 99) stringResource(R.string.display_count_max) else displayCount.toString())
     }
 }
+```
 
-@OptIn(ExperimentalMaterial3Api::class)
+```kotlin
 @Composable
 fun NavBarTop(
     navItems: List<NavItem>,
     navigator: Navigator,
-    currentNavTarget: NavTarget? = null,
     scrollBehavior: TopAppBarScrollBehavior,
+    currentNavTarget: NavTarget? = null,
+    isNavIconVisible: Boolean = currentNavTarget != NavTargetBottom.Shabbat,
 ) {
     val (topNavigationItem, topActionItems) = navItems.extractTopBarItems()
 
@@ -975,12 +980,16 @@ fun NavBarTop(
             actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             subtitleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
-        title = { Text(text = currentNavTarget?.simpleName() ?: "None") },
+        title = { currentNavTarget?.titleOr()?.let { Text(text = it.asString()) } },
         navigationIcon = {
             topNavigationItem?.let {
-                IconButton(onClick = { navigator.navigateUp() }) {
+                IconButton(
+                    onClick = { navigator.navigateUp() },
+                    enabled = isNavIconVisible,
+                    modifier = Modifier.alpha(if (isNavIconVisible) 1f else 0f)
+                ) {
                     NavBarIcon(
-                        isSelected = currentNavTarget == it.target,
+                        isSelected = false,
                         badgeCount = null,
                         item = it,
                     )
@@ -1007,7 +1016,7 @@ fun NavBarTop(
 
 ---
 
-## 4. 🚦 Permissions Management
+## 🚦 Permissions Management
 
 - Implements a robust permission system for requesting and managing Android location permissions.
 - Crucial for fetching the user's location and calculating accurate Shabbat times.
@@ -1244,7 +1253,6 @@ fun HandlePermissions(
 }
 ```
 
-
 #### 🟢 5. Sealed Interfaces
 
 - `PermissionState`:
@@ -1300,7 +1308,7 @@ fun HandlePermissions(
 
 ---
 
-## 5. 🔍︎ Search Architecture
+## 🔍︎ Search Architecture
 
 The search functionality is designed as a reactive, modular system that bridges user input with the core calculation engine. It demonstrates a clean separation between generic UI components, domain-specific state wrappers, and optimized data fetching.
 
@@ -1455,7 +1463,7 @@ fun LocationSearchScreen(
 }
 ```
 
-## 5.1 🧠 Search State Management (SearchViewModel)
+## 🧠 Search State Management (SearchViewModel)
 
 ### The SearchViewModel
 
@@ -1516,7 +1524,7 @@ data class SearchUiState(
 4. **Failure** → `SearchResultState.Failure` + `AppEffect.ShowToast`
 5. **`ShabbatScreen` empty card** maps `gpsResult` → `LocationStatus` → label updates reactively
 
-### 5.2 💾 Data Layer
+### 💾 Data Layer
 
 Responsibilities are now split across focused repositories — each with a single concern:
 
@@ -1583,16 +1591,16 @@ Fetches solar times from https://sunrisesunset.io/  per `SolarTimesRequest` (coo
 
 ```kotlin
 @Singleton
-class SavedLocationsRepositoryInMemory : SavedLocationsRepository {
+class SavedLocationsRepositoryInMemory @Inject constructor() : SavedLocationsRepository {
     private val _locations: MutableStateFlow<List<SavedLocation>> = MutableStateFlow(emptyList())
     override val locations: StateFlow<List<SavedLocation>> = _locations
 
     override suspend fun save(location: SavedLocation) {
         _locations.update { current ->
-            if (current.any { it.id == location.id }) {
-                current.map { if (it.id == location.id) location else it }
-            } else {
-                current + location
+            when {
+                current.size >= MAX_SAVED_LOCATIONS -> current
+                current.any { it.id == location.id } -> current.map { if (it.id == location.id) location else it }
+                else -> current + location
             }
         }
     }
@@ -1600,10 +1608,14 @@ class SavedLocationsRepositoryInMemory : SavedLocationsRepository {
     override suspend fun remove(location: SavedLocation) {
         _locations.update { it.filter { loc -> loc.id != location.id } }
     }
+
+    override suspend fun reorder(locations: List<SavedLocation>) {
+        _locations.update { locations }
+    }
 }
 ```
 
-## 6. 🔀 Reorderable Cards
+## 🔀 Reorderable Cards
 
 Cards support drag-to-reorder and swipe-to-delete, implemented as a generic, self-contained container wrapping any card.
 
@@ -1684,6 +1696,7 @@ fun ShabbatContent(
     onReorder: (from: Int, to: Int) -> Unit = {_, _ ->},
 ) {
     val state = rememberReorderableState(items = items, onReorder = onReorder)
+    val header = stringResource(R.string.shabbat_my_locations)
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -1695,7 +1708,7 @@ fun ShabbatContent(
         ) {
             reorderableList(
                 state = state,
-                header = "My locations",
+                header = header,
                 items = state.list,
                 keyOf = { it.location.id },
                 swipeConfig = swipeConfig,
@@ -1708,14 +1721,17 @@ fun ShabbatContent(
                 )
             }
         }
-        //..
+
+        AnimatedSearchScrim(searchConfig = searchConfig)
+        AnimatedSearchOverlay(searchConfig = searchConfig)
+        AnimatedSearchFab(searchConfig = searchConfig)
     }
 }
 ```
 
 Both draggable and swipeable can be toggled independently via parameters, making the container reusable across different screens with different interaction needs.
 
-## 📌 7. Current Location Feature
+## 📌 Current Location Feature
 
 Detects the user's current location via GPS, reverse geocodes it to a named location, and displays it alongside manually saved locations with dynamic distance labels.
 
@@ -1773,7 +1789,7 @@ Computed dynamically in `LocationWithTimesLoaded` reducer — never stored:
 - **Times fetched per `Coordinates`** — GPS and saved locations treated identically by times domain
 - **`LocationStatus` computed from permission + distance** — never stored, always derived
 
-### 🗄️ 8. Persistence
+### 🗄️ Persistence
 
 The app uses **Room** for local persistence:
 

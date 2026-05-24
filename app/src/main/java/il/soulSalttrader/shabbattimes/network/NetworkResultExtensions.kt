@@ -1,8 +1,5 @@
 package il.soulSalttrader.shabbattimes.network
 
-import android.util.Log
-import il.soulSalttrader.shabbattimes.Debug
-
 inline fun <T, R> NetworkResult<T>.fold(
     onSuccess: (T) -> R,
     onFailure: (NetworkResult.Failure) -> R
@@ -28,27 +25,21 @@ inline fun <T> NetworkResult<T>.mapFailure(
         is NetworkResult.Failure -> transform(this)
     }
 
-inline fun <T> NetworkResult<T>.onSuccess(tag: String, action: (T) -> Unit): NetworkResult<T> {
-    if (this is NetworkResult.Success) {
-        if (Debug.enabled) Log.d(tag, "Success: $data")
-        action(data)
-    }
+inline fun <T> NetworkResult<T>.onSuccess(action: (T) -> Unit): NetworkResult<T> {
+    if (this is NetworkResult.Success) { action(data) }
 
     return this
 }
 
-inline fun <T> NetworkResult<T>.onFailure(tag: String, action: (NetworkResult.Failure) -> Unit): NetworkResult<T> {
-    if (this is NetworkResult.Failure) {
-        if (Debug.enabled) Log.d(tag, "Failure: $message", cause)
-        action(this)
-    }
+inline fun <T> NetworkResult<T>.onFailure(action: (NetworkResult.Failure) -> Unit): NetworkResult<T> {
+    if (this is NetworkResult.Failure) { action(this) }
     return this
 }
 
 fun <T> NetworkResult<T>.getOrThrow(): T =
     when (this) {
         is NetworkResult.Success -> data
-        is NetworkResult.Failure -> throw RuntimeException(message, cause)
+        is NetworkResult.Failure -> throw RuntimeException(cause)
     }
 
 inline fun <T> NetworkResult<T>.getOrElse(onFailure: (NetworkResult.Failure) -> Nothing): T =

@@ -1,6 +1,8 @@
 package il.soulSalttrader.shabbattimes.ui.permission
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.ExplanatoryDialog
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
@@ -14,27 +16,24 @@ fun PermissionDialogs(
 
     when (permissionState.permission) {
         PermissionState.Education -> ExplanatoryDialog(
-            title = "Times, wherever you are",
-            message = "To show candle lightning and havdalah time for your current position, " +
-                    "the app needs access to your location.\n" +
-                    "\n" +
-                    "Your location is only used locally — never stored or shared.",
-            onConfirmText = "Continue",
+            title = stringResource(R.string.permission_education_title),
+            message = stringResource(R.string.permission_education_message),
+            onConfirmText = stringResource(R.string.permission_education_confirm),
             onConfirm = { dispatch(PermissionEvent.Request) },
-            onDismissText = "Add manually instead",
+            onDismissText = stringResource(R.string.permission_education_dismiss),
             onDismiss = { dispatch(PermissionEvent.DismissedRationale) },
         )
 
         PermissionState.Denied    -> ExplanatoryDialog(
-            message = "We need location to show accurate zmanim times.",
-            onConfirmText = "Allow",
+            message = stringResource(R.string.permission_denied_message),
+            onConfirmText = stringResource(R.string.permission_denied_confirm),
             onConfirm = { dispatch(PermissionEvent.AcceptedRationale) },
             onDismiss = { dispatch(PermissionEvent.DismissedRationale) },
         )
 
         PermissionState.DeniedPermanently -> ExplanatoryDialog(
-            message = "Location access was permanently denied. Please enable it in settings.",
-            onConfirmText = "Open Settings",
+            message = stringResource(R.string.permission_denied_permanently_message),
+            onConfirmText = stringResource(R.string.permission_denied_permanently_confirm),
             onConfirm = { dispatch(PermissionEvent.RequestedAppSettings) },
             onDismiss = { dispatch(PermissionEvent.DismissedRationale) },
         )
