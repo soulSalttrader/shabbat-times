@@ -158,11 +158,13 @@ fun ShabbatScreen() {
 ```kotlin
 @HiltViewModel
 class ShabbatViewModel @Inject constructor(
-    savedLocationsRepository: SavedLocationsRepository,
-    currentLocationRepository: CurrentLocationRepository,
-    permissionRepository: PermissionRepository,
+    @param:InMemory private val currentLocationRepository: CurrentLocationRepository,
+    @param:Persisted private val savedLocationsRepository: SavedLocationsRepository,
+    private val reorderLocationsUseCase: ReorderLocationsUseCase,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
-    private val removeLocationUseCase: RemoveCityUseCase,
+    private val removeLocationUseCase: RemoveSavedLocationUseCase,
+    userPreferencesRepository: UserPreferencesRepository,
+    permissionRepository: PermissionRepository,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
@@ -171,27 +173,35 @@ class ShabbatViewModel @Inject constructor(
     val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
         currentLocationRepository.location,
         savedLocationsRepository.locations,
-    ) { gpsLocation, savedLocations ->
-        buildList {
+        userPreferencesRepository.shabbatPreset,
+    ) { gpsLocation, savedLocations, preset ->
+        val locations = buildList {
             gpsLocation?.let { add(it) }
             addAll(savedLocations)
         }
-    }.flatMapLatest { savedLocations ->
+
+        locations to preset
+    }.flatMapLatest { (savedLocations, preset) ->
         flow {
-            val results = getHalachicTimesUseCase(savedLocations)
+            val results = getHalachicTimesUseCase(savedLocations, preset)
             val successes = results.filterIsInstance<NetworkResult.Success<HalachicTimes>>()
                 .map { it.data }
 
-            if (results.any { it is NetworkResult.Failure }) {
-                _effects.tryEmit(AppEffect.ShowToast("Some times failed to load"))
+            results.forEach { result ->
+                when (result) {
+                    is NetworkResult.Failure -> _effects.tryEmit(
+                        AppEffect.ShowToast(result.cause.userMessage())
+                    )
+                    is NetworkResult.Success -> Unit
+                }
             }
 
             emit(successes)
         }
     }
-        .catch { throwable ->
-            dispatch(ShabbatEvent.LocationWithTimesLoadFailed(throwable.message ?: "Unknown error", throwable))
-            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+        .catch { cause ->
+            dispatch(ShabbatEvent.ShabbatEntryLoadFailed(cause))
+            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
             emit(emptyList())
         }
         .stateIn(
@@ -209,7 +219,7 @@ class ShabbatViewModel @Inject constructor(
         savedLocationsRepository.locations,
         permissionRepository.permissionState,
     ) { state, halachicTimes, currentLocation, savedLocations, permission ->
-        ShabbatEvent.LocationWithTimesLoaded(savedLocations, currentLocation, halachicTimes, permission).reducer reduce state
+        ShabbatEvent.ShabbatEntryLoaded(savedLocations, currentLocation, halachicTimes, permission).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -225,8 +235,16 @@ class ShabbatViewModel @Inject constructor(
         }
 
         when (event) {
-            is ShabbatEvent.LocationDeleted -> handleDeleteLocation(event)
-            else                            -> Unit
+            is ShabbatEvent.LocationDeleted  -> handleDeleteLocation(event)
+            is ShabbatEvent.ReorderLocations -> handleReorderLocations(event)
+            else                             -> Unit
+        }
+    }
+
+    private fun handleReorderLocations(event: ShabbatEvent.ReorderLocations) {
+        viewModelScope.launch {
+            val entries = (state.value.shabbat as? ShabbatResultState.Ready)?.entries ?: return@launch
+            reorderLocationsUseCase(entries, event.from, event.to)
         }
     }
 
@@ -602,17 +620,18 @@ currentLocationRepository.location (in-memory, resets on restart)
 
   ```kotlin
   fun dispatch(event: AppEvent) {
-        _state.update { current ->
-            when (event) {
-                is ShabbatEvent -> event.reducer reduce current
-                else            -> current
-            }
-        }
+      _state.updateAndGet { current ->
+          when (event) {
+              is ShabbatEvent -> event.reducer reduce current
+              else            -> current
+          }
+      }
 
-        when (event) {
-            is ShabbatEvent.LocationDeleted      -> handleDeleteLocation(event)
-            else                                 -> Unit
-        }
+      when (event) {
+          is ShabbatEvent.LocationDeleted  -> handleDeleteLocation(event)
+          is ShabbatEvent.ReorderLocations -> handleReorderLocations(event)
+          else                             -> Unit
+      }
   }
   ```
 
@@ -774,7 +793,7 @@ object NavItems {
 
     val Settings = NavItem(
         target = NavTargetTop.Settings,
-        title = "Settings",
+        title = UiText.Resource(R.string.nav_settings),
         selectedIcon = UiIcon.Resource(R.drawable.settings_filled_24),
         unselectedIcon = UiIcon.Resource(R.drawable.settings_outlined_24),
         role = NavRole.TOP_ACTION,
@@ -865,16 +884,9 @@ class NavManager @Inject constructor() {
 - Navigation graphs are pure functions — no @Composable, no navController passed around.
 
 ```kotlin
-fun NavGraphBuilder.mainNavGraph(navigator: Navigator) {
-    composable<NavTargetBottom.Shabbat> {
-        ShabbatScreen()
-    }
-
-    composable<NavTargetTop.Settings> {
-        FailureScreen(message = "Coming Soon") {
-            navigator.navigateUp()
-        }
-    }
+fun NavGraphBuilder.mainNavGraph(snackbarHostState: SnackbarHostState) {
+    composable<NavTargetBottom.Shabbat> { ShabbatScreen(snackbarHostState) }
+    composable<NavTargetTop.Settings> { SettingsScreen() }
 }
 ```
 
@@ -887,9 +899,8 @@ fun NavGraphBuilder.mainNavGraph(navigator: Navigator) {
 @Composable
 fun NavApp(
     modifier: Modifier,
-    state: AppModel,
-    onEvent: (AppEvent) -> Unit,
     navigator: Navigator,
+    snackbarHostState: SnackbarHostState,
 ) {
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -902,29 +913,16 @@ fun NavApp(
         navigator.collectNavigationCommands(navController)
     }
 
-    val startDestination = NavTargetBottom.Home
+    val startDestination = NavTargetBottom.Shabbat
 
     NavHost(
         modifier = modifier,
         navController = navController,
         startDestination = startDestination,
     ) {
-        mainNavGraph(
-            state = state,
-            onEvent = onEvent,
-        )
+        mainNavGraph(snackbarHostState)
     }
-
-    if (Debug.enabled) {
-        LaunchedEffect(navController) {
-            navController.addOnDestinationChangedListener { controller, destination, arguments ->
-                Log.d(
-                    "navController",
-                    "Current destination: ${navController.currentDestinationName()}"
-                )
-            }
-        }
-    }
+    //...
 }
 ```
 
@@ -946,7 +944,9 @@ fun NavBarIcon(
         )
     }
 }
+```
 
+```kotlin
 @Composable
 fun NavBarBadge(count: Int? = null) {
     val displayCount = count?.takeIf { it > 0 } ?: return
@@ -955,17 +955,19 @@ fun NavBarBadge(count: Int? = null) {
         containerColor = MaterialTheme.colorScheme.tertiary,
         contentColor = MaterialTheme.colorScheme.onTertiary,
     ) {
-        Text(text = if (displayCount > 99) "99+" else displayCount.toString())
+        Text(text = if (displayCount > 99) stringResource(R.string.display_count_max) else displayCount.toString())
     }
 }
+```
 
-@OptIn(ExperimentalMaterial3Api::class)
+```kotlin
 @Composable
 fun NavBarTop(
     navItems: List<NavItem>,
     navigator: Navigator,
-    currentNavTarget: NavTarget? = null,
     scrollBehavior: TopAppBarScrollBehavior,
+    currentNavTarget: NavTarget? = null,
+    isNavIconVisible: Boolean = currentNavTarget != NavTargetBottom.Shabbat,
 ) {
     val (topNavigationItem, topActionItems) = navItems.extractTopBarItems()
 
@@ -978,12 +980,16 @@ fun NavBarTop(
             actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             subtitleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
-        title = { Text(text = currentNavTarget?.simpleName() ?: "None") },
+        title = { currentNavTarget?.titleOr()?.let { Text(text = it.asString()) } },
         navigationIcon = {
             topNavigationItem?.let {
-                IconButton(onClick = { navigator.navigateUp() }) {
+                IconButton(
+                    onClick = { navigator.navigateUp() },
+                    enabled = isNavIconVisible,
+                    modifier = Modifier.alpha(if (isNavIconVisible) 1f else 0f)
+                ) {
                     NavBarIcon(
-                        isSelected = currentNavTarget == it.target,
+                        isSelected = false,
                         badgeCount = null,
                         item = it,
                     )
@@ -1585,22 +1591,26 @@ Fetches solar times from https://sunrisesunset.io/  per `SolarTimesRequest` (coo
 
 ```kotlin
 @Singleton
-class SavedLocationsRepositoryInMemory : SavedLocationsRepository {
+class SavedLocationsRepositoryInMemory @Inject constructor() : SavedLocationsRepository {
     private val _locations: MutableStateFlow<List<SavedLocation>> = MutableStateFlow(emptyList())
     override val locations: StateFlow<List<SavedLocation>> = _locations
 
     override suspend fun save(location: SavedLocation) {
         _locations.update { current ->
-            if (current.any { it.id == location.id }) {
-                current.map { if (it.id == location.id) location else it }
-            } else {
-                current + location
+            when {
+                current.size >= MAX_SAVED_LOCATIONS -> current
+                current.any { it.id == location.id } -> current.map { if (it.id == location.id) location else it }
+                else -> current + location
             }
         }
     }
 
     override suspend fun remove(location: SavedLocation) {
         _locations.update { it.filter { loc -> loc.id != location.id } }
+    }
+
+    override suspend fun reorder(locations: List<SavedLocation>) {
+        _locations.update { locations }
     }
 }
 ```
@@ -1686,6 +1696,7 @@ fun ShabbatContent(
     onReorder: (from: Int, to: Int) -> Unit = {_, _ ->},
 ) {
     val state = rememberReorderableState(items = items, onReorder = onReorder)
+    val header = stringResource(R.string.shabbat_my_locations)
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -1697,7 +1708,7 @@ fun ShabbatContent(
         ) {
             reorderableList(
                 state = state,
-                header = "My locations",
+                header = header,
                 items = state.list,
                 keyOf = { it.location.id },
                 swipeConfig = swipeConfig,
@@ -1710,7 +1721,10 @@ fun ShabbatContent(
                 )
             }
         }
-        //..
+
+        AnimatedSearchScrim(searchConfig = searchConfig)
+        AnimatedSearchOverlay(searchConfig = searchConfig)
+        AnimatedSearchFab(searchConfig = searchConfig)
     }
 }
 ```
