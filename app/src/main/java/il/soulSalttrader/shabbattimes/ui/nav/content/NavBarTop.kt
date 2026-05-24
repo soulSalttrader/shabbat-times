@@ -37,7 +37,7 @@ fun NavBarTop(
             actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             subtitleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
-        title = { currentNavTarget?.titleOr("No title")?.let { Text(text = it) } },
+        title = { currentNavTarget?.titleOr()?.let { Text(text = it.asString()) } },
         navigationIcon = {
             topNavigationItem?.let {
                 IconButton(

@@ -3,17 +3,19 @@ package il.soulSalttrader.shabbattimes.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.shabbattimes.common.userMessage
 import il.soulSalttrader.shabbattimes.di.InMemory
 import il.soulSalttrader.shabbattimes.di.Persisted
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
+import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
+import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
 import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
 import il.soulSalttrader.shabbattimes.ui.event.AppEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
-import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
 import il.soulSalttrader.shabbattimes.useCase.RemoveSavedLocationUseCase
@@ -41,6 +43,7 @@ class ShabbatViewModel @Inject constructor(
     private val reorderLocationsUseCase: ReorderLocationsUseCase,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
     private val removeLocationUseCase: RemoveSavedLocationUseCase,
+    userPreferencesRepository: UserPreferencesRepository,
     permissionRepository: PermissionRepository,
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
@@ -50,27 +53,35 @@ class ShabbatViewModel @Inject constructor(
     val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
         currentLocationRepository.location,
         savedLocationsRepository.locations,
-    ) { gpsLocation, savedLocations ->
-        buildList {
+        userPreferencesRepository.shabbatPreset,
+    ) { gpsLocation, savedLocations, preset ->
+        val locations = buildList {
             gpsLocation?.let { add(it) }
             addAll(savedLocations)
         }
-    }.flatMapLatest { savedLocations ->
+
+        locations to preset
+    }.flatMapLatest { (savedLocations, preset) ->
         flow {
-            val results = getHalachicTimesUseCase(savedLocations)
+            val results = getHalachicTimesUseCase(savedLocations, preset)
             val successes = results.filterIsInstance<NetworkResult.Success<HalachicTimes>>()
                 .map { it.data }
 
-            if (results.any { it is NetworkResult.Failure }) {
-                _effects.tryEmit(AppEffect.ShowToast("Some times failed to load"))
+            results.forEach { result ->
+                when (result) {
+                    is NetworkResult.Failure -> _effects.tryEmit(
+                        AppEffect.ShowToast(result.cause.userMessage())
+                    )
+                    is NetworkResult.Success -> Unit
+                }
             }
 
             emit(successes)
         }
     }
-        .catch { throwable ->
-            dispatch(ShabbatEvent.ShabbatEntryLoadFailed(throwable.message ?: "Unknown error", throwable))
-            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+        .catch { cause ->
+            dispatch(ShabbatEvent.ShabbatEntryLoadFailed(cause))
+            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
             emit(emptyList())
         }
         .stateIn(

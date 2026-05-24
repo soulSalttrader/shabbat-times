@@ -1,0 +1,18 @@
+package il.soulSalttrader.shabbattimes.model
+
+import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
+
+@Immutable
+sealed interface ShabbatResultState : State {
+    @Immutable
+    data object Idle : ShabbatResultState
+    @Immutable
+    data object Loading : ShabbatResultState
+    @Immutable
+    data object Empty : ShabbatResultState
+    @Immutable
+    data class Ready(val entries: ImmutableList<ShabbatEntry>) : ShabbatResultState
+    @Immutable
+    data class Failure(val cause: Throwable? = null) : ShabbatResultState
+}

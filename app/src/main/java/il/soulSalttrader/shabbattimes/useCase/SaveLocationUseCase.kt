@@ -2,6 +2,7 @@ package il.soulSalttrader.shabbattimes.useCase
 
 import il.soulSalttrader.shabbattimes.di.Persisted
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
+import il.soulSalttrader.shabbattimes.model.SaveLocationResult
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import jakarta.inject.Inject
@@ -9,7 +10,8 @@ import jakarta.inject.Inject
 class SaveLocationUseCase @Inject constructor(
     @param:Persisted private val savedLocationsRepository: SavedLocationsRepository,
 ) {
-    suspend operator fun invoke(resolved: ResolvedLocation) {
+    suspend operator fun invoke(resolved: ResolvedLocation): SaveLocationResult {
+        if (savedLocationsRepository.isLimitReached()) return SaveLocationResult.LimitReached
         savedLocationsRepository.save(
             SavedLocation(
                 id = resolved.id,
@@ -18,9 +20,6 @@ class SaveLocationUseCase @Inject constructor(
                 timeZoneId = resolved.timeZoneId,
             )
         )
-    }
-
-    suspend operator fun invoke(saved: SavedLocation) {
-        savedLocationsRepository.save(saved)
+        return SaveLocationResult.Success
     }
 }

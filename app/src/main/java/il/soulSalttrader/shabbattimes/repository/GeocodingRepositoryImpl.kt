@@ -21,10 +21,10 @@ class GeocodingRepositoryImpl @Inject constructor(
                 val response = geoapifyService.api.reverseGeocode(location.latitude, location.longitude)
                 response.results?.firstOrNull()?.toResolvedLocation(
                     requestCoordinates = location.normalize()
-                ) ?: return@withContext NetworkResult.Failure(message = "No results found")
+                ) ?: return@withContext NetworkResult.Failure()
             }.fold(
-                onSuccess = { NetworkResult.Success(data = it) },
-                onFailure = { e -> NetworkResult.Failure(message = "Reverse geocode failed: ${e.message}", cause = e.cause) }
+                onSuccess = { data -> NetworkResult.Success(data) },
+                onFailure = { cause -> NetworkResult.Failure(cause) }
             )
         }
 
@@ -38,8 +38,8 @@ class GeocodingRepositoryImpl @Inject constructor(
                 val response = geoapifyService.api.autocomplete(queryText = normalized)
                 response.results?.map { it.toResolvedLocation() } ?: emptyList()
             }.fold(
-                onSuccess = { NetworkResult.Success(data = it) },
-                onFailure = { e -> NetworkResult.Failure(message = "Autocomplete failed: ${e.message}", cause = e.cause) }
+                onSuccess = { data -> NetworkResult.Success(data) },
+                onFailure = { cause -> NetworkResult.Failure(cause) }
             )
         }
 }

@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
@@ -26,7 +27,7 @@ fun LocationSearchBarInputField(
     onClear: () -> Unit,
 
     placeholder: @Composable (() -> Unit)? = {
-        Text("City, address or zip code")
+        Text(stringResource(R.string.search_placeholder))
     },
 
     leadingIcon: @Composable (() -> Unit)? = {

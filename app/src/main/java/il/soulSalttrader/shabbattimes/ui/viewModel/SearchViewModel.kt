@@ -3,16 +3,21 @@ package il.soulSalttrader.shabbattimes.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import il.soulSalttrader.shabbattimes.ui.normalizedOrEmpty
-import il.soulSalttrader.shabbattimes.ui.normalizedOrNull
-import il.soulSalttrader.shabbattimes.ui.search.SearchUiState
-import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
-import il.soulSalttrader.shabbattimes.ui.event.AppEvent
-import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
+import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.common.constants.LocationConfig.MAX_SAVED_LOCATIONS
+import il.soulSalttrader.shabbattimes.common.userMessage
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
+import il.soulSalttrader.shabbattimes.model.SaveLocationResult
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
+import il.soulSalttrader.shabbattimes.ui.UiText
+import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
+import il.soulSalttrader.shabbattimes.ui.event.AppEvent
+import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
+import il.soulSalttrader.shabbattimes.ui.normalizedOrEmpty
+import il.soulSalttrader.shabbattimes.ui.normalizedOrNull
+import il.soulSalttrader.shabbattimes.ui.search.SearchUiState
 import il.soulSalttrader.shabbattimes.useCase.GetLocationSuggestionsUseCase
 import il.soulSalttrader.shabbattimes.useCase.ResolveGpsLocationUseCase
 import il.soulSalttrader.shabbattimes.useCase.SaveLocationUseCase
@@ -63,13 +68,13 @@ class SearchViewModel @Inject constructor(
         .flatMapLatest { query ->
             flow {
                 getLocationSuggestion(query)
-                    .onSuccess("SearchVM") { suggestions -> emit(suggestions) }
-                    .onFailure("SearchVM") { e -> _effects.tryEmit(AppEffect.ShowToast(e.message)) }
+                    .onSuccess { suggestions -> emit(suggestions) }
+                    .onFailure { e -> _effects.tryEmit(AppEffect.ShowToast(e.cause.userMessage())) }
             }
         }
-        .catch { throwable ->
-            SearchEvent.SuggestionsLoadFailed(throwable.message ?: "Unknown error", throwable).reducer reduce _state.value
-            _effects.tryEmit(AppEffect.ShowToast("Unexpected error: ${throwable.message}"))
+        .catch { cause ->
+            SearchEvent.SuggestionsLoadFailed(cause).reducer reduce _state.value
+            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
             emit(emptyList())
         }
         .stateIn(
@@ -82,9 +87,9 @@ class SearchViewModel @Inject constructor(
     private val gpsLocationFlow: StateFlow<ResolvedLocation?> = resolveGpsLocationUseCase()
         .onStart { dispatch(SearchEvent.GpsLocationRequested) }
         .onEach { resolved -> updateCurrentLocationUseCase(resolved) }
-        .catch { e ->
-            dispatch(SearchEvent.GpsLocationError(e.message ?: "Unknown error"))
-            _effects.tryEmit(AppEffect.ShowToast(e.message ?: "Unknown error"))
+        .catch { cause ->
+            dispatch(SearchEvent.GpsLocationError(cause))
+            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
             emit(null)
         }
         .stateIn(
@@ -127,6 +132,19 @@ class SearchViewModel @Inject constructor(
         val resolved = state.selectedSuggestion.normalizedOrNull() ?: return
 
         viewModelScope.launch {
+            when (saveLocationUseCase(resolved)) {
+                SaveLocationResult.LimitReached -> _effects.tryEmit(
+                    AppEffect.ShowSnackBar(
+                        message = UiText.Resource(
+                            id = R.string.search_limit_reached,
+                            args = listOf(MAX_SAVED_LOCATIONS),
+                        ),
+                        actionLabel = UiText.Resource(R.string.search_limit_action),
+                        onAction = { dispatch(SearchEvent.SearchVisibilityChanged(false)) },
+                    )
+                )
+                SaveLocationResult.Success -> Unit
+            }
             saveLocationUseCase(resolved)
         }
     }

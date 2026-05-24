@@ -14,6 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.ui.ExplanatoryDialog
 import kotlinx.coroutines.launch
 
@@ -23,10 +25,10 @@ fun <T> SwipeableItem(
     item: T,
     modifier: Modifier = Modifier,
     swipeConfig: SwipeConfig<T>,
-    message: String = "This action cannot be undone.",
-    title: String = "Delete item?",
-    onConfirmText: String = "Delete",
-    onDismissText: String = "Undo",
+    message: String = stringResource(R.string.swipe_delete_message),
+    title: String = stringResource(R.string.swipe_delete_title),
+    onConfirmText: String = stringResource(R.string.swipe_delete_confirm),
+    onDismissText: String = stringResource(R.string.swipe_delete_dismiss),
     content: @Composable () -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }

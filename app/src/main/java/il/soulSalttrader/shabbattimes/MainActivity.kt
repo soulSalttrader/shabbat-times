@@ -25,10 +25,11 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             ShabbatTheme {
-                ShabbatScaffold(navigator = navigator) { innerPadding ->
+                ShabbatScaffold(navigator) { innerPadding, snackbarHostState ->
                     NavApp(
                         modifier = Modifier.padding(innerPadding),
                         navigator = navigator,
+                        snackbarHostState = snackbarHostState,
                     )
                 }
             }
