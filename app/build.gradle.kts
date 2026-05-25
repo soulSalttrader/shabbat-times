@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
@@ -12,9 +11,7 @@ plugins {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.fromTarget("11")
-    }
+    jvmToolchain(17)
 }
 
 android {
@@ -65,8 +62,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
