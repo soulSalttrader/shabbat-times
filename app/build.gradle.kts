@@ -3,7 +3,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.parcelize)
@@ -20,7 +19,7 @@ kotlin {
 
 android {
     namespace = "il.soulSalttrader.shabbattimes"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "il.soulSaltrader.shabbattimes"
@@ -87,47 +86,65 @@ room { schemaDirectory("$projectDir/schemas") }
 
 dependencies {
 
+    // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.kotlinx.collections.immutable)
+
+    // UI
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.material)
+    implementation(libs.reorderable)
 
+    // Navigation
+    implementation(libs.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
+
+    // Dependency Injection
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    ksp(libs.hilt.compiler)
+
+    // Network
     implementation(libs.retrofit)
     implementation(libs.kotlinx.serialization.converter)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
 
-    implementation(libs.navigation.compose)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlin.reflect)
-    implementation(libs.material)
-
-    implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.navigation.compose)
-    ksp(libs.hilt.compiler)
-    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
-
-    implementation(libs.material3)
-
-    implementation(libs.reorderable)
-
+    // Location
     implementation(libs.play.services.location)
 
-    implementation(libs.kotlinx.collections.immutable)
+    // Persistence
     implementation(libs.androidx.datastore.preferences)
-
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // Unit Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.mockk)
+    testImplementation(libs.hilt.android.testing)
+
+    // UI / Instrumented Testing
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.runner)
+    androidTestImplementation(libs.androidx.rules)
+
+    // Debug
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
