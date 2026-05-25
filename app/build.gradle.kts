@@ -79,8 +79,6 @@ android {
     }
 }
 
-room { schemaDirectory("$projectDir/schemas") }
-
 dependencies {
 
     // Core
@@ -146,4 +144,30 @@ dependencies {
     // Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+room { schemaDirectory("$projectDir/schemas") }
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+
+    // show test results in console
+    testLogging {
+        events("passed", "skipped", "failed")
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+    }
+
+    // timeout per test
+    systemProperty("kotest.framework.timeout", "10000")
+
+    // fail fast — stop on first failure
+//    failFast = true
+
+    // increase heap if tests are memory intensive
+//    maxHeapSize = "1g"
+
+    // parallel execution
+//    maxParallelForks = Runtime.getRuntime().availableProcessors()
 }
