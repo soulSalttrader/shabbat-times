@@ -15,5 +15,5 @@ object Debug {
     ): String = "${logTag()}(event=$eventName) ➜ $next"
 
     fun <S : State> Reducer<S>.formatEventName(): String =
-        javaClass.enclosingClass.simpleName
+        javaClass.enclosingClass?.simpleName ?: "Unknown"
 }
