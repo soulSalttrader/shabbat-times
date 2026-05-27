@@ -65,6 +65,57 @@ class PermissionViewModelTest : DescribeSpec({
 
     describe("PERM_RESTART - App Restart Scenarios") {
 
+        // PERM_RESTART_S1 — Restart with granted permission
+        it("PERM_RESTART_S1 - cold start with Granted, no dialogs") {
+            runTest {
+                val repo = FakePermissionRepository()
+                repo.updatePermissionState(LocationPermission.Granted)
+                val vm = PermissionViewModel(repo)
+
+                vm.state.test {
+                    awaitItem().apply {
+                        permission shouldBe PermissionState.Granted
+                        isDialogVisible shouldBe false
+                    }
+                    cancelAndIgnoreRemainingEvents()
+                }
+            }
+        }
+
+        // PERM_RESTART_S2 — Restart with denied permission
+        it("PERM_RESTART_S2 - cold start with Denied, no dialogs") {
+            runTest {
+                val repo = FakePermissionRepository()
+                repo.updatePermissionState(LocationPermission.Denied)
+                val vm = PermissionViewModel(repo)
+
+                vm.state.test {
+                    awaitItem().apply {
+                        permission shouldBe PermissionState.Denied
+                        isDialogVisible shouldBe false
+                    }
+                    cancelAndIgnoreRemainingEvents()
+                }
+            }
+        }
+
+        // PERM_RESTART_S3 - Restart with permanently denied
+        it("PERM_RESTART_S3 - cold start with DeniedPermanently, no dialogs") {
+            runTest {
+                val repo = FakePermissionRepository()
+                repo.updatePermissionState(LocationPermission.DeniedPermanently)
+                val vm = PermissionViewModel(repo)
+
+                vm.state.test {
+                    awaitItem().apply {
+                        permission shouldBe PermissionState.DeniedPermanently
+                        isDialogVisible shouldBe false
+                    }
+                    cancelAndIgnoreRemainingEvents()
+                }
+            }
+        }
+
         it("PERM_RESTART_S3 - cold start after permanent denial skips Education, shows Open Settings on tap") {
             runTest {
                 val repo = FakePermissionRepository()
@@ -87,6 +138,23 @@ class PermissionViewModelTest : DescribeSpec({
                 }
             }
         }
+
+        // PERM_RESTART_S4 - External revocation (e.g. settings revoke while app was backgrounded)
+        it("PERM_RESTART_S4 - repo emits Denied after external revocation") {
+            runTest {
+                val (vm, repo) = setup()
+                vm.state.test {
+                    awaitItem() // Idle
+
+                    repo.updatePermissionState(LocationPermission.Denied)
+                    testDispatcher.scheduler.advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Denied
+
+                    cancelAndIgnoreRemainingEvents()
+                }
+            }
+        }
+    }
 
     }
 })
