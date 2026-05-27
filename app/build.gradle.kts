@@ -77,6 +77,12 @@ android {
             pickFirsts += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
         }
     }
+
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 dependencies {
