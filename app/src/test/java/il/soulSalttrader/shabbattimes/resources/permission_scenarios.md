@@ -39,11 +39,9 @@
 ## PERM_FRESH_S5 - Dismiss system permission dialog
 🖐️
 
-1. Tap card → Education → "Continue"
-2. System dialog appears 
-3. Swipe away / dismiss without choosing 
-4. ✅ Goes to rationale state (Denied)
-5. Tap card again → Rationale dialog appears
+⚠️ Not applicable for minSdk >= 29
+System dialog cannot be dismissed without making a choice on API 29+.
+Only relevant for older devices — manual test only if minSdk < 29.
 
 ## PERM_FRESH_S6 - Dismiss education dialog
 🖐️
