@@ -35,10 +35,10 @@ class PermissionViewModelTest : DescribeSpec({
         return vm to repo
     }
 
-    describe("PERM_FRESH — fresh install flow") {
+    describe("PERM_FRESH - fresh install flow") {
 
-        // PERM_FRESH_S1 — Grant on first ask
-        it("PERM_FRESH_S1 — full happy path: Education → Requesting → Granted") {
+        // PERM_FRESH_S1 - Grant on first ask
+        it("PERM_FRESH_S1 - full happy path: Education → Requesting → Granted") {
             runTest {
                 val (vm, repo) = setup()
 
@@ -89,7 +89,7 @@ class PermissionViewModelTest : DescribeSpec({
             }
         }
 
-        it("PERM_FRESH_S2 — deny → rationale visible, no GPS card") {
+        it("PERM_FRESH_S2 - deny → rationale visible, no GPS card") {
             runTest {
                 val (vm, repo) = setup()
                 vm.state.test {
@@ -115,8 +115,8 @@ class PermissionViewModelTest : DescribeSpec({
             }
         }
 
-        // PERM_FRESH_S3 — Deny then allow via rationale
-        it("PERM_FRESH_S3 — deny → accept rationale → grant") {
+        // PERM_FRESH_S3 - Deny then allow via rationale
+        it("PERM_FRESH_S3 - deny → accept rationale → grant") {
             runTest {
                 val (vm, repo) = setup()
                 vm.state.test {
@@ -142,7 +142,7 @@ class PermissionViewModelTest : DescribeSpec({
         }
 
         //
-        it("PERM_FRESH_S4 — deny twice → permanently denied") {
+        it("PERM_FRESH_S4 - deny twice → permanently denied") {
             runTest {
                 val (vm, repo) = setup()
                 vm.state.test {
@@ -292,7 +292,7 @@ class PermissionViewModelTest : DescribeSpec({
 
     describe("PERM_RESTART - App Restart Scenarios") {
 
-        // PERM_RESTART_S1 — Restart with granted permission
+        // PERM_RESTART_S1 - Restart with granted permission
         it("PERM_RESTART_S1 - cold start with Granted, no dialogs") {
             runTest {
                 val repo = FakePermissionRepository()
@@ -309,7 +309,7 @@ class PermissionViewModelTest : DescribeSpec({
             }
         }
 
-        // PERM_RESTART_S2 — Restart with denied permission
+        // PERM_RESTART_S2 - Restart with denied permission
         it("PERM_RESTART_S2 - cold start with Denied, no dialogs") {
             runTest {
                 val repo = FakePermissionRepository()
@@ -472,5 +472,80 @@ class PermissionViewModelTest : DescribeSpec({
         }
     }
 
+    describe("PERM_MAPPING - repo emission flows through to public state") {
+
+        listOf(
+            LocationPermission.Idle              to PermissionState.Idle,
+            LocationPermission.Education         to PermissionState.Education,
+            LocationPermission.Requesting        to PermissionState.Requesting,
+            LocationPermission.Granted           to PermissionState.Granted,
+            LocationPermission.Denied            to PermissionState.Denied,
+            LocationPermission.DeniedPermanently to PermissionState.DeniedPermanently,
+        ).forEach { (locationPermission, expectedState) ->
+
+            it("PERM_MAPPING - repo emits $locationPermission → public state = $expectedState") {
+                runTest {
+                    val repo = FakePermissionRepository()
+                    repo.updatePermissionState(locationPermission)
+                    val vm = PermissionViewModel(repo)
+
+                    vm.state.test {
+                        awaitItem().permission shouldBe expectedState
+                        cancelAndIgnoreRemainingEvents()
+                    }
+                }
+            }
+        }
+    }
+
+    describe("BUG REGRESSION - combine() intermediate states") {
+        it("ShowEducation never produces invalid intermediate state Idle+dialogVisible") {
+            // BUG: combine() fires twice on dispatch - first emission has correct isDialogVisible
+            // but stale permission=Idle because repo hasn't updated yet.
+            // Seen in logs: Idle/true appears briefly before Education/true.
+            // Fix: separate _uiState (UI fields) from repo (permission) in combine,
+            // and update repo before _uiState in dispatch().
+            runTest(UnconfinedTestDispatcher()) {
+                val (vm, _) = setup()
+                val allStates = mutableListOf<PermissionUiState>()
+
+                val job = launch {
+                    vm.state.collect { allStates.add(it) }
+                }
+
+                vm.dispatch(PermissionEvent.ShowEducation)
+
+                job.cancel()
+
+                allStates.none {
+                    it.permission == PermissionState.Idle && it.isDialogVisible
+                } shouldBe true
+
+                allStates.last().permission shouldBe PermissionState.Education
+                allStates.last().isDialogVisible shouldBe true
+            }
+        }
+
+        it("BUG_COMBINE_S2 - cold start with DeniedPermanently never flashes Idle first") {
+            // BUG: stateIn initialValue was hardcoded to PermissionUiState() = Idle
+            // causing one Idle emission before combine produced the real value.
+            // Fix: initialValue reads repo.permissionState.value synchronously.
+            runTest(UnconfinedTestDispatcher()) {
+                val repo = FakePermissionRepository()
+                repo.updatePermissionState(LocationPermission.DeniedPermanently)
+                val vm = PermissionViewModel(repo)
+
+                val allStates = mutableListOf<PermissionUiState>()
+                val job = launch { vm.state.collect { allStates.add(it) } }
+                job.cancel()
+
+                // must never flash Idle before DeniedPermanently
+                allStates.none {
+                    it.permission == PermissionState.Idle
+                } shouldBe true
+
+                allStates.first().permission shouldBe PermissionState.DeniedPermanently
+            }
+        }
     }
 })
