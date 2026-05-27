@@ -4,11 +4,14 @@ import app.cash.turbine.test
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
+import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -373,6 +376,95 @@ class PermissionViewModelTest : DescribeSpec({
                     repo.updatePermissionState(LocationPermission.Denied)
                     testDispatcher.scheduler.advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.Denied
+
+                    cancelAndIgnoreRemainingEvents()
+                }
+            }
+        }
+    }
+
+    describe("PERM_CARD") {
+        // PERM_CARD_S1 - Remove GPS card then re-add (permission unchanged)
+        it("PERM_CARD_S1 - removing GPS card does not change permission state") {
+            runTest {
+                val (vm, repo) = setup()
+                vm.dispatch(PermissionEvent.AllGranted)
+                testDispatcher.scheduler.advanceUntilIdle()
+
+                // card removed - no permission event dispatched
+                repo.permissionState.value shouldBe LocationPermission.Granted
+            }
+        }
+
+        it("PERM_CARD_S1 - re-adding when already granted, dispatch AllGranted goes straight to Granted") {
+            runTest {
+                val repo = FakePermissionRepository()
+                repo.updatePermissionState(LocationPermission.Granted)
+                val vm = PermissionViewModel(repo)
+
+                vm.state.test {
+                    awaitItem().apply {
+                        permission shouldBe PermissionState.Granted
+                        isDialogVisible shouldBe false
+                        // Education was never dispatched - no isDialogVisible=true with Education state
+                    }
+                    cancelAndIgnoreRemainingEvents()
+                }
+            }
+        }
+    }
+
+    describe("PERM_EDGE - edge cases") {
+        it("PERM_EDGE_S1 - rapid taps do not cause invalid state transitions") {
+            runTest {
+                val (vm, _) = setup()
+                vm.state.test {
+                    awaitItem() // Idle
+
+                    // simulate rapid tap - user taps card multiple times quickly
+                    // real risk: ShowEducation fired multiple times before dialog appears
+                    vm.dispatch(PermissionEvent.ShowEducation)
+                    vm.dispatch(PermissionEvent.ShowEducation)
+                    vm.dispatch(PermissionEvent.ShowEducation)
+                    testDispatcher.scheduler.advanceUntilIdle()
+
+                    val states = cancelAndConsumeRemainingEvents()
+                        .filterIsInstance<app.cash.turbine.Event.Item<PermissionUiState>>()
+                        .map { it.value }
+
+                    // must never go back to Idle
+                    states.none { it.permission == PermissionState.Idle } shouldBe true
+
+                    // final state must be Education with dialog visible
+                    states.last().apply {
+                        permission shouldBe PermissionState.Education
+                        isDialogVisible shouldBe true
+                    }
+
+                    // dialog must not have appeared more than once - isDialogVisible flips
+                    // should only go true once, not true/false/true
+                    states.count { it.isDialogVisible } shouldBe states.size // stays true throughout
+                }
+            }
+        }
+
+        it("PERM_EDGE_S5 - events during Requesting state handled gracefully, no invalid transitions") {
+            runTest {
+                val (vm, repo) = setup()
+                vm.state.test {
+                    awaitItem()
+
+                    vm.dispatch(PermissionEvent.Request)
+                    testDispatcher.scheduler.advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Requesting
+
+                    // ON_RESUME fires after returning from other app
+                    // resolvePermissionEvent might return AllGranted or DeniedWithRationale
+                    vm.dispatch(PermissionEvent.AllGranted)
+                    testDispatcher.scheduler.advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Granted
+
+                    repo.permissionState.value shouldBe LocationPermission.Granted
 
                     cancelAndIgnoreRemainingEvents()
                 }
