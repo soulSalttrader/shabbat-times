@@ -39,9 +39,12 @@ class PermissionRepositoryImpl @Inject constructor(
 
     override fun updatePermissionState(state: LocationPermission) {
         _permissionState.value = state
-        if (state == LocationPermission.DeniedPermanently) {
-            CoroutineScope(Dispatchers.IO).launch {
-                dataStore.edit { it[PERMISSION_KEY] = "DeniedPermanently" }
+        CoroutineScope(Dispatchers.IO).launch {
+            dataStore.edit { prefs ->
+                when (state == LocationPermission.DeniedPermanently) {
+                    true -> prefs[PERMISSION_KEY] = "DeniedPermanently"
+                    else -> prefs.remove(PERMISSION_KEY)
+                }
             }
         }
     }
