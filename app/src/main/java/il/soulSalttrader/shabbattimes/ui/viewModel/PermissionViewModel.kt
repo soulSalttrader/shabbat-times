@@ -36,7 +36,9 @@ class PermissionViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = PermissionUiState()
+        initialValue = PermissionEvent.PermissionChanged(
+            permissionRepository.permissionState.value
+        ).reducer reduce PermissionUiState()
     )
 
     fun dispatch(event: AppEvent) {
