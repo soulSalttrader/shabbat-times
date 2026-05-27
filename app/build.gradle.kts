@@ -138,6 +138,7 @@ dependencies {
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.androidx.test.runner)
 
     // UI / Instrumented Testing
     androidTestImplementation(libs.androidx.junit)
