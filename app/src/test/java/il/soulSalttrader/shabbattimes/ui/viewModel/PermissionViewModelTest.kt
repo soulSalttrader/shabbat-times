@@ -62,4 +62,31 @@ class PermissionViewModelTest : DescribeSpec({
             }
         }
     }
+
+    describe("PERM_RESTART - App Restart Scenarios") {
+
+        it("PERM_RESTART_S3 - cold start after permanent denial skips Education, shows Open Settings on tap") {
+            runTest {
+                val repo = FakePermissionRepository()
+                repo.updatePermissionState(LocationPermission.DeniedPermanently) // persisted
+                val vm = PermissionViewModel(repo)
+
+                vm.state.test {
+                    testDispatcher.scheduler.advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.DeniedPermanently
+
+                    // user taps card
+                    vm.dispatch(PermissionEvent.ShowDeniedPermanentlyDialog)
+                    testDispatcher.scheduler.advanceUntilIdle()
+                    awaitItem().apply {
+                        permission shouldBe PermissionState.DeniedPermanently
+                        isDialogVisible shouldBe true // Open Settings dialog, not Education
+                    }
+
+                    cancelAndIgnoreRemainingEvents()
+                }
+            }
+        }
+
+    }
 })
