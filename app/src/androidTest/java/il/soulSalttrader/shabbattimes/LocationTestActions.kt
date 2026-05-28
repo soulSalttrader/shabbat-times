@@ -7,6 +7,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 
 object LocationTestActions {
+    fun ComposeTestRule.waitUntilGpsCardVisible(timeoutMillis: Long = 5000) {
+        waitUntil(timeoutMillis) {
+            onAllNodesWithTag(TestTags.GPS_CARD)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
     fun ComposeTestRule.addLocationBySearch(
         cityName: String,
         slowModeDelayMs: Long = 0,

@@ -1,12 +1,11 @@
 package il.soulSalttrader.shabbattimes.permission
 
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.LocationTestActions.addLocationBySearch
+import il.soulSalttrader.shabbattimes.LocationTestActions.waitUntilGpsCardVisible
 import il.soulSalttrader.shabbattimes.TestTags
 import org.junit.Before
 import org.junit.Test
@@ -33,7 +32,7 @@ class PermissionGrantedFlowTest : PermissionFlowTestBase() {
     @Test
     fun `should not show drag handle on Empty card`() {
         composeRule.onNodeWithTag(TestTags.EMPTY_CARD).assertExists()
-        composeRule.onNodeWithContentDescription(TestTags.DRAG_HANDLE).assertDoesNotExist()
+        composeRule.onNodeWithTag(TestTags.DRAG_HANDLE).assertDoesNotExist()
     }
 
     @Test
@@ -43,23 +42,13 @@ class PermissionGrantedFlowTest : PermissionFlowTestBase() {
 
     @Test
     fun `should show drag handle on GPS card`() {
-        composeRule.waitUntil(timeoutMillis = 5000) {
-            composeRule
-                .onAllNodesWithTag(TestTags.GPS_CARD)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeRule.waitUntilGpsCardVisible()
         composeRule.onNodeWithTag(TestTags.DRAG_HANDLE, true).assertExists()
     }
 
     @Test
     fun `should show drag handle on location card`() {
-        composeRule.waitUntil(timeoutMillis = 5000) {
-            composeRule
-                .onAllNodesWithTag(TestTags.GPS_CARD)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeRule.waitUntilGpsCardVisible()
         composeRule.onNodeWithTag(TestTags.DRAG_HANDLE, true).assertExists()
     }
 
@@ -70,12 +59,7 @@ class PermissionGrantedFlowTest : PermissionFlowTestBase() {
 
     @Test
     fun `PERM_RESTART_S1 - GPS card visible when permission already granted`() {
-        composeRule.waitUntil(timeoutMillis = 5000) {
-            composeRule
-                .onAllNodesWithTag(TestTags.GPS_CARD)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeRule.waitUntilGpsCardVisible()
         composeRule.onNodeWithTag(TestTags.GPS_CARD).assertExists()
     }
 }
