@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
+import il.soulSalttrader.shabbattimes.LocationSearchScreenTest
 import il.soulSalttrader.shabbattimes.LocationTestActions.addLocationBySearch
 import il.soulSalttrader.shabbattimes.LocationTestActions.waitUntilGpsCardVisible
 import il.soulSalttrader.shabbattimes.TestTags
@@ -55,7 +56,13 @@ class PermissionGrantedFlowTest : PermissionFlowTestBase() {
 
     @Test
     fun `should successfully add new location from search suggestion`() {
-        composeRule.addLocationBySearch("Brno")
+        LocationSearchScreenTest(composeRule)
+            .openSearch()
+            .typeCity("Brno")
+            .waitForSuggestions()
+            .selectSuggestion()
+            .closeSearch()
+
         composeRule.onNodeWithText("Brno", substring = true).assertExists()
     }
 
