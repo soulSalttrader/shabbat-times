@@ -19,9 +19,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.TestTags
+import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.ui.FabMenu
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.ui.reorderable.rememberReorderableState
@@ -62,7 +65,12 @@ fun ShabbatContent(
                 swipeConfig = swipeConfig,
             ) { item, modifier ->
                 ShabbatCard(
-                    modifier = modifier,
+                    modifier = modifier.testTag(
+                        when (item.location.id == SavedLocation.GPS_ID) {
+                            true -> TestTags.GPS_CARD
+                            else -> TestTags.LOCATION_CARD
+                        }
+                    ),
                     item = item,
                     isDraggable = isDraggable,
                     onClick = { onClick() }

@@ -41,7 +41,7 @@ fun ShabbatCard(
     onClick: () -> Unit = {},
 ) {
     ElevatedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 8.dp),
         shape = shape,
