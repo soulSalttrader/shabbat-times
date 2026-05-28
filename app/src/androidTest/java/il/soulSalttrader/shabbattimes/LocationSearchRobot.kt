@@ -6,10 +6,18 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 
-class LocationSearchScreenTest(
+class LocationSearchRobot(
     private val rule: ComposeTestRule,
     private val slowModeDelayMs: Long = 0,
 ) {
+    fun waitUntilGpsCardVisible(timeoutMillis: Long = 5000) = apply {
+        rule.waitUntil(timeoutMillis) {
+            rule.onAllNodesWithTag(TestTags.GPS_CARD)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
+
     fun openSearch() = apply {
         rule.onNodeWithTag(TestTags.FAB_ADD).performClick()
         slow()

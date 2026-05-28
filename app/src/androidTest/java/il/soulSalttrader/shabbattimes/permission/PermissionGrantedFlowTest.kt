@@ -5,9 +5,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
-import il.soulSalttrader.shabbattimes.LocationSearchScreenTest
-import il.soulSalttrader.shabbattimes.LocationTestActions.addLocationBySearch
-import il.soulSalttrader.shabbattimes.LocationTestActions.waitUntilGpsCardVisible
+import il.soulSalttrader.shabbattimes.LocationSearchRobot
 import il.soulSalttrader.shabbattimes.TestTags
 import org.junit.Before
 import org.junit.Test
@@ -44,19 +42,26 @@ class PermissionGrantedFlowTest : PermissionFlowTestBase() {
 
     @Test
     fun `should show drag handle on GPS card`() {
-        composeRule.waitUntilGpsCardVisible()
+        LocationSearchRobot(composeRule).waitUntilGpsCardVisible()
         composeRule.onNodeWithTag(TestTags.DRAG_HANDLE, true).assertExists()
     }
 
+
     @Test
     fun `should show drag handle on location card`() {
-        composeRule.waitUntilGpsCardVisible()
+        LocationSearchRobot(composeRule)
+            .openSearch()
+            .typeCity("Brno")
+            .waitForSuggestions()
+            .selectSuggestion()
+            .closeSearch()
+
         composeRule.onNodeWithTag(TestTags.DRAG_HANDLE, true).assertExists()
     }
 
     @Test
     fun `should successfully add new location from search suggestion`() {
-        LocationSearchScreenTest(composeRule)
+        LocationSearchRobot(composeRule)
             .openSearch()
             .typeCity("Brno")
             .waitForSuggestions()
@@ -68,7 +73,7 @@ class PermissionGrantedFlowTest : PermissionFlowTestBase() {
 
     @Test
     fun `PERM_RESTART_S1 - GPS card visible when permission already granted`() {
-        composeRule.waitUntilGpsCardVisible()
+        LocationSearchRobot(composeRule).waitUntilGpsCardVisible()
         composeRule.onNodeWithTag(TestTags.GPS_CARD).assertExists()
     }
 }
