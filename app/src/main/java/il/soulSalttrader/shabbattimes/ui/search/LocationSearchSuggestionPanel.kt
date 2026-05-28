@@ -17,8 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import il.soulSalttrader.shabbattimes.TestTags
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 
 @Composable
@@ -102,6 +104,7 @@ private fun SuggestionListItem(
             .clickable {
                 onSuggestionSelected(suggestion)
             }
+            .testTag(TestTags.SEARCH_SUGGESTION_ITEM)
     )
 }
 

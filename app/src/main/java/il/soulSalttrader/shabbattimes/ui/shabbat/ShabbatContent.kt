@@ -96,6 +96,7 @@ private fun BoxScope.AnimatedSearchScrim(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
                 .clickable { searchConfig.action.onChangeVisibility(false) }
+                .testTag(TestTags.SEARCH_SCRIM)
         )
     }
 }
