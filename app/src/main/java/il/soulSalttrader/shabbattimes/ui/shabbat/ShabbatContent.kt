@@ -66,9 +66,10 @@ fun ShabbatContent(
             ) { item, modifier ->
                 ShabbatCard(
                     modifier = modifier.testTag(
-                        when (item.location.id == SavedLocation.GPS_ID) {
-                            true -> TestTags.GPS_CARD
-                            else -> TestTags.LOCATION_CARD
+                        when (item.location.id) {
+                            SavedLocation.GPS_ID   -> TestTags.GPS_CARD
+                            SavedLocation.EMPTY_ID -> TestTags.EMPTY_CARD
+                            else                   -> TestTags.LOCATION_CARD
                         }
                     ),
                     item = item,
