@@ -1,35 +1,26 @@
 package il.soulSalttrader.shabbattimes.permission
 
-import android.Manifest
-import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.rule.GrantPermissionRule
-import dagger.hilt.android.testing.HiltAndroidRule
-import dagger.hilt.android.testing.HiltAndroidTest
-import il.soulSalttrader.shabbattimes.MainActivity
+import androidx.test.platform.app.InstrumentationRegistry
 import il.soulSalttrader.shabbattimes.TestTags
-import org.junit.Rule
+import dagger.hilt.android.testing.HiltAndroidTest
+import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 
 @HiltAndroidTest
-@RunWith(AndroidJUnit4::class)
-class PermissionGrantedFlowTest {
+class PermissionGrantedFlowTest : BasePermissionFlowTest() {
 
-    @get:Rule(order = 0)
-    val hiltRule = HiltAndroidRule(this)
+    @Before
+    fun grantPermissions() {
+        val packageName = InstrumentationRegistry.getInstrumentation().targetContext.packageName
 
-    @get:Rule(order = 1)
-    val permissionRule: GrantPermissionRule? = GrantPermissionRule.grant(
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-    )
-
-    @get:Rule(order = 2)
-    val composeRule = createAndroidComposeRule<MainActivity>()
+        InstrumentationRegistry.getInstrumentation().uiAutomation.apply {
+            executeShellCommand("pm grant $packageName android.permission.ACCESS_FINE_LOCATION")
+            executeShellCommand("pm grant $packageName android.permission.ACCESS_COARSE_LOCATION")
+        }
+    }
 
     @Test
     fun `app launches without crash`() {
