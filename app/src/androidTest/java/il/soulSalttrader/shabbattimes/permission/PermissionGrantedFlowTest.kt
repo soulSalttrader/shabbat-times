@@ -1,16 +1,17 @@
 package il.soulSalttrader.shabbattimes.permission
 
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
-import il.soulSalttrader.shabbattimes.TestTags
 import dagger.hilt.android.testing.HiltAndroidTest
+import il.soulSalttrader.shabbattimes.TestTags
 import org.junit.Before
 import org.junit.Test
 
 @HiltAndroidTest
-class PermissionGrantedFlowTest : BasePermissionFlowTest() {
+class PermissionGrantedFlowTest : PermissionFlowTestBase() {
 
     @Before
     fun grantPermissions() {
@@ -20,11 +21,34 @@ class PermissionGrantedFlowTest : BasePermissionFlowTest() {
             executeShellCommand("pm grant $packageName android.permission.ACCESS_FINE_LOCATION")
             executeShellCommand("pm grant $packageName android.permission.ACCESS_COARSE_LOCATION")
         }
+        Thread.sleep(300)
     }
 
     @Test
     fun `app launches without crash`() {
         composeRule.onRoot().assertExists()
+    }
+
+    @Test
+    fun `should not show drag handle on Empty card`() {
+        composeRule.onNodeWithTag(TestTags.EMPTY_CARD).assertExists()
+        composeRule.onNodeWithContentDescription(TestTags.DRAG_HANDLE).assertDoesNotExist()
+    }
+
+    @Test
+    fun `should show Empty card when no locations are saved`() {
+        composeRule.onNodeWithTag(TestTags.EMPTY_CARD).assertExists()
+    }
+
+    @Test
+    fun `should show drag handle on GPS card`() {
+        composeRule.waitUntil(timeoutMillis = 5000) {
+            composeRule
+                .onAllNodesWithTag(TestTags.GPS_CARD)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        composeRule.onNodeWithTag(TestTags.DRAG_HANDLE, true).assertExists()
     }
 
     @Test
@@ -35,8 +59,6 @@ class PermissionGrantedFlowTest : BasePermissionFlowTest() {
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
-        composeRule
-            .onNodeWithTag(TestTags.GPS_CARD)
-            .assertExists()
+        composeRule.onNodeWithTag(TestTags.GPS_CARD).assertExists()
     }
 }
