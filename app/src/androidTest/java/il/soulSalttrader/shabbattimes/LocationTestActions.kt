@@ -14,56 +14,66 @@ object LocationTestActions {
                 .isNotEmpty()
         }
     }
+
     fun ComposeTestRule.addLocationBySearch(
         cityName: String,
         slowModeDelayMs: Long = 0,
         selectNthSuggestion: Int = 0,
         closeSearchAfter: Boolean = true,
     ) {
-        apply {
-            // 1. Open FAB
-            onNodeWithTag(TestTags.FAB_ADD).performClick()
-            Thread.sleep(slowModeDelayMs)
+        openNewLocationSearch(slowModeDelayMs)
+        searchLocation(cityName, slowModeDelayMs)
+        selectSuggestion(selectNthSuggestion, slowModeDelayMs)
 
-            // 2. Click "New Location"
-            onNodeWithTag(TestTags.FAB_NEW_LOCATION)
-                .assertExists()
-                .performClick()
-            Thread.sleep(slowModeDelayMs)
-
-            // 3. Type in search field
-            onNodeWithTag(TestTags.SEARCH_INPUT).performTextInput(cityName)
-            Thread.sleep(slowModeDelayMs)
-
-            // 4. Wait for suggestions
-            waitUntil(timeoutMillis = 6000) {
-                onAllNodesWithTag(TestTags.SEARCH_SUGGESTION_ITEM)
-                    .fetchSemanticsNodes()
-                    .isNotEmpty()
-            }
-            Thread.sleep(slowModeDelayMs)
-
-            // 5. Select N-th suggestion
-            val suggestions = onAllNodesWithTag(TestTags.SEARCH_SUGGESTION_ITEM, useUnmergedTree = true)
-
-            if (suggestions.fetchSemanticsNodes().isEmpty()) {
-                throw AssertionError("No search suggestions found for '$cityName'")
-            }
-
-            if (selectNthSuggestion >= suggestions.fetchSemanticsNodes().size) {
-                throw AssertionError("Only ${suggestions.fetchSemanticsNodes().size} suggestions found, cannot select index $selectNthSuggestion")
-            }
-
-            suggestions[selectNthSuggestion].performClick()
-
-            Thread.sleep(slowModeDelayMs)
-
-            // 6. Close search overlay (if needed)
-            if (closeSearchAfter) {
-                onNodeWithTag(TestTags.SEARCH_SCRIM, useUnmergedTree = true)
-                    .performClick()
-                Thread.sleep(slowModeDelayMs)
-            }
+        if (closeSearchAfter) {
+            closeSearch(slowModeDelayMs)
         }
+    }
+
+    private fun ComposeTestRule.openNewLocationSearch(
+        slowModeDelayMs: Long = 0,
+    ) {
+        onNodeWithTag(TestTags.FAB_ADD).performClick()
+        slow(slowModeDelayMs)
+
+        onNodeWithTag(TestTags.FAB_NEW_LOCATION).assertExists().performClick()
+        slow(slowModeDelayMs)
+    }
+
+    private fun ComposeTestRule.searchLocation(
+        cityName: String,
+        slowModeDelayMs: Long = 0,
+    ) {
+        onNodeWithTag(TestTags.SEARCH_INPUT).performTextInput(cityName)
+        slow(slowModeDelayMs)
+
+        waitUntil(timeoutMillis = 6000) {
+            onAllNodesWithTag(TestTags.SEARCH_SUGGESTION_ITEM).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    private fun ComposeTestRule.selectSuggestion(
+        index: Int = 0,
+        slowModeDelayMs: Long = 0,
+    ) {
+        val suggestions = onAllNodesWithTag(TestTags.SEARCH_SUGGESTION_ITEM,true)
+        val count = suggestions.fetchSemanticsNodes().size
+
+        require(count > 0) { "No search suggestions found" }
+        require(index < count) { "Only $count suggestions found, cannot select index $index" }
+
+        suggestions[index].performClick()
+        slow(slowModeDelayMs)
+    }
+
+    private fun ComposeTestRule.closeSearch(
+        slowModeDelayMs: Long = 0,
+    ) {
+        onNodeWithTag(TestTags.SEARCH_SCRIM, true).performClick()
+        slow(slowModeDelayMs)
+    }
+
+    private fun slow(delayMs: Long) {
+        if (delayMs > 0) Thread.sleep(delayMs)
     }
 }

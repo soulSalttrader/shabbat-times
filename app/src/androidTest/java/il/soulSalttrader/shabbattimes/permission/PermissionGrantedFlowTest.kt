@@ -1,6 +1,7 @@
 package il.soulSalttrader.shabbattimes.permission
 
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -55,6 +56,7 @@ class PermissionGrantedFlowTest : PermissionFlowTestBase() {
     @Test
     fun `should successfully add new location from search suggestion`() {
         composeRule.addLocationBySearch("Brno")
+        composeRule.onNodeWithText("Brno", substring = true).assertExists()
     }
 
     @Test
