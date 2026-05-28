@@ -19,9 +19,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.TestTags
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconLabel
@@ -73,9 +75,9 @@ fun ShabbatCard(
 
             isDraggable.takeIf { it }?.let {
                 UiIconImage(
-                    modifier = modifier,
-                    icon = UiIcon.Resource(R.drawable.drag_indicator),
-                    contentDescription = "dragIndicator",
+                    modifier = Modifier.testTag(TestTags.DRAG_HANDLE),
+                    icon = UiIcon.Resource(R.drawable.drag_handle),
+                    contentDescription = "dragHandle",
                     contentColor = when (item.status) {
                         LocationStatus.Current -> colors.contentColor
                         else                   -> colors.contentColor
