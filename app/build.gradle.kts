@@ -25,7 +25,8 @@ android {
         versionCode = 1
         versionName = "v1.5.1"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "il.soulSalttrader.shabbattimes.HiltTestRunner"
 
         val secretsFile by lazy {
             rootProject.file("secrets.properties")
@@ -147,6 +148,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
 
     // Debug
     debugImplementation(libs.androidx.ui.tooling)
