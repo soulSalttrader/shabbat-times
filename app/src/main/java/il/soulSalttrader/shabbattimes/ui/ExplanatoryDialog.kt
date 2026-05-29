@@ -6,10 +6,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.TestTags.DIALOG_CONFIRM_BUTTON
+import il.soulSalttrader.shabbattimes.TestTags.DIALOG_DISMISS_BUTTON
 
 @Composable
 fun ExplanatoryDialog(
@@ -23,13 +27,20 @@ fun ExplanatoryDialog(
     onDismissText: String = stringResource(R.string.dialog_default_dismiss),
     onDismiss: () -> Unit,
     onDismissColor: @Composable () -> Color = { MaterialTheme.colorScheme.error },
+
+    testTag: String = "",
 ) {
     AlertDialog(
+        modifier = Modifier
+            .then(if (testTag.isNotEmpty()) Modifier.testTag(testTag) else Modifier),
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(message) },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(
+                modifier = Modifier.testTag(DIALOG_CONFIRM_BUTTON),
+                onClick = onConfirm,
+            ) {
                 Text(
                     text = onConfirmText,
                     color = onConfirmColor(),
@@ -37,7 +48,10 @@ fun ExplanatoryDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                modifier = Modifier.testTag(DIALOG_DISMISS_BUTTON),
+                onClick = onDismiss,
+            ) {
                 Text(
                     text = onDismissText,
                     color = onDismissColor(),
