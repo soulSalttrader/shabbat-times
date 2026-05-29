@@ -5,7 +5,9 @@ import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import il.soulSalttrader.shabbattimes.di.FakePermissionRepositoryModule
 import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
+import il.soulSalttrader.shabbattimes.model.LocationPermission
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -26,6 +28,7 @@ abstract class BaseInstrumentedTest {
         hiltRule.inject()
         FakePersistenceModule.fakeSavedLocations.clear()
         FakePersistenceModule.fakeCurrentLocation.clear()
+        FakePermissionRepositoryModule.fakePermissionRepository.updatePermissionState(LocationPermission.Idle)
         Thread.sleep(400)
     }
 
