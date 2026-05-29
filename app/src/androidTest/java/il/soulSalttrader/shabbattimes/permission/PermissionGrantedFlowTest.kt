@@ -56,7 +56,21 @@ class PermissionGrantedFlowTest : BaseInstrumentedTest() {
             .selectSuggestion()
             .closeSearch()
 
-        composeRule.onNodeWithTag(TestTags.DRAG_HANDLE, true).assertExists()
+        // assert Brno card exists
+        composeRule
+            .onNode(
+                hasTestTag(LOCATION_CARD)
+                    .and(hasText("Brno", substring = true)), useUnmergedTree = false)
+            .assertExists()
+
+        // assert drag handle exists within any location card
+        composeRule
+            .onNode(
+                hasTestTag(DRAG_HANDLE)
+                    .and(hasAnyAncestor(hasTestTag(LOCATION_CARD))),
+                useUnmergedTree = true
+            )
+            .assertExists()
     }
 
     @Test
