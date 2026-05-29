@@ -29,16 +29,24 @@ abstract class BaseInstrumentedTest {
     @Before
     fun setup() {
         hiltRule.inject()
-        runBlocking { FakePersistenceModule.fakeSavedLocations.clear() }
-        runBlocking { FakePersistenceModule.fakeCurrentLocation.update(null) }
-        FakePermissionRepositoryModule.fakePermissionRepository.updatePermissionState(LocationPermission.Idle)
+        resetFakes()
+        composeRule.activityRule.scenario.recreate()
         setupTest()
-        Thread.sleep(1000)
+        composeRule.waitForIdle()
     }
 
     @After
     fun tearDown() {
         runCatching { Espresso.pressBack() }
-        Thread.sleep(1000)
+        composeRule.waitForIdle()
+    }
+
+    private fun resetFakes() {
+        runBlocking {
+            FakePersistenceModule.fakeSavedLocations.clear()
+            FakePersistenceModule.fakeCurrentLocation.update(null)
+        }
+        FakePermissionRepositoryModule.fakePermissionRepository
+            .updatePermissionState(LocationPermission.Idle)
     }
 }
