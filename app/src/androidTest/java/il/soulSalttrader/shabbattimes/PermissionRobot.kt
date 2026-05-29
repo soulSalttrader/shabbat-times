@@ -70,6 +70,13 @@ class PermissionRobot(
         rule.onNodeWithTag(GPS_CARD).assertDoesNotExist()
     }
 
+    fun assertSystemDialogAppeared() = apply {
+        device.waitForIdle(2000)
+
+        val appeared = device.wait(Until.hasObject(By.text("While using the app")),3000)
+        assert(appeared != null) { "System permission dialog did not appear" }
+    }
+
     fun assertRationaleDialogVisible() = apply {
         rule.onNodeWithTag(RATIONALE_DIALOG).assertExists()
     }
