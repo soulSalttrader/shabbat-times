@@ -49,6 +49,7 @@ androidTestRunner = "1.7.0"
 mockk = "1.14.9"
 turbine = "1.2.1"
 kotest = "6.1.11"
+uiautomator = "2.3.0"
 
 [libraries]
 # AndroidX Core
@@ -104,6 +105,7 @@ androidx-test-runner = { module = "androidx.test:runner", version.ref = "android
 androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidTestRunner" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
