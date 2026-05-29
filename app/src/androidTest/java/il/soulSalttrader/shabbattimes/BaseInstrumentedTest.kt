@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes
 
-import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
-import androidx.test.espresso.Espresso
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
+import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -22,7 +22,9 @@ abstract class BaseInstrumentedTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
-    val composeRule = createAndroidComposeRule<MainActivity>()
+    val composeRule = createEmptyComposeRule()
+
+    lateinit var activityScenario: ActivityScenario<MainActivity>
 
     open fun setupTest() {}
 
@@ -30,15 +32,17 @@ abstract class BaseInstrumentedTest {
     fun setup() {
         hiltRule.inject()
         resetFakes()
-        composeRule.activityRule.scenario.recreate()
+
+        activityScenario = ActivityScenario.launch(MainActivity::class.java)
+        activityScenario.onActivity { }
+
         setupTest()
         composeRule.waitForIdle()
     }
 
     @After
     fun tearDown() {
-        runCatching { Espresso.pressBack() }
-        composeRule.waitForIdle()
+        activityScenario.close()
     }
 
     private fun resetFakes() {
