@@ -1,11 +1,10 @@
-package il.soulSalttrader.shabbattimes.permission
+package il.soulSalttrader.shabbattimes
 
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import il.soulSalttrader.shabbattimes.MainActivity
 import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
 import org.junit.After
 import org.junit.Before
@@ -14,7 +13,7 @@ import org.junit.runner.RunWith
 
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
-abstract class PermissionFlowTestBase {
+abstract class BaseInstrumentedTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)

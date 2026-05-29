@@ -5,13 +5,14 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
+import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.LocationSearchRobot
 import il.soulSalttrader.shabbattimes.TestTags
 import org.junit.Before
 import org.junit.Test
 
 @HiltAndroidTest
-class PermissionGrantedFlowTest : PermissionFlowTestBase() {
+class PermissionGrantedFlowTest : BaseInstrumentedTest() {
 
     @Before
     fun grantPermissions() {

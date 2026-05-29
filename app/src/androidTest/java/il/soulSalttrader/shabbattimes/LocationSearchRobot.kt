@@ -39,10 +39,7 @@ class LocationSearchRobot(
     }
 
     fun selectSuggestion(index: Int = 0) = apply {
-        val suggestions = rule.onAllNodesWithTag(
-            TestTags.SEARCH_SUGGESTION_ITEM,
-            useUnmergedTree = true,
-        )
+        val suggestions = rule.onAllNodesWithTag(TestTags.SEARCH_SUGGESTION_ITEM, true)
         val count = suggestions.fetchSemanticsNodes().size
 
         check(count > 0) { "No search suggestions found" }
