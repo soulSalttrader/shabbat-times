@@ -1,20 +1,17 @@
 package il.soulSalttrader.shabbattimes.permission
 
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
-import il.soulSalttrader.shabbattimes.LocationSearchRobot
-import il.soulSalttrader.shabbattimes.TestTags
-import org.junit.Before
+import il.soulSalttrader.shabbattimes.PermissionRobot
 import org.junit.Test
 
 @HiltAndroidTest
 class PermissionGrantedFlowTest : BaseInstrumentedTest() {
 
-    @Before
-    fun grantPermissions() {
+
+    override fun setupTest() {
         val packageName = InstrumentationRegistry.getInstrumentation().targetContext.packageName
 
         InstrumentationRegistry.getInstrumentation().uiAutomation.apply {
@@ -31,7 +28,8 @@ class PermissionGrantedFlowTest : BaseInstrumentedTest() {
 
     @Test
     fun `PERM_RESTART_S1 - GPS card visible when permission already granted`() {
-        LocationSearchRobot(composeRule).waitUntilGpsCardVisible()
-        composeRule.onNodeWithTag(TestTags.GPS_CARD).assertExists()
+        PermissionRobot(composeRule)
+            .waitForGpsCard()
+            .assertGpsCardVisible()
     }
 }

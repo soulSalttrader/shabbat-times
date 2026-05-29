@@ -8,6 +8,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.di.FakePermissionRepositoryModule
 import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
 import il.soulSalttrader.shabbattimes.model.LocationPermission
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -23,18 +24,21 @@ abstract class BaseInstrumentedTest {
     @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
+    open fun setupTest() {}
+
     @Before
     fun setup() {
         hiltRule.inject()
-        FakePersistenceModule.fakeSavedLocations.clear()
-        FakePersistenceModule.fakeCurrentLocation.clear()
+        runBlocking { FakePersistenceModule.fakeSavedLocations.clear() }
+        runBlocking { FakePersistenceModule.fakeCurrentLocation.update(null) }
         FakePermissionRepositoryModule.fakePermissionRepository.updatePermissionState(LocationPermission.Idle)
-        Thread.sleep(400)
+        setupTest()
+        Thread.sleep(1000)
     }
 
     @After
     fun tearDown() {
         runCatching { Espresso.pressBack() }
-        Thread.sleep(300)
+        Thread.sleep(1000)
     }
 }

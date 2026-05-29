@@ -15,16 +15,9 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-class PermissionDeniedPermanentlyFlowTest {
+class PermissionDeniedPermanentlyFlowTest : BaseInstrumentedTest() {
 
-    @get:Rule(order = 0)
-    val hiltRule = HiltAndroidRule(this)
-
-    @get:Rule(order = 1)
-    val composeRule = createAndroidComposeRule<MainActivity>()
-
-    @Before
-    fun revokePermissions() {
+    override fun setupTest() {
         val packageName = InstrumentationRegistry.getInstrumentation().targetContext.packageName
 
         InstrumentationRegistry.getInstrumentation().uiAutomation.apply {
