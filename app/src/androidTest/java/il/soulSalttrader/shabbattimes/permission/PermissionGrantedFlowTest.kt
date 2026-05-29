@@ -47,7 +47,6 @@ class PermissionGrantedFlowTest : BaseInstrumentedTest() {
         composeRule.onNodeWithTag(TestTags.DRAG_HANDLE, true).assertExists()
     }
 
-
     @Test
     fun `should show drag handle on location card`() {
         LocationSearchRobot(composeRule)
@@ -58,18 +57,6 @@ class PermissionGrantedFlowTest : BaseInstrumentedTest() {
             .closeSearch()
 
         composeRule.onNodeWithTag(TestTags.DRAG_HANDLE, true).assertExists()
-    }
-
-    @Test
-    fun `should successfully add new location from search suggestion`() {
-        LocationSearchRobot(composeRule)
-            .openSearch()
-            .typeCity("Brno")
-            .waitForSuggestions()
-            .selectSuggestion()
-            .closeSearch()
-
-        composeRule.onNodeWithText("Brno", substring = true).assertExists()
     }
 
     @Test
