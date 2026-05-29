@@ -80,9 +80,8 @@ android {
     }
 
     testOptions {
-        unitTests {
-            isReturnDefaultValues = true
-        }
+        unitTests { isReturnDefaultValues = true }
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
 }
 
@@ -150,6 +149,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(libs.hilt.android.testing)
+    androidTestUtil(libs.androidx.orchestrator)
     kspAndroidTest(libs.hilt.compiler)
 
     // Debug
