@@ -2,15 +2,15 @@ package il.soulSalttrader.shabbattimes.search
 
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.platform.app.InstrumentationRegistry
+import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.LocationSearchRobot
-import org.junit.Before
 import org.junit.Test
 
+@HiltAndroidTest
 class LocationSearchTest : BaseInstrumentedTest() {
 
-    @Before
-    fun grantPermissions() {
+    override fun setupTest() {
         val packageName = InstrumentationRegistry.getInstrumentation().targetContext.packageName
 
         InstrumentationRegistry.getInstrumentation().uiAutomation.apply {
