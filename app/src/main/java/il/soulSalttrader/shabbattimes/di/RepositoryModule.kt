@@ -35,14 +35,8 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindPermissionRepository(impl: PermissionRepositoryImpl): PermissionRepository
-
-    @Binds
-    @Singleton
     @InMemory
     abstract fun bindCurrentLocationRepository(impl: CurrentLocationRepositoryImpl): CurrentLocationRepository
-
-
 
     companion object {
         @Provides
