@@ -22,7 +22,21 @@ class PermissionRobot(
 ) {
 
     fun tapEmptyCardToStartFlow() = apply {
+        rule.waitUntil(3000) {
+            rule.onAllNodesWithTag(EMPTY_CARD)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         rule.onNode(hasTestTag(EMPTY_CARD), true)
+            .assertExists()
+            .performClick()
+    }
+
+    fun tapGpsCardToStartFlow() = apply {
+        rule.waitUntil(3000) {
+            rule.onAllNodesWithTag(GPS_CARD)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onNodeWithTag(GPS_CARD)
             .assertExists()
             .performClick()
     }
@@ -39,7 +53,7 @@ class PermissionRobot(
     }
 
     fun waitForSystemPermissionDialog() = apply {
-        device.wait(Until.hasObject(By.pkg("com.android.permissioncontroller")), 3000)
+        device.wait(Until.hasObject(By.pkg("com.android.permissioncontroller")), 1000)
     }
 
     fun grantSystemPermission() = apply {
