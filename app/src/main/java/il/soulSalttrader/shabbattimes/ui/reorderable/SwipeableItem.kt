@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.TestTags.DELETE_CARD_DIALOG
 import il.soulSalttrader.shabbattimes.ui.ExplanatoryDialog
 import kotlinx.coroutines.launch
 
@@ -72,6 +73,7 @@ fun <T> SwipeableItem(
             },
             onConfirmColor = { MaterialTheme.colorScheme.error },
             onDismissColor = { MaterialTheme.colorScheme.primary },
+            testTag = DELETE_CARD_DIALOG
         )
     }
 }
