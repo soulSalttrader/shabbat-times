@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.MainActivity
+import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -24,6 +25,8 @@ abstract class PermissionFlowTestBase {
     @Before
     fun setup() {
         hiltRule.inject()
+        FakePersistenceModule.fakeSavedLocations.clear()
+        FakePersistenceModule.fakeCurrentLocation.clear()
         Thread.sleep(400)
     }
 
