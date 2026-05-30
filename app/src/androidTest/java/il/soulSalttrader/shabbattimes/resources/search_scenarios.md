@@ -100,6 +100,8 @@
 3. ✅ GPS card visible
 4. ✅ Drag handle visible on GPS card
 
+> Covered by UI_PERM_FRESH_S1 - GPS card appears after granting permission
+
 ## UI_CARD_S3 - Location card shown after adding location
 🤖
 
@@ -107,13 +109,113 @@
 2. ✅ Location card visible with city name
 3. ✅ Drag handle visible on location card
 
-## UI_CARD_S4 - GPS card disappears after swipe to delete
-🤖🖐️
+> Covered by SEARCH_ADD_LOCATION_S1 - should successfully add new location from search suggestion
 
-1. Grant permission, GPS card visible
-2. Swipe GPS card left
-3. Confirm deletion dialog
+# Card UI Scenarios
+
+## UI_CARD_SWIPE_S1 - Swipe left shows delete confirmation dialog
+🤖
+
+1. Add location card
+2. Swipe card left
+3. ✅ Delete confirmation dialog appears
+
+## UI_CARD_SWIPE_S2 - Confirm delete removes card
+🤖
+
+1. Add location card
+2. Swipe left → confirmation dialog
+3. Tap confirm
+4. ✅ Card removed, empty card appears
+
+## UI_CARD_SWIPE_S3 - Dismiss delete keeps card
+🤖
+
+1. Add location card
+2. Swipe left → confirmation dialog
+3. Tap dismiss
+4. ✅ Card still visible
+
+## UI_CARD_SWIPE_S4 - GPS card swipe removes GPS card
+🤖
+
+1. GPS card visible
+2. Swipe left → confirmation dialog
+3. Tap confirm
 4. ✅ GPS card removed, empty card appears
+
+---
+
+## UI_CARD_REORDER_S1 - Drag card up changes order
+🤖
+
+1. Add two location cards (A, B)
+2. Drag B above A
+3. ✅ Order is B, A in repo
+
+## UI_CARD_REORDER_S2 - Drag card down changes order
+🤖
+
+1. Add two location cards (A, B)
+2. Drag A below B
+3. ✅ Order is B, A in repo
+
+## UI_CARD_REORDER_S3 - GPS card can be reordered
+🤖
+
+1. GPS card + location card visible
+2. Drag GPS card below location card
+3. ✅ Order updated in repo
+
+## UI_CARD_REORDER_S4 - Empty card has no drag handle
+🤖
+
+1. No locations saved
+2. ✅ Empty card visible, no drag handle
+
+---
+
+## UI_CARD_CONTENT_S1 - Location name displayed on card
+🤖
+
+1. Add location "Brno"
+2. ✅ "Brno" text visible on card
+
+## UI_CARD_CONTENT_S2 - Shabbat times displayed on card
+🤖
+
+1. Add location card with times
+2. ✅ Candle lighting and havdalah times visible
+
+## UI_CARD_CONTENT_S3 - GPS card shows current location label
+🤖
+
+1. GPS card visible
+2. ✅ Current location status label displayed
+
+## UI_CARD_CONTENT_S4 - Empty card shows add location prompt
+🤖
+
+1. No locations saved
+2. ✅ Add location prompt visible on empty card
+
+## UI_CARD_CONTENT_S5 - Drag handle visible on GPS card
+🤖
+
+1. GPS card visible
+2. ✅ Drag handle icon present on GPS card
+
+## UI_CARD_CONTENT_S6 - Drag handle visible on location card
+🤖
+
+1. Location card visible
+2. ✅ Drag handle icon present on location card
+
+## UI_CARD_CONTENT_S7 - No drag handle on empty card
+🤖
+
+1. No locations saved
+2. ✅ Empty card visible, no drag handle
 
 ---
 
@@ -171,7 +273,7 @@
 
 ---
 
-## Bug
+# Bug
 
 ## BUG_SEARCH_ADD_LOCATION_S1 — Location saved twice on suggestion select
 🎨 Instrumented (FakeSavedLocationsRepository)
@@ -184,3 +286,48 @@
     > Fake correctly reveals the real double-dispatch behavior.
     > Fix: find and remove duplicate save() call in SearchViewModel dispatch handling.
     > Related: SEARCH_ADD_LOCATION_S1
+
+# Overview
+
+## ✅ UI_PERM_FRESH_S1 - GPS card appears after granting permission
+## ✅ UI_PERM_FRESH_S2 - system dialog appears after education dialog when permission denied
+## ✅ UI_PERM_FRESH_S3 - system dialog appears when permission denied
+## 🖐️ UI_PERM_FRESH_S4 - rationale dialog appears after system dialog denial
+## 🖐️ UI_PERM_FRESH_S5 - GPS card appears after rationale → allow
+## ✅ UI_PERM_FRESH_S6 - Permanently denied dialog appears after denying twice
+
+## ✅ UI_PERM_RESTART_S1 - GPS card visible on relaunch when permission granted
+## ✅ UI_PERM_RESTART_S2 - Outdated GPS card visible and tapping shows system dialog when denied
+## ✅ UI_PERM_RESTART_S3 - Outdated GPS card visible and tapping shows open settings dialog
+
+## ✅ UI_CARD_S1 - Empty card shown when no locations saved
+## ✅ UI_CARD_S2 - GPS card shown when permission granted > UI_PERM_FRESH_S1
+## ✅ UI_CARD_S3 - Location card shown after adding location > UI_SEARCH_S1
+
+## ✅ UI_CARD_SWIPE_S1 - Swipe left shows delete confirmation dialog
+## ✅ UI_CARD_SWIPE_S2 - Confirm delete removes card
+## ✅ UI_CARD_SWIPE_S3 - Dismiss delete keeps card
+## ✅ UI_CARD_SWIPE_S4 - GPS card swipe removes GPS card
+
+## UI_CARD_REORDER_S1 - Drag card up changes order
+## UI_CARD_REORDER_S2 - Drag card down changes order
+## UI_CARD_REORDER_S3 - GPS card can be reordered
+## ✅ UI_CARD_REORDER_S4 - Empty card has no drag handle
+
+## UI_CARD_CONTENT_S1 - Location name displayed on card
+## UI_CARD_CONTENT_S2 - Shabbat times displayed on card
+## UI_CARD_CONTENT_S3 - GPS card shows current location label
+## UI_CARD_CONTENT_S4 - Empty card shows add location prompt
+## ✅ UI_CARD_CONTENT_S5 - Drag handle visible on GPS card
+## ✅ UI_CARD_CONTENT_S6 - Drag handle visible on location card
+## UI_CARD_CONTENT_S7 - No drag handle on empty card
+
+## ✅ UI_SEARCH_S1 - Location added from search suggestion
+## UI_SEARCH_S2 - Search closed without selection
+
+## UI_PERM_SETTINGS_S1 - GPS card appears after granting in settings
+## UI_PERM_SETTINGS_S2 - State resets to Idle after returning from settings
+
+## ⚠️ SEARCH_ADD_LOCATION_S1 — Add new location from search suggestion
+
+## ⚠️ BUG_SEARCH_ADD_LOCATION_S1 — Location saved twice on suggestion select
