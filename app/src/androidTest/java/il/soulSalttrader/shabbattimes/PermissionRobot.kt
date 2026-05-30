@@ -9,47 +9,72 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import il.soulSalttrader.shabbattimes.TestTags.DENIED_PERMANENTLY_DIALOG
-import il.soulSalttrader.shabbattimes.TestTags.DIALOG_CONFIRM_BUTTON
-import il.soulSalttrader.shabbattimes.TestTags.EDUCATION_DIALOG
-import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
-import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
-import il.soulSalttrader.shabbattimes.TestTags.RATIONALE_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.CONFIRM_BUTTON_DIALOG
+import il.soulSalttrader.shabbattimes.di.FakePermissionRepositoryModule
+import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
+import il.soulSalttrader.shabbattimes.model.Coordinates
+import il.soulSalttrader.shabbattimes.model.LocationPermission
+import il.soulSalttrader.shabbattimes.model.SavedLocation
+import kotlinx.coroutines.runBlocking
+import java.time.ZoneId
 
 class PermissionRobot(
     private val rule: ComposeTestRule,
     private val device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 ) {
 
-    fun tapEmptyCardToStartFlow() = apply {
+    fun tapCardToStartFlow(testTag: String) = apply {
         rule.waitUntil(3000) {
-            rule.onAllNodesWithTag(EMPTY_CARD)
+            rule.onAllNodesWithTag(testTag)
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNode(hasTestTag(EMPTY_CARD), true)
+        rule.onNode(hasTestTag(testTag), true)
             .assertExists()
             .performClick()
     }
 
-    fun tapGpsCardToStartFlow() = apply {
-        rule.waitUntil(3000) {
-            rule.onAllNodesWithTag(GPS_CARD)
-                .fetchSemanticsNodes().isNotEmpty()
+    fun assertAppDialogPresented(testTag: String) = apply {
+        rule.onNodeWithTag(testTag).assertExists()
+    }
+
+    fun confirmAppDialog(testTag: String) = apply {
+        rule.onNodeWithTag(CONFIRM_BUTTON_DIALOG).assertExists().performClick()
+        rule.onNodeWithTag(testTag).assertDoesNotExist()
+    }
+
+    fun addShabbatCard(savedLocationId: String, cityName: String = "Brno") = apply {
+        runBlocking {
+            FakePersistenceModule.fakeSavedLocations.save(
+                SavedLocation(
+                    id = savedLocationId,
+                    name = cityName,
+                    coordinates = Coordinates(0.0, 0.0),
+                    timeZoneId = ZoneId.systemDefault(),
+                )
+            )
         }
-        rule.onNodeWithTag(GPS_CARD)
-            .assertExists()
-            .performClick()
     }
 
-    fun assertEducationDialogVisible() = apply {
-        rule.onNodeWithTag(EDUCATION_DIALOG).assertExists()
+    fun waitForShabbatCard(testTag: String) = apply {
+        rule.waitUntil(5000) {
+            rule.onAllNodesWithTag(testTag)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
     }
 
-    fun confirmEducationDialog() = apply {
-        rule.onNodeWithTag(DIALOG_CONFIRM_BUTTON)
-            .assertExists()
-            .performClick()
-        rule.onNodeWithTag(EDUCATION_DIALOG).assertDoesNotExist()
+    fun assertShabbatCardPresented(testTag: String) = apply {
+        rule.onNodeWithTag(testTag).assertExists()
+    }
+
+    fun assertShabbatCardNotPresented(testTag: String) = apply {
+        rule.onNodeWithTag(testTag).assertDoesNotExist()
+    }
+
+    fun updateFakePermissionRepository(permission: LocationPermission) = apply {
+        FakePermissionRepositoryModule
+            .fakePermissionRepository
+            .updatePermissionState(permission)
     }
 
     fun waitForSystemPermissionDialog() = apply {
@@ -62,28 +87,6 @@ class PermissionRobot(
         allowButton?.click()
     }
 
-    fun denySystemPermission() = apply {
-        val denyButton = device.findObject(By.text("Don't allow"))
-            ?: device.findObject(By.text("Deny"))
-        denyButton?.click()
-    }
-
-    fun waitForGpsCard() = apply {
-        rule.waitUntil(5000) {
-            rule.onAllNodesWithTag(GPS_CARD)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
-    }
-
-    fun assertGpsCardVisible() = apply {
-        rule.onNodeWithTag(GPS_CARD).assertExists()
-    }
-
-    fun assertGpsCardNotVisible() = apply {
-        rule.onNodeWithTag(GPS_CARD).assertDoesNotExist()
-    }
-
     fun assertSystemDialogAppeared() = apply {
         device.waitForIdle(2000)
 
@@ -91,11 +94,9 @@ class PermissionRobot(
         assert(appeared != null) { "System permission dialog did not appear" }
     }
 
-    fun assertRationaleDialogVisible() = apply {
-        rule.onNodeWithTag(RATIONALE_DIALOG).assertExists()
-    }
-
-    fun assertDeniedPermanentlyDialogVisible() = apply {
-        rule.onNodeWithTag(DENIED_PERMANENTLY_DIALOG).assertExists()
+    fun denySystemPermission() = apply {
+        val denyButton = device.findObject(By.text("Don't allow"))
+            ?: device.findObject(By.text("Deny"))
+        denyButton?.click()
     }
 }

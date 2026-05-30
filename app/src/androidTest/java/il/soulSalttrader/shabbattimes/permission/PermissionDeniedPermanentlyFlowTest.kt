@@ -1,21 +1,20 @@
 package il.soulSalttrader.shabbattimes.permission
 
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.PermissionRobot
+import il.soulSalttrader.shabbattimes.TestTags.CONFIRM_BUTTON_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.DENIED_PERMANENTLY_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.DISMISS_BUTTON_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.EDUCATION_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
 import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
-import il.soulSalttrader.shabbattimes.di.FakePermissionRepositoryModule
-import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
-import il.soulSalttrader.shabbattimes.model.Coordinates
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.SavedLocation
-import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import java.time.ZoneId
 
 @HiltAndroidTest
 class PermissionDeniedPermanentlyFlowTest : BaseInstrumentedTest() {
@@ -37,80 +36,48 @@ class PermissionDeniedPermanentlyFlowTest : BaseInstrumentedTest() {
     @Test
     fun `UI_PERM_FRESH_S2 - system dialog appears after education dialog when permission permanently denied`() {
         PermissionRobot(composeRule)
-            .tapEmptyCardToStartFlow()
-            .assertEducationDialogVisible()
-            .confirmEducationDialog()
+            .tapCardToStartFlow(EMPTY_CARD)
+            .assertAppDialogPresented(EDUCATION_DIALOG)
+            .confirmAppDialog(EDUCATION_DIALOG)
             .waitForSystemPermissionDialog()
             .assertSystemDialogAppeared()
     }
 
     @Test
     fun `UI_PERM_FRESH_S3 - system dialog appears when permission denied`() {
-        FakePermissionRepositoryModule
-            .fakePermissionRepository
-            .updatePermissionState(LocationPermission.Denied)
-
         PermissionRobot(composeRule)
-            .tapEmptyCardToStartFlow()
+            .updateFakePermissionRepository(LocationPermission.Denied)
+            .tapCardToStartFlow(EMPTY_CARD)
             .assertSystemDialogAppeared()
     }
 
     @Test
     fun `UI_PERM_FRESH_S6 - Permanently denied dialog appears after denying twice`() {
-        FakePermissionRepositoryModule
-            .fakePermissionRepository
-            .updatePermissionState(LocationPermission.DeniedPermanently)
-
         PermissionRobot(composeRule)
-            .tapEmptyCardToStartFlow()
-            .assertDeniedPermanentlyDialogVisible()
+            .updateFakePermissionRepository(LocationPermission.DeniedPermanently)
+            .tapCardToStartFlow(EMPTY_CARD)
+            .assertAppDialogPresented(DENIED_PERMANENTLY_DIALOG)
     }
 
     @Test
     fun `UI_PERM_RESTART_S2 - Outdated GPS card visible and tapping shows system dialog when denied`() {
-        FakePermissionRepositoryModule
-            .fakePermissionRepository
-            .updatePermissionState(LocationPermission.Denied)
-
-        runBlocking {
-            FakePersistenceModule.fakeSavedLocations.save(
-                SavedLocation(
-                    id = SavedLocation.GPS_ID,
-                    name = "Brno",
-                    coordinates = Coordinates(0.0, 0.0),
-                    timeZoneId = ZoneId.systemDefault(),
-                )
-            )
-        }
-
-        composeRule.onNodeWithTag(GPS_CARD).assertExists()
-
         PermissionRobot(composeRule)
-            .tapGpsCardToStartFlow()
+            .updateFakePermissionRepository(LocationPermission.Denied)
+            .addShabbatCard(SavedLocation.GPS_ID, "My gsp city")
+            .assertShabbatCardPresented(GPS_CARD)
+            .tapCardToStartFlow(GPS_CARD)
             .assertSystemDialogAppeared()
     }
 
     @Test
     fun `UI_PERM_RESTART_S3 - Outdated GPS card visible and tapping shows open settings dialog when permanently denied`() {
-        FakePermissionRepositoryModule
-            .fakePermissionRepository
-            .updatePermissionState(LocationPermission.DeniedPermanently)
-
-        runBlocking {
-            FakePersistenceModule.fakeSavedLocations.save(
-                SavedLocation(
-                    id = SavedLocation.GPS_ID,
-                    name = "Brno",
-                    coordinates = Coordinates(0.0, 0.0),
-                    timeZoneId = ZoneId.systemDefault(),
-                )
-            )
-        }
-
         PermissionRobot(composeRule)
-            .tapGpsCardToStartFlow()
-            .assertDeniedPermanentlyDialogVisible()
+            .updateFakePermissionRepository(LocationPermission.DeniedPermanently)
+            .addShabbatCard(SavedLocation.GPS_ID, "My gsp city")
+            .tapCardToStartFlow(GPS_CARD)
+            .assertAppDialogPresented(DENIED_PERMANENTLY_DIALOG)
 
-        composeRule.onNodeWithText("Open Settings").assertExists()
+        composeRule.onNodeWithTag(CONFIRM_BUTTON_DIALOG).assertExists()
+        composeRule.onNodeWithTag(DISMISS_BUTTON_DIALOG).assertExists()
     }
 }

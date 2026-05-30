@@ -5,6 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.PermissionRobot
+import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
 import org.junit.Test
 
 @HiltAndroidTest
@@ -29,7 +30,7 @@ class PermissionGrantedFlowTest : BaseInstrumentedTest() {
     @Test
     fun `PERM_RESTART_S1 - GPS card visible when permission already granted`() {
         PermissionRobot(composeRule)
-            .waitForGpsCard()
-            .assertGpsCardVisible()
+            .waitForShabbatCard(GPS_CARD)
+            .assertShabbatCardPresented(GPS_CARD)
     }
 }
