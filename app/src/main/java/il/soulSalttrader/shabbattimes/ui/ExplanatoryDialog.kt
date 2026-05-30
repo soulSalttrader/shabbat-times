@@ -12,8 +12,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import il.soulSalttrader.shabbattimes.R
-import il.soulSalttrader.shabbattimes.TestTags.CONFIRM_BUTTON_DIALOG
-import il.soulSalttrader.shabbattimes.TestTags.DISMISS_BUTTON_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
+import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
 
 @Composable
 fun ExplanatoryDialog(
@@ -38,7 +38,7 @@ fun ExplanatoryDialog(
         text = { Text(message) },
         confirmButton = {
             TextButton(
-                modifier = Modifier.testTag(CONFIRM_BUTTON_DIALOG),
+                modifier = Modifier.testTag(BUTTON_DIALOG_CONFIRM),
                 onClick = onConfirm,
             ) {
                 Text(
@@ -49,7 +49,7 @@ fun ExplanatoryDialog(
         },
         dismissButton = {
             TextButton(
-                modifier = Modifier.testTag(DISMISS_BUTTON_DIALOG),
+                modifier = Modifier.testTag(BUTTON_DIALOG_DISMISS),
                 onClick = onDismiss,
             ) {
                 Text(

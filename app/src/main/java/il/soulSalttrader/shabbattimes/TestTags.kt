@@ -11,10 +11,10 @@ object TestTags {
     const val SEARCH_INPUT = "search_input"
     const val SEARCH_SUGGESTION_ITEM = "search_suggestion_item"
     const val SEARCH_SCRIM = "search_scrim"
-    const val DELETE_CARD_DIALOG = "delete_card_dialog"
+    const val SWIPE_CARD_DIALOG = "swipe_card_dialog"
     const val EDUCATION_DIALOG = "education_dialog"
     const val RATIONALE_DIALOG = "rationale_dialog"
     const val DENIED_PERMANENTLY_DIALOG = "denied_permanently_dialog"
-    const val CONFIRM_BUTTON_DIALOG = "confirm_button_dialog"
-    const val DISMISS_BUTTON_DIALOG = "dismiss_button_dialog"
+    const val BUTTON_DIALOG_CONFIRM = "confirm_button_dialog"
+    const val BUTTON_DIALOG_DISMISS = "dismiss_button_dialog"
 }
