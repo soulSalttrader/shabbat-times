@@ -35,7 +35,7 @@ import il.soulSalttrader.shabbattimes.model.toLabel
 @Composable
 fun ShabbatCard(
     item: ShabbatEntry,
-    dragModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     testTag: String = "",
     shape: Shape = RoundedCornerShape(16.dp),
     colors: CardColors = getDefaultCardColors(item.status),
@@ -77,8 +77,7 @@ fun ShabbatCard(
 
             isDraggable.takeIf { it }?.let {
                 UiIconImage(
-//                    modifier = Modifier.testTag(TestTags.DRAG_HANDLE),
-                    modifier = dragModifier.testTag(TestTags.DRAG_HANDLE),
+                    modifier = modifier.testTag(TestTags.DRAG_HANDLE),
                     icon = UiIcon.Resource(R.drawable.drag_handle),
                     contentDescription = "dragHandle",
                     contentColor = when (item.status) {

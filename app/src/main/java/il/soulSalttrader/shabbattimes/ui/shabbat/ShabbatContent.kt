@@ -65,7 +65,7 @@ fun ShabbatContent(
                 swipeConfig = swipeConfig,
             ) { item, modifier ->
                 ShabbatCard(
-                    dragModifier = modifier,
+                    modifier = modifier, // drag modifier
                     testTag = when (item.location.id) {
                         SavedLocation.GPS_ID   -> TestTags.GPS_CARD
                         SavedLocation.EMPTY_ID -> TestTags.EMPTY_CARD
