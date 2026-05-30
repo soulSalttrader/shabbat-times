@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
@@ -50,12 +51,25 @@ class ShabbatCardRobot(
         addCard(rule, savedLocationId, cityName)
     }
 
+    fun waitForTag(tag: String, timeout: Long = 3000) {
+        rule.waitUntil(timeout) {
+            try {
+                rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
+            } catch (e: IllegalStateException) { false }
+        }
+    }
+
     fun dragCardUp(tag: String) = apply {
-        rule.onNodeWithTag(tag).performTouchInput {
+        waitForTag(tag)
+
+        val handleNode = rule.onNode(hasTestTag(DRAG_HANDLE).and(hasAnyAncestor(hasTestTag(tag))), true,)
+        val handleBounds = handleNode.fetchSemanticsNode().boundsInRoot
+
+        rule.onRoot().performTouchInput {
             swipeUp(
-                startY = centerY,
-                endY = centerY - 300f,
-                durationMillis = 500
+                startY = handleBounds.center.y,
+                endY = handleBounds.center.y - 500f,
+                durationMillis = 500,
             )
         }
         rule.waitForIdle()

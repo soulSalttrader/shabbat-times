@@ -147,11 +147,15 @@
 ---
 
 ## UI_CARD_REORDER_S1 - Drag card up changes order
-🤖
+🖐️
 
 1. Add two location cards (A, B)
 2. Drag B above A
 3. ✅ Order is B, A in repo
+
+> ReorderableItem uses custom pointer input not triggerable
+> via Compose test performTouchInput.
+> Drag handle presence is verified automatically in UI_CARD_CONTENT_S5/S6.
 
 ## UI_CARD_REORDER_S2 - Drag card down changes order
 🤖
@@ -309,10 +313,10 @@
 ## ✅ UI_CARD_SWIPE_S3 - Dismiss delete keeps card
 ## ✅ UI_CARD_SWIPE_S4 - GPS card swipe removes GPS card
 
-## UI_CARD_REORDER_S1 - Drag card up changes order
-## UI_CARD_REORDER_S2 - Drag card down changes order
-## UI_CARD_REORDER_S3 - GPS card can be reordered
-## ✅ UI_CARD_REORDER_S4 - Empty card has no drag handle
+## 🖐️ UI_CARD_REORDER_S1 - Drag card up changes order
+## 🖐️ UI_CARD_REORDER_S2 - Drag card down changes order
+## 🖐️ UI_CARD_REORDER_S3 - GPS card can be reordered
+## ✅ UI_CARD_REORDER_S4 - Empty card has no drag handle > UI_CARD_CONTENT_S7
 
 ## UI_CARD_CONTENT_S1 - Location name displayed on card
 ## UI_CARD_CONTENT_S2 - Shabbat times displayed on card
@@ -320,7 +324,7 @@
 ## UI_CARD_CONTENT_S4 - Empty card shows add location prompt
 ## ✅ UI_CARD_CONTENT_S5 - Drag handle visible on GPS card
 ## ✅ UI_CARD_CONTENT_S6 - Drag handle visible on location card
-## UI_CARD_CONTENT_S7 - No drag handle on empty card
+## ✅ UI_CARD_CONTENT_S7 - No drag handle on empty card
 
 ## ✅ UI_SEARCH_S1 - Location added from search suggestion
 ## UI_SEARCH_S2 - Search closed without selection
