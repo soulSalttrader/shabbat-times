@@ -9,20 +9,14 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import il.soulSalttrader.shabbattimes.TestTags.CONFIRM_BUTTON_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
 import il.soulSalttrader.shabbattimes.di.FakePermissionRepositoryModule
-import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
-import il.soulSalttrader.shabbattimes.model.Coordinates
 import il.soulSalttrader.shabbattimes.model.LocationPermission
-import il.soulSalttrader.shabbattimes.model.SavedLocation
-import kotlinx.coroutines.runBlocking
-import java.time.ZoneId
 
 class PermissionRobot(
     private val rule: ComposeTestRule,
     private val device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 ) {
-
     fun tapCardToStartFlow(testTag: String) = apply {
         rule.waitUntil(3000) {
             rule.onAllNodesWithTag(testTag)
@@ -38,21 +32,12 @@ class PermissionRobot(
     }
 
     fun confirmAppDialog(testTag: String) = apply {
-        rule.onNodeWithTag(CONFIRM_BUTTON_DIALOG).assertExists().performClick()
+        rule.onNodeWithTag(BUTTON_DIALOG_CONFIRM).assertExists().performClick()
         rule.onNodeWithTag(testTag).assertDoesNotExist()
     }
 
     fun addShabbatCard(savedLocationId: String, cityName: String = "Brno") = apply {
-        runBlocking {
-            FakePersistenceModule.fakeSavedLocations.save(
-                SavedLocation(
-                    id = savedLocationId,
-                    name = cityName,
-                    coordinates = Coordinates(0.0, 0.0),
-                    timeZoneId = ZoneId.systemDefault(),
-                )
-            )
-        }
+        addCard(rule, savedLocationId, cityName)
     }
 
     fun waitForShabbatCard(testTag: String) = apply {

@@ -6,9 +6,9 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.PermissionRobot
-import il.soulSalttrader.shabbattimes.TestTags.CONFIRM_BUTTON_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
 import il.soulSalttrader.shabbattimes.TestTags.DENIED_PERMANENTLY_DIALOG
-import il.soulSalttrader.shabbattimes.TestTags.DISMISS_BUTTON_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
 import il.soulSalttrader.shabbattimes.TestTags.EDUCATION_DIALOG
 import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
 import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
@@ -77,7 +77,7 @@ class PermissionDeniedPermanentlyFlowTest : BaseInstrumentedTest() {
             .tapCardToStartFlow(GPS_CARD)
             .assertAppDialogPresented(DENIED_PERMANENTLY_DIALOG)
 
-        composeRule.onNodeWithTag(CONFIRM_BUTTON_DIALOG).assertExists()
-        composeRule.onNodeWithTag(DISMISS_BUTTON_DIALOG).assertExists()
+        composeRule.onNodeWithTag(BUTTON_DIALOG_CONFIRM).assertExists()
+        composeRule.onNodeWithTag(BUTTON_DIALOG_DISMISS).assertExists()
     }
 }

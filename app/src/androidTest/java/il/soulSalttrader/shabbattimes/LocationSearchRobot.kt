@@ -6,10 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 
-class LocationSearchRobot(
-    private val rule: ComposeTestRule,
-    private val slowModeDelayMs: Long = 0,
-) {
+class LocationSearchRobot(private val rule: ComposeTestRule) {
     fun waitUntilGpsCardVisible(timeoutMillis: Long = 5000) = apply {
         rule.waitUntil(timeoutMillis) {
             rule.onAllNodesWithTag(TestTags.GPS_CARD)
@@ -20,22 +17,22 @@ class LocationSearchRobot(
 
     fun openSearch() = apply {
         rule.onNodeWithTag(TestTags.FAB_ADD).performClick()
-        slow()
+        rule.waitForIdle()
 
         rule.onNodeWithTag(TestTags.FAB_NEW_LOCATION).assertExists().performClick()
-        slow()
+        rule.waitForIdle()
     }
 
     fun typeCity(city: String) = apply {
         rule.onNodeWithTag(TestTags.SEARCH_INPUT).performTextInput(city)
-        slow()
+        rule.waitForIdle()
     }
 
     fun waitForSuggestions() = apply {
         rule.waitUntil(timeoutMillis = 6000) {
             rule.onAllNodesWithTag(TestTags.SEARCH_SUGGESTION_ITEM).fetchSemanticsNodes().isNotEmpty()
         }
-        slow()
+        rule.waitForIdle()
     }
 
     fun selectSuggestion(index: Int = 0) = apply {
@@ -46,15 +43,11 @@ class LocationSearchRobot(
         check(index < count) { "Only $count suggestions found, cannot select index $index" }
 
         suggestions[index].performClick()
-        slow()
+        rule.waitForIdle()
     }
 
     fun closeSearch() = apply {
         rule.onNodeWithTag(TestTags.SEARCH_SCRIM, true).performClick()
-        slow()
-    }
-
-    private fun slow() {
-        if (slowModeDelayMs > 0) { Thread.sleep(slowModeDelayMs) }
+        rule.waitForIdle()
     }
 }

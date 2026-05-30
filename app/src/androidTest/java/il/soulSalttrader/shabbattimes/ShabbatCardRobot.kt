@@ -12,15 +12,7 @@ import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeUp
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import il.soulSalttrader.shabbattimes.TestTags.CONFIRM_BUTTON_DIALOG
-import il.soulSalttrader.shabbattimes.TestTags.DELETE_CARD_DIALOG
-import il.soulSalttrader.shabbattimes.TestTags.DISMISS_BUTTON_DIALOG
 import il.soulSalttrader.shabbattimes.TestTags.DRAG_HANDLE
-import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
-import il.soulSalttrader.shabbattimes.model.Coordinates
-import il.soulSalttrader.shabbattimes.model.SavedLocation
-import kotlinx.coroutines.runBlocking
-import java.time.ZoneId
 
 class ShabbatCardRobot(
     private val rule: ComposeTestRule,
@@ -55,16 +47,7 @@ class ShabbatCardRobot(
     }
 
     fun addShabbatCard(savedLocationId: String, cityName: String = "Brno") = apply {
-        runBlocking {
-            FakePersistenceModule.fakeSavedLocations.save(
-                SavedLocation(
-                    id = savedLocationId,
-                    name = cityName,
-                    coordinates = Coordinates(0.0, 0.0),
-                    timeZoneId = ZoneId.systemDefault(),
-                )
-            )
-        }
+        addCard(rule, savedLocationId, cityName)
     }
 
     fun dragCardUp(tag: String) = apply {
@@ -75,10 +58,11 @@ class ShabbatCardRobot(
                 durationMillis = 500
             )
         }
+        rule.waitForIdle()
     }
 
-    fun swipeCardToDelete(testTag: String) = apply {
-        val node = rule.onNodeWithTag(testTag)
+    fun swipeCardToDelete(cardTag: String) = apply {
+        val node = rule.onNodeWithTag(cardTag)
 
         node.performTouchInput {
             swipe(
@@ -90,19 +74,16 @@ class ShabbatCardRobot(
         rule.waitForIdle()
     }
 
-    fun assertSwipeCardToDeleteDialog() = apply {
+    fun assertAppDialogPresented(testTag: String) = apply {
         rule.waitUntil(3000) {
-            rule.onAllNodesWithTag(DELETE_CARD_DIALOG)
+            rule.onAllNodesWithTag(testTag)
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNodeWithTag(DELETE_CARD_DIALOG).assertExists()
+
+        rule.onNodeWithTag(testTag).assertExists()
     }
 
-    fun confirmDeleteDialog() = apply {
-        rule.onNodeWithTag(CONFIRM_BUTTON_DIALOG).performClick()
-    }
-
-    fun dismissDeleteDialog() = apply {
-        rule.onNodeWithTag(DISMISS_BUTTON_DIALOG).performClick()
+    fun performClickOnButtonDialog(buttonTag: String) = apply {
+        rule.onNodeWithTag(buttonTag).performClick()
     }
 }

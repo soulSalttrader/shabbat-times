@@ -4,9 +4,12 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.ShabbatCardRobot
+import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
+import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
 import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
 import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
 import il.soulSalttrader.shabbattimes.TestTags.LOCATION_CARD
+import il.soulSalttrader.shabbattimes.TestTags.SWIPE_CARD_DIALOG
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import org.junit.Test
 
@@ -49,7 +52,7 @@ class ShabbatCardTest : BaseInstrumentedTest() {
             .addShabbatCard(SavedLocation.LOCATION_ID)
             .assertCardPresent(LOCATION_CARD)
             .swipeCardToDelete(LOCATION_CARD)
-            .assertSwipeCardToDeleteDialog()
+            .assertAppDialogPresented(SWIPE_CARD_DIALOG)
     }
 
     @Test
@@ -58,8 +61,8 @@ class ShabbatCardTest : BaseInstrumentedTest() {
             .addShabbatCard(SavedLocation.LOCATION_ID)
             .assertCardPresent(LOCATION_CARD)
             .swipeCardToDelete(LOCATION_CARD)
-            .assertSwipeCardToDeleteDialog()
-            .confirmDeleteDialog()
+            .assertAppDialogPresented(SWIPE_CARD_DIALOG)
+            .performClickOnButtonDialog(BUTTON_DIALOG_CONFIRM)
             .assertCardNotPresent(LOCATION_CARD)
     }
 
@@ -69,8 +72,8 @@ class ShabbatCardTest : BaseInstrumentedTest() {
             .addShabbatCard(SavedLocation.LOCATION_ID)
             .assertCardPresent(LOCATION_CARD)
             .swipeCardToDelete(LOCATION_CARD)
-            .assertSwipeCardToDeleteDialog()
-            .dismissDeleteDialog()
+            .assertAppDialogPresented(SWIPE_CARD_DIALOG)
+            .performClickOnButtonDialog(BUTTON_DIALOG_DISMISS)
             .assertCardPresent(LOCATION_CARD)
     }
 
@@ -80,8 +83,8 @@ class ShabbatCardTest : BaseInstrumentedTest() {
             .addShabbatCard(SavedLocation.GPS_ID, "My gps city")
             .assertCardPresent(GPS_CARD)
             .swipeCardToDelete(GPS_CARD)
-            .assertSwipeCardToDeleteDialog()
-            .confirmDeleteDialog()
+            .assertAppDialogPresented(SWIPE_CARD_DIALOG)
+            .performClickOnButtonDialog(BUTTON_DIALOG_CONFIRM)
             .assertCardNotPresent(GPS_CARD)
     }
 

@@ -28,6 +28,7 @@ class LocationSearchTest : BaseInstrumentedTest() {
             .waitForSuggestions()
             .selectSuggestion()
             .closeSearch()
+            .waitUntilGpsCardVisible()
 
         composeRule.onNodeWithText("Brno", substring = true).assertExists()
     }
