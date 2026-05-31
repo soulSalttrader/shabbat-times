@@ -38,8 +38,8 @@
 
 ## ⚠️ SEARCH_ADD_LOCATION_S1 — Add new location from search suggestion > BUG_SEARCH_ADD_LOCATION_S1
 
-## ✅ REPO_REORDER_S1 - Reorder persists new sort order
-## ✅ REPO_REORDER_S2 - Drag card down persists new sort order
-## REPO_REORDER_S3 - GPS card reorder persists correctly
+## ✅ REPO_REORDER_S1 - should persist new sort order after reorder
+## ✅ REPO_REORDER_S2 - should persist sort order when card moved down
+## REPO_REORDER_S3 - should persist sort order when GPS card reordered
 
 ## ⚠️ BUG_SEARCH_ADD_LOCATION_S1 — Location saved twice on suggestion select

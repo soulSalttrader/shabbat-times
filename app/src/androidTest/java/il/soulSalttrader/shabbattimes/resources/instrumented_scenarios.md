@@ -272,26 +272,26 @@
 
 # Repository
 
-## REPO_REORDER_S1 - Reorder persists new sort order
+## REPO_REORDER_S1 - should persist new sort order after reorder
 🔧 (SavedLocationsRepositoryRoomTest)
 
-1. Save id_1, id_2
-2. Reorder to [id_2, id_1]
-3. ✅ DAO returns [id_2, id_1] in correct order
+1. Save [ID1, ID2, ID3]
+2. Reorder to [ID1, ID3, ID2]
+3. ✅ DAO returns [ID1, ID3, ID2] in correct order
 
-## REPO_REORDER_S2 - Drag card down persists new sort order
+## REPO_REORDER_S2 - should persist sort order when card moved down
 🔧 (SavedLocationsRepositoryRoomTest)
 
-1. Save id_1, id_2
-2. Reorder to [id_1, id_2] → move id_1 down
-3. ✅ DAO returns [id_1, id_2] with updated sortOrder
+1. Save [ID1, ID2, ID3]
+2. Reorder to [ID3, ID2, ID1] → move ID1 down
+3. ✅ DAO returns [ID3, ID2, ID1] with updated sortOrder
 
-## REPO_REORDER_S3 - GPS card reorder persists correctly
+## REPO_REORDER_S3 - should persist sort order when GPS card reordered
 🔧 (SavedLocationsRepositoryRoomTest)
 
-1. Save GPS, id_1
-2. Reorder to [id_1, GPS]
-3. ✅ DAO returns [id_1, GPS] with correct sortOrder
+1. Save [GPS, ID1, ID2, ID3]
+2. Reorder to [ID1, ID2, GPS, ID3]
+3. ✅ DAO returns [ID1, ID2, GPS, ID3] with correct sortOrder
 
 ---
 
