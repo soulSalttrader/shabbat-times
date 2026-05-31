@@ -41,9 +41,9 @@
 
 ⚠️ Not applicable for minSdk >= 29
 System dialog cannot be dismissed without making a choice on API 29+.
-Only relevant for older devices — manual test only if minSdk < 29.
+Only relevant for older devices - manual test only if minSdk < 29.
 
-## PERM_FRESH_S6 - Dismiss education dialog
+## PERM_FRESH_S6 - Dismiss education dialog > UI_PERM_FRESH_S2
 🖐️
 
 1. Tap card → Education dialog 
@@ -81,9 +81,9 @@ Only relevant for older devices — manual test only if minSdk < 29.
 5. User taps card → Education → Request → still DeniedPermanently
 6. ✅ Open Settings dialog appears again
 
-## PERM_SETTINGS_S4 — Kill app from settings → reopen
-🖐️ (Part 1 — persistence: manual or instrumented test)
-📏 (Part 2 — VM reaction: covered by PERM_RESTART_S1)
+## PERM_SETTINGS_S4 - Kill app from settings → reopen
+🖐️ (Part 1 - persistence: manual or instrumented test)
+📏 (Part 2 - VM reaction: covered by PERM_RESTART_S1)
 
 1. App in permanently denied state
 2. Open Settings → grant permission
@@ -92,18 +92,18 @@ Only relevant for older devices — manual test only if minSdk < 29.
 5. ✅ GPS card appears (repo rehydrates Granted → VM reflects it)
 
 > Part 1 requires PermissionRepositoryImpl to persist state across process death.
-> Part 2 is identical to PERM_RESTART_S1 — no separate unit test needed.
+> Part 2 is identical to PERM_RESTART_S1 - no separate unit test needed.
 
 # App Restart Scenarios
 
-## PERM_RESTART_S1 — Restart with granted permission
+## PERM_RESTART_S1 - Restart with granted permission
 🖐️
 
 1. State is NOT persisted in repo across process death. 
 2. On cold start repo always starts Idle. 
 3. Real permission state is resolved via PermissionHandler in HandlePermissions 
 4. composable (LaunchedEffect + ON_RESUME). 
-5. VM restart behavior is not unit testable — covered by manual/Espresso test.
+5. VM restart behavior is not unit testable - covered by manual/Espresso test.
 
 ## PERM_RESTART_S2 - Restart with temporary denial
 🖐️
@@ -119,7 +119,7 @@ Only relevant for older devices — manual test only if minSdk < 29.
 2. Kill and reopen app
 3. ✅ No GPS card, no dialogs on restart (state restored from DataStore)
 4. Tap GPS card → Open Settings dialog appears immediately
-   (no Education step — user already went through it)
+   (no Education step - user already went through it)
 
 ## PERM_RESTART_S4 - Restart after revoking in settings
 🖐️
@@ -130,9 +130,9 @@ Only relevant for older devices — manual test only if minSdk < 29.
 
 # GPS Card Interactions
 
-## PERM_CARD_S1 — Remove GPS card then re-add
+## PERM_CARD_S1 - Remove GPS card then re-add
 📏 (permission unchanged on remove)
-🖐️ (Education skipped when re-adding — driven by HandlePermissions composable)
+🖐️ (Education skipped when re-adding - driven by HandlePermissions composable)
 
 1. Grant permission, GPS card visible
 2. Swipe to remove GPS card 
@@ -140,13 +140,13 @@ Only relevant for older devices — manual test only if minSdk < 29.
 4. Tap "Add current location"
 5. ✅ GPS card reappears immediately (no permission dialog, already granted)
 
-## PERM_CARD_S2 — Remove GPS card, revoke permission, re-add
+## PERM_CARD_S2 - Remove GPS card, revoke permission, re-add
 🖐️
 
 1. Grant permission, remove GPS card
 2. Revoke permission in settings
 3. Tap "Add current location"
-4. ✅ Education dialog appears (driven by HandlePermissions —
+4. ✅ Education dialog appears (driven by HandlePermissions -
    resolvePermissionEvent returns null, state=Idle → ShowEducation dispatched)
 
 > VM behavior covered by PERM_FRESH_S1.
@@ -160,10 +160,10 @@ Only relevant for older devices — manual test only if minSdk < 29.
 
 # Edge Cases
 
-## PERM_EDGE_S1 — Rapid tap GPS card
+## PERM_EDGE_S1 - Rapid tap GPS card
 🖐️🎨📏 Unit (VM processes events correctly)
 
-VM correctly processes rapid ShowEducation dispatches — state stays Education.
+VM correctly processes rapid ShowEducation dispatches - state stays Education.
 Deduplication guard (only one dialog) is HandlePermissions responsibility.
 
 ## PERM_EDGE_S2 - Rotate screen during permission dialog
@@ -207,42 +207,42 @@ Deduplication guard (only one dialog) is HandlePermissions responsibility.
 
 # PERM_MAPPING - PermissionChanged Mapping
 
-## PERM_MAPPING_S1 — Idle state mapping
+## PERM_MAPPING_S1 - Idle state mapping
 📏
 
 1. Repository emits LocationPermission.Idle 
 2. PermissionChanged event is processed 
 3. ✅ UI State becomes PermissionState.Idle
 
-## PERM_MAPPING_S2 — Education state mapping
+## PERM_MAPPING_S2 - Education state mapping
 📏
 
 1. Repository emits LocationPermission.Education 
 2. PermissionChanged event is processed 
 3. ✅ UI State becomes PermissionState.Education
 
-## PERM_MAPPING_S3 — Requesting state mapping
+## PERM_MAPPING_S3 - Requesting state mapping
 📏
 
 1. Repository emits LocationPermission.Requesting 
 2. PermissionChanged event is processed 
 3. ✅ UI State becomes PermissionState.Requesting
 
-## PERM_MAPPING_S4 — Granted state mapping
+## PERM_MAPPING_S4 - Granted state mapping
 📏
 
 1. Repository emits LocationPermission.Granted 
 2. PermissionChanged event is processed 
 3. ✅ UI State becomes PermissionState.Granted
 
-## PERM_MAPPING_S5 — Denied (temporary) state mapping
+## PERM_MAPPING_S5 - Denied (temporary) state mapping
 📏
 
 1. Repository emits LocationPermission.Denied 
 2. PermissionChanged event is processed 
 3. ✅ UI State becomes PermissionState.Denied
 
-## PERM_MAPPING_S6 — DeniedPermanently state mapping
+## PERM_MAPPING_S6 - DeniedPermanently state mapping
 📏
 
 1. Repository emits LocationPermission.DeniedPermanently 
@@ -251,7 +251,7 @@ Deduplication guard (only one dialog) is HandlePermissions responsibility.
 
 # Bug
 
-## PERM_COMBINE_S1 — ShowEducation never produces invalid intermediate state Idle+dialogVisible
+## PERM_COMBINE_S1 - ShowEducation never produces invalid intermediate state Idle+dialogVisible
 📏 Unit (UnconfinedTestDispatcher)
 
 > combine() fires twice on dispatch(ShowEducation):
@@ -262,7 +262,7 @@ Deduplication guard (only one dialog) is HandlePermissions responsibility.
     > Fix: separate _uiState (UI fields) from repo (permission) in combine,
     > and update repo before _uiState in dispatch().
 
-## BUG_COMBINE_S2 — Idle flash on cold start with DeniedPermanently
+## BUG_COMBINE_S2 - Idle flash on cold start with DeniedPermanently
 📏 Unit (UnconfinedTestDispatcher)
 
 > stateIn initialValue was hardcoded to Idle, causing one invalid Idle
