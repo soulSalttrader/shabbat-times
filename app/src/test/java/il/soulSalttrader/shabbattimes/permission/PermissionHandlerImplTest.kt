@@ -14,37 +14,33 @@ class PermissionHandlerImplTest : DescribeSpec({
         rationale: Set<String> = emptySet(),
     ) = FakePermissionHandler(granted, rationale)
 
-    describe("resolvePermissionEvent") {
-
-        // PERM_FRESH_S1
-        it("all granted → AllGranted") {
+    describe("PERM_HANDLER - resolvePermissionEvent") {
+        it("PERM_HANDLER_S1 - should return AllGranted when all permissions granted") {
             makeHandler(granted = setOf(fine, coarse))
                 .resolvePermissionEvent(listOf(fine, coarse)) shouldBe PermissionEvent.AllGranted
         }
 
-        // PERM_FRESH_S2
-        it("denied + shouldShowRationale → DeniedWithRationale") {
+        it("PERM_HANDLER_S2 - should return DeniedWithRationale when all denied with rationale") {
             makeHandler(rationale = setOf(fine, coarse))
                 .resolvePermissionEvent(listOf(fine, coarse)) shouldBe PermissionEvent.DeniedWithRationale
         }
 
-        // PERM_FRESH_S4
-        it("denied + no rationale → null (permanent denial indistinguishable from fresh install)") {
+        it("PERM_HANDLER_S3 - should return null when all denied without rationale") {
             makeHandler()
                 .resolvePermissionEvent(listOf(fine, coarse)) shouldBe null
         }
 
-        it("partial grant — one granted, one with rationale → DeniedWithRationale") {
+        it("PERM_HANDLER_S4 - should return DeniedWithRationale when partially granted with rationale") {
             makeHandler(granted = setOf(coarse), rationale = setOf(fine))
                 .resolvePermissionEvent(listOf(fine, coarse)) shouldBe PermissionEvent.DeniedWithRationale
         }
 
-        it("partial grant — one granted, one with no rationale → null") {
+        it("PERM_HANDLER_S5 - should return null when partially granted without rationale") {
             makeHandler(granted = setOf(coarse))
                 .resolvePermissionEvent(listOf(fine, coarse)) shouldBe null
         }
 
-        it("mixed rationale — any permission with rationale → DeniedWithRationale") {
+        it("PERM_HANDLER_S6 - should return DeniedWithRationale when any permission has rationale") {
             makeHandler(rationale = setOf(coarse))
                 .resolvePermissionEvent(listOf(fine, coarse)) shouldBe PermissionEvent.DeniedWithRationale
         }
