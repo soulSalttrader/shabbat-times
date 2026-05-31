@@ -12,8 +12,6 @@ class PermissionReducerTest : DescribeSpec({
     val idle = PermissionUiState()
 
     describe("PERM_FRESH - fresh install flow") {
-
-        // PERM_FRESH_S1 — Grant on first ask
         it("PERM_FRESH_S1 - ShowEducation sets Education + shows dialog") {
             val result = PermissionEvent.ShowEducation.reducer reduce idle
             result.permission shouldBe PermissionState.Education
@@ -31,7 +29,6 @@ class PermissionReducerTest : DescribeSpec({
             result.permission shouldBe PermissionState.Granted
         }
 
-        // PERM_FRESH_S2 — Deny on first ask
         it("PERM_FRESH_S2 - DeniedWithRationale sets Denied") {
             val result = PermissionEvent.DeniedWithRationale.reducer reduce idle
             result.permission shouldBe PermissionState.Denied
@@ -44,20 +41,17 @@ class PermissionReducerTest : DescribeSpec({
             result.permission shouldBe PermissionState.Denied
         }
 
-        // PERM_FRESH_S3 — Deny then allow via rationale
         it("PERM_FRESH_S3 - AcceptedRationale sets Requesting") {
             val denied = idle.copy(permission = PermissionState.Denied)
             val result = PermissionEvent.AcceptedRationale.reducer reduce denied
             result.permission shouldBe PermissionState.Requesting
         }
 
-        // PERM_FRESH_S4 — Deny permanently
         it("PERM_FRESH_S4 - DeniedPermanently sets DeniedPermanently") {
             val result = PermissionEvent.DeniedPermanently.reducer reduce idle
             result.permission shouldBe PermissionState.DeniedPermanently
         }
 
-        // PERM_FRESH_S5 — Dismiss system permission dialog
         it("PERM_FRESH_S5 - System dialog dismiss keeps Requesting state") {
             val requesting = idle.copy(permission = PermissionState.Requesting)
             requesting.permission shouldBe PermissionState.Requesting
@@ -69,7 +63,6 @@ class PermissionReducerTest : DescribeSpec({
 
         val permanentlyDenied = idle.copy(permission = PermissionState.DeniedPermanently)
 
-        // PERM_SETTINGS_S1 - Grant permission in Settings
         it("PERM_SETTINGS_S1 - ShowDeniedPermanentlyDialog sets DeniedPermanently + shows dialog") {
             val result = PermissionEvent.ShowDeniedPermanentlyDialog.reducer reduce idle
             result.permission shouldBe PermissionState.DeniedPermanently
@@ -96,13 +89,11 @@ class PermissionReducerTest : DescribeSpec({
             afterTap.permission shouldBe PermissionState.Education
         }
 
-        // PERM_SETTINGS_S2 - Set to "Ask every time" in Settings
         it("PERM_SETTINGS_S2 - ReturnedFromAppSettings works from any state") {
             val result = PermissionEvent.ReturnedFromAppSettings.reducer reduce idle
             result.permission shouldBe PermissionState.Idle
         }
 
-        // PERM_SETTINGS_S3 - Return from Settings without change
         it("PERM_SETTINGS_S3 - No change in Settings keeps DeniedPermanently") {
             val result = PermissionEvent.RequestedAppSettings.reducer reduce permanentlyDenied
             result.permission shouldBe PermissionState.DeniedPermanently
@@ -110,8 +101,6 @@ class PermissionReducerTest : DescribeSpec({
     }
 
     describe("PERM_EDGE - reducer edge cases") {
-
-        // PERM_EDGE_S6 - Unrelated event should not touch permission
         it("PERM_EDGE_S4 - permission state unaffected by unrelated events") {
             val granted = idle.copy(permission = PermissionState.Granted)
             // dispatching an unrelated event should not touch permission
@@ -132,7 +121,6 @@ class PermissionReducerTest : DescribeSpec({
     }
 
     describe("PERM_MAPPING - PermissionChanged mapping") {
-
         it("PERM_MAPPING_S1 - maps Idle → Idle") {
             val result = PermissionEvent.PermissionChanged(LocationPermission.Idle).reducer reduce idle
             result.permission shouldBe PermissionState.Idle
