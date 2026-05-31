@@ -13,6 +13,9 @@ interface SavedLocationDao {
     @Query("SELECT * FROM saved_locations ORDER BY sortOrder ASC")
     fun observeAll(): Flow<List<SavedLocationEntity>>
 
+    @Query("SELECT * FROM saved_locations ORDER BY sortOrder ASC")
+    suspend fun getAll(): List<SavedLocationEntity>
+
     @Upsert
     suspend fun upsertAll(entities: List<SavedLocationEntity>)
 
