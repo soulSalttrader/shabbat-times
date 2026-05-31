@@ -28,7 +28,7 @@ class PermissionGrantedFlowTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `PERM_RESTART_S1 - GPS card visible when permission already granted`() {
+    fun `UI_PERM_RESTART_S1 - should show GPS card on relaunch when permission granted`() {
         PermissionRobot(composeRule)
             .waitForShabbatCard(GPS_CARD)
             .assertShabbatCardPresented(GPS_CARD)

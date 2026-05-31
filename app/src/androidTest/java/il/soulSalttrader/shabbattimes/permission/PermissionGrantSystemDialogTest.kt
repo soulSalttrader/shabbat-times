@@ -12,7 +12,7 @@ import org.junit.Test
 class PermissionGrantSystemDialogTest : BaseInstrumentedTest() {
 
     @Test
-    fun `UI_PERM_FRESH_S1 - GPS card appears after granting permission`() {
+    fun `UI_PERM_FRESH_S1 - should show GPS card after granting permission`() {
         PermissionRobot(composeRule)
             .tapCardToStartFlow(EMPTY_CARD)
             .assertAppDialogPresented(EDUCATION_DIALOG)

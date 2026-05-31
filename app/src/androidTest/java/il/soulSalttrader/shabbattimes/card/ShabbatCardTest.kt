@@ -30,27 +30,13 @@ class ShabbatCardTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_CARD_S1 - Empty card shown when no locations saved`() {
+    fun `UI_CARD_S1 - should show empty card when no locations saved`() {
         ShabbatCardRobot(composeRule)
             .assertCardPresent(EMPTY_CARD)
     }
 
     @Test
-    fun `UI_CARD_CONTENT_S5 - Drag handle visible on GPS card`() {
-        ShabbatCardRobot(composeRule)
-            .addShabbatCard(SavedLocation.GPS_ID, "My gps city")
-            .assertDragHandleOnCard(GPS_CARD)
-    }
-
-    @Test
-    fun `UI_CARD_CONTENT_S6 - Drag handle visible on location card`() {
-        ShabbatCardRobot(composeRule)
-            .addShabbatCard(LOCATION_CARD)
-            .assertDragHandleOnCard(LOCATION_CARD)
-    }
-
-    @Test
-    fun `UI_CARD_SWIPE_S1 - swipe left shows delete confirmation dialog`() {
+    fun `UI_CARD_SWIPE_S1 - should show delete confirmation dialog when swiped left`() {
         ShabbatCardRobot(composeRule)
             .addShabbatCard(SavedLocation.LOCATION_ID)
             .assertCardPresent(LOCATION_CARD)
@@ -59,7 +45,7 @@ class ShabbatCardTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_CARD_SWIPE_S2 - confirm delete removes card`() {
+    fun `UI_CARD_SWIPE_S2 - should remove card when delete confirmed`() {
         ShabbatCardRobot(composeRule)
             .addShabbatCard(SavedLocation.LOCATION_ID)
             .assertCardPresent(LOCATION_CARD)
@@ -70,7 +56,7 @@ class ShabbatCardTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_CARD_SWIPE_S3 - dismiss delete keeps card`() {
+    fun `UI_CARD_SWIPE_S3 - should keep card when delete dismissed`() {
         ShabbatCardRobot(composeRule)
             .addShabbatCard(SavedLocation.LOCATION_ID)
             .assertCardPresent(LOCATION_CARD)
@@ -81,7 +67,7 @@ class ShabbatCardTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_CARD_SWIPE_S4 - GPS card swipe removes GPS card`() {
+    fun `UI_CARD_SWIPE_S4 - should remove GPS card when swiped and confirmed`() {
         ShabbatCardRobot(composeRule)
             .addShabbatCard(SavedLocation.GPS_ID, "My gps city")
             .assertCardPresent(GPS_CARD)
@@ -92,7 +78,21 @@ class ShabbatCardTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_CARD_CONTENT_S7 - No drag handle on empty card`() {
+    fun `UI_CARD_CONTENT_S5 - should show drag handle on GPS card`() {
+        ShabbatCardRobot(composeRule)
+            .addShabbatCard(SavedLocation.GPS_ID, "My gps city")
+            .assertDragHandleOnCard(GPS_CARD)
+    }
+
+    @Test
+    fun `UI_CARD_CONTENT_S6 - should show drag handle on location card`() {
+        ShabbatCardRobot(composeRule)
+            .addShabbatCard(LOCATION_CARD)
+            .assertDragHandleOnCard(LOCATION_CARD)
+    }
+
+    @Test
+    fun `UI_CARD_CONTENT_S7 - should not show drag handle on empty card`() {
         ShabbatCardRobot(composeRule)
             .assertCardPresent(EMPTY_CARD)
             .assertDragHandleNotPresentOnCard(EMPTY_CARD)

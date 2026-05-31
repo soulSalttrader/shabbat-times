@@ -21,7 +21,7 @@ class LocationSearchTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `SEARCH_ADD_LOCATION_S1 - should successfully add new location from search suggestion`() {
+    fun `UI_SEARCH_S1 - should add location from search suggestion`() {
         LocationSearchRobot(composeRule)
             .openSearch()
             .typeCity("Brno")
