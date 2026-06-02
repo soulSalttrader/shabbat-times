@@ -70,11 +70,11 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
 
     val onCardClick = {
-        when (permissionUiState.permission) {
-            PermissionState.Granted           -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
-            PermissionState.Denied            -> permissionViewModel.dispatch(PermissionEvent.AcceptedRationale)
-            PermissionState.DeniedPermanently -> permissionViewModel.dispatch(PermissionEvent.ShowDeniedPermanentlyDialog)
-            else                              -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
+        when (permissionUiState.dispatchCardAction()) {
+            CardAction.OpenGpsSearch    -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
+            CardAction.AcceptRationale  -> permissionViewModel.dispatch(PermissionEvent.AcceptedRationale)
+            CardAction.ShowDeniedDialog -> permissionViewModel.dispatch(PermissionEvent.ShowDeniedPermanentlyDialog)
+            CardAction.ShowEducation    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
         }
     }
 
