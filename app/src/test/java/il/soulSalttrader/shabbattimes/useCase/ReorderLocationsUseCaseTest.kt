@@ -24,8 +24,7 @@ class ReorderLocationsUseCaseTest : DescribeSpec({
         useCase = ReorderLocationsUseCase(savedLocationsRepository)
     }
 
-    describe("reorder") {
-
+    describe("CARD_REORDER - SCENARIO: Reorder cards via drag handle") {
         it("USECASE_REORDER_S1 - should move first item to the end") {
             runTest {
                 useCase(listOf(jerusalemEntry, telAvivEntry, brnoEntry).toImmutableList(), from = 0, to = 2)

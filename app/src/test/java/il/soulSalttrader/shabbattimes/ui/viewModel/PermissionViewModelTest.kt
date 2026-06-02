@@ -35,8 +35,8 @@ class PermissionViewModelTest : DescribeSpec({
         return vm to repo
     }
 
-    describe("PERM_FRESH - fresh install flow") {
-        it("PERM_FRESH_S1 - full happy path: Education → Requesting → Granted") {
+    describe("PERM_FRESH_S1 - SCENARIO: User grants permission on first ask") {
+        it("PERM_FRESH_S1_VM - should reflect Granted after full Education → Requesting → Granted flow") {
             runTest {
                 val (vm, repo) = setup()
 
@@ -63,7 +63,7 @@ class PermissionViewModelTest : DescribeSpec({
             }
         }
 
-        it("PERM_FRESH_S1: isDialogVisible must survive repo emission after ShowEducation") {
+        it("PERM_FRESH_S1_VM_2 - should keep isDialogVisible after repo emission following ShowEducation ") {
             runTest {
                 val (vm, repo) = setup()
                 vm.state.test {
@@ -86,94 +86,100 @@ class PermissionViewModelTest : DescribeSpec({
                 }
             }
         }
-
-        it("PERM_FRESH_S2 - deny → rationale visible, no GPS card") {
-            runTest {
-                val (vm, repo) = setup()
-                vm.state.test {
-                    awaitItem() // initial Idle
-
-                    vm.dispatch(PermissionEvent.ShowEducation)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Education - consume
-
-                    vm.dispatch(PermissionEvent.Request)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Requesting - consume
-
-                    vm.dispatch(PermissionEvent.DeniedWithRationale)
-                    testDispatcher.scheduler.advanceUntilIdle()
-
-                     // Denied - this is what we assert
-                    awaitItem().permission shouldBe PermissionState.Denied
-                    repo.permissionState.value shouldBe LocationPermission.Denied
-
-                    cancelAndIgnoreRemainingEvents()
-                }
-            }
-        }
-
-        it("PERM_FRESH_S3 - deny → accept rationale → grant") {
-            runTest {
-                val (vm, repo) = setup()
-                vm.state.test {
-                    awaitItem() // initial Idle
-
-                    vm.dispatch(PermissionEvent.DeniedWithRationale)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Denied - consume
-
-                    vm.dispatch(PermissionEvent.AcceptedRationale)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.Requesting
-
-                    vm.dispatch(PermissionEvent.AllGranted)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.Granted
-
-                    repo.permissionState.value shouldBe LocationPermission.Granted
-
-                    cancelAndIgnoreRemainingEvents()
-                }
-            }
-        }
-
-        it("PERM_FRESH_S4 - deny twice → permanently denied") {
-            runTest {
-                val (vm, repo) = setup()
-                vm.state.test {
-                    awaitItem() // Idle
-
-                    vm.dispatch(PermissionEvent.ShowEducation)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Education
-
-                    vm.dispatch(PermissionEvent.Request)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Requesting
-
-                    vm.dispatch(PermissionEvent.DeniedWithRationale) // first deny
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.Denied
-
-                    vm.dispatch(PermissionEvent.AcceptedRationale) // tap Allow on rationale
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.Requesting
-
-                    vm.dispatch(PermissionEvent.DeniedPermanently) // second deny
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.DeniedPermanently
-
-                    repo.permissionState.value shouldBe LocationPermission.DeniedPermanently
-
-                    cancelAndIgnoreRemainingEvents()
-                }
-            }
-        }
     }
 
-    describe("PERM_SETTINGS - App Settings Flow") {
-        it("PERM_SETTINGS_S1 - ReturnedFromAppSettings resets DeniedPermanently to Idle") {
+        describe("PERM_FRESH_S2 - SCENARIO: User denies permission on first ask") {
+            it("PERM_FRESH_S2_VM - should show Denied state after deny flow") {
+                runTest {
+                    val (vm, repo) = setup()
+                    vm.state.test {
+                        awaitItem() // initial Idle
+
+                        vm.dispatch(PermissionEvent.ShowEducation)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem() // Education - consume
+
+                        vm.dispatch(PermissionEvent.Request)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem() // Requesting - consume
+
+                        vm.dispatch(PermissionEvent.DeniedWithRationale)
+                        testDispatcher.scheduler.advanceUntilIdle()
+
+                        // Denied - this is what we assert
+                        awaitItem().permission shouldBe PermissionState.Denied
+                        repo.permissionState.value shouldBe LocationPermission.Denied
+
+                        cancelAndIgnoreRemainingEvents()
+                    }
+                }
+            }
+        }
+
+        describe("PERM_FRESH_S3 - SCENARIO: User denies then allows via rationale") {
+            it("PERM_FRESH_S3_VM - should reflect Granted after deny → accept rationale → grant") {
+                runTest {
+                    val (vm, repo) = setup()
+                    vm.state.test {
+                        awaitItem() // initial Idle
+
+                        vm.dispatch(PermissionEvent.DeniedWithRationale)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem() // Denied - consume
+
+                        vm.dispatch(PermissionEvent.AcceptedRationale)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.Requesting
+
+                        vm.dispatch(PermissionEvent.AllGranted)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.Granted
+
+                        repo.permissionState.value shouldBe LocationPermission.Granted
+
+                        cancelAndIgnoreRemainingEvents()
+                    }
+                }
+            }
+        }
+
+        describe("PERM_FRESH_S4 - SCENARIO: User permanently denies permission") {
+            it("PERM_FRESH_S4_VM - should reflect DeniedPermanently after denying twice ") {
+                runTest {
+                    val (vm, repo) = setup()
+                    vm.state.test {
+                        awaitItem() // Idle
+
+                        vm.dispatch(PermissionEvent.ShowEducation)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem() // Education
+
+                        vm.dispatch(PermissionEvent.Request)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem() // Requesting
+
+                        vm.dispatch(PermissionEvent.DeniedWithRationale) // first deny
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.Denied
+
+                        vm.dispatch(PermissionEvent.AcceptedRationale) // tap Allow on rationale
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.Requesting
+
+                        vm.dispatch(PermissionEvent.DeniedPermanently) // second deny
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.DeniedPermanently
+
+                        repo.permissionState.value shouldBe LocationPermission.DeniedPermanently
+
+                        cancelAndIgnoreRemainingEvents()
+                    }
+                }
+            }
+        }
+
+    describe("PERM_SETTINGS_S1 - SCENARIO: User grants permission in settings") {
+        it("PERM_SETTINGS_S1_VM_1 - should set Idle after returning from settings") {
             runTest {
                 val (vm, repo) = setup()
 
@@ -199,7 +205,7 @@ class PermissionViewModelTest : DescribeSpec({
             }
         }
 
-        it("PERM_SETTINGS_S1 - After returning from Settings, tapping card should start fresh Education flow") {
+        it("PERM_SETTINGS_S1_VM_2: should start fresh Education flow when card is tapped after returning from Settings") {
             runTest {
                 val (vm, _) = setup()
 
@@ -220,73 +226,77 @@ class PermissionViewModelTest : DescribeSpec({
                 }
             }
         }
-
-        it("PERM_SETTINGS_S2 - User grants in Settings → next tap grants") {
-            runTest {
-                val (vm, repo) = setup()
-                vm.state.test {
-                    awaitItem()
-
-                    vm.dispatch(PermissionEvent.DeniedPermanently)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem()
-
-                    vm.dispatch(PermissionEvent.ReturnedFromAppSettings)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.Idle
-
-                    vm.dispatch(PermissionEvent.ShowEducation)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.Education
-                        isDialogVisible shouldBe true
-                    }
-
-                    repo.permissionState.value shouldBe LocationPermission.Education
-
-                    cancelAndIgnoreRemainingEvents()
-                }
-            }
-        }
-
-        it("PERM_SETTINGS_S3 - ignore settings → return → Idle → re-denied on next request") {
-            runTest {
-                val (vm, repo) = setup()
-                vm.state.test {
-                    awaitItem() // Idle
-
-                    vm.dispatch(PermissionEvent.DeniedPermanently)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.DeniedPermanently
-
-                    // ON_RESUME fires, resolvePermissionEvent = null + DeniedPermanently
-                    vm.dispatch(PermissionEvent.ReturnedFromAppSettings)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.Idle
-
-                    // user taps card → Education → Request → still permanently denied
-                    vm.dispatch(PermissionEvent.ShowEducation)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem()
-
-                    vm.dispatch(PermissionEvent.Request)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem()
-
-                    vm.dispatch(PermissionEvent.DeniedPermanently)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.DeniedPermanently
-
-                    repo.permissionState.value shouldBe LocationPermission.DeniedPermanently
-
-                    cancelAndIgnoreRemainingEvents()
-                }
-            }
-        }
     }
 
-    describe("PERM_RESTART - App Restart Scenarios") {
-        it("PERM_RESTART_S1 - cold start with Granted, no dialogs") {
+        describe("PERM_SETTINGS_S2 - SCENARIO: User sets Ask every time in settings") {
+            it("PERM_SETTINGS_S2_VM_1 - should show Education dialog on next tap after user grants it in Settings") {
+                runTest {
+                    val (vm, repo) = setup()
+                    vm.state.test {
+                        awaitItem()
+
+                        vm.dispatch(PermissionEvent.DeniedPermanently)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem()
+
+                        vm.dispatch(PermissionEvent.ReturnedFromAppSettings)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.Idle
+
+                        vm.dispatch(PermissionEvent.ShowEducation)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().apply {
+                            permission shouldBe PermissionState.Education
+                            isDialogVisible shouldBe true
+                        }
+
+                        repo.permissionState.value shouldBe LocationPermission.Education
+
+                        cancelAndIgnoreRemainingEvents()
+                    }
+                }
+            }
+        }
+
+        describe("PERM_SETTINGS_S3 - SCENARIO: User ignores settings and returns") {
+            it("PERM_SETTINGS_S3_VM_1 - should keep DeniedPermanently when settings ignored") {
+                runTest {
+                    val (vm, repo) = setup()
+                    vm.state.test {
+                        awaitItem() // Idle
+
+                        vm.dispatch(PermissionEvent.DeniedPermanently)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.DeniedPermanently
+
+                        // ON_RESUME fires, resolvePermissionEvent = null + DeniedPermanently
+                        vm.dispatch(PermissionEvent.ReturnedFromAppSettings)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.Idle
+
+                        // user taps card → Education → Request → still permanently denied
+                        vm.dispatch(PermissionEvent.ShowEducation)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem()
+
+                        vm.dispatch(PermissionEvent.Request)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem()
+
+                        vm.dispatch(PermissionEvent.DeniedPermanently)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.DeniedPermanently
+
+                        repo.permissionState.value shouldBe LocationPermission.DeniedPermanently
+
+                        cancelAndIgnoreRemainingEvents()
+                    }
+                }
+            }
+        }
+
+    describe("PERM_RESTART_S1 - SCENARIO: Restart with granted permission") {
+        it("PERM_RESTART_S1_VM_1 - should reflect Granted immediately on cold start ") {
             runTest {
                 val repo = FakePermissionRepository()
                 repo.updatePermissionState(LocationPermission.Granted)
@@ -301,110 +311,86 @@ class PermissionViewModelTest : DescribeSpec({
                 }
             }
         }
+    }
 
-        it("PERM_RESTART_S2 - cold start with Denied, no dialogs") {
-            runTest {
-                val repo = FakePermissionRepository()
-                repo.updatePermissionState(LocationPermission.Denied)
-                val vm = PermissionViewModel(repo)
-
-                vm.state.test {
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.Denied
-                        isDialogVisible shouldBe false
-                    }
-                    cancelAndIgnoreRemainingEvents()
-                }
-            }
-        }
-
-        it("PERM_RESTART_S3 - cold start with DeniedPermanently, no dialogs") {
-            runTest {
-                val repo = FakePermissionRepository()
-                repo.updatePermissionState(LocationPermission.DeniedPermanently)
-                val vm = PermissionViewModel(repo)
-
-                vm.state.test {
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.DeniedPermanently
-                        isDialogVisible shouldBe false
-                    }
-                    cancelAndIgnoreRemainingEvents()
-                }
-            }
-        }
-
-        it("PERM_RESTART_S3 - cold start after permanent denial skips Education, shows Open Settings on tap") {
-            runTest {
-                val repo = FakePermissionRepository()
-                repo.updatePermissionState(LocationPermission.DeniedPermanently) // persisted
-                val vm = PermissionViewModel(repo)
-
-                vm.state.test {
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.DeniedPermanently
-
-                    // user taps card
-                    vm.dispatch(PermissionEvent.ShowDeniedPermanentlyDialog)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.DeniedPermanently
-                        isDialogVisible shouldBe true // Open Settings dialog, not Education
-                    }
-
-                    cancelAndIgnoreRemainingEvents()
-                }
-            }
-        }
-
-        it("PERM_RESTART_S4 - repo emits Denied after external revocation") {
-            runTest {
-                val (vm, repo) = setup()
-                vm.state.test {
-                    awaitItem() // Idle
-
+        describe("PERM_RESTART_S2 - SCENARIO: Restart with temporary denial") {
+            it("PERM_RESTART_S2_VM_1 - should reflect Denied on cold start, no dialogs") {
+                runTest {
+                    val repo = FakePermissionRepository()
                     repo.updatePermissionState(LocationPermission.Denied)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.Denied
+                    val vm = PermissionViewModel(repo)
 
-                    cancelAndIgnoreRemainingEvents()
-                }
-            }
-        }
-    }
-
-    describe("PERM_CARD") {
-        it("PERM_CARD_S1 - removing GPS card does not change permission state") {
-            runTest {
-                val (vm, repo) = setup()
-                vm.dispatch(PermissionEvent.AllGranted)
-                testDispatcher.scheduler.advanceUntilIdle()
-
-                // card removed - no permission event dispatched
-                repo.permissionState.value shouldBe LocationPermission.Granted
-            }
-        }
-
-        it("PERM_CARD_S1 - re-adding when already granted, dispatch AllGranted goes straight to Granted") {
-            runTest {
-                val repo = FakePermissionRepository()
-                repo.updatePermissionState(LocationPermission.Granted)
-                val vm = PermissionViewModel(repo)
-
-                vm.state.test {
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.Granted
-                        isDialogVisible shouldBe false
-                        // Education was never dispatched - no isDialogVisible=true with Education state
+                    vm.state.test {
+                        awaitItem().apply {
+                            permission shouldBe PermissionState.Denied
+                            isDialogVisible shouldBe false
+                        }
+                        cancelAndIgnoreRemainingEvents()
                     }
-                    cancelAndIgnoreRemainingEvents()
                 }
             }
         }
-    }
 
-    describe("PERM_EDGE - edge cases") {
-        it("PERM_EDGE_S1 - rapid taps do not cause invalid state transitions") {
+        describe("PERM_RESTART_S3 - SCENARIO: Restart with permanently denied") {
+            it("PERM_RESTART_S3_VM_1 - should reflect DeniedPermanently on cold start") {
+                runTest {
+                    val repo = FakePermissionRepository()
+                    repo.updatePermissionState(LocationPermission.DeniedPermanently)
+                    val vm = PermissionViewModel(repo)
+
+                    vm.state.test {
+                        awaitItem().apply {
+                            permission shouldBe PermissionState.DeniedPermanently
+                            isDialogVisible shouldBe false
+                        }
+                        cancelAndIgnoreRemainingEvents()
+                    }
+                }
+            }
+
+            it("PERM_RESTART_S3_VM_2 - should skip Education and show Open Settings after cold start when permission is permanently denied") {
+                runTest {
+                    val repo = FakePermissionRepository()
+                    repo.updatePermissionState(LocationPermission.DeniedPermanently) // persisted
+                    val vm = PermissionViewModel(repo)
+
+                    vm.state.test {
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.DeniedPermanently
+
+                        // user taps card
+                        vm.dispatch(PermissionEvent.ShowDeniedPermanentlyDialog)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().apply {
+                            permission shouldBe PermissionState.DeniedPermanently
+                            isDialogVisible shouldBe true // Open Settings dialog, not Education
+                        }
+
+                        cancelAndIgnoreRemainingEvents()
+                    }
+                }
+            }
+        }
+
+        describe("PERM_RESTART_S4 - SCENARIO: Restart after revoking in settings") {
+            it("PERM_RESTART_S4_VM - should reflect Denied after external revocation") {
+                runTest {
+                    val (vm, repo) = setup()
+                    vm.state.test {
+                        awaitItem() // Idle
+
+                        repo.updatePermissionState(LocationPermission.Denied)
+                        testDispatcher.scheduler.advanceUntilIdle()
+                        awaitItem().permission shouldBe PermissionState.Denied
+
+                        cancelAndIgnoreRemainingEvents()
+                    }
+                }
+            }
+        }
+
+    describe("PERM_EDGE_S1 - SCENARIO: Rapid tap GPS card") {
+        it("PERM_EDGE_S1_VM - should not cause invalid state on rapid dispatches") {
             runTest {
                 val (vm, _) = setup()
                 vm.state.test {
@@ -436,8 +422,10 @@ class PermissionViewModelTest : DescribeSpec({
                 }
             }
         }
+    }
 
-        it("PERM_EDGE_S5 - events during Requesting state handled gracefully, no invalid transitions") {
+    describe("PERM_EDGE_S5 - SCENARIO: Switch apps during system permission dialog") {
+        it("PERM_EDGE_S5_VM - should keep Requesting state when interrupted") {
             runTest {
                 val (vm, repo) = setup()
                 vm.state.test {
@@ -461,18 +449,17 @@ class PermissionViewModelTest : DescribeSpec({
         }
     }
 
-    describe("PERM_MAPPING - repo emission flows through to public state") {
-
+    describe("PERM_MAPPING - SCENARIO: LocationPermission maps correctly to PermissionState") {
         listOf(
-            LocationPermission.Idle              to PermissionState.Idle,
-            LocationPermission.Education         to PermissionState.Education,
-            LocationPermission.Requesting        to PermissionState.Requesting,
-            LocationPermission.Granted           to PermissionState.Granted,
-            LocationPermission.Denied            to PermissionState.Denied,
-            LocationPermission.DeniedPermanently to PermissionState.DeniedPermanently,
-        ).forEach { (locationPermission, expectedState) ->
+            Triple(1, LocationPermission.Idle             , PermissionState.Idle),
+            Triple(2, LocationPermission.Education        , PermissionState.Education),
+            Triple(3, LocationPermission.Requesting       , PermissionState.Requesting),
+            Triple(4, LocationPermission.Granted          , PermissionState.Granted),
+            Triple(5, LocationPermission.Denied           , PermissionState.Denied),
+            Triple(6, LocationPermission.DeniedPermanently, PermissionState.DeniedPermanently),
+        ).forEach { (order, locationPermission, expectedState) ->
 
-            it("PERM_MAPPING - repo emits $locationPermission → public state = $expectedState") {
+            it("PERM_MAPPING_S${order} - should map $locationPermission to $expectedState") {
                 runTest {
                     val repo = FakePermissionRepository()
                     repo.updatePermissionState(locationPermission)
@@ -487,8 +474,8 @@ class PermissionViewModelTest : DescribeSpec({
         }
     }
 
-    describe("BUG REGRESSION - combine() intermediate states") {
-        it("ShowEducation never produces invalid intermediate state Idle+dialogVisible") {
+    describe("PERM_COMBINE_S1 - SCENARIO: combine() fires twice causing invalid intermediate state") {
+        it("PERM_COMBINE_S1_VM - should never produce Idle+dialogVisible intermediate state") {
             // BUG: ⚠️ combine() fires twice on dispatch - first emission has correct isDialogVisible
             // but stale permission=Idle because repo hasn't updated yet.
             // Seen in logs: Idle/true appears briefly before Education/true.
@@ -514,27 +501,29 @@ class PermissionViewModelTest : DescribeSpec({
                 allStates.last().isDialogVisible shouldBe true
             }
         }
+    }
 
-        it("BUG_COMBINE_S2 - cold start with DeniedPermanently never flashes Idle first") {
-            // BUG: ⚠️ stateIn initialValue was hardcoded to PermissionUiState() = Idle
-            // causing one Idle emission before combine produced the real value.
-            // Fix: initialValue reads repo.permissionState.value synchronously.
-            runTest(UnconfinedTestDispatcher()) {
-                val repo = FakePermissionRepository()
-                repo.updatePermissionState(LocationPermission.DeniedPermanently)
-                val vm = PermissionViewModel(repo)
+        describe("PERM_COMBINE_S2 - SCENARIO: Idle flash on cold start with DeniedPermanently") {
+            it("BUG_COMBINE_S2 - cold start with DeniedPermanently never flashes Idle first") {
+                // BUG: ⚠️ stateIn initialValue was hardcoded to PermissionUiState() = Idle
+                // causing one Idle emission before combine produced the real value.
+                // Fix: initialValue reads repo.permissionState.value synchronously.
+                runTest(UnconfinedTestDispatcher()) {
+                    val repo = FakePermissionRepository()
+                    repo.updatePermissionState(LocationPermission.DeniedPermanently)
+                    val vm = PermissionViewModel(repo)
 
-                val allStates = mutableListOf<PermissionUiState>()
-                val job = launch { vm.state.collect { allStates.add(it) } }
-                job.cancel()
+                    val allStates = mutableListOf<PermissionUiState>()
+                    val job = launch { vm.state.collect { allStates.add(it) } }
+                    job.cancel()
 
-                // must never flash Idle before DeniedPermanently
-                allStates.none {
-                    it.permission == PermissionState.Idle
-                } shouldBe true
+                    // must never flash Idle before DeniedPermanently
+                    allStates.none {
+                        it.permission == PermissionState.Idle
+                    } shouldBe true
 
-                allStates.first().permission shouldBe PermissionState.DeniedPermanently
+                    allStates.first().permission shouldBe PermissionState.DeniedPermanently
+                }
             }
         }
-    }
 })
