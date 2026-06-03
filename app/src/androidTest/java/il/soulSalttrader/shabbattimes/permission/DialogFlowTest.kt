@@ -12,6 +12,7 @@ import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
 import il.soulSalttrader.shabbattimes.TestTags.EDUCATION_DIALOG
 import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
 import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
+import il.soulSalttrader.shabbattimes.TestTags.LOCATION_CARD
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import org.junit.Test
@@ -51,6 +52,10 @@ class DialogFlowTest : BaseInstrumentedTest() {
             .assertSystemDialogAppeared()
     }
 
+    // UI_DIALOG_S3 - should show rationale dialog after system dialog denial 🖐️
+
+    // UI_DIALOG_S4 - should show GPS card after allowing via rationale ✅ → see UI_CARD_S2_1
+
     @Test
     fun `UI_DIALOG_S5 - should show permanently denied dialog after denying twice`() {
         PermissionRobot(composeRule)
@@ -79,5 +84,25 @@ class DialogFlowTest : BaseInstrumentedTest() {
 
         composeRule.onNodeWithTag(BUTTON_DIALOG_CONFIRM).assertExists()
         composeRule.onNodeWithTag(BUTTON_DIALOG_DISMISS).assertExists()
+    }
+
+    @Test
+    fun `UI_DIALOG_S8 - should show Education dialog when card tapped with Idle permission`() {
+        PermissionRobot(composeRule)
+            .updateFakePermissionRepository(LocationPermission.Idle)
+            .tapCardToStartFlow(EMPTY_CARD)
+            .assertAppDialogPresented(EDUCATION_DIALOG)
+    }
+
+    @Test
+    fun `UI_DIALOG_S9 - should keep empty card when Education dialog is dismissed`() {
+        PermissionRobot(composeRule)
+            .updateFakePermissionRepository(LocationPermission.Idle)
+            .tapCardToStartFlow(EMPTY_CARD)
+            .assertAppDialogPresented(EDUCATION_DIALOG)
+            .dismissAppDialog(EDUCATION_DIALOG)
+            .assertShabbatCardPresented(EMPTY_CARD)
+            .assertShabbatCardNotPresented(GPS_CARD)
+            .assertShabbatCardNotPresented(LOCATION_CARD)
     }
 }
