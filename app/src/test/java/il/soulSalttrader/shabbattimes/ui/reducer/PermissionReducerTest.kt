@@ -126,7 +126,7 @@ class PermissionReducerTest : DescribeSpec({
             result.permission shouldBe PermissionState.Granted
         }
 
-        it("PERM_EDGE_S7_REDUCER_2 - should set Granted from DeniedPermanently on AllGranted ") {
+        it("PERM_EDGE_S7_REDUCER_2 - should set Granted from DeniedPermanently on AllGranted") {
             val permDenied = idle.copy(permission = PermissionState.DeniedPermanently)
             val result = PermissionEvent.AllGranted.reducer reduce permDenied
             result.permission shouldBe PermissionState.Granted
