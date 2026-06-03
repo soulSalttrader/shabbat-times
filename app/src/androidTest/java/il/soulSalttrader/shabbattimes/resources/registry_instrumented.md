@@ -47,10 +47,10 @@ UI_CARD_CONTENT
 
 | Layer | Slug                                                                  | Status |
 |---|-----------------------------------------------------------------------|---|
-| UI | ~ UI_CARD_CONTENT_S1 - should display location name on card           | ❓ |
-| UI | ~ UI_CARD_CONTENT_S2 - should display shabbat times on card           | ❓ |
-| UI | ~ UI_CARD_CONTENT_S3 - should show current location label on GPS card | ❓ |
-| UI | ~ UI_CARD_CONTENT_S4 - should show add location prompt on empty card  | ❓ |
+| UI | ~ UI_CARD_CONTENT_S1 - should display location name on card           | ✅ |
+| UI | ~ UI_CARD_CONTENT_S2 - should display shabbat times on card           | ✅ |
+| UI | ~ UI_CARD_CONTENT_S3 - should show current location label on GPS card | ✅ |
+| UI | ~ UI_CARD_CONTENT_S4 - should show add location prompt on empty card  | ✅ |
 | UI | ~ UI_CARD_CONTENT_S5 - should show drag handle on GPS card            | ✅ |
 | UI | ~ UI_CARD_CONTENT_S6 - should show drag handle on location card       | ✅ |
 | UI | ~ UI_CARD_CONTENT_S7 - should not show drag handle on empty card      | ✅ |

@@ -1,11 +1,16 @@
 package il.soulSalttrader.shabbattimes.card
 
 import android.util.Log
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.PermissionRobot
 import il.soulSalttrader.shabbattimes.ShabbatCardRobot
+import il.soulSalttrader.shabbattimes.TestTags
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
 import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
@@ -83,6 +88,78 @@ class ShabbatCardTest : BaseInstrumentedTest() {
             .assertAppDialogPresented(SWIPE_CARD_DIALOG)
             .performClickOnButtonDialog(BUTTON_DIALOG_CONFIRM)
             .assertCardNotPresent(GPS_CARD)
+    }
+
+
+    @Test
+    fun `UI_CARD_CONTENT_S1 - should display location name on card`() {
+        ShabbatCardRobot(composeRule)
+            .addShabbatCard(SavedLocation.GPS_ID, "My gps city name")
+            .assertCardPresent(GPS_CARD)
+
+        composeRule.onNode(
+            hasText("My gps city name")
+                .and(hasAnyAncestor(hasTestTag(GPS_CARD))),
+            true
+        ).assertExists()
+    }
+
+    @Test
+    fun `UI_CARD_CONTENT_S2 - should display shabbat times on card`() {
+        ShabbatCardRobot(composeRule)
+            .addShabbatCard(SavedLocation.LOCATION_ID, "Location")
+            .assertCardPresent(LOCATION_CARD)
+
+        composeRule.onAllNodes(
+            hasText("--:--")
+                .and(hasAnyAncestor(hasTestTag(LOCATION_CARD))),
+            useUnmergedTree = true
+        ).assertCountEquals(2)
+
+        composeRule.onAllNodes(
+            hasText("dd/mm/yyyy")
+                .and(hasAnyAncestor(hasTestTag(LOCATION_CARD))),
+            useUnmergedTree = true
+        ).assertCountEquals(2)
+
+        composeRule.onNode(
+            hasText("Candle Lighting", substring = true)
+                .and(hasAnyAncestor(hasTestTag(LOCATION_CARD))),
+            useUnmergedTree = true
+        ).assertExists()
+
+        composeRule.onNode(
+            hasText("Havdalah Time", substring = true)
+                .and(hasAnyAncestor(hasTestTag(LOCATION_CARD))),
+            useUnmergedTree = true
+        ).assertExists()
+    }
+
+    @Test
+    fun `UI_CARD_CONTENT_S3 - should show current location label on GPS card`() {
+        ShabbatCardRobot(composeRule)
+            .waitForTag(GPS_CARD)
+            .assertCardPresent(GPS_CARD)
+
+        composeRule.onNode(
+            hasTestTag(TestTags.LOCATION_LABEL)
+                .and(hasAnyAncestor(hasTestTag(GPS_CARD))),
+            useUnmergedTree = true
+        ).assertExists()
+    }
+
+    @Test
+    fun `UI_CARD_CONTENT_S4 - should show add location prompt on empty card`() {
+        ShabbatCardRobot(composeRule)
+            .removeShabbatCard(GPS_CARD)
+            .assertCardNotPresent(GPS_CARD)
+            .assertCardPresent(EMPTY_CARD)
+
+        composeRule.onNode(
+            hasText("Tap to use current location", true)
+                .and(hasAnyAncestor(hasTestTag(EMPTY_CARD))),
+            useUnmergedTree = true
+        ).assertExists()
     }
 
     @Test
