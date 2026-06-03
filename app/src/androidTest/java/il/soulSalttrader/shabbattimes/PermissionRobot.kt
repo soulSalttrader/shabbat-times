@@ -10,6 +10,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
+import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
 import il.soulSalttrader.shabbattimes.di.FakePermissionRepositoryModule
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 
@@ -33,6 +34,11 @@ class PermissionRobot(
 
     fun confirmAppDialog(testTag: String) = apply {
         rule.onNodeWithTag(BUTTON_DIALOG_CONFIRM).assertExists().performClick()
+        rule.onNodeWithTag(testTag).assertDoesNotExist()
+    }
+
+    fun dismissAppDialog(testTag: String) = apply {
+        rule.onNodeWithTag(BUTTON_DIALOG_DISMISS).assertExists().performClick()
         rule.onNodeWithTag(testTag).assertDoesNotExist()
     }
 
