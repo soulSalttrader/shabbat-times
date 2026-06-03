@@ -49,15 +49,15 @@ PERM_FRESH_S3
 ## SCENARIO: User permanently denies permission
 PERM_FRESH_S4
 
-| Layer | Slug                                                                                                                | Status |
-|---|---------------------------------------------------------------------------------------------------------------------|--|
-| Reducer | ~ PERM_FRESH_S4_REDUCER_1 - should set DeniedPermanently on DeniedPermanently                                       | ✅ |
-| VM | ~ PERM_FRESH_S4_VM - should reflect DeniedPermanently after denying twice                                           | ✅ |
-| Handler | ~ PERM_HANDLER_S3 - should return null when all denied without rationale                                            | ✅ |
-| UI | ~ UI_DIALOG_S4 - should show GPS card after allowing via rationale                                                  | ❓ |
-| UI | ~ UI_DIALOG_S5 - should show permanently denied dialog after denying twice                                          | ❓ |
-| UI | ~ UI_DIALOG_S6 - should show system dialog when tapping outdated GPS card with denied permission                    | ❓ |
-| UI | ~ UI_DIALOG_S7 - should show open settings dialog when tapping outdated GPS card with permanently denied permission | ❓ |
+| Layer | Slug                                                                                                                | Status               |
+|---|---------------------------------------------------------------------------------------------------------------------|----------------------|
+| Reducer | ~ PERM_FRESH_S4_REDUCER_1 - should set DeniedPermanently on DeniedPermanently                                       | ✅                    |
+| VM | ~ PERM_FRESH_S4_VM - should reflect DeniedPermanently after denying twice                                           | ✅                    |
+| Handler | ~ PERM_HANDLER_S3 - should return null when all denied without rationale                                            | ✅                    |
+| UI | ~ UI_DIALOG_S4 - should show GPS card after allowing via rationale                                                  | ✅ → see UI_CARD_S2_1 |
+| UI | ~ UI_DIALOG_S5 - should show permanently denied dialog after denying twice                                          | ✅                    |
+| UI | ~ UI_DIALOG_S6 - should show system dialog when tapping outdated GPS card with denied permission                    | ✅                    |
+| UI | ~ UI_DIALOG_S7 - should show open settings dialog when tapping outdated GPS card with permanently denied permission | ✅                    |
 
 ## SCENARIO: User dismisses system dialog without choosing
 PERM_FRESH_S5
@@ -71,10 +71,11 @@ PERM_FRESH_S5
 ## SCENARIO: User dismisses education dialog
 PERM_FRESH_S6
 
-| Layer | Slug               | Status |
-|---|--------------------|---|
-| VM | ~ PERM_FRESH_S6_VM | ❓ |
-| UI | —                  | ❓ |
+| Layer | Slug                                                                                                            | Status |
+|---|-----------------------------------------------------------------------------------------------------------------|--|
+| VM | ~ PERM_FRESH_S6_VM - should return to Idle with dialog hidden when Education dialog dismissed | ✅ |
+| UI | ~ UI_DIALOG_S8 - should show Education dialog when card tapped with Idle permission                             | ✅ |
+| UI | ~ UI_DIALOG_S9 - should keep empty card when Education dialog is dismissed                                      | ✅ |
 
 ---
 
@@ -82,11 +83,10 @@ PERM_FRESH_S6
 PERM_HANDLER_PARTIAL
 
 | Layer   | Slug                                                                                        | Status |
-|---------|---------------------------------------------------------------------------------------------|---|
+|---------|---------------------------------------------------------------------------------------------|--|
 | Handler | ~ PERM_HANDLER_S4 - should return DeniedWithRationale when partially granted with rationale | ✅ |
 | Handler | ~ PERM_HANDLER_S5 - should return null when partially granted without rationale             | ✅ |
 | Handler | ~ PERM_HANDLER_S6 - should return DeniedWithRationale when any permission has rationale     | ✅ |
-| UI      | —                                                                                           | ❓ |
 
 ---
 
@@ -182,21 +182,21 @@ PERM_RESTART_S4
 ## SCENARIO: Remove GPS card then re-add
 PERM_CARD_S1
 
-| Layer    | Slug                                                                                              | Status |
-|----------|---------------------------------------------------------------------------------------------------|--|
-| VM       | ~ PERM_CARD_S1_VM_1 - should call removeLocationUseCase when GPS card deleted                     | ✅ |
-| VM       | ~ PERM_CARD_S1_VM_2 - should call removeLocationUseCase with isCurrent false for non-GPS card     | ✅ |
-| Use Case | ~ PERM_CARD_S1_UC_1 - should keep permission state unchanged when removing a non-current location | ❓ |
-| UI       | —                                                                                                 | 🖐️ |
+| Layer | Slug                                                                                              | Status |
+|-------|---------------------------------------------------------------------------------------------------|--|
+| VM    | ~ PERM_CARD_S1_VM_1 - should call removeLocationUseCase when GPS card deleted                     | ✅ |
+| VM    | ~ PERM_CARD_S1_VM_2 - should call removeLocationUseCase with isCurrent false for non-GPS card     | ✅ |
+| VM    | ~ PERM_CARD_S1_UC_1 - should keep permission state unchanged when removing a non-current location | ✅ |
+| UI    | —                                                                                                 | 🖐️ |
 
 ## SCENARIO: Remove GPS card, revoke permission, re-add
 PERM_CARD_S2
 
-| Layer    | Slug                                                                                       | Status |
-|----------|--------------------------------------------------------------------------------------------|--|
-| VM       | ~ PERM_CARD_S2_VM_1 - should show Education flow when permission resets to Idle            | PERM_CARD_S6 |
-| Use Case | ~ PERM_CARD_S2_UC_1 - should reset permission state to Idle when removing current location | ❓ |
-| UI       | —                                                                                          | 🖐️ |
+| Layer    | Slug                                                                                       | Status               |
+|----------|--------------------------------------------------------------------------------------------|----------------------|
+| VM       | ~ PERM_CARD_S2_VM_1 - should show Education flow when permission resets to Idle            | ✅ → see PERM_CARD_S6 |
+| Use Case | ~ PERM_CARD_S2_UC_1 - should reset permission state to Idle when removing current location | ✅                    |
+| Use Case       | ~ PERM_CARD_S2_UC_2 - should not reset permission state when removing non-current location | ✅                 |
 
 ## SCENARIO: Card click with granted permission opens GPS search
 PERM_CARD_S3
@@ -273,8 +273,10 @@ PERM_EDGE_S2
 
 | Layer | Slug | Status |
 |---|---|---|
-| VM | — | — |
-| UI | — | 🖐️ |
+| VM | ~ PERM_EDGE_S2_VM_1 - should preserve Education state after configuration change | ✅ |
+| VM | ~ PERM_EDGE_S2_VM_2 - should preserve DeniedPermanently state after configuration change | ✅ |
+| UI | ~ UI_PERM_EDGE_S2_1 - should preserve Education dialog after rotation | 🖐️ |
+| UI | ~ UI_PERM_EDGE_S2_2 - should preserve Open Settings dialog after rotation | 🖐️ |
 
 ---
 
@@ -283,28 +285,34 @@ PERM_EDGE_S3
 
 | Layer | Slug | Status |
 |---|---|---|
-| VM | — | — |
-| UI | — | 🖐️ |
+| VM | ~ PERM_EDGE_S3_VM_1 - should reset to Idle after app backgrounded during permission request | ✅ |
+| UI | ~ UI_PERM_EDGE_S3_1 - should preserve Education dialog when returning from background | 🖐️ |
+| UI | ~ UI_PERM_EDGE_S3_2 - should preserve Open Settings dialog when returning from background | 🖐️ |
+
+> Requesting is a transient state — system dialog is dismissed when app
+> is backgrounded. On return, HandlePermissions resolves real OS state.
+> VM correctly resets to Idle, not Requesting.
 
 ---
 
 ## SCENARIO: Location limit reached with permission
 PERM_EDGE_S4
 
-| Layer | Slug                                                                               | Status |
-|---|------------------------------------------------------------------------------------|---|
-| VM | ~ PERM_EDGE_S4_VM - should not affect permission state when location limit reached | ❓ |
-| UI | —                                                                                  | 🖐️ |
+| Layer    | Slug                                                                                                  | Status |
+|----------|-------------------------------------------------------------------------------------------------------|---|
+| Use Case | ~ PERM_EDGE_S4_UC_1 - should return LimitReached when location limit is reached |  ✅ |
+| Use Case | ~ PERM_EDGE_S4_UC_2 - should save location and return Success when limit not reached |  ✅ |
+| UI       | ~ UI_PERM_EDGE_S4_1 - should show snackbar when tapping add location at limit                         | 🖐️ |
 
 ---
 
 ## SCENARIO: Switch apps during system permission dialog
 PERM_EDGE_S5
 
-| Layer | Slug                                                              | Status |
-|---|-------------------------------------------------------------------|---|
-| VM | ~ PERM_EDGE_S5_VM - should keep Requesting state when interrupted | ✅ |
-| UI | —                                                                 | 🖐️ |
+| Layer | Slug                                                                                 | Status |
+|---|--------------------------------------------------------------------------------------|---|
+| VM | ~ PERM_EDGE_S5_VM - should keep Requesting state when interrupted                    | ✅ |
+| UI | ~ UI_PERM_EDGE_S5_1 - should show system dialog again when returning from other app  | 🖐️ |
 
 ---
 
@@ -313,19 +321,15 @@ PERM_EDGE_S6
 
 | Layer   | Slug                                                                          | Status |
 |---------|-------------------------------------------------------------------------------|---|
-| VM      | ~ PERM_EDGE_S6_VM - should not change permission state on unrelated event     | ❓ |
+| VM      | ~ PERM_EDGE_S6_VM - should not change permission state on unrelated event     | ✅ |
 | Reducer | ~ PERM_EDGE_S6_REDUCER_1 - should not change Granted state on unrelated event |✅|
-| UI      | —                                                                             | — |
 
 ## SCENARIO: AllGranted works from any denied state
 PERM_EDGE_S7
 
 | Layer   | Slug                                                                               | Status |
 |---------|------------------------------------------------------------------------------------|--|
-| Reducer | ~ PERM_EDGE_S7_REDUCER_1 - should not change Granted state on unrelated event      |✅|
-| Reducer | ~ PERM_EDGE_S7_REDUCER_2 - should set Granted from Denied on AllGranted            |❓|
-| Reducer | ~ PERM_EDGE_S7_REDUCER_3 - should set Granted from DeniedPermanently on AllGranted |❓|
-| UI      | —                                                                                  | — |
+| Reducer | ~ PERM_EDGE_S7_REDUCER_2 - should set Granted from DeniedPermanently on AllGranted           |✅|
 
 ---
 
