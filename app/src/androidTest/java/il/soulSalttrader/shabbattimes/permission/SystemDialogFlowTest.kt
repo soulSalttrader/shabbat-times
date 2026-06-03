@@ -9,10 +9,10 @@ import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
 import org.junit.Test
 
 @HiltAndroidTest
-class PermissionGrantSystemDialogTest : BaseInstrumentedTest() {
+class SystemDialogFlowTest : BaseInstrumentedTest() {
 
     @Test
-    fun `UI_PERM_FRESH_S1 - should show GPS card after granting permission`() {
+    fun `UI_CARD_S2_1 - should show GPS card when permission granted `() {
         PermissionRobot(composeRule)
             .tapCardToStartFlow(EMPTY_CARD)
             .assertAppDialogPresented(EDUCATION_DIALOG)

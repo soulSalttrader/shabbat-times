@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
+import il.soulSalttrader.shabbattimes.PermissionRobot
 import il.soulSalttrader.shabbattimes.ShabbatCardRobot
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
@@ -33,6 +34,13 @@ class ShabbatCardTest : BaseInstrumentedTest() {
     fun `UI_CARD_S1 - should show empty card when no locations saved`() {
         ShabbatCardRobot(composeRule)
             .assertCardPresent(EMPTY_CARD)
+    }
+
+    @Test
+    fun `UI_CARD_S2_2 - should show GPS card on relaunch when permission granted`() {
+        PermissionRobot(composeRule)
+            .waitForShabbatCard(GPS_CARD)
+            .assertShabbatCardPresented(GPS_CARD)
     }
 
     @Test

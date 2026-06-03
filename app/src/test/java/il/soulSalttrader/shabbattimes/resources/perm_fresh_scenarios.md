@@ -18,10 +18,6 @@
 6. Tap "Add manually instead" → dismissed
 
 ## PERM_FRESH_S3 - SCENARIO: User denies then allows via rationale
-PERM_FRESH_S3_REDUCER_1 - should set Requesting on AcceptedRationale
-PERM_FRESH_S3_VM - should reflect Granted after deny → accept rationale → grant
-UI_PERM_FRESH_S4 - should show rationale dialog after system dialog denial
-UI_PERM_FRESH_S5 - should show GPS card after allowing via rationale
 📏
 
 1. First ask denied

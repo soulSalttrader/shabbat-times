@@ -52,7 +52,7 @@ class SavedLocationsRepositoryRoomTest {
     }
 
     @Test
-    fun `REPO_REORDER_S1 - should persist new sort order after reorder`() = testScope.runTest {
+    fun `REPO_CARD_REORDER_S1 - should persist new sort order after reorder`() = testScope.runTest {
         repo.save(jerusalemLocation())
         repo.save(telAvivLocation())
         repo.save(brnoLocation())
@@ -73,7 +73,7 @@ class SavedLocationsRepositoryRoomTest {
     }
 
     @Test
-    fun `REPO_REORDER_S2 - should persist sort order when card moved down`() = testScope.runTest {
+    fun `REPO_CARD_REORDER_S2 - should persist sort order when card moved down`() = testScope.runTest {
         repo.save(jerusalemLocation())
         repo.save(telAvivLocation())
         repo.save(brnoLocation())
@@ -95,7 +95,7 @@ class SavedLocationsRepositoryRoomTest {
     }
 
     @Test
-    fun `REPO_REORDER_S3 - should persist sort order when GPS card reordered`() {
+    fun `REPO_CARD_REORDER_S3 - should persist sort order when GPS card reordered`() {
 
     }
 }

@@ -17,7 +17,7 @@ import il.soulSalttrader.shabbattimes.model.SavedLocation
 import org.junit.Test
 
 @HiltAndroidTest
-class PermissionDeniedPermanentlyFlowTest : BaseInstrumentedTest() {
+class DialogFlowTest : BaseInstrumentedTest() {
 
     override fun setupTest() {
         val packageName = InstrumentationRegistry.getInstrumentation().targetContext.packageName
@@ -34,7 +34,7 @@ class PermissionDeniedPermanentlyFlowTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_PERM_FRESH_S2 - should show system dialog after education dialog when permission denied`() {
+    fun `UI_DIALOG_S1 - should show system dialog after education dialog when permission denied`() {
         PermissionRobot(composeRule)
             .tapCardToStartFlow(EMPTY_CARD)
             .assertAppDialogPresented(EDUCATION_DIALOG)
@@ -44,7 +44,7 @@ class PermissionDeniedPermanentlyFlowTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_PERM_FRESH_S3 - should show system dialog when permission denied`() {
+    fun `UI_DIALOG_S2 - should show system dialog when permission denied`() {
         PermissionRobot(composeRule)
             .updateFakePermissionRepository(LocationPermission.Denied)
             .tapCardToStartFlow(EMPTY_CARD)
@@ -52,7 +52,7 @@ class PermissionDeniedPermanentlyFlowTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_PERM_FRESH_S6 - should show permanently denied dialog after denying twice`() {
+    fun `UI_DIALOG_S5 - should show permanently denied dialog after denying twice`() {
         PermissionRobot(composeRule)
             .updateFakePermissionRepository(LocationPermission.DeniedPermanently)
             .tapCardToStartFlow(EMPTY_CARD)
@@ -60,7 +60,7 @@ class PermissionDeniedPermanentlyFlowTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_PERM_RESTART_S2 - should show system dialog when tapping outdated GPS card with denied permission`() {
+    fun `UI_DIALOG_S6 - should show system dialog when tapping outdated GPS card with denied permission`() {
         PermissionRobot(composeRule)
             .updateFakePermissionRepository(LocationPermission.Denied)
             .addShabbatCard(SavedLocation.GPS_ID, "My gsp city")
@@ -70,7 +70,7 @@ class PermissionDeniedPermanentlyFlowTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_PERM_RESTART_S3 - should show open settings dialog when tapping outdated GPS card with permanently denied permission`() {
+    fun `UI_DIALOG_S7 - should show open settings dialog when tapping outdated GPS card with permanently denied permission`() {
         PermissionRobot(composeRule)
             .updateFakePermissionRepository(LocationPermission.DeniedPermanently)
             .addShabbatCard(SavedLocation.GPS_ID, "My gsp city")
