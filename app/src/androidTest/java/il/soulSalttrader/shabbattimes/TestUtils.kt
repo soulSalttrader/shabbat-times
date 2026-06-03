@@ -24,3 +24,21 @@ fun addCard(
     }
     rule.waitForIdle()
 }
+
+fun removeCard(
+    rule: ComposeTestRule,
+    savedLocationId: String,
+    cityName: String = "Brno",
+) {
+    runBlocking {
+        FakePersistenceModule.fakeSavedLocations.remove(
+            SavedLocation(
+                id = savedLocationId,
+                name = cityName,
+                coordinates = Coordinates(0.0, 0.0),
+                timeZoneId = ZoneId.systemDefault(),
+            )
+        )
+    }
+    rule.waitForIdle()
+}

@@ -51,7 +51,11 @@ class ShabbatCardRobot(
         addCard(rule, savedLocationId, cityName)
     }
 
-    fun waitForTag(tag: String, timeout: Long = 3000) {
+    fun removeShabbatCard(savedLocationId: String, cityName: String = "Brno") = apply {
+        removeCard(rule, savedLocationId, cityName)
+    }
+
+    fun waitForTag(tag: String, timeout: Long = 3000) = apply {
         rule.waitUntil(timeout) {
             try {
                 rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
