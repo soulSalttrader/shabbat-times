@@ -139,7 +139,7 @@ private fun UiIconLocationLabel(
     status: LocationStatus,
     label: String,
 ) {
-    Row {
+    Row(modifier = Modifier.testTag(TestTags.LOCATION_LABEL)) {
         val icon = when (status is LocationStatus.Current) {
             true -> UiIcon.Resource(R.drawable.home_pin_24px)
             else -> null
