@@ -17,7 +17,6 @@ class LocationSearchTest : BaseInstrumentedTest() {
             executeShellCommand("pm grant $packageName android.permission.ACCESS_FINE_LOCATION")
             executeShellCommand("pm grant $packageName android.permission.ACCESS_COARSE_LOCATION")
         }
-        Thread.sleep(300)
     }
 
     @Test
@@ -31,5 +30,17 @@ class LocationSearchTest : BaseInstrumentedTest() {
             .waitUntilGpsCardVisible()
 
         composeRule.onNodeWithText("Brno", substring = true).assertExists()
+    }
+
+    @Test
+    fun `UI_SEARCH_S2 - should not add location when search closed without selection`() {
+        LocationSearchRobot(composeRule)
+            .openSearch()
+            .typeCity("Brno")
+            .waitForSuggestions()
+            .closeSearch()
+            .waitUntilGpsCardVisible()
+
+        composeRule.onNodeWithText("Brno", substring = true).assertDoesNotExist()
     }
 }

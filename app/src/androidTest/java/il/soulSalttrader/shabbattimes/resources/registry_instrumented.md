@@ -94,7 +94,7 @@ UI_SEARCH_S1
 
 | Layer | Slug                                                        | Status |
 |---|-------------------------------------------------------------|---|
-| UI | ~ UI_SEARCH_S1 - should add location from search suggestion | ⚠️ BUG_SEARCH_ADD_LOCATION_S1 |
+| UI | ~ UI_SEARCH_S1 - should add location from search suggestion | ⚠️ BUG_SEARCH_S1 |
 
 ---
 
@@ -103,7 +103,7 @@ UI_SEARCH_S2
 
 | Layer | Slug                                                                          | Status |
 |---|-------------------------------------------------------------------------------|---|
-| UI | ~ UI_SEARCH_S2 - should not add location when search closed without selection | ❓ |
+| UI | ~ UI_SEARCH_S2 - should not add location when search closed without selection | ✅ |
 
 ---
 
