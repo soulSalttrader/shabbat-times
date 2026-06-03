@@ -3,6 +3,7 @@ package il.soulSalttrader.shabbattimes
 import il.soulSalttrader.shabbattimes.model.Coordinates
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.LocationStatus
+import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 import java.time.ZoneId
@@ -57,4 +58,11 @@ val gpsEntry = ShabbatEntry(
     location = gpsLocation(),
     times = HalachicTimesDisplay(gpsLocation().coordinates),
     status = LocationStatus.Current,
+)
+
+fun SavedLocation.toResolvedLocation() = ResolvedLocation(
+    id = id,
+    name = name,
+    coordinates = coordinates,
+    timeZoneId = timeZoneId,
 )
