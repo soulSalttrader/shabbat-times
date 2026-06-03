@@ -6,7 +6,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import il.soulSalttrader.shabbattimes.brnoLocation
 import il.soulSalttrader.shabbattimes.data.AppDatabase
 import il.soulSalttrader.shabbattimes.data.SavedLocationDao
+import il.soulSalttrader.shabbattimes.gpsLocation
 import il.soulSalttrader.shabbattimes.jerusalemLocation
+import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.telAvivLocation
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
@@ -95,7 +97,27 @@ class SavedLocationsRepositoryRoomTest {
     }
 
     @Test
-    fun `REPO_CARD_REORDER_S3 - should persist sort order when GPS card reordered`() {
+    fun `REPO_CARD_REORDER_S3 - should persist sort order when GPS card reordered`() = testScope.runTest {
+        repo.save(jerusalemLocation())
+        repo.save(gpsLocation())
+        repo.save(telAvivLocation())
+        repo.save(brnoLocation())
 
+        repo.locations.first { it.size == 4 }
+
+        repo.reorder(
+            listOf(
+                gpsLocation(),
+                jerusalemLocation(),
+                telAvivLocation(),
+                brnoLocation(),
+            )
+        )
+
+        val result = dao.observeAll().first()
+        assert(result[0].id == SavedLocation.GPS_ID) { "expected ${SavedLocation.GPS_ID} first" }
+        assert(result[1].id == "id_1") { "expected id_1 second" }
+        assert(result[2].id == "id_2") { "expected id_2 third" }
+        assert(result[3].id == "id_3") { "expected id_3 fourth" }
     }
 }
