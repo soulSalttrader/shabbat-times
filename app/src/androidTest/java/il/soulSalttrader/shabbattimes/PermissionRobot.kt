@@ -1,5 +1,7 @@
 package il.soulSalttrader.shabbattimes
 
+import android.os.Environment
+import android.util.Log
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -13,6 +15,7 @@ import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
 import il.soulSalttrader.shabbattimes.di.FakePermissionRepositoryModule
 import il.soulSalttrader.shabbattimes.model.LocationPermission
+import java.io.File
 
 class PermissionRobot(
     private val rule: ComposeTestRule,
@@ -68,16 +71,6 @@ class PermissionRobot(
             .updatePermissionState(permission)
     }
 
-    fun waitForSystemPermissionDialog() = apply {
-        device.wait(Until.hasObject(By.pkg("com.android.permissioncontroller")), 1000)
-    }
-
-    fun grantSystemPermission() = apply {
-        val allowButton = device.findObject(By.text("While using the app"))
-            ?: device.findObject(By.text("Allow"))
-        allowButton?.click()
-    }
-
     fun assertSystemDialogAppeared() = apply {
         device.waitForIdle(2000)
 
@@ -85,9 +78,35 @@ class PermissionRobot(
         assert(appeared != null) { "System permission dialog did not appear" }
     }
 
-    fun denySystemPermission() = apply {
-        val denyButton = device.findObject(By.text("Don't allow"))
-            ?: device.findObject(By.text("Deny"))
-        denyButton?.click()
+    fun waitForSystemPermissionDialog(timeoutMs: Long = 6000) = apply {
+        val appeared = device.wait(
+            Until.hasObject(By.pkg("com.android.permissioncontroller")),
+            timeoutMs
+        )
+
+        if (!appeared) {
+            takeScreenshot()
+            throw AssertionError("System permission dialog did not appear")
+        }
+    }
+
+    fun denyPermissionForever() = apply {
+        device.findObject(By.textContains("Don't allow"))?.click()
+            ?: device.findObject(By.textContains("Deny"))?.click()
+            ?: throw AssertionError("Deny button not found")
+    }
+
+    fun allowWhileUsingApp() = apply {
+        device.findObject(By.textContains("While using the app"))?.click()
+            ?: device.findObject(By.textContains("Allow"))?.click()
+            ?: throw AssertionError("Allow button not found")
+    }
+
+    private fun takeScreenshot(name: String = "screenshot") {
+        val fileName = "${name}_${System.currentTimeMillis()}.png"
+        val path = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), fileName)
+
+        device.takeScreenshot(path)
+        Log.d("PermissionRobot", "Screenshot Saved: $fileName")
     }
 }
