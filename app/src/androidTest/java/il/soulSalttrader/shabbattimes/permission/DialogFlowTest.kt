@@ -1,5 +1,6 @@
 package il.soulSalttrader.shabbattimes.permission
 
+import android.util.Log
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
@@ -7,8 +8,8 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.PermissionRobot
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
-import il.soulSalttrader.shabbattimes.TestTags.DENIED_PERMANENTLY_DIALOG
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
+import il.soulSalttrader.shabbattimes.TestTags.DENIED_PERMANENTLY_DIALOG
 import il.soulSalttrader.shabbattimes.TestTags.EDUCATION_DIALOG
 import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
 import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
@@ -42,6 +43,7 @@ class DialogFlowTest : BaseInstrumentedTest() {
             .confirmAppDialog(EDUCATION_DIALOG)
             .waitForSystemPermissionDialog()
             .assertSystemDialogAppeared()
+            .allowWhileUsingApp()
     }
 
     @Test
@@ -50,6 +52,7 @@ class DialogFlowTest : BaseInstrumentedTest() {
             .updateFakePermissionRepository(LocationPermission.Denied)
             .tapCardToStartFlow(EMPTY_CARD)
             .assertSystemDialogAppeared()
+            .allowWhileUsingApp()
     }
 
     // UI_DIALOG_S3 - should show rationale dialog after system dialog denial 🖐️
@@ -72,6 +75,7 @@ class DialogFlowTest : BaseInstrumentedTest() {
             .assertShabbatCardPresented(GPS_CARD)
             .tapCardToStartFlow(GPS_CARD)
             .assertSystemDialogAppeared()
+            .allowWhileUsingApp()
     }
 
     @Test
