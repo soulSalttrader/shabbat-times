@@ -1,7 +1,9 @@
 package il.soulSalttrader.shabbattimes
 
+import android.util.Log
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.test.core.app.ActivityScenario
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -42,7 +44,16 @@ abstract class BaseInstrumentedTest {
 
     @After
     fun tearDown() {
-        activityScenario.close()
+        runCatching {
+            repeat(3) {
+                runCatching { Espresso.pressBack() }
+                composeRule.waitForIdle()
+            }
+
+            activityScenario.close()
+
+            resetFakes()
+        }.onFailure { e ->  Log.w("BaseInstrumentedTest", "Cleanup failed", e) }
     }
 
     private fun resetFakes() {
