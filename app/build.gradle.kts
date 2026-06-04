@@ -27,6 +27,7 @@ android {
 
 //        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner = "il.soulSalttrader.shabbattimes.HiltTestRunner"
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
 
         val secretsFile by lazy {
             rootProject.file("secrets.properties")
