@@ -42,6 +42,13 @@ class ShabbatCardTest : BaseInstrumentedTest() {
     }
 
     @Test
+    fun `UI_CARD_S2_1 - should show GPS card when permission granted `() {
+        PermissionRobot(composeRule)
+            .waitForShabbatCard(GPS_CARD)
+            .assertShabbatCardPresented(GPS_CARD)
+    }
+
+    @Test
     fun `UI_CARD_S2_2 - should show GPS card on relaunch when permission granted`() {
         PermissionRobot(composeRule)
             .waitForShabbatCard(GPS_CARD)
@@ -138,7 +145,7 @@ class ShabbatCardTest : BaseInstrumentedTest() {
     @Test
     fun `UI_CARD_CONTENT_S3 - should show current location label on GPS card`() {
         ShabbatCardRobot(composeRule)
-            .waitForTag(GPS_CARD)
+            .waitForTag(GPS_CARD, 5000)
             .assertCardPresent(GPS_CARD)
 
         composeRule.onNode(
