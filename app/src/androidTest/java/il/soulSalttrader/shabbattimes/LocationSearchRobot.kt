@@ -11,17 +11,10 @@ import il.soulSalttrader.shabbattimes.TestTags.SEARCH_INPUT
 import il.soulSalttrader.shabbattimes.TestTags.SEARCH_SCRIM
 import il.soulSalttrader.shabbattimes.TestTags.SEARCH_SUGGESTION_ITEM
 
-class LocationSearchRobot(private val rule: ComposeTestRule) {
-    fun assertCardPresented(testTag: String) = apply {
-        waitForTag(testTag)
-        rule.onNodeWithTag(testTag).assertExists()
-    }
-
-    fun assertCardNotPresented(testTag: String) = apply {
-        waitForTagToDisappear(testTag)
-        rule.onNodeWithTag(testTag).assertDoesNotExist()
-    }
-
+class LocationSearchRobot(
+    private val rule: ComposeTestRule,
+    private val uiRobot: UiRobot = UiRobot(rule),
+) {
     private fun openFabMenu() = apply {
         rule.onNodeWithTag(FAB_ADD).assertExists().performClick()
         rule.waitForIdle()
@@ -38,13 +31,13 @@ class LocationSearchRobot(private val rule: ComposeTestRule) {
         rule.waitForIdle()
     }
 
-    fun typeCity(city: String) = apply {
+    fun enterCity(city: String) = apply {
         rule.onNodeWithTag(SEARCH_INPUT).assertExists().performTextInput(city)
         rule.waitForIdle()
     }
 
     fun selectSuggestionAt(index: Int = 0) = apply {
-        waitForTag(SEARCH_SUGGESTION_ITEM)
+        uiRobot.waitForTag(SEARCH_SUGGESTION_ITEM)
         val suggestions = rule.onAllNodesWithTag(SEARCH_SUGGESTION_ITEM, true)
         val count = suggestions.fetchSemanticsNodes().size
 
@@ -53,21 +46,5 @@ class LocationSearchRobot(private val rule: ComposeTestRule) {
 
         suggestions[index].assertExists().performClick()
         rule.waitForIdle()
-    }
-
-    private fun waitForTag(tag: String, timeout: Long = 5000) = apply {
-        rule.waitUntil(timeout) {
-            runCatching {
-                rule.onAllNodesWithTag(tag, true).fetchSemanticsNodes().isNotEmpty()
-            }.getOrDefault(false)
-        }
-    }
-
-    private fun waitForTagToDisappear(tag: String, timeout: Long = 5000) = apply {
-        rule.waitUntil(timeout) {
-            runCatching {
-                rule.onAllNodesWithTag(tag, true).fetchSemanticsNodes().isEmpty()
-            }.getOrDefault(false)
-        }
     }
 }

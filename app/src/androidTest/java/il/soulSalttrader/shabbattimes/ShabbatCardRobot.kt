@@ -1,61 +1,26 @@
 package il.soulSalttrader.shabbattimes
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeUp
-import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
-import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
 import il.soulSalttrader.shabbattimes.TestTags.DRAG_HANDLE
+import il.soulSalttrader.shabbattimes.TestTags.LOCATION_CARD
+import il.soulSalttrader.shabbattimes.TestTags.LOCATION_LABEL
 
-class ShabbatCardRobot(private val rule: ComposeTestRule) {
-    fun assertCardPresented(testTag: String) = apply {
-        waitForTag(testTag)
-        rule.onNodeWithTag(testTag).assertExists()
-    }
-
-    fun assertCardNotPresented(testTag: String) = apply {
-        waitForTagToDisappear(testTag)
-        rule.onNodeWithTag(testTag).assertDoesNotExist()
-    }
-
-    fun assertDragHandlePresented() = apply {
-        waitForTag(DRAG_HANDLE)
-        rule.onNodeWithTag(DRAG_HANDLE).assertExists()
-    }
-
-    fun assertAppDialogPresented(testTag: String) = apply {
-        waitForTag(testTag)
-        rule.onNodeWithTag(testTag).assertExists()
-    }
-
-    fun assertDragHandlePresentedOnCard(testTag: String) = apply {
-        waitForTag(testTag)
-        rule.onNode(
-            hasTestTag(DRAG_HANDLE)
-                .and(hasAnyAncestor(hasTestTag(testTag))),
-            useUnmergedTree = true
-        ).assertExists()
-    }
-
-    fun assertDragHandleNotPresentedOnCard(testTag: String) = apply {
-        waitForTagToDisappear(testTag)
-        rule.onNode(
-            hasTestTag(DRAG_HANDLE)
-                .and(hasAnyAncestor(hasTestTag(testTag))),
-            useUnmergedTree = true
-        ).assertDoesNotExist()
-    }
-
+class ShabbatCardRobot(
+    private val rule: ComposeTestRule,
+    private val uiRobot: UiRobot = UiRobot(rule),
+) {
     fun dragCardUp(tag: String) = apply {
-        waitForTag(tag)
+        uiRobot.waitForTag(tag)
 
         val handleNode = rule.onNode(hasTestTag(DRAG_HANDLE).and(hasAnyAncestor(hasTestTag(tag))), true,)
         val handleBounds = handleNode.fetchSemanticsNode().boundsInRoot
@@ -71,7 +36,7 @@ class ShabbatCardRobot(private val rule: ComposeTestRule) {
     }
 
     fun swipeCardToLeft(cardTag: String) = apply {
-        waitForTag(cardTag)
+        uiRobot.waitForTag(cardTag)
         val node = rule.onNodeWithTag(cardTag)
 
         node.assertExists().performTouchInput {
@@ -84,39 +49,24 @@ class ShabbatCardRobot(private val rule: ComposeTestRule) {
         rule.waitForIdle()
     }
 
-    fun addShabbatCard(savedLocationId: String, cityName: String = "Brno") = apply {
-        addCard(rule, savedLocationId, cityName)
+    fun assertTextPlaceholdersCount(
+        text: String,
+        cardTag: String = LOCATION_CARD,
+        expectedCount: Int = 2,
+        substring: Boolean = true,
+    ) = apply {
+        rule.onAllNodes(
+            hasText(text, substring)
+                .and(hasAnyAncestor(hasTestTag(cardTag))),
+            useUnmergedTree = true
+        ).assertCountEquals(expectedCount)
     }
 
-    fun removeShabbatCard(savedLocationId: String, cityName: String = "Brno") = apply {
-        removeCard(rule, savedLocationId, cityName)
-    }
-
-    fun confirmAppDialog(testTag: String) = apply {
-        waitForTag(testTag)
-        rule.onNodeWithTag(BUTTON_DIALOG_CONFIRM, true).assertExists().performClick()
-        rule.onNodeWithTag(testTag, true).assertDoesNotExist()
-    }
-
-    fun dismissAppDialog(testTag: String) = apply {
-        waitForTag(testTag)
-        rule.onNodeWithTag(BUTTON_DIALOG_DISMISS, true).assertExists().performClick()
-        rule.onNodeWithTag(testTag, true).assertDoesNotExist()
-    }
-
-    private fun waitForTag(tag: String, timeout: Long = 5000) = apply {
-        rule.waitUntil(timeout) {
-            runCatching {
-                rule.onAllNodesWithTag(tag, true).fetchSemanticsNodes().isNotEmpty()
-            }.getOrDefault(false)
-        }
-    }
-
-    private fun waitForTagToDisappear(tag: String, timeout: Long = 5000) = apply {
-        rule.waitUntil(timeout) {
-            runCatching {
-                rule.onAllNodesWithTag(tag, true).fetchSemanticsNodes().isEmpty()
-            }.getOrDefault(false)
-        }
+    fun assertLocationLabelPresented(cardTag: String) = apply {
+        rule.onNode(
+            hasTestTag(LOCATION_LABEL)
+                .and(hasAnyAncestor(hasTestTag(cardTag))),
+            useUnmergedTree = true
+        ).assertExists()
     }
 }
