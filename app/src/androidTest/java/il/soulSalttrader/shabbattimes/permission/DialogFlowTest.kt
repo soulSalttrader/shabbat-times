@@ -1,12 +1,12 @@
 package il.soulSalttrader.shabbattimes.permission
 
-import android.util.Log
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.PermissionRobot
+import il.soulSalttrader.shabbattimes.SystemPermissionRobot
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_DISMISS
 import il.soulSalttrader.shabbattimes.TestTags.DENIED_PERMANENTLY_DIALOG
@@ -14,6 +14,7 @@ import il.soulSalttrader.shabbattimes.TestTags.EDUCATION_DIALOG
 import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
 import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
 import il.soulSalttrader.shabbattimes.TestTags.LOCATION_CARD
+import il.soulSalttrader.shabbattimes.TestTags.RATIONALE_DIALOG
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import org.junit.Test
@@ -36,23 +37,31 @@ class DialogFlowTest : BaseInstrumentedTest() {
     }
 
     @Test
-    fun `UI_DIALOG_S1 - should show system dialog after education dialog when permission denied`() {
+    fun `UI_DIALOG_S1 - should show system dialog after education dialog`() {
         PermissionRobot(composeRule)
-            .tapCardToStartFlow(EMPTY_CARD)
+            .tapCardToStartPermissionFlow(EMPTY_CARD)
             .assertAppDialogPresented(EDUCATION_DIALOG)
             .confirmAppDialog(EDUCATION_DIALOG)
-            .waitForSystemPermissionDialog()
-            .assertSystemDialogAppeared()
-            .allowWhileUsingApp()
+
+        SystemPermissionRobot()
+            .assertSystemDialogAppeared(composeRule)
+            .allowWhileUsingApp(composeRule)
     }
 
     @Test
-    fun `UI_DIALOG_S2 - should show system dialog when permission denied`() {
+    fun `UI_DIALOG_S2 - should show rationale dialog when system permission denied`() {
         PermissionRobot(composeRule)
-            .updateFakePermissionRepository(LocationPermission.Denied)
-            .tapCardToStartFlow(EMPTY_CARD)
-            .assertSystemDialogAppeared()
-            .allowWhileUsingApp()
+            .tapCardToStartPermissionFlow(EMPTY_CARD)
+            .assertAppDialogPresented(EDUCATION_DIALOG)
+            .confirmAppDialog(EDUCATION_DIALOG)
+
+        SystemPermissionRobot()
+            .assertSystemDialogAppeared(composeRule)
+            .denyPermission(composeRule)
+
+        PermissionRobot(composeRule)
+            .assertAppDialogPresented(RATIONALE_DIALOG)
+            .confirmAppDialog(RATIONALE_DIALOG)
     }
 
     // UI_DIALOG_S3 - should show rationale dialog after system dialog denial 🖐️
@@ -63,7 +72,7 @@ class DialogFlowTest : BaseInstrumentedTest() {
     fun `UI_DIALOG_S5 - should show permanently denied dialog after denying twice`() {
         PermissionRobot(composeRule)
             .updateFakePermissionRepository(LocationPermission.DeniedPermanently)
-            .tapCardToStartFlow(EMPTY_CARD)
+            .tapCardToStartPermissionFlow(EMPTY_CARD)
             .assertAppDialogPresented(DENIED_PERMANENTLY_DIALOG)
     }
 
@@ -72,10 +81,12 @@ class DialogFlowTest : BaseInstrumentedTest() {
         PermissionRobot(composeRule)
             .updateFakePermissionRepository(LocationPermission.Denied)
             .addShabbatCard(SavedLocation.GPS_ID, "My gsp city")
-            .assertShabbatCardPresented(GPS_CARD)
-            .tapCardToStartFlow(GPS_CARD)
-            .assertSystemDialogAppeared()
-            .allowWhileUsingApp()
+            .assertCardPresented(GPS_CARD)
+            .tapCardToStartPermissionFlow(GPS_CARD)
+
+        SystemPermissionRobot()
+            .assertSystemDialogAppeared(composeRule)
+            .allowWhileUsingApp(composeRule)
     }
 
     @Test
@@ -83,7 +94,7 @@ class DialogFlowTest : BaseInstrumentedTest() {
         PermissionRobot(composeRule)
             .updateFakePermissionRepository(LocationPermission.DeniedPermanently)
             .addShabbatCard(SavedLocation.GPS_ID, "My gsp city")
-            .tapCardToStartFlow(GPS_CARD)
+            .tapCardToStartPermissionFlow(GPS_CARD)
             .assertAppDialogPresented(DENIED_PERMANENTLY_DIALOG)
 
         composeRule.onNodeWithTag(BUTTON_DIALOG_CONFIRM).assertExists()
@@ -94,7 +105,7 @@ class DialogFlowTest : BaseInstrumentedTest() {
     fun `UI_DIALOG_S8 - should show Education dialog when card tapped with Idle permission`() {
         PermissionRobot(composeRule)
             .updateFakePermissionRepository(LocationPermission.Idle)
-            .tapCardToStartFlow(EMPTY_CARD)
+            .tapCardToStartPermissionFlow(EMPTY_CARD)
             .assertAppDialogPresented(EDUCATION_DIALOG)
     }
 
@@ -102,11 +113,11 @@ class DialogFlowTest : BaseInstrumentedTest() {
     fun `UI_DIALOG_S9 - should keep empty card when Education dialog is dismissed`() {
         PermissionRobot(composeRule)
             .updateFakePermissionRepository(LocationPermission.Idle)
-            .tapCardToStartFlow(EMPTY_CARD)
+            .tapCardToStartPermissionFlow(EMPTY_CARD)
             .assertAppDialogPresented(EDUCATION_DIALOG)
             .dismissAppDialog(EDUCATION_DIALOG)
-            .assertShabbatCardPresented(EMPTY_CARD)
-            .assertShabbatCardNotPresented(GPS_CARD)
-            .assertShabbatCardNotPresented(LOCATION_CARD)
+            .assertCardPresented(EMPTY_CARD)
+            .assertCardNotPresented(GPS_CARD)
+            .assertCardNotPresented(LOCATION_CARD)
     }
 }

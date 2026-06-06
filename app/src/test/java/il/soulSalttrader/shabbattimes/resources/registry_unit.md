@@ -34,8 +34,8 @@ PERM_FRESH_S2
 | Reducer | ~ PERM_FRESH_S2_REDUCER_2 - should hide dialog and keep Denied on DismissedRationale     | ✅ |
 | VM | ~ PERM_FRESH_S2_VM - should show Denied state after deny flow                            | ✅ |
 | Handler | ~ PERM_HANDLER_S2 - should return DeniedWithRationale when all denied with rationale     | ✅ |
-| UI | ~ UI_DIALOG_S1 - should show system dialog after education dialog when permission denied | ✅ |
-| UI | ~ UI_DIALOG_S2 - should show system dialog when permission denied                        | 🖐️ |
+| UI | ~ UI_DIALOG_S1 - should show system dialog after education dialog | ✅ |
+| UI | ~ UI_DIALOG_S2 - should show rationale dialog when system permission denied                       | 🖐️ |
 
 ## SCENARIO: User denies then allows via rationale
 PERM_FRESH_S3

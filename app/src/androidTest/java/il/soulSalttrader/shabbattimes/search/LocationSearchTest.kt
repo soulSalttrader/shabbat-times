@@ -1,10 +1,11 @@
 package il.soulSalttrader.shabbattimes.search
 
-import androidx.compose.ui.test.onNodeWithText
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.LocationSearchRobot
+import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
+import il.soulSalttrader.shabbattimes.TestTags.LOCATION_CARD
 import org.junit.Test
 
 @HiltAndroidTest
@@ -24,12 +25,10 @@ class LocationSearchTest : BaseInstrumentedTest() {
         LocationSearchRobot(composeRule)
             .openSearch()
             .typeCity("Brno")
-            .waitForSuggestions()
-            .selectSuggestion()
+            .selectSuggestionAt()
             .closeSearch()
-            .waitUntilGpsCardVisible()
-
-        composeRule.onNodeWithText("Brno", substring = true).assertExists()
+            .assertCardPresented(GPS_CARD)
+            .assertCardPresented(LOCATION_CARD)
     }
 
     @Test
@@ -37,10 +36,8 @@ class LocationSearchTest : BaseInstrumentedTest() {
         LocationSearchRobot(composeRule)
             .openSearch()
             .typeCity("Brno")
-            .waitForSuggestions()
             .closeSearch()
-            .waitUntilGpsCardVisible()
-
-        composeRule.onNodeWithText("Brno", substring = true).assertDoesNotExist()
+            .assertCardPresented(GPS_CARD)
+            .assertCardNotPresented(LOCATION_CARD)
     }
 }

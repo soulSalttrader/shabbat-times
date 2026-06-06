@@ -1,12 +1,12 @@
 # PERM_FRESH_S1 - SCENARIO: User denies permission on first ask
-## UI_DIALOG_S1 - should show system dialog after education dialog when permission denied
+## UI_DIALOG_S1 - should show system dialog after education dialog
 🤖
 
 1. State = Denied (via fake repo)
 2. Tap card
 3. ✅ System permission dialog appears (Allow / Don't allow)
 
-## UI_DIALOG_S2 - should show system dialog when permission denied
+## UI_DIALOG_S2 - should show rationale dialog when system permission denied
 🤖
 
 1. State = Denied (via fake repo)
