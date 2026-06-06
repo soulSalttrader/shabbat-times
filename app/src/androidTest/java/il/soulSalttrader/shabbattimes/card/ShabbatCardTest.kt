@@ -1,15 +1,11 @@
 package il.soulSalttrader.shabbattimes.card
 
 import android.util.Log
-import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.ShabbatCardRobot
-import il.soulSalttrader.shabbattimes.TestTags
+import il.soulSalttrader.shabbattimes.UiRobot
 import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
 import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
 import il.soulSalttrader.shabbattimes.TestTags.LOCATION_CARD
@@ -22,6 +18,8 @@ import org.junit.Test
 
 @HiltAndroidTest
 class ShabbatCardTest : BaseInstrumentedTest() {
+    private lateinit var uiRobot: UiRobot
+    private lateinit var cardRobot: ShabbatCardRobot
 
     override fun setupTest() {
         val packageName = InstrumentationRegistry.getInstrumentation().targetContext.packageName
@@ -30,42 +28,45 @@ class ShabbatCardTest : BaseInstrumentedTest() {
             executeShellCommand("pm grant $packageName android.permission.ACCESS_FINE_LOCATION")
             executeShellCommand("pm grant $packageName android.permission.ACCESS_COARSE_LOCATION")
         }
-        Thread.sleep(300)
+
+        uiRobot = UiRobot(composeRule)
+        cardRobot = ShabbatCardRobot(composeRule)
     }
 
     @Test
     fun `UI_CARD_S1 - should show empty card when no locations saved`() {
-        ShabbatCardRobot(composeRule)
-            .assertCardPresented(EMPTY_CARD)
+        uiRobot.assertCardPresented(EMPTY_CARD)
     }
 
     @Test
-    fun `UI_CARD_S2_1 - should show GPS card when permission granted `() {
-        ShabbatCardRobot(composeRule)
-            .assertCardPresented(GPS_CARD)
+    fun `UI_CARD_S2_1 - should show GPS card when permission granted`() {
+        uiRobot.assertCardPresented(GPS_CARD)
     }
 
     @Test
     fun `UI_CARD_S2_2 - should show GPS card on relaunch when permission granted`() {
-        ShabbatCardRobot(composeRule)
-            .assertCardPresented(GPS_CARD)
+        uiRobot.assertCardPresented(GPS_CARD)
     }
 
     @Test
     fun `UI_CARD_SWIPE_S1 - should show delete confirmation dialog when swiped left`() {
-        ShabbatCardRobot(composeRule)
+        uiRobot
             .addShabbatCard(LOCATION_ID)
             .assertCardPresented(LOCATION_CARD)
+        cardRobot
             .swipeCardToLeft(LOCATION_CARD)
+        uiRobot
             .assertAppDialogPresented(SWIPE_CARD_DIALOG)
     }
 
     @Test
     fun `UI_CARD_SWIPE_S2 - should remove card when delete confirmed`() {
-        ShabbatCardRobot(composeRule)
+        uiRobot
             .addShabbatCard(LOCATION_ID)
             .assertCardPresented(LOCATION_CARD)
+        cardRobot
             .swipeCardToLeft(LOCATION_CARD)
+        uiRobot
             .assertAppDialogPresented(SWIPE_CARD_DIALOG)
             .confirmAppDialog(SWIPE_CARD_DIALOG)
             .assertCardNotPresented(LOCATION_CARD)
@@ -73,10 +74,12 @@ class ShabbatCardTest : BaseInstrumentedTest() {
 
     @Test
     fun `UI_CARD_SWIPE_S3 - should keep card when delete dismissed`() {
-        ShabbatCardRobot(composeRule)
+        uiRobot
             .addShabbatCard(LOCATION_ID)
             .assertCardPresented(LOCATION_CARD)
+        cardRobot
             .swipeCardToLeft(LOCATION_CARD)
+        uiRobot
             .assertAppDialogPresented(SWIPE_CARD_DIALOG)
             .dismissAppDialog(SWIPE_CARD_DIALOG)
             .assertCardPresented(LOCATION_CARD)
@@ -84,10 +87,12 @@ class ShabbatCardTest : BaseInstrumentedTest() {
 
     @Test
     fun `UI_CARD_SWIPE_S4 - should remove GPS card when swiped and confirmed`() {
-        ShabbatCardRobot(composeRule)
+        uiRobot
             .addShabbatCard(SavedLocation.GPS_ID, "My gps city")
             .assertCardPresented(GPS_CARD)
+        cardRobot
             .swipeCardToLeft(GPS_CARD)
+        uiRobot
             .assertAppDialogPresented(SWIPE_CARD_DIALOG)
             .confirmAppDialog(SWIPE_CARD_DIALOG)
             .assertCardNotPresented(GPS_CARD)
@@ -96,91 +101,83 @@ class ShabbatCardTest : BaseInstrumentedTest() {
 
     @Test
     fun `UI_CARD_CONTENT_S1 - should display location name on card`() {
-        ShabbatCardRobot(composeRule)
-            .addShabbatCard(SavedLocation.GPS_ID, "My gps city name")
+        uiRobot
+            .addShabbatCard(SavedLocation.GPS_ID, "My gps city")
             .assertCardPresented(GPS_CARD)
-
-        composeRule.onNode(
-            hasText("My gps city name")
-                .and(hasAnyAncestor(hasTestTag(GPS_CARD))),
-            true
-        ).assertExists()
+        cardRobot
+            .assertTextPlaceholdersCount(
+                text = "My gps city",
+                cardTag = GPS_CARD,
+                expectedCount = 1,
+            )
     }
 
     @Test
     fun `UI_CARD_CONTENT_S2 - should display shabbat times on card`() {
-        ShabbatCardRobot(composeRule)
-            .addShabbatCard(LOCATION_ID, "Location")
+        uiRobot
+            .addShabbatCard(LOCATION_ID)
             .assertCardPresented(LOCATION_CARD)
 
-        composeRule.onAllNodes(
-            hasText("--:--")
-                .and(hasAnyAncestor(hasTestTag(LOCATION_CARD))),
-            useUnmergedTree = true
-        ).assertCountEquals(2)
-
-        composeRule.onAllNodes(
-            hasText("dd/mm/yyyy")
-                .and(hasAnyAncestor(hasTestTag(LOCATION_CARD))),
-            useUnmergedTree = true
-        ).assertCountEquals(2)
-
-        composeRule.onNode(
-            hasText("Candle Lighting", substring = true)
-                .and(hasAnyAncestor(hasTestTag(LOCATION_CARD))),
-            useUnmergedTree = true
-        ).assertExists()
-
-        composeRule.onNode(
-            hasText("Havdalah Time", substring = true)
-                .and(hasAnyAncestor(hasTestTag(LOCATION_CARD))),
-            useUnmergedTree = true
-        ).assertExists()
+        cardRobot
+            .assertTextPlaceholdersCount(
+                text = "--:--",
+                cardTag = LOCATION_CARD,
+                expectedCount = 2,
+            )
+            .assertTextPlaceholdersCount(
+                text = "dd/mm/yyyy",
+                cardTag = LOCATION_CARD,
+                expectedCount = 2
+            )
+            .assertTextPlaceholdersCount(
+                text = "Candle Lighting",
+                cardTag = LOCATION_CARD,
+                expectedCount = 1,
+            )
+            .assertTextPlaceholdersCount(
+                text = "Havdalah Time",
+                cardTag = LOCATION_CARD,
+                expectedCount = 1,
+            )
     }
 
     @Test
     fun `UI_CARD_CONTENT_S3 - should show current location label on GPS card`() {
-        ShabbatCardRobot(composeRule)
-            .assertCardPresented(GPS_CARD)
-
-        composeRule.onNode(
-            hasTestTag(TestTags.LOCATION_LABEL)
-                .and(hasAnyAncestor(hasTestTag(GPS_CARD))),
-            useUnmergedTree = true
-        ).assertExists()
+        uiRobot.assertCardPresented(GPS_CARD)
+        cardRobot.assertLocationLabelPresented(GPS_CARD)
     }
 
     @Test
     fun `UI_CARD_CONTENT_S4 - should show add location prompt on empty card`() {
-        ShabbatCardRobot(composeRule)
-            .removeShabbatCard(GPS_CARD)
+        uiRobot
+            .removeShabbatCard(GPS_CARD, "My gps city")
             .assertCardNotPresented(GPS_CARD)
             .assertCardPresented(EMPTY_CARD)
-
-        composeRule.onNode(
-            hasText("Tap to use current location", true)
-                .and(hasAnyAncestor(hasTestTag(EMPTY_CARD))),
-            useUnmergedTree = true
-        ).assertExists()
+        cardRobot
+            .assertTextPlaceholdersCount(
+                text = "Tap to use current location",
+                cardTag = EMPTY_CARD,
+                expectedCount = 1,
+            )
     }
 
     @Test
     fun `UI_CARD_CONTENT_S5 - should show drag handle on GPS card`() {
-        ShabbatCardRobot(composeRule)
+        uiRobot
             .addShabbatCard(SavedLocation.GPS_ID, "My gps city")
             .assertDragHandlePresentedOnCard(GPS_CARD)
     }
 
     @Test
     fun `UI_CARD_CONTENT_S6 - should show drag handle on location card`() {
-        ShabbatCardRobot(composeRule)
+        uiRobot
             .addShabbatCard(LOCATION_CARD)
             .assertDragHandlePresentedOnCard(LOCATION_CARD)
     }
 
     @Test
     fun `UI_CARD_CONTENT_S7 - should not show drag handle on empty card`() {
-        ShabbatCardRobot(composeRule)
+        uiRobot
             .assertCardPresented(EMPTY_CARD)
             .assertDragHandleNotPresentedOnCard(EMPTY_CARD)
     }
@@ -188,10 +185,11 @@ class ShabbatCardTest : BaseInstrumentedTest() {
     @Ignore("ReorderableItem uses custom pointer input not triggerable via performTouchInput. Re-enable when Compose test framework supports drag-and-drop gestures reliably. See UI_CARD_REORDER_S1 in ui_scenarios.md")
     @Test
     fun `UI_CARD_REORDER_S1 - drag card up changes order`() {
-        ShabbatCardRobot(composeRule)
+        uiRobot
             .addShabbatCard(SavedLocation.GPS_ID, "gps")
             .addShabbatCard(LOCATION_ID, "location")
             .assertDragHandlePresentedOnCard(LOCATION_CARD)
+        cardRobot
             .dragCardUp(LOCATION_CARD)
 
         assert(FakePersistenceModule.fakeSavedLocations.reorderCalled) {
