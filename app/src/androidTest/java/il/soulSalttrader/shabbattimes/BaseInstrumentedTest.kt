@@ -2,6 +2,7 @@ package il.soulSalttrader.shabbattimes
 
 import android.util.Log
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -36,7 +37,7 @@ abstract class BaseInstrumentedTest {
         resetFakes()
 
         activityScenario = ActivityScenario.launch(MainActivity::class.java)
-        activityScenario.onActivity { }
+        activityScenario.moveToState(Lifecycle.State.RESUMED)
 
         setupTest()
         composeRule.waitForIdle()
