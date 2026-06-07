@@ -9,3 +9,6 @@
     > Fake correctly reveals the real double-dispatch behavior.
     > Fix: find and remove duplicate save() call in SearchViewModel dispatch handling.
     > Related: SEARCH_ADD_LOCATION_S1
+
+## UI_DIALOG_S2 - should show rationale dialog when system permission denied
+## UI_DIALOG_S1 - should show system dialog after education dialog
