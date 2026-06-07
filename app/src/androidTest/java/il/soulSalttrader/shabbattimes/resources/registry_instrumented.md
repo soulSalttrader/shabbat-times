@@ -94,7 +94,7 @@ UI_SEARCH_S1
 
 | Layer | Slug                                                        | Status |
 |---|-------------------------------------------------------------|---|
-| UI | ~ UI_SEARCH_S1 - should add location from search suggestion | ⚠️ BUG_SEARCH_S1 |
+| UI | ~ UI_SEARCH_S1 - should add location from search suggestion | ✅ |
 
 ---
 
@@ -106,20 +106,3 @@ UI_SEARCH_S2
 | UI | ~ UI_SEARCH_S2 - should not add location when search closed without selection | ✅ |
 
 ---
-
-# Permission — App Settings Flow
-
-# Bug Registry
-
-## BUG_SEARCH_S1 - Location saved twice on suggestion select
-⚠️ Production hidden by Room OnConflictStrategy.IGNORE
-Exposed by FakeSavedLocationsRepository
-Fix: remove duplicate save() call in SearchViewModel
-
-## BUG_COMBINE_S1 - Invalid intermediate state during ShowEducation
-⚠️ combine() fires twice — first emission has stale permission=Idle
-Fix: update repo before _uiState in dispatch()
-
-## BUG_COMBINE_S2 - Idle flash on cold start with DeniedPermanently
-⚠️ stateIn initialValue hardcoded to Idle
-Fix: initialValue reads repo.permissionState.value synchronously

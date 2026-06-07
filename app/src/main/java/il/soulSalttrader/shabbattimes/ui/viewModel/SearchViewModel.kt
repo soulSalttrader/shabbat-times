@@ -145,7 +145,6 @@ class SearchViewModel @Inject constructor(
                 )
                 SaveLocationResult.Success -> Unit
             }
-            saveLocationUseCase(resolved)
         }
     }
 }

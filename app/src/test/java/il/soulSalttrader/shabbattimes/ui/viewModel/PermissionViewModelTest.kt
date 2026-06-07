@@ -610,9 +610,6 @@ class PermissionViewModelTest : DescribeSpec({
 
     describe("PERM_COMBINE_S2 - SCENARIO: Idle flash on cold start with DeniedPermanently") {
         it("BUG_COMBINE_S2 - cold start with DeniedPermanently never flashes Idle first") {
-            // BUG: ⚠️ stateIn initialValue was hardcoded to PermissionUiState() = Idle
-            // causing one Idle emission before combine produced the real value.
-            // Fix: initialValue reads repo.permissionState.value synchronously.
             runTest(UnconfinedTestDispatcher()) {
                 val repo = FakePermissionRepository()
                 repo.updatePermissionState(LocationPermission.DeniedPermanently)
