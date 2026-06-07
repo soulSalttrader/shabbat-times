@@ -56,7 +56,7 @@ class PermissionViewModel @Inject constructor(
             is PermissionEvent.ShowEducation            -> permissionRepository.updatePermissionState(LocationPermission.Education)
             is PermissionEvent.Request                  -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
             is PermissionEvent.AcceptedRationale        -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
-            is PermissionEvent.ReturnedFromAppSettings  -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
+            is PermissionEvent.ReturnedFromAppSettings  -> permissionRepository.updatePermissionState(LocationPermission.Idle)
             is PermissionEvent.RequestedAppSettings     -> _effects.tryEmit(AppEffect.OpenAppSettings)
 
             else -> Unit
