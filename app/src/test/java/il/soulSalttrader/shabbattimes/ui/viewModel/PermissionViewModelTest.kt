@@ -233,7 +233,7 @@ class PermissionViewModelTest : DescribeSpec({
             }
         }
 
-        it("PERM_SETTINGS_S1_VM_2: should start fresh Education flow when card is tapped after returning from Settings") {
+        it("PERM_SETTINGS_S1_VM_2 - should start fresh Education flow when card is tapped after returning from Settings") {
             runTest {
                 val (vm, _) = setup()
 
