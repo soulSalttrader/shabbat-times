@@ -8,14 +8,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import il.soulSalttrader.shabbattimes.model.LocationStatus
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 import il.soulSalttrader.shabbattimes.model.ShabbatResultState
-import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.FailureScreen
 import il.soulSalttrader.shabbattimes.ui.LoadingScreen
 import il.soulSalttrader.shabbattimes.ui.effect.handleAppEffect
@@ -24,6 +21,7 @@ import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.ui.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionDialogs
+import il.soulSalttrader.shabbattimes.ui.permission.dispatchCardAction
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.ui.search.SearchConfig
@@ -46,12 +44,6 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
 
     val permissionViewModel: PermissionViewModel = hiltViewModel()
     val permissionUiState by permissionViewModel.state.collectAsStateWithLifecycle()
-
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        if (permissionUiState.permission == PermissionState.DeniedPermanently) {
-            permissionViewModel.dispatch(PermissionEvent.ReturnedFromAppSettings)
-        }
-    }
 
     HandlePermissions(
         permissions = listOf(
