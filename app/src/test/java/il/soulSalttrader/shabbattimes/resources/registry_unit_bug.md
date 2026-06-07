@@ -23,6 +23,6 @@
 ## ✅ PERM_SETTINGS_S1_REDUCER_2 - should reset to Idle on ReturnedFromAppSettings
 ## ✅ PERM_SETTINGS_S1_REDUCER_3 - should start fresh Education flow after returning from settings
 ## ✅ PERM_SETTINGS_S2_REDUCER_1 - should reset to Idle from any state on ReturnedFromAppSettings
-## ⚠️ PERM_HANDLER_S3 - should return null when all denied without rationale
-## ⚠️ PERM_HANDLER_S5 - should return null when partially granted without rationale
-## ⚠️ PERM_HANDLER_S6 - should return DeniedWithRationale when any permission has rationale
+## ✅ PERM_HANDLER_S3 - should return null when all denied without rationale
+## ✅ PERM_HANDLER_S5 - should return null when partially granted without rationale
+## ✅ PERM_HANDLER_S6 - should return DeniedWithRationale when any permission has rationale
