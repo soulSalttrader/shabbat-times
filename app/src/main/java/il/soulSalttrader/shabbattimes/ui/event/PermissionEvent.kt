@@ -63,7 +63,7 @@ sealed interface PermissionEvent : AppEvent, Reducible<PermissionUiState> {
 
     data object ReturnedFromAppSettings : PermissionEvent {
         override val reducer = PermissionReducer { state ->
-            state.copy(permission = PermissionState.Requesting, isDialogVisible = true)
+            state.copy(permission = PermissionState.Idle, isDialogVisible = false)
         }
     }
 
