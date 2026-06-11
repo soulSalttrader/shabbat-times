@@ -13,11 +13,13 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 
 @HiltViewModel
@@ -27,19 +29,23 @@ class PermissionViewModel @Inject constructor(
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
-    private val _state: MutableStateFlow<PermissionUiState> = MutableStateFlow(PermissionUiState())
-    val state: StateFlow<PermissionUiState> = combine(
-        _state,
-        permissionRepository.permissionState,
-    ) { state, permission ->
-        PermissionEvent.PermissionChanged(permission).reducer reduce state
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = PermissionEvent.PermissionChanged(
+    private val _state: MutableStateFlow<PermissionUiState> = MutableStateFlow(
+        PermissionEvent.PermissionChanged(
             permissionRepository.permissionState.value
         ).reducer reduce PermissionUiState()
     )
+
+    val state: StateFlow<PermissionUiState> = _state.asStateFlow()
+
+    init {
+        permissionRepository.permissionState
+            .onEach { permission ->
+                _state.update { current ->
+                    PermissionEvent.PermissionChanged(permission).reducer reduce current
+                }
+            }
+            .launchIn(viewModelScope)
+    }
 
     fun dispatch(event: AppEvent) {
         _state.update { current ->

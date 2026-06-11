@@ -1,4 +1,4 @@
-## ⚠️ PERM_COMBINE_S1_VM - SCENARIO: combine() fires twice causing invalid intermediate state
+## ✅ PERM_COMBINE_S1_VM - SCENARIO: combine() fires twice causing invalid intermediate state
 
 > combine() fires twice on dispatch(ShowEducation):
 > - first emission: permission=Idle, isDialogVisible=true  ← invalid

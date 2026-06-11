@@ -285,7 +285,7 @@ PERM_EDGE_S3
 
 | Layer | Slug | Status |
 |---|---|---|
-| VM | ~ PERM_EDGE_S3_VM_1 - should reset to Idle after app backgrounded during permission request | ✅ |
+| VM | ~ PERM_EDGE_S3_VM_1 - should keep Requesting state after app backgrounded during permission request | ✅ |
 | UI | ~ UI_PERM_EDGE_S3_1 - should preserve Education dialog when returning from background | 🖐️ |
 | UI | ~ UI_PERM_EDGE_S3_2 - should preserve Open Settings dialog when returning from background | 🖐️ |
 
@@ -357,7 +357,7 @@ PERM_COMBINE_S1
 
 | Layer | Slug                                                                              | Status |
 |---|-----------------------------------------------------------------------------------|---|
-| VM | ~ PERM_COMBINE_S1_VM - should never produce Idle+dialogVisible intermediate state | ⚠️ |
+| VM | ~ PERM_COMBINE_S1_VM - should never produce Idle+dialogVisible intermediate state | ✅ |
 
 ---
 
@@ -366,6 +366,6 @@ PERM_COMBINE_S2
 
 | Layer | Slug                                                                                | Status |
 |---|-------------------------------------------------------------------------------------|---|
-| VM | ~ PERM_COMBINE_S2_VM - should not flash Idle before DeniedPermanently on cold start | ⚠️ |
+| VM | ~ PERM_COMBINE_S2_VM - should not flash Idle before DeniedPermanently on cold start | ✅ |
 
 ---

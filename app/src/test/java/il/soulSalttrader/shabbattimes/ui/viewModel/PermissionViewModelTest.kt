@@ -13,6 +13,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -487,22 +489,22 @@ class PermissionViewModelTest : DescribeSpec({
     }
 
     describe("PERM_EDGE_S3 - SCENARIO: Background app during permission dialog") {
-        it("PERM_EDGE_S3_VM_1 - should reset to Idle after app backgrounded during permission request") {
+        it("PERM_EDGE_S3_VM_1 - should keep Requesting state after app backgrounded during permission request") {
             runTest {
-                val (vm, repo) = setup()
+                val (vm, _) = setup()
                 vm.dispatch(PermissionEvent.Request)
-                testDispatcher.scheduler.advanceUntilIdle()
+                advanceUntilIdle()
 
                 // collect to keep subscription alive, then cancel to simulate background
                 val job = launch { vm.state.collect {} }
                 job.cancel()
 
                 // advance past WhileSubscribed(5000) timeout
-                testDispatcher.scheduler.advanceTimeBy(6000)
+                advanceTimeBy(6000)
 
                 // resubscribe to simulate foreground
                 vm.state.test {
-                    awaitItem().permission shouldBe PermissionState.Idle
+                    awaitItem().permission shouldBe PermissionState.Requesting
                     cancelAndIgnoreRemainingEvents()
                 }
             }
@@ -581,19 +583,11 @@ class PermissionViewModelTest : DescribeSpec({
 
     describe("PERM_COMBINE_S1 - SCENARIO: combine() fires twice causing invalid intermediate state") {
         it("PERM_COMBINE_S1_VM - should never produce Idle+dialogVisible intermediate state") {
-            // BUG: ⚠️ combine() fires twice on dispatch - first emission has correct isDialogVisible
-            // but stale permission=Idle because repo hasn't updated yet.
-            // Seen in logs: Idle/true appears briefly before Education/true.
-            // Fix: separate _uiState (UI fields) from repo (permission) in combine,
-            // and update repo before _uiState in dispatch().
             runTest(UnconfinedTestDispatcher()) {
                 val (vm, _) = setup()
                 val allStates = mutableListOf<PermissionUiState>()
 
-                val job = launch {
-                    vm.state.collect { allStates.add(it) }
-                }
-
+                val job = launch { vm.state.collect { allStates.add(it) } }
                 vm.dispatch(PermissionEvent.ShowEducation)
 
                 job.cancel()
