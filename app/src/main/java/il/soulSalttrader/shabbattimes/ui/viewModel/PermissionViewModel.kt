@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
-import il.soulSalttrader.shabbattimes.ui.event.AppEvent
+import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import jakarta.inject.Inject
@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.update
 class PermissionViewModel @Inject constructor(
     private val permissionRepository: PermissionRepository,
 ): ViewModel() {
-    internal var onDispatch: (AppEvent) -> Unit = {}
+    internal var onDispatch: (UiEvent) -> Unit = {}
 
     private val _effects: MutableSharedFlow<UiEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<UiEffect> = _effects.asSharedFlow()
@@ -47,7 +47,7 @@ class PermissionViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    fun dispatch(event: AppEvent) {
+    fun dispatch(event: UiEvent) {
         onDispatch(event)
         _state.update { current ->
             when (event) {

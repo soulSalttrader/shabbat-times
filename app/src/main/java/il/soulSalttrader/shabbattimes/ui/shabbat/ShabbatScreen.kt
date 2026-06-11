@@ -15,7 +15,7 @@ import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.ui.FailureScreen
 import il.soulSalttrader.shabbattimes.ui.LoadingScreen
-import il.soulSalttrader.shabbattimes.ui.effect.handleAppEffect
+import il.soulSalttrader.shabbattimes.ui.effect.handleUiEffect
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
@@ -127,6 +127,6 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
             shabbatViewModel.effects,
             searchViewModel.effects,
             permissionViewModel.effects,
-        ).collect { effect -> handleAppEffect(effect, context, snackbarHostState) }
+        ).collect { effect -> handleUiEffect(effect, context, snackbarHostState) }
     }
 }

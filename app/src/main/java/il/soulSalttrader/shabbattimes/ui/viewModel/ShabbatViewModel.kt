@@ -14,7 +14,7 @@ import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
 import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
-import il.soulSalttrader.shabbattimes.ui.event.AppEvent
+import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
@@ -106,7 +106,7 @@ class ShabbatViewModel @Inject constructor(
         initialValue = ShabbatUiState(),
     )
 
-    fun dispatch(event: AppEvent) {
+    fun dispatch(event: UiEvent) {
         _state.updateAndGet { current ->
             when (event) {
                 is ShabbatEvent -> event.reducer reduce current

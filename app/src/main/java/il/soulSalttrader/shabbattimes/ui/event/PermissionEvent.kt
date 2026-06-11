@@ -7,7 +7,7 @@ import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import il.soulSalttrader.shabbattimes.ui.reducer.PermissionReducer
 import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
 
-sealed interface PermissionEvent : AppEvent, Reducible<PermissionUiState> {
+sealed interface PermissionEvent : UiEvent, Reducible<PermissionUiState> {
     data object ShowEducation : PermissionEvent {
         override val reducer = PermissionReducer { state ->
             state.copy(permission = PermissionState.Education, isDialogVisible = true)

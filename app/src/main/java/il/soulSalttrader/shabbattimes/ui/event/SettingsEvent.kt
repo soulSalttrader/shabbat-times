@@ -5,7 +5,7 @@ import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
 import il.soulSalttrader.shabbattimes.ui.reducer.SettingsReducer
 import il.soulSalttrader.shabbattimes.ui.settings.SettingsUiState
 
-interface SettingsEvent : AppEvent, Reducible<SettingsUiState> {
+interface SettingsEvent : UiEvent, Reducible<SettingsUiState> {
 
     data class PresetSelected(val preset: ShabbatPreset) : SettingsEvent {
         override val reducer = SettingsReducer { state -> state.copy(preset = preset) }

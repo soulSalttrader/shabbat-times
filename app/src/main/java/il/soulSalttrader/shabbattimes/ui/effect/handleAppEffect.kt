@@ -7,7 +7,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import il.soulSalttrader.shabbattimes.common.openAppSettings
 
-suspend fun handleAppEffect(
+suspend fun handleUiEffect(
     effect: UiEffect,
     context: Context,
     snackbarHostState: SnackbarHostState,

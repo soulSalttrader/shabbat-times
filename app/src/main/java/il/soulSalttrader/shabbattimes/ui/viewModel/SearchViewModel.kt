@@ -13,7 +13,7 @@ import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.ui.UiText
 import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
-import il.soulSalttrader.shabbattimes.ui.event.AppEvent
+import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
 import il.soulSalttrader.shabbattimes.ui.normalizedOrEmpty
 import il.soulSalttrader.shabbattimes.ui.normalizedOrNull
@@ -114,7 +114,7 @@ class SearchViewModel @Inject constructor(
         initialValue = SearchUiState()
     )
 
-    fun dispatch(event: AppEvent) {
+    fun dispatch(event: UiEvent) {
         val newState = _state.updateAndGet { current ->
             when (event) {
                 is SearchEvent -> event.reducer reduce current
