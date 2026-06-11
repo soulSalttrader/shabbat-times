@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
-import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
+import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
 import il.soulSalttrader.shabbattimes.ui.event.AppEvent
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
@@ -26,8 +26,8 @@ class PermissionViewModel @Inject constructor(
 ): ViewModel() {
     internal var onDispatch: (AppEvent) -> Unit = {}
 
-    private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
-    val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
+    private val _effects: MutableSharedFlow<UiEffect> = MutableSharedFlow(extraBufferCapacity = 20)
+    val effects: SharedFlow<UiEffect> = _effects.asSharedFlow()
 
     private val _state: MutableStateFlow<PermissionUiState> = MutableStateFlow(
         PermissionEvent.PermissionChanged(
@@ -64,7 +64,7 @@ class PermissionViewModel @Inject constructor(
             is PermissionEvent.Request                  -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
             is PermissionEvent.AcceptedRationale        -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
             is PermissionEvent.ReturnedFromAppSettings  -> permissionRepository.updatePermissionState(LocationPermission.Idle)
-            is PermissionEvent.RequestedAppSettings     -> _effects.tryEmit(AppEffect.OpenAppSettings)
+            is PermissionEvent.RequestedAppSettings     -> _effects.tryEmit(UiEffect.OpenAppSettings)
 
             else -> Unit
         }

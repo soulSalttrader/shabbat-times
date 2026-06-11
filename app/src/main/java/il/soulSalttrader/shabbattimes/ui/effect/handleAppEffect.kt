@@ -8,19 +8,19 @@ import androidx.compose.material3.SnackbarResult
 import il.soulSalttrader.shabbattimes.common.openAppSettings
 
 suspend fun handleAppEffect(
-    effect: AppEffect,
+    effect: UiEffect,
     context: Context,
     snackbarHostState: SnackbarHostState,
 ) {
     when (effect) {
-        is AppEffect.ShowToast -> {
+        is UiEffect.ShowToast       -> {
             Toast.makeText(
                 context,
                 effect.message.resolve(context),
                 Toast.LENGTH_LONG,
             ).show()
         }
-        is AppEffect.ShowSnackBar -> {
+        is UiEffect.ShowSnackBar    -> {
             val result = snackbarHostState.showSnackbar(
                 message = effect.message.resolve(context),
                 actionLabel = effect.actionLabel?.resolve(context),
@@ -29,6 +29,6 @@ suspend fun handleAppEffect(
 
             if (result == SnackbarResult.ActionPerformed) { effect.onAction?.invoke() }
         }
-        is AppEffect.OpenAppSettings -> context.openAppSettings()
+        is UiEffect.OpenAppSettings -> context.openAppSettings()
     }
 }
