@@ -21,7 +21,6 @@ object UiEffectModule {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    // Optional: help Hilt understand the type
     @Provides
     @ViewModelScoped
     fun provideUiEffectFlowAsSharedFlow(

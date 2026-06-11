@@ -3,8 +3,8 @@ package il.soulSalttrader.shabbattimes.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
+import il.soulSalttrader.shabbattimes.ui.effect.SideEffectHandler
 import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
 import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
@@ -22,7 +22,8 @@ import kotlinx.coroutines.flow.update
 
 @HiltViewModel
 class PermissionViewModel @Inject constructor(
-    private val permissionRepository: PermissionRepository,
+    val permissionSideEffectHandler: SideEffectHandler<PermissionEvent>,
+    permissionRepository: PermissionRepository,
 ): ViewModel() {
     internal var onDispatch: (UiEvent) -> Unit = {}
 
@@ -56,17 +57,6 @@ class PermissionViewModel @Inject constructor(
             }
         }
 
-        when (event) {
-            is PermissionEvent.AllGranted               -> permissionRepository.updatePermissionState(LocationPermission.Granted)
-            is PermissionEvent.DeniedPermanently        -> permissionRepository.updatePermissionState(LocationPermission.DeniedPermanently)
-            is PermissionEvent.DeniedWithRationale      -> permissionRepository.updatePermissionState(LocationPermission.Denied)
-            is PermissionEvent.ShowEducation            -> permissionRepository.updatePermissionState(LocationPermission.Education)
-            is PermissionEvent.Request                  -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
-            is PermissionEvent.AcceptedRationale        -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
-            is PermissionEvent.ReturnedFromAppSettings  -> permissionRepository.updatePermissionState(LocationPermission.Idle)
-            is PermissionEvent.RequestedAppSettings     -> _effects.tryEmit(UiEffect.OpenAppSettings)
-
-            else -> Unit
-        }
+        if (event is PermissionEvent) { permissionSideEffectHandler.handle(event) }
     }
 }
