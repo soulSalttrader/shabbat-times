@@ -15,8 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -26,6 +24,8 @@ import kotlinx.coroutines.flow.update
 class PermissionViewModel @Inject constructor(
     private val permissionRepository: PermissionRepository,
 ): ViewModel() {
+    internal var onDispatch: (AppEvent) -> Unit = {}
+
     private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
 
@@ -48,6 +48,7 @@ class PermissionViewModel @Inject constructor(
     }
 
     fun dispatch(event: AppEvent) {
+        onDispatch(event)
         _state.update { current ->
             when (event) {
                 is PermissionEvent  -> event.reducer reduce current
