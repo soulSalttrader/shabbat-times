@@ -106,3 +106,13 @@ UI_SEARCH_S2
 | UI | ~ UI_SEARCH_S2 - should not add location when search closed without selection | ✅ |
 
 ---
+
+# SCENARIO: should never dispatch same event multiple times consecutively
+PERM_DISPATCH_S1
+
+| Layer | Slug                                                                          | Status |
+|---|-------------------------------------------------------------------------------|---|
+| UI | ~ PERM_DISPATCH_S1_1 - should dispatch AllGranted exactly once | ✅ |
+| UI | ~ PERM_DISPATCH_S1_2 - should dispatch DeniedWithRationale exactly once | ✅ |
+
+---

@@ -12,7 +12,7 @@
 ## ✅ UI_DIALOG_S2 - should show rationale dialog when system permission denied
 ## ✅ UI_DIALOG_S1 - should show system dialog after education dialog
 
-## ⚠️ PERM_DISPATCH_S1_1 - should dispatch AllGranted exactly once 
+## ✅ PERM_DISPATCH_S1_1 - should dispatch AllGranted exactly once 
 > AllGranted dispatched 3x after permission granted
 > observed in logs
 > event:AllGranted → HandlePermissions.kt:36  (LaunchedEffect result)
@@ -37,7 +37,7 @@
 > Removed redundant `LaunchedEffect(Unit)` and `LaunchedEffect(ON_RESUME)`.
 > Guarded `LifecycleEventEffect(ON_RESUME)` to skip when an active request flow is in progress.
 
-## ⚠️ PERM_DISPATCH_S1_2 - should dispatch DeniedWithRationale exactly once 
+## ✅ PERM_DISPATCH_S1_2 - should dispatch DeniedWithRationale exactly once 
 > DeniedWithRationale dispatched 2x after permission denied
 > observed in logs
 > event:DeniedWithRationale → HandlePermissions.kt:25  (LifecycleEventEffect ON_RESUME)

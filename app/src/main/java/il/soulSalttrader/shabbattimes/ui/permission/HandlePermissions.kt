@@ -18,27 +18,17 @@ fun HandlePermissions(
     val permissionHandler = rememberPermissionHandler()
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        val resolved = permissionHandler.resolvePermissionEvent(permissions)
-
-        when {
-            resolved != null -> {
-                dispatch(resolved)
+        when (permissionState.permission) {
+            PermissionState.Idle -> {
+                // Initial check only
+                permissionHandler.resolvePermissionEvent(permissions)?.let(dispatch)
             }
-            permissionState.permission == PermissionState.DeniedPermanently -> {
-                // User might have enabled permission in Settings
+            PermissionState.DeniedPermanently -> {
+                // User may have enabled permission in Settings
                 dispatch(PermissionEvent.ReturnedFromAppSettings)
             }
+            else -> Unit  // Requesting, Denied, Education
         }
-    }
-
-    // Initial check only for already granted or needs rationale
-    LaunchedEffect(Lifecycle.Event.ON_RESUME) {
-        permissionHandler.resolvePermissionEvent(permissions)?.let(dispatch)
-    }
-
-    // Initial check when screen is first composed
-    LaunchedEffect(Unit) {
-        permissionHandler.resolvePermissionEvent(permissions)?.let(dispatch)
     }
 
     LaunchedEffect(permissionState.permission) {
