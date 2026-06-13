@@ -2,14 +2,14 @@ package il.soulSalttrader.shabbattimes.ui.effect
 
 import il.soulSalttrader.shabbattimes.ui.UiText
 
-sealed interface AppEffect {
-    data class ShowToast(val message: UiText) : AppEffect
+sealed interface UiEffect {
+    data class ShowToast(val message: UiText) : UiEffect
 
     data class ShowSnackBar(
         val message: UiText,
         val actionLabel: UiText? = null,
         val onAction: (() -> Unit)? = null,
-    ) : AppEffect
+    ) : UiEffect
 
-    data object OpenAppSettings : AppEffect
+    data object OpenAppSettings : UiEffect
 }

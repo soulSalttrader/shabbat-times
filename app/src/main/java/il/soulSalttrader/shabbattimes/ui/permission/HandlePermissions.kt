@@ -2,6 +2,8 @@ package il.soulSalttrader.shabbattimes.ui.permission
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import il.soulSalttrader.shabbattimes.permission.PermissionResult
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.permission.resolvePermissionEvent
@@ -15,8 +17,18 @@ fun HandlePermissions(
 ) {
     val permissionHandler = rememberPermissionHandler()
 
-    LaunchedEffect(Unit) {
-        permissionHandler.resolvePermissionEvent(permissions)?.let(dispatch)
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        when (permissionState.permission) {
+            PermissionState.Idle -> {
+                // Initial check only
+                permissionHandler.resolvePermissionEvent(permissions)?.let(dispatch)
+            }
+            PermissionState.DeniedPermanently -> {
+                // User may have enabled permission in Settings
+                dispatch(PermissionEvent.ReturnedFromAppSettings)
+            }
+            else -> Unit  // Requesting, Denied, Education
+        }
     }
 
     LaunchedEffect(permissionState.permission) {

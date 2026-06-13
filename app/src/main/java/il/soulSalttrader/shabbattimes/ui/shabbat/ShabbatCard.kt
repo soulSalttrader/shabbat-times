@@ -19,9 +19,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.TestTags
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconLabel
@@ -34,6 +36,7 @@ import il.soulSalttrader.shabbattimes.model.toLabel
 fun ShabbatCard(
     item: ShabbatEntry,
     modifier: Modifier = Modifier,
+    testTag: String = "",
     shape: Shape = RoundedCornerShape(16.dp),
     colors: CardColors = getDefaultCardColors(item.status),
     elevation: CardElevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
@@ -43,7 +46,8 @@ fun ShabbatCard(
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .testTag(testTag),
         shape = shape,
         colors = colors,
         elevation = elevation,
@@ -73,9 +77,9 @@ fun ShabbatCard(
 
             isDraggable.takeIf { it }?.let {
                 UiIconImage(
-                    modifier = modifier,
-                    icon = UiIcon.Resource(R.drawable.drag_indicator),
-                    contentDescription = "dragIndicator",
+                    modifier = modifier.testTag(TestTags.DRAG_HANDLE),
+                    icon = UiIcon.Resource(R.drawable.drag_handle),
+                    contentDescription = "dragHandle",
                     contentColor = when (item.status) {
                         LocationStatus.Current -> colors.contentColor
                         else                   -> colors.contentColor
@@ -135,7 +139,7 @@ private fun UiIconLocationLabel(
     status: LocationStatus,
     label: String,
 ) {
-    Row {
+    Row(modifier = Modifier.testTag(TestTags.LOCATION_LABEL)) {
         val icon = when (status is LocationStatus.Current) {
             true -> UiIcon.Resource(R.drawable.home_pin_24px)
             else -> null

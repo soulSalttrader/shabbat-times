@@ -30,7 +30,7 @@ fun UiIconLabel(
                 children = {
                     UiIconImage(
                         icon = icon,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         contentDescription = contentDescription,
                     )
                 }

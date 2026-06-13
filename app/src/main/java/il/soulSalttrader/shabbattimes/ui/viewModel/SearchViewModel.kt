@@ -12,8 +12,8 @@ import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.ui.UiText
-import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
-import il.soulSalttrader.shabbattimes.ui.event.AppEvent
+import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
+import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
 import il.soulSalttrader.shabbattimes.ui.normalizedOrEmpty
 import il.soulSalttrader.shabbattimes.ui.normalizedOrNull
@@ -55,8 +55,8 @@ class SearchViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state: MutableStateFlow<SearchUiState> = MutableStateFlow(value = SearchUiState())
 
-    private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
-    val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
+    private val _effects: MutableSharedFlow<UiEffect> = MutableSharedFlow(extraBufferCapacity = 20)
+    val effects: SharedFlow<UiEffect> = _effects.asSharedFlow()
 
     private val queryFlow: Flow<String> = _state
         .map { it.query.normalizedOrEmpty() }
@@ -69,12 +69,12 @@ class SearchViewModel @Inject constructor(
             flow {
                 getLocationSuggestion(query)
                     .onSuccess { suggestions -> emit(suggestions) }
-                    .onFailure { e -> _effects.tryEmit(AppEffect.ShowToast(e.cause.userMessage())) }
+                    .onFailure { e -> _effects.tryEmit(UiEffect.ShowToast(e.cause.userMessage())) }
             }
         }
         .catch { cause ->
             SearchEvent.SuggestionsLoadFailed(cause).reducer reduce _state.value
-            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
+            _effects.tryEmit(UiEffect.ShowToast(cause.userMessage()))
             emit(emptyList())
         }
         .stateIn(
@@ -89,7 +89,7 @@ class SearchViewModel @Inject constructor(
         .onEach { resolved -> updateCurrentLocationUseCase(resolved) }
         .catch { cause ->
             dispatch(SearchEvent.GpsLocationError(cause))
-            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
+            _effects.tryEmit(UiEffect.ShowToast(cause.userMessage()))
             emit(null)
         }
         .stateIn(
@@ -114,7 +114,7 @@ class SearchViewModel @Inject constructor(
         initialValue = SearchUiState()
     )
 
-    fun dispatch(event: AppEvent) {
+    fun dispatch(event: UiEvent) {
         val newState = _state.updateAndGet { current ->
             when (event) {
                 is SearchEvent -> event.reducer reduce current
@@ -134,7 +134,7 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             when (saveLocationUseCase(resolved)) {
                 SaveLocationResult.LimitReached -> _effects.tryEmit(
-                    AppEffect.ShowSnackBar(
+                    UiEffect.ShowSnackBar(
                         message = UiText.Resource(
                             id = R.string.search_limit_reached,
                             args = listOf(MAX_SAVED_LOCATIONS),
@@ -145,7 +145,6 @@ class SearchViewModel @Inject constructor(
                 )
                 SaveLocationResult.Success -> Unit
             }
-            saveLocationUseCase(resolved)
         }
     }
 }

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
-import il.soulSalttrader.shabbattimes.ui.event.AppEvent
+import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.SettingsEvent
 import il.soulSalttrader.shabbattimes.ui.settings.SettingsUiState
 import il.soulSalttrader.shabbattimes.useCase.SaveShabbatPresetUseCase
@@ -33,7 +33,7 @@ class SettingsViewModel @Inject constructor(
             initialValue = SettingsUiState()
         )
 
-    fun dispatch(event: AppEvent) {
+    fun dispatch(event: UiEvent) {
         val newState = _state.updateAndGet { current ->
             when (event) {
                 is SettingsEvent -> event.reducer reduce current

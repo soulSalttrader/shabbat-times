@@ -23,9 +23,11 @@ android {
         minSdk = 30
         targetSdk = 36
         versionCode = 1
-        versionName = "v1.5.1"
+        versionName = "v1.5.2"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "il.soulSalttrader.shabbattimes.HiltTestRunner"
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
 
         val secretsFile by lazy {
             rootProject.file("secrets.properties")
@@ -77,9 +79,12 @@ android {
             pickFirsts += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
         }
     }
-}
 
-room { schemaDirectory("$projectDir/schemas") }
+    testOptions {
+        unitTests { isReturnDefaultValues = true }
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
+    }
+}
 
 dependencies {
 
@@ -131,6 +136,10 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.mockk)
     testImplementation(libs.hilt.android.testing)
+    testImplementation(libs.kotest.assertions.core)
+    testImplementation(libs.kotest.property)
+    testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.androidx.test.runner)
 
     // UI / Instrumented Testing
     androidTestImplementation(libs.androidx.junit)
@@ -139,8 +148,38 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.uiautomator)
+    androidTestImplementation(libs.hilt.android.testing)
+    androidTestUtil(libs.androidx.orchestrator)
+    kspAndroidTest(libs.hilt.compiler)
 
     // Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+room { schemaDirectory("$projectDir/schemas") }
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+
+    // show test results in console
+    testLogging {
+        events("passed", "skipped", "failed")
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+    }
+
+    // timeout per test
+    systemProperty("kotest.framework.timeout", "10000")
+
+    // fail fast — stop on first failure
+//    failFast = true
+
+    // increase heap if tests are memory intensive
+//    maxHeapSize = "1g"
+
+    // parallel execution
+//    maxParallelForks = Runtime.getRuntime().availableProcessors()
 }

@@ -13,8 +13,8 @@ import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
-import il.soulSalttrader.shabbattimes.ui.effect.AppEffect
-import il.soulSalttrader.shabbattimes.ui.event.AppEvent
+import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
+import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
@@ -46,8 +46,8 @@ class ShabbatViewModel @Inject constructor(
     userPreferencesRepository: UserPreferencesRepository,
     permissionRepository: PermissionRepository,
 ) : ViewModel() {
-    private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
-    val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
+    private val _effects: MutableSharedFlow<UiEffect> = MutableSharedFlow(extraBufferCapacity = 20)
+    val effects: SharedFlow<UiEffect> = _effects.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
@@ -70,7 +70,7 @@ class ShabbatViewModel @Inject constructor(
             results.forEach { result ->
                 when (result) {
                     is NetworkResult.Failure -> _effects.tryEmit(
-                        AppEffect.ShowToast(result.cause.userMessage())
+                        UiEffect.ShowToast(result.cause.userMessage())
                     )
                     is NetworkResult.Success -> Unit
                 }
@@ -81,7 +81,7 @@ class ShabbatViewModel @Inject constructor(
     }
         .catch { cause ->
             dispatch(ShabbatEvent.ShabbatEntryLoadFailed(cause))
-            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
+            _effects.tryEmit(UiEffect.ShowToast(cause.userMessage()))
             emit(emptyList())
         }
         .stateIn(
@@ -106,7 +106,7 @@ class ShabbatViewModel @Inject constructor(
         initialValue = ShabbatUiState(),
     )
 
-    fun dispatch(event: AppEvent) {
+    fun dispatch(event: UiEvent) {
         _state.updateAndGet { current ->
             when (event) {
                 is ShabbatEvent -> event.reducer reduce current
