@@ -36,21 +36,19 @@ class PermissionHandlerImpl(
     fun onResult(result: Map<String, Boolean>) {
         val cont = continuation ?: return
         try {
-            val denied = result.filterValues { !it }.keys.toList()
-            val permanentlyDenied = denied.filterNot(checkShouldShowRationale)
+            val deniedPermissions = result.filterValues { !it }.keys.toList()
 
-            when {
-                denied.isEmpty() -> {
-                    cont.resume(PermissionResult.Granted)
-                }
+            if (deniedPermissions.isEmpty()) {
+                cont.resume(PermissionResult.Granted)
+                return
+            }
 
-                permanentlyDenied.isNotEmpty() -> {
-                    cont.resume(PermissionResult.Blocked(permissions = permanentlyDenied))
-                }
+            val permanentlyDenied = deniedPermissions.filterNot { checkShouldShowRationale(it) }
 
-                else -> {
-                    cont.resume(PermissionResult.Explain(permissions = denied))
-                }
+            if (permanentlyDenied.isNotEmpty()) {
+                cont.resume(PermissionResult.Blocked(permanentlyDenied))
+            } else {
+                cont.resume(PermissionResult.Explain(deniedPermissions))
             }
         } finally {
             continuation = null

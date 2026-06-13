@@ -13,8 +13,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.TestTags
 import il.soulSalttrader.shabbattimes.ui.search.SearchItem
+import il.soulSalttrader.shabbattimes.ui.search.SearchItems
 import il.soulSalttrader.shabbattimes.ui.search.SearchItems.Add
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconImage
@@ -55,6 +58,10 @@ private fun FloatingActionButtonMenuScope.FabMenuItems(
 ) {
     items.forEach { item ->
         FloatingActionButtonMenuItem(
+            modifier = when (item) {
+                Add  -> Modifier.testTag(TestTags.FAB_NEW_LOCATION)
+                else -> Modifier
+            },
             onClick = {
                 onClick()
                 toggleExpanded()
@@ -75,6 +82,7 @@ private fun FabMenuButton(
     contentDescription: String? = null,
 ) {
     ToggleFloatingActionButton(
+        modifier = Modifier.testTag(TestTags.FAB_ADD),
         checked = isExpanded,
         onCheckedChange = { toggleExpanded() },
     ) {

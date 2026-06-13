@@ -17,6 +17,7 @@ data class SavedLocation(
         const val EMPTY_NAME = "Tap to use current location"
         const val GPS_ID = "gps"
         const val EMPTY_ID = "empty"
+        const val LOCATION_ID = "location"
 
         fun empty() = SavedLocation(
             id = EMPTY_ID,

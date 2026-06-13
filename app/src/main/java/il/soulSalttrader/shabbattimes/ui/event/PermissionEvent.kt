@@ -1,12 +1,13 @@
 package il.soulSalttrader.shabbattimes.ui.event
 
 import il.soulSalttrader.shabbattimes.model.LocationPermission
+import il.soulSalttrader.shabbattimes.model.toPermissionState
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import il.soulSalttrader.shabbattimes.ui.reducer.PermissionReducer
 import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
 
-sealed interface PermissionEvent : AppEvent, Reducible<PermissionUiState> {
+sealed interface PermissionEvent : UiEvent, Reducible<PermissionUiState> {
     data object ShowEducation : PermissionEvent {
         override val reducer = PermissionReducer { state ->
             state.copy(permission = PermissionState.Education, isDialogVisible = true)
@@ -63,22 +64,13 @@ sealed interface PermissionEvent : AppEvent, Reducible<PermissionUiState> {
 
     data object ReturnedFromAppSettings : PermissionEvent {
         override val reducer = PermissionReducer { state ->
-            state.copy(permission = PermissionState.Requesting, isDialogVisible = true)
+            state.copy(permission = PermissionState.Idle, isDialogVisible = false)
         }
     }
 
     data class PermissionChanged(val permission: LocationPermission) : PermissionEvent {
         override val reducer = PermissionReducer { state ->
-            state.copy(
-                permission = when (permission) {
-                    is LocationPermission.Idle              -> PermissionState.Idle
-                    is LocationPermission.Education         -> PermissionState.Education
-                    is LocationPermission.Requesting        -> PermissionState.Requesting
-                    is LocationPermission.Granted           -> PermissionState.Granted
-                    is LocationPermission.Denied            -> PermissionState.Denied
-                    is LocationPermission.DeniedPermanently -> PermissionState.DeniedPermanently
-                },
-            )
+            state.copy(permission = permission.toPermissionState())
         }
     }
 }

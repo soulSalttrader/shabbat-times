@@ -12,7 +12,7 @@ import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
 import il.soulSalttrader.shabbattimes.ui.reducer.SearchReducer
 
-sealed interface SearchEvent : AppEvent, Reducible<SearchUiState> {
+sealed interface SearchEvent : UiEvent, Reducible<SearchUiState> {
     data class QueryChanged(val newQuery: String) : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(

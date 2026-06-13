@@ -53,7 +53,7 @@ The app is built using modern Android architecture principles and libraries:
 
 ```kotlin
 @Composable
-fun ShabbatScreen() {
+fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
     val shabbatViewModel: ShabbatViewModel = hiltViewModel()
     val shabbatState by shabbatViewModel.state.collectAsStateWithLifecycle()
 
@@ -62,12 +62,6 @@ fun ShabbatScreen() {
 
     val permissionViewModel: PermissionViewModel = hiltViewModel()
     val permissionUiState by permissionViewModel.state.collectAsStateWithLifecycle()
-
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        if (permissionUiState.permission == PermissionState.DeniedPermanently) {
-            permissionViewModel.dispatch(PermissionEvent.Request)
-        }
-    }
 
     HandlePermissions(
         permissions = listOf(
@@ -86,11 +80,11 @@ fun ShabbatScreen() {
     val context = LocalContext.current
 
     val onCardClick = {
-        when (permissionUiState.permission) {
-            PermissionState.Granted           -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
-            PermissionState.Denied            -> permissionViewModel.dispatch(PermissionEvent.AcceptedRationale)
-            PermissionState.DeniedPermanently -> permissionViewModel.dispatch(PermissionEvent.ShowDeniedPermanentlyDialog)
-            else                              -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
+        when (permissionUiState.dispatchCardAction()) {
+            CardAction.OpenGpsSearch    -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
+            CardAction.AcceptRationale  -> permissionViewModel.dispatch(PermissionEvent.AcceptedRationale)
+            CardAction.ShowDeniedDialog -> permissionViewModel.dispatch(PermissionEvent.ShowDeniedPermanentlyDialog)
+            CardAction.ShowEducation    -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
         }
     }
 
@@ -134,18 +128,25 @@ fun ShabbatScreen() {
                 onClick = onCardClick,
                 onReorder = { from, to ->
                     shabbatViewModel.dispatch(
-                        ShabbatEvent.ReorderLocations(from = from, to = to,)
+                        ShabbatEvent.ReorderLocations(from = from, to = to)
                     )
                 },
             )
         }
 
         is ShabbatResultState.Failure -> FailureScreen(
-            message = entries.message,
+            cause = entries.cause,
             onRetry = { shabbatViewModel.dispatch(ShabbatEvent.RetryLoadShabbatEntry) },
         )
     }
-    //..
+
+    LaunchedEffect(Unit) {
+        merge(
+            shabbatViewModel.effects,
+            searchViewModel.effects,
+            permissionViewModel.effects,
+        ).collect { effect -> handleUiEffect(effect, context, snackbarHostState) }
+    }
 }
 ```
 
@@ -166,8 +167,8 @@ class ShabbatViewModel @Inject constructor(
     userPreferencesRepository: UserPreferencesRepository,
     permissionRepository: PermissionRepository,
 ) : ViewModel() {
-    private val _effects: MutableSharedFlow<AppEffect> = MutableSharedFlow(extraBufferCapacity = 20)
-    val effects: SharedFlow<AppEffect> = _effects.asSharedFlow()
+    private val _effects: MutableSharedFlow<UiEffect> = MutableSharedFlow(extraBufferCapacity = 20)
+    val effects: SharedFlow<UiEffect> = _effects.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
@@ -190,7 +191,7 @@ class ShabbatViewModel @Inject constructor(
             results.forEach { result ->
                 when (result) {
                     is NetworkResult.Failure -> _effects.tryEmit(
-                        AppEffect.ShowToast(result.cause.userMessage())
+                        UiEffect.ShowToast(result.cause.userMessage())
                     )
                     is NetworkResult.Success -> Unit
                 }
@@ -201,7 +202,7 @@ class ShabbatViewModel @Inject constructor(
     }
         .catch { cause ->
             dispatch(ShabbatEvent.ShabbatEntryLoadFailed(cause))
-            _effects.tryEmit(AppEffect.ShowToast(cause.userMessage()))
+            _effects.tryEmit(UiEffect.ShowToast(cause.userMessage()))
             emit(emptyList())
         }
         .stateIn(
@@ -226,7 +227,7 @@ class ShabbatViewModel @Inject constructor(
         initialValue = ShabbatUiState(),
     )
 
-    fun dispatch(event: AppEvent) {
+    fun dispatch(event: UiEvent) {
         _state.updateAndGet { current ->
             when (event) {
                 is ShabbatEvent -> event.reducer reduce current
@@ -1211,8 +1212,6 @@ class PermissionHandlerImpl(
   - `dispatch`: Function to send `PermissionEvent`s to the ViewModel.
 
 - Behavior:
-  - `LaunchedEffect(Unit)` — syncs real device permission on first composition via `resolvePermissionEvent()`:
-    - Restores `Granted`, `Denied`, or `DeniedPermanently` correctly on app restart.
   - `LaunchedEffect(permissionState.permission)` — triggers system permission dialog when state is `Requesting`.
   - `LifecycleEventEffect(ON_RESUME)` — re-checks permission when user returns from app settings.
   - Uses `rememberUpdatedState` to avoid stale state in lifecycle callbacks.
@@ -1228,18 +1227,27 @@ class PermissionHandlerImpl(
 @Composable
 fun HandlePermissions(
     permissions: List<String>,
-    permissionState: PermissionState,
+    permissionState: PermissionUiState,
     dispatch: (PermissionEvent) -> Unit,
 ) {
     val permissionHandler = rememberPermissionHandler()
-    val context = LocalContext.current
 
-  LaunchedEffect(Unit) {
-    permissionHandler.resolvePermissionEvent(permissions)?.let(dispatch)
-  }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        when (permissionState.permission) {
+            PermissionState.Idle -> {
+                // Initial check only
+                permissionHandler.resolvePermissionEvent(permissions)?.let(dispatch)
+            }
+            PermissionState.DeniedPermanently -> {
+                // User may have enabled permission in Settings
+                dispatch(PermissionEvent.ReturnedFromAppSettings)
+            }
+            else -> Unit  // Requesting, Denied, Education
+        }
+    }
 
-    LaunchedEffect(permissionState) {
-        if (permissionState == PermissionState.Requesting) {
+    LaunchedEffect(permissionState.permission) {
+        if (permissionState.permission == PermissionState.Requesting) {
             val result = permissionHandler.request(permissions)
 
             when (result) {
@@ -1249,7 +1257,6 @@ fun HandlePermissions(
             }
         }
     }
-// ...
 }
 ```
 
@@ -1714,7 +1721,12 @@ fun ShabbatContent(
                 swipeConfig = swipeConfig,
             ) { item, modifier ->
                 ShabbatCard(
-                    modifier = modifier,
+                    modifier = modifier, // drag modifier
+                    testTag = when (item.location.id) {
+                        SavedLocation.GPS_ID   -> TestTags.GPS_CARD
+                        SavedLocation.EMPTY_ID -> TestTags.EMPTY_CARD
+                        else                   -> TestTags.LOCATION_CARD
+                    },
                     item = item,
                     isDraggable = isDraggable,
                     onClick = { onClick() }

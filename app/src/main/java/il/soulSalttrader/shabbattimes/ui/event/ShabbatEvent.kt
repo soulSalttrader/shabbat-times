@@ -15,7 +15,7 @@ import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import kotlinx.collections.immutable.toImmutableList
 
-sealed interface ShabbatEvent : AppEvent, Reducible<ShabbatUiState> {
+sealed interface ShabbatEvent : UiEvent, Reducible<ShabbatUiState> {
     data class ShabbatEntryLoaded(
         val savedLocations: List<SavedLocation>,
         val currentLocation: SavedLocation?,

@@ -3,6 +3,9 @@ package il.soulSalttrader.shabbattimes.ui.permission
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import il.soulSalttrader.shabbattimes.R
+import il.soulSalttrader.shabbattimes.TestTags.DENIED_PERMANENTLY_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.EDUCATION_DIALOG
+import il.soulSalttrader.shabbattimes.TestTags.RATIONALE_DIALOG
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.ExplanatoryDialog
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
@@ -22,6 +25,7 @@ fun PermissionDialogs(
             onConfirm = { dispatch(PermissionEvent.Request) },
             onDismissText = stringResource(R.string.permission_education_dismiss),
             onDismiss = { dispatch(PermissionEvent.DismissedRationale) },
+            testTag = EDUCATION_DIALOG,
         )
 
         PermissionState.Denied    -> ExplanatoryDialog(
@@ -29,6 +33,7 @@ fun PermissionDialogs(
             onConfirmText = stringResource(R.string.permission_denied_confirm),
             onConfirm = { dispatch(PermissionEvent.AcceptedRationale) },
             onDismiss = { dispatch(PermissionEvent.DismissedRationale) },
+            testTag = RATIONALE_DIALOG,
         )
 
         PermissionState.DeniedPermanently -> ExplanatoryDialog(
@@ -36,6 +41,7 @@ fun PermissionDialogs(
             onConfirmText = stringResource(R.string.permission_denied_permanently_confirm),
             onConfirm = { dispatch(PermissionEvent.RequestedAppSettings) },
             onDismiss = { dispatch(PermissionEvent.DismissedRationale) },
+            testTag = DENIED_PERMANENTLY_DIALOG,
         )
 
         else -> Unit
