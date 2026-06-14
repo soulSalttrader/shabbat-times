@@ -1,8 +1,8 @@
 package il.soulSalttrader.shabbattimes.ui.settings
 
-import il.soulSalttrader.shabbattimes.settings.ShabbatPreset
 import il.soulSalttrader.shabbattimes.model.State
+import il.soulSalttrader.shabbattimes.settings.ShabbatPreferences
 
 data class SettingsUiState(
-    val preset: ShabbatPreset = ShabbatPreset.Ashkenazi,
+    val preferences: ShabbatPreferences = ShabbatDefaults.PREFERENCES,
 ) : State
