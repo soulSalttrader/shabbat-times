@@ -53,17 +53,17 @@ class ShabbatViewModel @Inject constructor(
     val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
         currentLocationRepository.location,
         savedLocationsRepository.locations,
-        userPreferencesRepository.shabbatPreset,
-    ) { gpsLocation, savedLocations, preset ->
+        userPreferencesRepository.shabbatPreferences,
+    ) { gpsLocation, savedLocations, preferences ->
         val locations = buildList {
             gpsLocation?.let { add(it) }
             addAll(savedLocations)
         }
 
-        locations to preset
-    }.flatMapLatest { (savedLocations, preset) ->
+        locations to preferences
+    }.flatMapLatest { (savedLocations, preferences) ->
         flow {
-            val results = getHalachicTimesUseCase(savedLocations, preset)
+            val results = getHalachicTimesUseCase(savedLocations, preferences)
             val successes = results.filterIsInstance<NetworkResult.Success<HalachicTimes>>()
                 .map { it.data }
 
