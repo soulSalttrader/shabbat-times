@@ -369,3 +369,31 @@ PERM_COMBINE_S2
 | VM | ~ PERM_COMBINE_S2_VM - should not flash Idle before DeniedPermanently on cold start | ✅ |
 
 ---
+
+# Solar Ephemeris Calculator
+
+## SCENARIO: Compute solar declination
+EPHEMERIS-NOAA-S1
+
+| Layer      | Slug                                                                                | Status |
+|------------|-------------------------------------------------------------------------------------|--|
+| Calculator | ~ EPHEMERIS-NOAA-S1_1 - should returns declination near -22.84° on the perihelion | ❓ |
+| Calculator | ~ EPHEMERIS-NOAA-S1_2 - should returns declination near 0° at March equinox | ❓ |
+| Calculator | ~ EPHEMERIS-NOAA-S1_3 - should returns declination near +23.44° at June solstice | ❓ |
+| Calculator | ~ EPHEMERIS-NOAA-S1_4 - should returns declination near 22.83° on the aphelion | ❓ |
+| Calculator | ~ EPHEMERIS-NOAA-S1_5 - should returns declination near 0° at September equinox | ❓ |
+| Calculator | ~ EPHEMERIS-NOAA-S1_6 - should returns declination near -23.44° at December solstice | ❓ |
+
+## SCENARIO: Compute Equation of time
+EPHEMERIS-NOAA-S2
+
+| Layer | Slug                                                                                | Status |
+|--|-------------------------------------------------------------------------------------|--|
+| Calculator | ~ EPHEMERIS-NOAA-S2_1 - equation of time should be near -4.5 min on the Perihelion | ❓ |
+| Calculator | ~ EPHEMERIS-NOAA-S2_2 - equation of time should be near -7.3 min on March equinox | ❓ |
+| Calculator | ~ EPHEMERIS-NOAA-S2_3 - equation of time should be near -1.7 min on June solstice | ❓ |
+| Calculator | ~ EPHEMERIS-NOAA-S2_4 - equation of time should be near -4.5 min on the aphelion | ❓ |
+| Calculator | ~ EPHEMERIS-NOAA-S2_5 - equation of time should be near +7.2 min on the September equinox | ❓ |
+| Calculator | ~ EPHEMERIS-NOAA-S2_6 - equation of time should be near +1.7 min on December solstice | ❓ |
+
+---
