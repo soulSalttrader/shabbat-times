@@ -19,8 +19,14 @@ object SunPositionCalculator {
     fun getEquationOfCenterDeg(
         meanAnomalyRad: Double,
         julianCenturiesSinceJ2000: Double,
-    ): Double = sin(meanAnomalyRad) * (CENTER_CORRECTION_C1_BASE - julianCenturiesSinceJ2000 * (CENTER_CORRECTION_C1_PER_CENTURY + CENTER_CORRECTION_C1_PER_CENTURY_SQ
-            * julianCenturiesSinceJ2000)) + sin(2 * meanAnomalyRad) * (CENTER_CORRECTION_C2_BASE - CENTER_CORRECTION_C2_PER_CENTURY * julianCenturiesSinceJ2000) + sin(3 * meanAnomalyRad) * CENTER_CORRECTION_C3
+    ): Double {
+        val c1 = CENTER_CORRECTION_C1_BASE - julianCenturiesSinceJ2000 * (CENTER_CORRECTION_C1_PER_CENTURY + CENTER_CORRECTION_C1_PER_CENTURY_SQ * julianCenturiesSinceJ2000)
+        val c2 = CENTER_CORRECTION_C2_BASE - CENTER_CORRECTION_C2_PER_CENTURY * julianCenturiesSinceJ2000
+
+        return sin(meanAnomalyRad) * c1 +
+                sin(2 * meanAnomalyRad) * c2 +
+                sin(3 * meanAnomalyRad) * CENTER_CORRECTION_C3
+    }
 
     fun getSunTrueLongitudeDeg(
         meanLongitudeDeg: Double,

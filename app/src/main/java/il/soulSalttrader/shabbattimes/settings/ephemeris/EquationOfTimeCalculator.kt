@@ -23,17 +23,17 @@ object EquationOfTimeCalculator {
         correctedObliquityDeg: Double
     ): Double {
 
-        val meanLongitudeRad = toRadians(meanLongitudeDeg)
+        val l = toRadians(meanLongitudeDeg)
 
         // y = tan²(ε/2) — standard auxiliary variable accounting for the obliquity of the ecliptic
         val y = getTanHalfObliquitySquared(correctedObliquityDeg)
 
         val eqTimeRad =
-            y * sin(2 * meanLongitudeRad) -
+            y * sin(2 * l) -
                     2 * eccentricity * sin(meanAnomalyRad) +
-                    4 * eccentricity * y * sin(meanAnomalyRad) * cos(2 * meanLongitudeRad) -
-                    0.5 * y * y * sin(4 * meanLongitudeRad) -
-                    1.25 * eccentricity * eccentricity * sin(2 * meanAnomalyRad)
+                    4 * eccentricity * y * sin(meanAnomalyRad) * cos(2 * l) -
+                    0.5 * y.pow(2) * sin(4 * l) -
+                    1.25 * eccentricity.pow(2) * sin(2 * meanAnomalyRad)
 
         return EQUATION_OF_TIME_MINUTES_PER_DEGREE * toDegrees(eqTimeRad)
     }
