@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.settings
+package il.soulSalttrader.shabbattimes.settings.ephemeris
 
 data class SolarEphemeris(
     val declinationRad: Double,
