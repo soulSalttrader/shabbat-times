@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.settings
+package il.soulSalttrader.shabbattimes.settings.solarPosition
 
 import java.time.Instant
 
