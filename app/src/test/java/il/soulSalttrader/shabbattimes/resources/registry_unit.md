@@ -397,3 +397,18 @@ EPHEMERIS-NOAA-S2
 | Calculator | ~ EPHEMERIS-NOAA-S2_6 - equation of time should be near +1.7 min on December solstice | ✅ |
 
 ---
+
+## SCENARIO: Compute Solar Altitude Calculations
+EPHEMERIS-ALTITUDE-S1
+
+| Layer | Slug                                                                                | Status |
+|--|-------------------------------------------------------------------------------------|---|
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_1 - should be near zenith (89.99°) at Tropic of Cancer on Summer Solstice 2026 | ❓ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_2 - should be near zenith (89.99°) at Tropic of Capricorn on Winter Solstice 2026 | ❓ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_3 - should show Midnight Sun (~ +23.44°) at North Pole on Summer Solstice 2026" | ❓ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_4 - should show polar night (~ -23.44°) at South Pole on Winter Solstice 2026 | ❓ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_5 - should have correct altitude (~ 23.38) at Greenwich during Equation of Time peak (Autumn 2026) | ❓ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_6 - should be near horizon (~ 1.8°) at International Date Line on March Equinox | ❓ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_7 - should have correct noon altitude (~ 61.35° ) in Prague on Summer Solstice 2026 | ❓ |
+
+---
