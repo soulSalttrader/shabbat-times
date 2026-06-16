@@ -412,3 +412,29 @@ EPHEMERIS-ALTITUDE-S1
 | Calculator | ~ EPHEMERIS-ALTITUDE-S1_7 - should have correct noon altitude (~ 61.35° ) in Prague on Summer Solstice 2026 | ✅ |
 
 ---
+
+## SCENARIO: Evening Time For Depression
+SOLAR-DEPRESSION_S1
+
+| Layer | Slug                                                                                | Status |
+|--|-------------------------------------------------------------------------------------|--|
+| Calculator | ~ SOLAR-DEPRESSION_S1_1 - Evening Civil Twilight (6°) - Summer Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_2 - Evening Civil Twilight (6°) - Winter Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_3 - Morning Civil Twilight (6°) - Summer Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_4 - Morning Civil Twilight (6°) - Winter Solstice Prague | ❓ |
+
+---
+
+## SCENARIO: SOLAR-BI-SEARCH_S1 - Find Crossing
+SOLAR-BI-SEARCH_S1
+
+| Layer | Slug                                                                                | Status |
+|--|-------------------------------------------------------------------------------------|--|
+| Calculator | ~ SOLAR-BI-SEARCH_S1_1 - Evening Civil Twilight (6°) - Summer Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-BI-SEARCH_S1_2 - Evening Civil Twilight (6°) - Winter Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-BI-SEARCH_S1_3 - Evening Nautical Twilight (12°) - Summer Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-BI-SEARCH_S1_4 - Evening Civil Twilight (6°) - March Equinox Prague | ❓ |
+| Calculator | ~ SOLAR-BI-SEARCH_S1_5 - Evening Nautical Twilight (12°) - Summer Solstice Gdansk | ❓ |
+| Calculator | ~ SOLAR-BI-SEARCH_S1_6 - Evening Nautical Twilight (12°) - Summer Solstice Riga (White Nights) | ❓ |
+
+---
