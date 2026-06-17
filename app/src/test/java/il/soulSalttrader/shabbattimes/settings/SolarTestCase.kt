@@ -28,7 +28,7 @@ sealed interface SolarTestCase {
         val targetDegrees: Double,
         val latitude: Double,
         val longitude: Double,
-        val expectedResult: ClosedRange<Instant>,
+        val expectedResult: ClosedRange<Instant>? = null,
     ) : SolarTestCase
 
     data class SolarAltitudeSearchTestCase(

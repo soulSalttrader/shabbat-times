@@ -11,7 +11,8 @@ import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarAltitudeSearch
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.ranges.shouldBeIn
-import java.time.Instant
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 
 class BinarySolarAltitudeSearchTest : DescribeSpec({
     lateinit var solarEphemerisCalculator: SolarEphemerisCalculator
@@ -44,7 +45,16 @@ class BinarySolarAltitudeSearchTest : DescribeSpec({
                 longitudeDeg = testCase.longitude
             )
 
-            result shouldBeIn testCase.expectedWindow as ClosedRange<Instant>
+            when {
+                testCase.expectedWindow != null -> {
+                    result shouldNotBe null
+                    result!! shouldBeIn testCase.expectedWindow
+                }
+
+                else -> {
+                    result shouldBe null
+                }
+            }
         }
     }
 })

@@ -12,6 +12,8 @@ import il.soulSalttrader.shabbattimes.settings.solarPosition.DepressionFixtures.
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.ranges.shouldBeIn
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 
 class AstronomicalSolarDepressionCalculatorTest : DescribeSpec({
     lateinit var solarEphemerisCalculator: NoaaSolarEphemerisCalculator
@@ -46,7 +48,16 @@ class AstronomicalSolarDepressionCalculatorTest : DescribeSpec({
                 longitude = testCase.longitude
             )
 
-            result shouldBeIn testCase.expectedResult
+            when {
+                testCase.expectedResult != null -> {
+                    result shouldNotBe null
+                    result!! shouldBeIn testCase.expectedResult
+                }
+
+                else -> {
+                    result shouldBe null
+                }
+            }
         }
     }
 })
