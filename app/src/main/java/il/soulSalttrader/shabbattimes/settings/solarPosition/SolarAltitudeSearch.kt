@@ -1,6 +1,5 @@
-package il.soulSalttrader.shabbattimes.settings
+package il.soulSalttrader.shabbattimes.settings.solarPosition
 
-import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarPositionCalculator
 import java.time.Instant
 
 interface SolarAltitudeSearch {
