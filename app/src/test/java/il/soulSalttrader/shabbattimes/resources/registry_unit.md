@@ -422,6 +422,10 @@ SOLAR-DEPRESSION_S1
 | Calculator | ~ SOLAR-DEPRESSION_S1_2 - Evening Civil Twilight (6°) - Winter Solstice Prague | ❓ |
 | Calculator | ~ SOLAR-DEPRESSION_S1_3 - Morning Civil Twilight (6°) - Summer Solstice Prague | ❓ |
 | Calculator | ~ SOLAR-DEPRESSION_S1_4 - Morning Civil Twilight (6°) - Winter Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_5 - Evening Nautical Twilight (12°) - Summer Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_6 - Evening Nautical Twilight (12°) - Winter Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_7 - Morning Nautical Twilight (12°) - Summer Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_8 - Morning Nautical Twilight (12°) - Winter Solstice Prague | ❓ |
 
 ---
 
