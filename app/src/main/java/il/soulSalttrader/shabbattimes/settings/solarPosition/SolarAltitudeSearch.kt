@@ -10,5 +10,5 @@ interface SolarAltitudeSearch {
         positionCalculator: SolarPositionCalculator,
         latitudeDeg: Double,
         longitudeDeg: Double,
-    ): Instant
+    ): Instant?
 }

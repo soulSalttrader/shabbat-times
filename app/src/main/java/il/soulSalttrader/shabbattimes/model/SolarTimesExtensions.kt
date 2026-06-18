@@ -3,7 +3,6 @@ package il.soulSalttrader.shabbattimes.model
 import il.soulSalttrader.shabbattimes.common.constants.DateTimeFormatters.API_DATE_PARSER
 import il.soulSalttrader.shabbattimes.common.parseRollingOver
 import il.soulSalttrader.shabbattimes.network.dto.SolarTimesResultDto
-import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
@@ -15,7 +14,7 @@ fun SolarTimesResultDto.toDomain(): SolarTimes {
         raw = sunset,
         date = localDate,
         zoneOffset = zoneOffset,
-        referenceInstant = Instant.MIN,
+        referenceInstant = null,
     )
 
     return SolarTimes(

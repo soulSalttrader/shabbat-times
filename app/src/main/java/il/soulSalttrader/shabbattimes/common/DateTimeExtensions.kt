@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes.common
 
+import il.soulSalttrader.shabbattimes.common.constants.DateTimeFormatters.API_DATE_FORMATTER
 import il.soulSalttrader.shabbattimes.common.constants.DateTimeFormatters.API_TIME_PARSER_24
-import il.soulSalttrader.shabbattimes.common.constants.DateTimeFormatters.HEBREW_DATE_FORMATTER
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -20,7 +20,7 @@ fun LocalDate.nextOrTodayDayOfWeek(target: DayOfWeek): LocalDate {
 
 fun upcomingFriday(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.FRIDAY)
 fun upcomingSaturday(): LocalDate = now().nextOrTodayDayOfWeek(DayOfWeek.SATURDAY)
-fun LocalDate.toDisplayString(): String = this.format(HEBREW_DATE_FORMATTER)
+fun LocalDate.toApiDateString(): String = this.format(API_DATE_FORMATTER)
 
 /**
  * Parses [raw] as a time-of-day on [date] in [zoneOffset], rolling over to the next day
@@ -31,12 +31,14 @@ fun parseRollingOver(
     raw: String,
     date: LocalDate,
     zoneOffset: ZoneOffset,
-    referenceInstant: Instant,
-): Instant {
-    val time = LocalTime.parse(raw, API_TIME_PARSER_24)
+    referenceInstant: Instant?,
+): Instant? {
+    if (raw.isBlank()) return null
+    val time = runCatching { LocalTime.parse(raw, API_TIME_PARSER_24) }.getOrNull() ?: return null
     val sameDay = date.atTime(time).toInstant(zoneOffset)
 
-    return when (sameDay.isBefore(referenceInstant))  {
+    val reference = referenceInstant ?: Instant.MIN
+    return when (sameDay.isBefore(reference))  {
         true -> date.plusDays(1).atTime(time).toInstant(zoneOffset)
         else -> sameDay
     }
