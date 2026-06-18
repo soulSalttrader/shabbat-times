@@ -448,7 +448,7 @@ PARSER_DATE_S1
 
 | Layer  | Slug                                                                                | Status |
 |--------|-------------------------------------------------------------------------------------|--|
-| Parser | ~ PARSER_DATE_S1_1 - handle empty strings by returning null instants | ❓ |
-| Parser | ~ PARSER_DATE_S1_2 - should parse valid times correctly | ❓ |
+| Parser | ~ PARSER_DATE_S1_1 - handle empty strings by returning null instants | ✅ |
+| Parser | ~ PARSER_DATE_S1_2 - should parse valid times correctly | ✅ |
 
 ---
