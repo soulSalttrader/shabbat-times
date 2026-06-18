@@ -442,3 +442,13 @@ SOLAR-BI-SEARCH_S1
 | Calculator | ~ SOLAR-BI-SEARCH_S1_6 - Evening Nautical Twilight (12°) - Summer Solstice Riga (White Nights) | ❓ |
 
 ---
+
+## SCENARIO: SolarTimesResultDto.toDomain()
+PARSER_DATE_S1
+
+| Layer  | Slug                                                                                | Status |
+|--------|-------------------------------------------------------------------------------------|--|
+| Parser | ~ PARSER_DATE_S1_1 - handle empty strings by returning null instants | ❓ |
+| Parser | ~ PARSER_DATE_S1_2 - should parse valid times correctly | ❓ |
+
+---
