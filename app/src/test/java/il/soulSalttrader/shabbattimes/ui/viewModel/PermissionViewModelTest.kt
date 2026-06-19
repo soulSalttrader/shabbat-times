@@ -40,7 +40,7 @@ class PermissionViewModelTest : DescribeSpec({
     fun setup(): PermissionTestFixture {
         val repo = FakePermissionRepository()
         val effects = MutableSharedFlow<UiEffect>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-        val handler = PermissionSideEffectHandler(repo, effects)
+        val handler = PermissionSideEffectHandler(repo)
         val viewModel = PermissionViewModel(handler, repo)
 
         return PermissionTestFixture(viewModel, repo, effects)
@@ -339,7 +339,7 @@ class PermissionViewModelTest : DescribeSpec({
                 val repo = FakePermissionRepository()
                 repo.updatePermissionState(LocationPermission.Granted)
                 val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
+                val handler = PermissionSideEffectHandler(repo)
                 val vm = PermissionViewModel(handler, repo)
 
                 vm.state.test {
@@ -359,7 +359,7 @@ class PermissionViewModelTest : DescribeSpec({
                 val repo = FakePermissionRepository()
                 repo.updatePermissionState(LocationPermission.Denied)
                 val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
+                val handler = PermissionSideEffectHandler(repo)
                 val vm = PermissionViewModel(handler, repo)
 
                 vm.state.test {
@@ -379,7 +379,7 @@ class PermissionViewModelTest : DescribeSpec({
                 val repo = FakePermissionRepository()
                 repo.updatePermissionState(LocationPermission.DeniedPermanently)
                 val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
+                val handler = PermissionSideEffectHandler(repo)
                 val vm = PermissionViewModel(handler, repo)
 
                 vm.state.test {
@@ -397,7 +397,7 @@ class PermissionViewModelTest : DescribeSpec({
                 val repo = FakePermissionRepository()
                 repo.updatePermissionState(LocationPermission.DeniedPermanently) // persisted
                 val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
+                val handler = PermissionSideEffectHandler(repo)
                 val vm = PermissionViewModel(handler, repo)
 
                 vm.state.test {
@@ -478,7 +478,7 @@ class PermissionViewModelTest : DescribeSpec({
                 testDispatcher.scheduler.advanceUntilIdle()
 
                 val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
+                val handler = PermissionSideEffectHandler(repo)
 
                 // simulate rotation — create new VM with same repo (same as config change)
                 val recreatedVm = PermissionViewModel(handler, repo)
@@ -497,7 +497,7 @@ class PermissionViewModelTest : DescribeSpec({
                 testDispatcher.scheduler.advanceUntilIdle()
 
                 val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
+                val handler = PermissionSideEffectHandler(repo)
 
                 // simulate rotation — create new VM with same repo (same as config change)
                 val recreatedVm = PermissionViewModel(handler, repo)
@@ -592,7 +592,7 @@ class PermissionViewModelTest : DescribeSpec({
                 runTest {
                     val (_, _, effects) = setup()
                     val repo = FakePermissionRepository()
-                    val handler = PermissionSideEffectHandler(repo, effects)
+                    val handler = PermissionSideEffectHandler(repo)
                     repo.updatePermissionState(locationPermission)
                     val vm = PermissionViewModel(handler, repo)
 
@@ -631,7 +631,7 @@ class PermissionViewModelTest : DescribeSpec({
             runTest(UnconfinedTestDispatcher()) {
                 val (_, _, effects) = setup()
                 val repo = FakePermissionRepository()
-                val handler = PermissionSideEffectHandler(repo, effects)
+                val handler = PermissionSideEffectHandler(repo)
                 repo.updatePermissionState(LocationPermission.DeniedPermanently)
                 val vm = PermissionViewModel(handler, repo)
 
