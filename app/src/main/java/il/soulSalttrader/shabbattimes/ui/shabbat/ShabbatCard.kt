@@ -141,6 +141,35 @@ private fun ShabbatKeyTimes(
                 modifier = modifier.padding(vertical = 4.dp)
             )
         }
+@Composable
+private fun ShabbatTimeColumn(
+    timeState: TimeState?,
+    label: String,
+    isHavdalah: Boolean,
+    colors: CardColors,
+    modifier: Modifier = Modifier,
+) {
+    when (timeState) {
+        is TimeState.Available -> ShabbatDateTimeAvailable(
+            label = label,
+            time = timeState.time,
+            date = timeState.date,
+            modifier = modifier.padding(vertical = 4.dp),
+        )
+
+        is TimeState.Unavailable -> ShabbatDateTimeUnavailable(
+            label = label,
+            modifier = modifier.padding(vertical = 4.dp),
+            colors = colors,
+            isHavdalah = isHavdalah,
+        )
+
+        else -> ShabbatDateTimeAvailable(
+            label = label,
+            time = null,
+            date = null,
+            modifier = modifier.padding(vertical = 4.dp),
+        )
     }
 }
 
