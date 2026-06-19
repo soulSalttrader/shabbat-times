@@ -19,11 +19,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.TestTags
+import il.soulSalttrader.shabbattimes.common.formatDate
+import il.soulSalttrader.shabbattimes.common.formatTime
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay.Companion.EMPTY_DATE
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay.Companion.EMPTY_TIME
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconLabel
@@ -31,6 +37,8 @@ import il.soulSalttrader.shabbattimes.model.LocationStatus
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 import il.soulSalttrader.shabbattimes.model.toLabel
+import java.time.LocalDate
+import java.time.LocalTime
 
 @Composable
 fun ShabbatCard(
@@ -185,13 +193,78 @@ private fun LocationTitle(
 }
 
 @Composable
-private fun ShabbatDateTime(
+private fun ShabbatDateTimeAvailable(
     label: String,
-    time: String,
-    date: String,
+    time: LocalTime?,
+    date: LocalDate?,
     modifier: Modifier,
 ) {
-    Text(modifier = modifier, text = label, style = MaterialTheme.typography.labelMedium)
-    Text(modifier = modifier, text = time, style = MaterialTheme.typography.headlineLarge)
-    Text(modifier = modifier, text = date, style = MaterialTheme.typography.bodyMedium)
+    val context = LocalContext.current
+
+    Text(
+        modifier = modifier,
+        text = label,
+        style = MaterialTheme.typography.labelMedium,
+    )
+
+    Text(
+        modifier = modifier,
+        text = time?.let { context.formatTime(it) } ?: AnnotatedString(EMPTY_TIME),
+        style = MaterialTheme.typography.headlineLarge,
+    )
+
+    Text(
+        modifier = modifier,
+        text = date?.let { context.formatDate(it) } ?: EMPTY_DATE,
+        style = MaterialTheme.typography.bodyMedium,
+    )
+}
+
+@Composable
+private fun ShabbatDateTimeUnavailable(
+    label: String,
+    time: String = NA_TIME,
+    note: String = "see note",
+    colors: CardColors,
+    modifier: Modifier,
+    isHavdalah: Boolean = false,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    UiIconLabel(
+        modifier = modifier.clickable { showDialog = true },
+        text = label,
+        style = MaterialTheme.typography.labelMedium,
+        trailingIcon = UiIcon.Resource(R.drawable.warning_24dp),
+        contentColor = colors.disabledContentColor,
+    )
+
+    Text(
+        modifier = modifier,
+        text = time,
+        style = MaterialTheme.typography.headlineLarge,
+    )
+
+    Text(
+        modifier = modifier,
+        text = note,
+        style = MaterialTheme.typography.bodyMedium,
+    )
+
+    if (showDialog) {
+        val message = when (isHavdalah) {
+            true -> stringResource(R.string.unavailable_havdalah_body)
+            else -> stringResource(R.string.unavailable_candle_lighting_body)
+        }
+
+        ExplanatoryDialog(
+            message = message,
+            title = stringResource(R.string.unavailable_dialog_title),
+            confirmAction = DialogButtonAction(
+                text = stringResource(R.string.unavailable_dialog_confirm),
+                onClick = { showDialog = false },
+                color = { MaterialTheme.colorScheme.primary }
+            ),
+        )
+    }
 }
