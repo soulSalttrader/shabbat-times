@@ -1,5 +1,6 @@
 package il.soulSalttrader.shabbattimes.ui.shabbat
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,10 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -28,15 +33,19 @@ import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.TestTags
 import il.soulSalttrader.shabbattimes.common.formatDate
 import il.soulSalttrader.shabbattimes.common.formatTime
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay.Companion.EMPTY_DATE
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay.Companion.EMPTY_TIME
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay.Companion.NA_TIME
+import il.soulSalttrader.shabbattimes.model.LocationStatus
+import il.soulSalttrader.shabbattimes.model.ShabbatEntry
+import il.soulSalttrader.shabbattimes.model.TimeState
+import il.soulSalttrader.shabbattimes.model.toLabel
+import il.soulSalttrader.shabbattimes.ui.DialogButtonAction
+import il.soulSalttrader.shabbattimes.ui.ExplanatoryDialog
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconLabel
-import il.soulSalttrader.shabbattimes.model.LocationStatus
-import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay
-import il.soulSalttrader.shabbattimes.model.ShabbatEntry
-import il.soulSalttrader.shabbattimes.model.toLabel
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -75,12 +84,7 @@ fun ShabbatCard(
 
                 Spacer(Modifier.height(16.dp))
 
-                ShabbatKeyTimes(
-                    candleLightingTime = item.times?.candleLightingTime ?: HalachicTimesDisplay.EMPTY_TIME,
-                    candleLightingDate = item.times?.candleLightingDate ?: HalachicTimesDisplay.EMPTY_DATE,
-                    havdalahTime = item.times?.havdalahTime ?: HalachicTimesDisplay.EMPTY_TIME,
-                    havdalahDate = item.times?.havdalahDate ?: HalachicTimesDisplay.EMPTY_DATE,
-                )
+                ShabbatKeyTimes(item.times, colors = colors)
             }
 
             isDraggable.takeIf { it }?.let {
@@ -118,29 +122,33 @@ private fun getDefaultCardColors(status: LocationStatus) = when (status) {
 
 @Composable
 private fun ShabbatKeyTimes(
-    candleLightingTime: String,
-    candleLightingDate: String,
-    havdalahTime: String,
-    havdalahDate: String,
+    times: HalachicTimesDisplay?,
     modifier: Modifier = Modifier,
+    colors: CardColors,
 ) {
     Row {
-        Column(modifier = Modifier.weight(1f)) {
-            ShabbatDateTime(
+        Column(modifier.weight(1f)) {
+            ShabbatTimeColumn(
+                timeState = times?.candleLighting,
                 label = stringResource(R.string.shabbat_candle_lighting),
-                time = candleLightingTime,
-                date = candleLightingDate,
-                modifier = modifier.padding(vertical = 4.dp)
+                isHavdalah = false,
+                colors = colors,
+                modifier = modifier,
             )
         }
-        Column(modifier = Modifier.weight(1f)) {
-            ShabbatDateTime(
+
+        Column(modifier.weight(1f)) {
+            ShabbatTimeColumn(
+                timeState = times?.havdalah,
                 label = stringResource(R.string.shabbat_havdalah_time),
-                time = havdalahTime,
-                date = havdalahDate,
-                modifier = modifier.padding(vertical = 4.dp)
+                isHavdalah = true,
+                colors = colors,
+                modifier = modifier,
             )
         }
+    }
+}
+
 @Composable
 private fun ShabbatTimeColumn(
     timeState: TimeState?,
