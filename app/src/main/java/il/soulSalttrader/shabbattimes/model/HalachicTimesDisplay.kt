@@ -13,5 +13,6 @@ data class HalachicTimesDisplay(
     companion object {
         const val EMPTY_TIME = "--:--"
         const val EMPTY_DATE = "dd/mm/yyyy"
+        const val NA_TIME = "N/A"
     }
 }
