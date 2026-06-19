@@ -1,5 +1,8 @@
 package il.soulSalttrader.shabbattimes.network
 
+import il.soulSalttrader.shabbattimes.common.userMessage
+import il.soulSalttrader.shabbattimes.ui.viewModel.BatchOutcome
+
 inline fun <T, R> NetworkResult<T>.fold(
     onSuccess: (T) -> R,
     onFailure: (NetworkResult.Failure) -> R
@@ -47,3 +50,18 @@ inline fun <T> NetworkResult<T>.getOrElse(onFailure: (NetworkResult.Failure) -> 
         is NetworkResult.Success -> data
         is NetworkResult.Failure -> onFailure(this)
     }
+
+fun <T> List<NetworkResult<T>>.toBatchOutcome(): BatchOutcome {
+    val failures = filterIsInstance<NetworkResult.Failure>()
+    return when {
+        failures.isEmpty()    -> BatchOutcome.AllSucceeded
+        failures.size == size -> BatchOutcome.AllFailed(failures.first().cause.userMessage())
+        else                  -> {
+            BatchOutcome.PartiallyFailed(
+                failedCount = failures.size,
+                totalCount = size,
+                sampleMessage = failures.first().cause.userMessage(),
+            )
+        }
+    }
+}
