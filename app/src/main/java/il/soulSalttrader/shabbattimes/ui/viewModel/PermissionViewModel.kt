@@ -57,6 +57,6 @@ class PermissionViewModel @Inject constructor(
             }
         }
 
-        if (event is PermissionEvent) { permissionSideEffectHandler.handle(event) }
+        if (event is PermissionEvent) { permissionSideEffectHandler.handle(event, _effects) }
     }
 }

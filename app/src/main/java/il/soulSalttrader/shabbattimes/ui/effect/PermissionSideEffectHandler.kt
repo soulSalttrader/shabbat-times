@@ -10,10 +10,9 @@ import javax.inject.Inject
 @ViewModelScoped
 class PermissionSideEffectHandler @Inject constructor(
     private val permissionRepository: PermissionRepository,
-    private val effects: MutableSharedFlow<UiEffect>,
 ) : SideEffectHandler<PermissionEvent> {
 
-    override fun handle(event: PermissionEvent) {
+    override fun handle(event: PermissionEvent, effects: MutableSharedFlow<UiEffect>) {
         when (event) {
             is PermissionEvent.AllGranted               -> permissionRepository.updatePermissionState(LocationPermission.Granted)
             is PermissionEvent.DeniedPermanently        -> permissionRepository.updatePermissionState(LocationPermission.DeniedPermanently)
