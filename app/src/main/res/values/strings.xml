@@ -151,4 +151,9 @@
     <string name="error_timeout">Connection timed out</string>
     <string name="error_invalid_request">Invalid request, please try again</string>
     <string name="error_invalid_date">Invalid date, please try again</string>
+
+    <string name="restored_internet">Connection restored</string>
+
+    <string name="batch_partial_failure">Couldn\'t update %1$d of %2$d items</string>
+    <string name="batch_all_failed_mixed">Several errors occurred</string>
 </resources>
