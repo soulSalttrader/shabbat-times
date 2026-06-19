@@ -63,7 +63,7 @@ fun ShabbatCard(
             Column(modifier = Modifier.padding(16.dp).weight(1f)) {
                 LocationTitle(item.location.name)
 
-                UiIconLocationLabel(item.status, item.status.toLabel())
+                UiIconLocationLabel(item.status, item.status.toLabel(), colors)
 
                 Spacer(Modifier.height(16.dp))
 
@@ -92,15 +92,17 @@ fun ShabbatCard(
 
 @Composable
 private fun getDefaultCardColors(status: LocationStatus) = when (status) {
-    is LocationStatus.Current -> CardDefaults.cardColors(
+    is LocationStatus.Current           -> CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
+
     is LocationStatus.LastKnownLocation -> CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     )
-    else -> CardDefaults.cardColors(
+
+    else                                -> CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -138,16 +140,24 @@ private fun ShabbatKeyTimes(
 private fun UiIconLocationLabel(
     status: LocationStatus,
     label: String,
+    colors: CardColors,
 ) {
     Row(modifier = Modifier.testTag(TestTags.LOCATION_LABEL)) {
-        val icon = when (status is LocationStatus.Current) {
-            true -> UiIcon.Resource(R.drawable.home_pin_24px)
-            else -> null
+        val icon = when (status) {
+            is LocationStatus.Current           -> UiIcon.Resource(R.drawable.location_on_24px)
+            is LocationStatus.LastKnownLocation -> UiIcon.Resource(R.drawable.pin_history_24)
+            is LocationStatus.Unknown           -> UiIcon.Resource(R.drawable.not_listed_location_24)
+            is LocationStatus.NoPermission      -> UiIcon.Resource(R.drawable.add_location24)
+            else                                -> UiIcon.Resource(R.drawable.map_search_24dp)
         }
 
         UiIconLabel(
             text = label,
-            icon = icon,
+            leadingIcon = icon,
+            contentColor = when (status) {
+                LocationStatus.Current -> colors.contentColor
+                else                   -> colors.contentColor
+            },
         )
     }
 }
