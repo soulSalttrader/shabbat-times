@@ -13,6 +13,7 @@
     <string name="location_status_unknown">Unknown distance</string>
     <string name="location_status_no_permission">Tap to use current location</string>
     <string name="location_status_last_known">Last known location</string>
+    <string name="location_added">Location successfully added</string>
 
     <!-- Presets -->
     <string name="preset_ashkenazi">Ashkenazi</string>
@@ -113,6 +114,7 @@
     <!-- Edge Cases -->
     <string name="unavailable_dialog_title">Please consult a local rabbi</string>
     <string name="unavailable_dialog_confirm">Got it</string>
+    <string name="unavailable_note">see note</string>
 
     <string name="unavailable_candle_lighting_body">
         Candle lightning can\'t be calculated for this location —
@@ -133,6 +135,17 @@
 
     <string name="unavailable_havdalah_snackbar">
         Havdalah time cannot be determined at this latitude
+        because the sun does not set (or sets extremely late).
+    </string>
+
+    <string name="unavailable_both_body">
+        Candle lightning and Havdalah can\'t be calculated for this location —
+        the sun doesn\'t set in the usual way at this latitude.
+        Consult a local rabbi for guidance.
+    </string>
+
+    <string name="unavailable_both_snackbar">
+        Havdalah and CandleLightning times cannot be determined at this latitude
         because the sun does not set (or sets extremely late).
     </string>
 
