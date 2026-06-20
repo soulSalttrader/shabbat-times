@@ -40,9 +40,13 @@ import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay.Companion.NA_TI
 import il.soulSalttrader.shabbattimes.model.LocationStatus
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
 import il.soulSalttrader.shabbattimes.model.TimeState
+import il.soulSalttrader.shabbattimes.model.TimeState.Unavailable
 import il.soulSalttrader.shabbattimes.model.toLabel
 import il.soulSalttrader.shabbattimes.ui.DialogButtonAction
 import il.soulSalttrader.shabbattimes.ui.ExplanatoryDialog
+import il.soulSalttrader.shabbattimes.ui.shabbat.UnavailableReason.Both
+import il.soulSalttrader.shabbattimes.ui.shabbat.UnavailableReason.CandleLighting
+import il.soulSalttrader.shabbattimes.ui.shabbat.UnavailableReason.Havdalah
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconImage
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconLabel
@@ -126,24 +130,37 @@ private fun ShabbatKeyTimes(
     modifier: Modifier = Modifier,
     colors: CardColors,
 ) {
+    val candleState = times?.candleLighting
+    val havdalahState = times?.havdalah
+
+    val bothUnavailable = candleState is Unavailable && havdalahState is Unavailable
+
     Row {
         Column(modifier.weight(1f)) {
             ShabbatTimeColumn(
-                timeState = times?.candleLighting,
+                timeState = candleState,
                 label = stringResource(R.string.shabbat_candle_lighting),
-                isHavdalah = false,
                 colors = colors,
                 modifier = modifier,
+                unavailableReason = when (bothUnavailable) {
+                    true -> Both
+                    else -> CandleLighting
+                },
+                showWarningIcon = !bothUnavailable,
             )
         }
 
         Column(modifier.weight(1f)) {
             ShabbatTimeColumn(
-                timeState = times?.havdalah,
+                timeState = havdalahState,
                 label = stringResource(R.string.shabbat_havdalah_time),
-                isHavdalah = true,
                 colors = colors,
                 modifier = modifier,
+                unavailableReason = when (bothUnavailable) {
+                    true -> Both
+                    else -> Havdalah
+                },
+                showWarningIcon = true,
             )
         }
     }
@@ -153,9 +170,10 @@ private fun ShabbatKeyTimes(
 private fun ShabbatTimeColumn(
     timeState: TimeState?,
     label: String,
-    isHavdalah: Boolean,
     colors: CardColors,
     modifier: Modifier = Modifier,
+    unavailableReason: UnavailableReason,
+    showWarningIcon: Boolean,
 ) {
     when (timeState) {
         is TimeState.Available -> ShabbatDateTimeAvailable(
@@ -165,14 +183,15 @@ private fun ShabbatTimeColumn(
             modifier = modifier.padding(vertical = 4.dp),
         )
 
-        is TimeState.Unavailable -> ShabbatDateTimeUnavailable(
+        is Unavailable         -> ShabbatDateTimeUnavailable(
             label = label,
             modifier = modifier.padding(vertical = 4.dp),
             colors = colors,
-            isHavdalah = isHavdalah,
+            unavailableReason = unavailableReason,
+            showWarningIcon = showWarningIcon,
         )
 
-        else -> ShabbatDateTimeAvailable(
+        else                   -> ShabbatDateTimeAvailable(
             label = label,
             time = null,
             date = null,
@@ -261,18 +280,24 @@ private fun ShabbatDateTimeAvailable(
 private fun ShabbatDateTimeUnavailable(
     label: String,
     time: String = NA_TIME,
-    note: String = "see note",
+    note: String = stringResource(R.string.unavailable_note),
     colors: CardColors,
     modifier: Modifier,
-    isHavdalah: Boolean = false,
+    unavailableReason: UnavailableReason,
+    showWarningIcon: Boolean = true,
 ) {
     var showDialog by remember { mutableStateOf(false) }
+
+    val icon = when (showWarningIcon) {
+        true -> UiIcon.Resource(R.drawable.warning_24dp)
+        else -> null
+    }
 
     UiIconLabel(
         modifier = modifier.clickable { showDialog = true },
         text = label,
         style = MaterialTheme.typography.labelMedium,
-        trailingIcon = UiIcon.Resource(R.drawable.warning_24dp),
+        trailingIcon = icon,
         contentColor = colors.disabledContentColor,
     )
 
@@ -289,9 +314,10 @@ private fun ShabbatDateTimeUnavailable(
     )
 
     if (showDialog) {
-        val message = when (isHavdalah) {
-            true -> stringResource(R.string.unavailable_havdalah_body)
-            else -> stringResource(R.string.unavailable_candle_lighting_body)
+        val message = when (unavailableReason) {
+            Both           -> stringResource(R.string.unavailable_both_body)
+            Havdalah       -> stringResource(R.string.unavailable_havdalah_body)
+            CandleLighting -> stringResource(R.string.unavailable_candle_lighting_body)
         }
 
         ExplanatoryDialog(
