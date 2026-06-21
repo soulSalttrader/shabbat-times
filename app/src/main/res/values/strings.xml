@@ -13,7 +13,7 @@
     <string name="location_status_unknown">Unknown distance</string>
     <string name="location_status_no_permission">Tap to use current location</string>
     <string name="location_status_last_known">Last known location</string>
-    <string name="location_added">Location successfully added</string>
+    <string name="location_added">Saved! Pick another spot</string>
 
     <!-- Presets -->
     <string name="preset_ashkenazi">Ashkenazi</string>
@@ -154,7 +154,7 @@
     <string name="error_unexpected">Unexpected error</string>
     <string name="error_times_failed">Some times failed to load</string>
     <string name="error_something_went_wrong">Oops! Something went wrong</string>
-    <string name="error_no_internet">No internet connection</string>
+    <string name="error_no_internet">You\'re offline</string>
     <string name="error_critical_failure">Something went wrong</string>
     <string name="error_no_results">No results found</string>
     <string name="error_unauthorized">Session expired, please sign in again</string>
@@ -165,7 +165,7 @@
     <string name="error_invalid_request">Invalid request, please try again</string>
     <string name="error_invalid_date">Invalid date, please try again</string>
 
-    <string name="restored_internet">Connection restored</string>
+    <string name="restored_internet">Back online</string>
 
     <string name="batch_partial_failure">Couldn\'t update %1$d of %2$d items</string>
     <string name="batch_all_failed_mixed">Several errors occurred</string>
