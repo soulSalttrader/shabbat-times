@@ -143,7 +143,7 @@ class SearchViewModel @Inject constructor(
                         onAction = { dispatch(SearchEvent.SearchVisibilityChanged(false)) },
                     )
                 )
-                SaveLocationResult.Success -> Unit
+                SaveLocationResult.Success -> emitEffect(UiEffect.ShowToast(UiText.Resource(R.string.location_added)))
             }
         }
     }
