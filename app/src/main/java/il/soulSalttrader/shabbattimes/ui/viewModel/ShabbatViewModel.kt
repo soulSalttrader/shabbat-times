@@ -1,6 +1,5 @@
 package il.soulSalttrader.shabbattimes.ui.viewModel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.common.userMessage
@@ -8,26 +7,27 @@ import il.soulSalttrader.shabbattimes.di.InMemory
 import il.soulSalttrader.shabbattimes.di.Persisted
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.ShabbatResultState
+import il.soulSalttrader.shabbattimes.model.toUnavailabilityWarning
 import il.soulSalttrader.shabbattimes.network.NetworkResult
+import il.soulSalttrader.shabbattimes.network.toBatchOutcome
 import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
+import il.soulSalttrader.shabbattimes.settings.OneTimeMessage
+import il.soulSalttrader.shabbattimes.settings.OneTimeMessageTracker
 import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
-import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
+import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
 import il.soulSalttrader.shabbattimes.useCase.RemoveSavedLocationUseCase
 import il.soulSalttrader.shabbattimes.useCase.ReorderLocationsUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -48,6 +48,8 @@ class ShabbatViewModel @Inject constructor(
 ) : ViewModel() {
     private val _effects: MutableSharedFlow<UiEffect> = MutableSharedFlow(extraBufferCapacity = 20)
     val effects: SharedFlow<UiEffect> = _effects.asSharedFlow()
+    oneTimeMessageTracker: OneTimeMessageTracker,
+) : BaseViewModel(oneTimeMessageTracker) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
@@ -75,13 +77,17 @@ class ShabbatViewModel @Inject constructor(
                     is NetworkResult.Success -> Unit
                 }
             }
+            successes.toUnavailabilityWarning()?.let { message ->
+                emitOnce(OneTimeMessage.UNAVAILABLE_TIME_WARNING, UiEffect.ShowSnackBar(message))
+            }
+            emitBatchOutcome(results.toBatchOutcome())
 
             emit(successes)
         }
     }
         .catch { cause ->
             dispatch(ShabbatEvent.ShabbatEntryLoadFailed(cause))
-            _effects.tryEmit(UiEffect.ShowToast(cause.userMessage()))
+            emitEffect(UiEffect.ShowToast(cause.userMessage()))
             emit(emptyList())
         }
         .stateIn(
