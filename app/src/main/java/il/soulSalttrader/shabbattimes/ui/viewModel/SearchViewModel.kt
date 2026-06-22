@@ -1,6 +1,5 @@
 package il.soulSalttrader.shabbattimes.ui.viewModel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.R
@@ -11,10 +10,11 @@ import il.soulSalttrader.shabbattimes.model.SaveLocationResult
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
+import il.soulSalttrader.shabbattimes.settings.OneTimeMessageTracker
 import il.soulSalttrader.shabbattimes.ui.UiText
 import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
-import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
+import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.normalizedOrEmpty
 import il.soulSalttrader.shabbattimes.ui.normalizedOrNull
 import il.soulSalttrader.shabbattimes.ui.search.SearchUiState
@@ -26,12 +26,9 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
@@ -52,12 +49,9 @@ class SearchViewModel @Inject constructor(
     private val getLocationSuggestion: GetLocationSuggestionsUseCase,
     resolveGpsLocationUseCase: ResolveGpsLocationUseCase,
     permissionRepository: PermissionRepository,
-) : ViewModel() {
+    oneTimeMessageTracker: OneTimeMessageTracker,
+) : BaseViewModel(oneTimeMessageTracker) {
     private val _state: MutableStateFlow<SearchUiState> = MutableStateFlow(value = SearchUiState())
-
-    private val _effects: MutableSharedFlow<UiEffect> = MutableSharedFlow(extraBufferCapacity = 20)
-    val effects: SharedFlow<UiEffect> = _effects.asSharedFlow()
-
     private val queryFlow: Flow<String> = _state
         .map { it.query.normalizedOrEmpty() }
         .distinctUntilChanged()
@@ -69,12 +63,12 @@ class SearchViewModel @Inject constructor(
             flow {
                 getLocationSuggestion(query)
                     .onSuccess { suggestions -> emit(suggestions) }
-                    .onFailure { e -> _effects.tryEmit(UiEffect.ShowToast(e.cause.userMessage())) }
+                    .onFailure { e -> emitEffect(UiEffect.ShowToast(e.cause.userMessage())) }
             }
         }
         .catch { cause ->
             SearchEvent.SuggestionsLoadFailed(cause).reducer reduce _state.value
-            _effects.tryEmit(UiEffect.ShowToast(cause.userMessage()))
+            emitEffect(UiEffect.ShowToast(cause.userMessage()))
             emit(emptyList())
         }
         .stateIn(
@@ -89,7 +83,7 @@ class SearchViewModel @Inject constructor(
         .onEach { resolved -> updateCurrentLocationUseCase(resolved) }
         .catch { cause ->
             dispatch(SearchEvent.GpsLocationError(cause))
-            _effects.tryEmit(UiEffect.ShowToast(cause.userMessage()))
+            emitEffect(UiEffect.ShowToast(cause.userMessage()))
             emit(null)
         }
         .stateIn(
@@ -133,7 +127,7 @@ class SearchViewModel @Inject constructor(
 
         viewModelScope.launch {
             when (saveLocationUseCase(resolved)) {
-                SaveLocationResult.LimitReached -> _effects.tryEmit(
+                SaveLocationResult.LimitReached -> emitEffect(
                     UiEffect.ShowSnackBar(
                         message = UiText.Resource(
                             id = R.string.search_limit_reached,
