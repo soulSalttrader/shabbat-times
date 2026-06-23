@@ -11,7 +11,7 @@
     <string name="location_status_nearby">%1$s km away</string>
     <string name="location_status_locating">Getting your location…</string>
     <string name="location_status_unknown">Unknown distance</string>
-    <string name="location_status_no_permission">Tap to use current location</string>
+    <string name="location_status_no_permission">Tap to grant location permission</string>
     <string name="location_status_last_known">Last known location</string>
     <string name="location_added">Saved! Pick another spot</string>
 
