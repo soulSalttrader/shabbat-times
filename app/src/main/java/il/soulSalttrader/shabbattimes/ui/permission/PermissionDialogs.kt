@@ -17,8 +17,6 @@ fun PermissionDialogs(
     permissionState: PermissionUiState,
     dispatch: (PermissionEvent) -> Unit,
 ) {
-    if (!permissionState.isDialogVisible) return
-
     when (permissionState.permission) {
         PermissionState.Education -> ExplanatoryDialog(
             title = stringResource(R.string.permission_education_title),
@@ -30,37 +28,37 @@ fun PermissionDialogs(
             ),
             dismissAction = DialogButtonAction(
                 text = stringResource(R.string.permission_education_dismiss),
-                onClick = { dispatch(PermissionEvent.DismissedRationale) },
+                onClick = { dispatch(PermissionEvent.DismissEducation) },
                 color = { MaterialTheme.colorScheme.error },
             ),
             testTag = EDUCATION_DIALOG,
         )
 
-        PermissionState.Denied    -> ExplanatoryDialog(
+        PermissionState.DeniedRationale    -> ExplanatoryDialog(
             message = stringResource(R.string.permission_denied_message),
             confirmAction = DialogButtonAction(
                 text = stringResource(R.string.permission_denied_confirm),
-                onClick = { dispatch(PermissionEvent.AcceptedRationale) },
+                onClick = { dispatch(PermissionEvent.Request) },
                 color = { MaterialTheme.colorScheme.primary },
             ),
             dismissAction = DialogButtonAction(
                 text = stringResource(R.string.dialog_default_dismiss),
-                onClick = { dispatch(PermissionEvent.DismissedRationale) },
+                onClick = { dispatch(PermissionEvent.DismissDeniedRationale) },
                 color = { MaterialTheme.colorScheme.error },
             ),
             testTag = RATIONALE_DIALOG,
         )
 
-        PermissionState.DeniedPermanently -> ExplanatoryDialog(
+        PermissionState.DeniedPermanentlyRationale -> ExplanatoryDialog(
             message = stringResource(R.string.permission_denied_permanently_message),
             confirmAction = DialogButtonAction(
                 text = stringResource(R.string.permission_denied_permanently_confirm),
-                onClick = { dispatch(PermissionEvent.RequestedAppSettings) },
+                onClick = { dispatch(PermissionEvent.OpenAppSettings) },
                 color = { MaterialTheme.colorScheme.primary }
             ),
             dismissAction = DialogButtonAction(
                 text = stringResource(R.string.dialog_default_dismiss),
-                onClick = { dispatch(PermissionEvent.DismissedRationale) },
+                onClick = { dispatch(PermissionEvent.DismissDeniedPermanently) },
                 color = { MaterialTheme.colorScheme.error },
             ),
             testTag = DENIED_PERMANENTLY_DIALOG,
