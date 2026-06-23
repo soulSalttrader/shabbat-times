@@ -21,6 +21,7 @@ import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import il.soulSalttrader.shabbattimes.useCase.GetHalachicTimesUseCase
+import il.soulSalttrader.shabbattimes.useCase.ObserveGpsLocationUseCase
 import il.soulSalttrader.shabbattimes.useCase.RemoveSavedLocationUseCase
 import il.soulSalttrader.shabbattimes.useCase.ReorderLocationsUseCase
 import jakarta.inject.Inject
@@ -43,6 +44,7 @@ class ShabbatViewModel @Inject constructor(
     private val reorderLocationsUseCase: ReorderLocationsUseCase,
     private val getHalachicTimesUseCase: GetHalachicTimesUseCase,
     private val removeLocationUseCase: RemoveSavedLocationUseCase,
+    observeGpsLocationUseCase: ObserveGpsLocationUseCase,
     userPreferencesRepository: UserPreferencesRepository,
     permissionRepository: PermissionRepository,
 ) : ViewModel() {
@@ -101,11 +103,11 @@ class ShabbatViewModel @Inject constructor(
     val state: StateFlow<ShabbatUiState> = combine(
         _state,
         halachicTimesFlow,
-        currentLocationRepository.location,
+        observeGpsLocationUseCase(),
         savedLocationsRepository.locations,
         permissionRepository.permissionState,
-    ) { state, halachicTimes, currentLocation, savedLocations, permission ->
-        ShabbatEvent.ShabbatEntryLoaded(savedLocations, currentLocation, halachicTimes, permission).reducer reduce state
+    ) { state, halachicTimes, currentLocationState, savedLocations, permission ->
+        ShabbatEvent.ShabbatEntryLoaded(savedLocations, currentLocationState, halachicTimes, permission).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
