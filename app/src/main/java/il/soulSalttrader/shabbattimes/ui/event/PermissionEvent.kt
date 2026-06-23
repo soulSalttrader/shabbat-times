@@ -10,61 +10,73 @@ import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
 sealed interface PermissionEvent : UiEvent, Reducible<PermissionUiState> {
     data object ShowEducation : PermissionEvent {
         override val reducer = PermissionReducer { state ->
-            state.copy(permission = PermissionState.Education, isDialogVisible = true)
+            state.copy(permission = PermissionState.Education)
+        }
+    }
+
+    data object DismissEducation : PermissionEvent {
+        override val reducer = PermissionReducer { state ->
+            state.copy(permission = PermissionState.Idle)
         }
     }
 
     data object Request : PermissionEvent {
         override val reducer = PermissionReducer { state ->
-            state.copy(permission = PermissionState.Requesting, isDialogVisible = true)
+            state.copy(permission = PermissionState.Requesting)
         }
     }
 
-    data object AllGranted : PermissionEvent {
+    data object SystemGranted : PermissionEvent {
         override val reducer = PermissionReducer { state ->
             state.copy(permission = PermissionState.Granted)
         }
     }
 
-    data object DeniedWithRationale : PermissionEvent {
+    data object SystemDenied : PermissionEvent {
         override val reducer = PermissionReducer { state ->
-            state.copy(permission = PermissionState.Denied)
+            state.copy(permission = PermissionState.DeniedRationale)
         }
     }
 
-    data object DeniedPermanently : PermissionEvent {
+    data object SystemDeniedPermanently : PermissionEvent {
         override val reducer = PermissionReducer { state ->
             state.copy(permission = PermissionState.DeniedPermanently)
         }
     }
 
-    data object AcceptedRationale : PermissionEvent {
+    data object TappedCardDenied : PermissionEvent {
         override val reducer = PermissionReducer { state ->
-            state.copy(permission = PermissionState.Requesting)
+            state.copy(permission = PermissionState.DeniedRationale)
         }
     }
 
-    data object DismissedRationale : PermissionEvent {
+    data object TappedCardDeniedPermanently : PermissionEvent {
         override val reducer = PermissionReducer { state ->
-            state.copy(isDialogVisible = false)
+            state.copy(permission = PermissionState.DeniedPermanentlyRationale)
         }
     }
 
-    data object RequestedAppSettings : PermissionEvent {
+    data object DismissDeniedRationale : PermissionEvent {
         override val reducer = PermissionReducer { state ->
             state.copy(permission = PermissionState.DeniedPermanently)
         }
     }
 
-    data object ShowDeniedPermanentlyDialog : PermissionEvent {
+    data object DismissDeniedPermanently : PermissionEvent {
         override val reducer = PermissionReducer { state ->
-            state.copy(permission = PermissionState.DeniedPermanently, isDialogVisible = true)
+            state.copy(permission = PermissionState.DeniedPermanently)
+        }
+    }
+
+    data object OpenAppSettings : PermissionEvent {
+        override val reducer = PermissionReducer { state ->
+            state.copy(permission = PermissionState.DeniedPermanently)
         }
     }
 
     data object ReturnedFromAppSettings : PermissionEvent {
         override val reducer = PermissionReducer { state ->
-            state.copy(permission = PermissionState.Idle, isDialogVisible = false)
+            state.copy(permission = PermissionState.Idle)
         }
     }
 

@@ -36,9 +36,9 @@ fun HandlePermissions(
             val result = permissionHandler.request(permissions)
 
             when (result) {
-                is PermissionResult.Granted -> dispatch(PermissionEvent.AllGranted)
-                is PermissionResult.Explain -> dispatch(PermissionEvent.DeniedWithRationale)
-                is PermissionResult.Blocked -> dispatch(PermissionEvent.DeniedPermanently)
+                is PermissionResult.Granted -> dispatch(PermissionEvent.SystemGranted)
+                is PermissionResult.Explain -> dispatch(PermissionEvent.SystemDenied)
+                is PermissionResult.Blocked -> dispatch(PermissionEvent.SystemDeniedPermanently)
             }
         }
     }

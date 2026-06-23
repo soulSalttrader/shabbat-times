@@ -16,10 +16,10 @@ class PermissionSideEffectHandler @Inject constructor(
 
     override suspend fun handle(event: PermissionEvent, emitter: EffectEmitter) {
         when (event) {
-            is PermissionEvent.AllGranted               -> permissionRepository.updatePermissionState(LocationPermission.Granted)
-            is PermissionEvent.DeniedPermanently        -> permissionRepository.updatePermissionState(LocationPermission.DeniedPermanently)
-            is PermissionEvent.DeniedWithRationale      -> permissionRepository.updatePermissionState(LocationPermission.Denied)
-            is PermissionEvent.ShowEducation -> {
+            is PermissionEvent.SystemGranted           -> permissionRepository.updatePermissionState(LocationPermission.Granted)
+            is PermissionEvent.SystemDeniedPermanently -> permissionRepository.updatePermissionState(LocationPermission.DeniedPermanently)
+            is PermissionEvent.SystemDenied            -> permissionRepository.updatePermissionState(LocationPermission.DeniedRationale)
+            is PermissionEvent.ShowEducation           -> {
                 val alreadyEducated = oneTimeMessageTracker.hasShown(LOCATION_PERMISSION_EDUCATION)
                 when (alreadyEducated) {
                     true -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
@@ -30,9 +30,8 @@ class PermissionSideEffectHandler @Inject constructor(
                 }
             }
             is PermissionEvent.Request                  -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
-            is PermissionEvent.AcceptedRationale        -> permissionRepository.updatePermissionState(LocationPermission.Requesting)
             is PermissionEvent.ReturnedFromAppSettings  -> permissionRepository.updatePermissionState(LocationPermission.Idle)
-            is PermissionEvent.RequestedAppSettings     -> emitter.emitEffect(UiEffect.OpenAppSettings)
+            is PermissionEvent.OpenAppSettings          -> emitter.emitEffect(UiEffect.OpenAppSettings)
 
             else -> {} // TODO: Integrate logging framework (Timber)
         }
