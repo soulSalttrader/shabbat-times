@@ -9,5 +9,7 @@ sealed interface PermissionState : State {
 
     data object Granted : PermissionState
     data object Denied : PermissionState
+    data object DeniedRationale : PermissionState
     data object DeniedPermanently : PermissionState
+    data object DeniedPermanentlyRationale : PermissionState
 }
