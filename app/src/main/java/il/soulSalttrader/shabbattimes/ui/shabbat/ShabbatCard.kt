@@ -211,8 +211,9 @@ private fun UiIconLocationLabel(
             is LocationStatus.Current           -> UiIcon.Resource(R.drawable.location_on_24px)
             is LocationStatus.LastKnownLocation -> UiIcon.Resource(R.drawable.pin_history_24)
             is LocationStatus.Unknown           -> UiIcon.Resource(R.drawable.not_listed_location_24)
-            is LocationStatus.NoPermission      -> UiIcon.Resource(R.drawable.add_location24)
-            else                                -> UiIcon.Resource(R.drawable.map_search_24dp)
+            is LocationStatus.NoPermission      -> UiIcon.Resource(R.drawable.wrong_location_24)
+            is LocationStatus.Nearby            -> UiIcon.Resource(R.drawable.add_location24)
+            is LocationStatus.Locating          -> UiIcon.Resource(R.drawable.map_search_24dp)
         }
 
         UiIconLabel(
