@@ -16,7 +16,7 @@ class ResolveGpsLocationUseCase @Inject constructor(
     private val observeGpsLocation: ObserveGpsLocationUseCase,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    operator fun invoke(): Flow<ResolvedLocation?> = observeGpsLocation()
+    operator fun invoke(): Flow<ResolvedLocation?> = observeGpsLocation.rawLocation
         .flatMapLatest { location ->
             location?.let {
                 flow {
