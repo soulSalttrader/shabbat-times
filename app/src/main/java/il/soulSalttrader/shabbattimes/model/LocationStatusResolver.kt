@@ -1,6 +1,8 @@
 package il.soulSalttrader.shabbattimes.model
 
-import il.soulSalttrader.shabbattimes.model.LocationPermission.*
+import il.soulSalttrader.shabbattimes.model.LocationPermission.Denied
+import il.soulSalttrader.shabbattimes.model.LocationPermission.DeniedPermanently
+import il.soulSalttrader.shabbattimes.model.LocationPermission.Requesting
 
 fun resolveLocationStatus(
     location: SavedLocation,
