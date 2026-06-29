@@ -71,14 +71,6 @@ class ShabbatViewModel @Inject constructor(
             val successes = results.filterIsInstance<NetworkResult.Success<HalachicTimes>>()
                 .map { it.data }
 
-            results.forEach { result ->
-                when (result) {
-                    is NetworkResult.Failure -> _effects.tryEmit(
-                        UiEffect.ShowToast(result.cause.userMessage())
-                    )
-                    is NetworkResult.Success -> Unit
-                }
-            }
             successes.toUnavailabilityWarning()?.let { message ->
                 emitOnce(OneTimeMessage.UNAVAILABLE_TIME_WARNING, UiEffect.ShowSnackBar(message))
             }
