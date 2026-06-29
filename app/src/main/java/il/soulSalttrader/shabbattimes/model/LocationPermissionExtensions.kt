@@ -1,6 +1,7 @@
 package il.soulSalttrader.shabbattimes.model
 
 import il.soulSalttrader.shabbattimes.permission.PermissionState
+import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 
 fun LocationPermission.toPermissionState() = when (this) {
     is LocationPermission.Idle                       -> PermissionState.Idle
@@ -12,3 +13,5 @@ fun LocationPermission.toPermissionState() = when (this) {
     is LocationPermission.DeniedPermanentlyRationale -> PermissionState.DeniedPermanentlyRationale
     is LocationPermission.DeniedRationale            -> PermissionState.DeniedRationale
 }
+
+fun LocationPermission.toUiState(current: PermissionUiState) = current.copy(permission = toPermissionState())
