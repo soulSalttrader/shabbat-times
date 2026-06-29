@@ -114,5 +114,8 @@ PERM_DISPATCH_S1
 |---|-------------------------------------------------------------------------------|---|
 | UI | ~ PERM_DISPATCH_S1_1 - should dispatch AllGranted exactly once | ✅ |
 | UI | ~ PERM_DISPATCH_S1_2 - should dispatch DeniedWithRationale exactly once | ✅ |
+| UI | ~ PERM_DISPATCH_S1_3 - should call onSettingsHandled when returnedFromSettings is true | ✅ |
+| UI | ~ PERM_DISPATCH_S1_4 - should not call onSettingsHandled when returnedFromSettings is false | ✅ |
+| UI | ~ PERM_DISPATCH_S1_4 - should dispatch event only once even if ON_RESUME fires multiple times | ✅ |
 
 ---
