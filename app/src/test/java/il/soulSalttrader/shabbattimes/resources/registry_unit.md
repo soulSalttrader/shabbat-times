@@ -21,7 +21,6 @@ PERM_FRESH_S1
 | Reducer | ~ PERM_FRESH_S1_REDUCER_2 - should set Requesting and show dialog on Request                   | ✅ |
 | Reducer | ~ PERM_FRESH_S1_REDUCER_3 - should set Granted on SystemGranted                                  | ✅ |
 | VM | ~ PERM_FRESH_S1_VM_1 - should reflect Granted after full Education → Requesting → Granted flow | ✅ |
-| VM | ~ PERM_FRESH_S1_VM_2 - should keep isDialogVisible after repo emission following ShowEducation | ✅ |
 | UI | ~ UI_CARD_S2_1 - should show GPS card when permission granted                                  | ✅ |
 
 ## SCENARIO: User denies permission on first ask
@@ -31,7 +30,7 @@ PERM_FRESH_S2
 |---|------------------------------------------------------------------------------------------|---|
 | Reducer | ~ PERM_FRESH_S2_REDUCER_1 - should set DeniedRationale on SystemDenied                  | ✅ |
 | Reducer | ~ PERM_FRESH_S2_REDUCER_2 - should set DeniedPermanently on DismissDeniedRationale     | ✅ |
-| VM | ~ PERM_FRESH_S2_VM - should show Denied state after deny flow                            | ✅ |
+| VM | ~ PERM_FRESH_S2_VM - should show DeniedRationale state after deny flow                           | ✅ |
 | UI | ~ UI_DIALOG_S1 - should show system dialog after education dialog | ✅ |
 | UI | ~ UI_DIALOG_S2 - should show rationale dialog when system permission denied                       | 🖐️ |
 
@@ -69,7 +68,7 @@ PERM_FRESH_S6
 
 | Layer | Slug                                                                                                            | Status |
 |---|-----------------------------------------------------------------------------------------------------------------|--|
-| VM | ~ PERM_FRESH_S6_VM - should return to Idle with dialog hidden when Education dialog dismissed | ✅ |
+| VM | ~ PERM_FRESH_S6_VM - should return to Idle when Education dialog dismissed | ✅ |
 | UI | ~ UI_DIALOG_S8 - should show Education dialog when card tapped with Idle permission                             | ✅ |
 | UI | ~ UI_DIALOG_S9 - should keep empty card when Education dialog is dismissed                                      | ✅ |
 
@@ -358,15 +357,6 @@ PERM_MAPPING
 
 # Permission — Bug Regression
 
-## SCENARIO: combine() fires twice causing invalid intermediate state
-PERM_COMBINE_S1
-
-| Layer | Slug                                                                              | Status |
-|---|-----------------------------------------------------------------------------------|---|
-| VM | ~ PERM_COMBINE_S1_VM - should never produce Idle+dialogVisible intermediate state | ✅ |
-
----
-
 ## SCENARIO: Idle flash on cold start with DeniedPermanently
 PERM_COMBINE_S2
 
@@ -456,5 +446,15 @@ PARSER_DATE_S1
 |--------|-------------------------------------------------------------------------------------|--|
 | Parser | ~ PARSER_DATE_S1_1 - handle empty strings by returning null instants | ✅ |
 | Parser | ~ PARSER_DATE_S1_2 - should parse valid times correctly | ✅ |
+
+---
+
+## SCENARIO: one-time education dialog
+PERM_EDUCATION
+
+| Layer | Slug                                                                                | Status |
+|-------|-------------------------------------------------------------------------------------|--|
+| VM    | ~ PERM_EDUCATION_S1 - should show education dialog only on first trigger | ✅ |
+| VM    | ~ PERM_EDUCATION_S2 - should not re-show education after app restart simulation | ✅ |
 
 ---
