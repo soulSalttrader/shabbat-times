@@ -15,6 +15,7 @@ import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
 @Composable
 fun PermissionDialogs(
     permissionState: PermissionUiState,
+    onOpenSettings: () -> Unit,
     dispatch: (PermissionEvent) -> Unit,
 ) {
     when (permissionState.permission) {
@@ -53,7 +54,10 @@ fun PermissionDialogs(
             message = stringResource(R.string.permission_denied_permanently_message),
             confirmAction = DialogButtonAction(
                 text = stringResource(R.string.permission_denied_permanently_confirm),
-                onClick = { dispatch(PermissionEvent.OpenAppSettings) },
+                onClick = {
+                    onOpenSettings()
+                    dispatch(PermissionEvent.OpenAppSettings)
+                },
                 color = { MaterialTheme.colorScheme.primary }
             ),
             dismissAction = DialogButtonAction(
