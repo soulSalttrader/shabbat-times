@@ -226,6 +226,34 @@ PERM_CARD_S6
 |-------|------------------------------------------------------------|--|
 | Presentation mapping    | ~ PERM_CARD_S6_UI_1 - should return ShowEducation for Idle | ✅ |
 
+## SCENARIO: Card click with Education permission starts education flow
+PERM_CARD_S7
+
+| Layer | Slug                                                       | Status |
+|-------|------------------------------------------------------------|--|
+| Presentation mapping    | ~ PERM_CARD_S7_UI_1 - should return ShowEducation for Education | ✅ |
+
+## SCENARIO: Card click with Requesting permission has no action
+PERM_CARD_S8
+
+| Layer | Slug                                                       | Status |
+|-------|------------------------------------------------------------|--|
+| Presentation mapping    | ~ PERM_CARD_S8_UI_1 - should return None for Requesting | ✅ |
+
+## SCENARIO: Card click with DeniedRationale permission has no action
+PERM_CARD_S9 
+
+| Layer | Slug                                                       | Status |
+|-------|------------------------------------------------------------|--|
+| Presentation mapping    | ~ PERM_CARD_S9_UI_1 - should return None for DeniedRationale | ✅ |
+
+## SCENARIO: Card click with DeniedPermanentlyRationale permission has no action
+PERM_CARD_S10
+
+| Layer | Slug                                                       | Status |
+|-------|------------------------------------------------------------|--|
+| Presentation mapping    | ~ PERM_CARD_S10_UI_1 - should return None for DeniedPermanentlyRationale | ✅ |
+
 ---
 
 # Card Content
