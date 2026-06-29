@@ -208,14 +208,14 @@ PERM_CARD_S6
 
 | Layer | Slug                                                       | Status |
 |-------|------------------------------------------------------------|--|
-| Presentation mapping    | ~ PERM_CARD_S6_UI_1 - should return ShowEducation for Idle | ✅ |
+| Presentation mapping    | ~ PERM_CARD_S6_UI_1 - should return PermissionRequested for Idle | ✅ |
 
 ## SCENARIO: Card click with Education permission starts education flow
 PERM_CARD_S7
 
 | Layer | Slug                                                       | Status |
 |-------|------------------------------------------------------------|--|
-| Presentation mapping    | ~ PERM_CARD_S7_UI_1 - should return ShowEducation for Education | ✅ |
+| Presentation mapping    | ~ PERM_CARD_S7_UI_1 - should return PermissionRequested for Education | ✅ |
 
 ## SCENARIO: Card click with Requesting permission has no action
 PERM_CARD_S8

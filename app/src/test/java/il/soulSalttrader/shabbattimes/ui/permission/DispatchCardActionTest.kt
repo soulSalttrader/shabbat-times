@@ -32,14 +32,14 @@ class DispatchCardActionTest : DescribeSpec({
     }
 
     describe("PERM_CARD_S6 - SCENARIO: Card click with idle permission starts education flow") {
-        it("PERM_CARD_S6_UI_1 - should return ShowEducation for Idle") {
-            PermissionUiState(Idle).permission.dispatchCardAction() shouldBe CardAction.ShowEducation
+        it("PERM_CARD_S6_UI_1 - should return PermissionRequested for Idle") {
+            PermissionUiState(Idle).permission.dispatchCardAction() shouldBe CardAction.PermissionRequested
         }
     }
 
     describe("PERM_CARD_S7 - SCENARIO: Card click with Education permission starts education flow") {
-        it("PERM_CARD_S7_UI_1 - should return ShowEducation for Education") {
-            PermissionUiState(Education).permission.dispatchCardAction() shouldBe CardAction.ShowEducation
+        it("PERM_CARD_S7_UI_1 - should return PermissionRequested for Education") {
+            PermissionUiState(Education).permission.dispatchCardAction() shouldBe CardAction.PermissionRequested
         }
     }
 
