@@ -5,6 +5,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.common.constants.LocationConfig.MAX_SAVED_LOCATIONS
 import il.soulSalttrader.shabbattimes.common.userMessage
+import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.model.SaveLocationResult
 import il.soulSalttrader.shabbattimes.network.onFailure
@@ -33,11 +34,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -51,6 +52,17 @@ class SearchViewModel @Inject constructor(
     permissionRepository: PermissionRepository,
     oneTimeMessageTracker: OneTimeMessageTracker,
 ) : BaseViewModel(oneTimeMessageTracker) {
+
+    init {
+        viewModelScope.launch {
+            permissionRepository.permissionState
+                .filter { it == LocationPermission.Granted }
+                .collect {
+                    dispatch(SearchEvent.GpsLocationRequested)
+                }
+        }
+    }
+
     private val _state: MutableStateFlow<SearchUiState> = MutableStateFlow(value = SearchUiState())
     private val queryFlow: Flow<String> = _state
         .map { it.query.normalizedOrEmpty() }
@@ -79,7 +91,6 @@ class SearchViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val gpsLocationFlow: StateFlow<ResolvedLocation?> = resolveGpsLocationUseCase()
-        .onStart { dispatch(SearchEvent.GpsLocationRequested) }
         .onEach { resolved -> updateCurrentLocationUseCase(resolved) }
         .catch { cause ->
             dispatch(SearchEvent.GpsLocationError(cause))
