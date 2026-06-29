@@ -11,5 +11,5 @@ fun PermissionState.dispatchCardAction(): CardAction = when (this) {
         PermissionState.DeniedRationale,
         PermissionState.DeniedPermanentlyRationale -> CardAction.None
         PermissionState.Idle,
-        PermissionState.Education                  -> CardAction.ShowEducation
+        PermissionState.Education                  -> CardAction.PermissionRequested
 }

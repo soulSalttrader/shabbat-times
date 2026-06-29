@@ -9,6 +9,7 @@ import il.soulSalttrader.shabbattimes.settings.OneTimeMessageTracker
 import il.soulSalttrader.shabbattimes.ui.effect.SideEffectHandler
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.ui.event.UiEvent
+import il.soulSalttrader.shabbattimes.ui.event.resolve
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,8 +23,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class PermissionViewModel @Inject constructor(
     val permissionSideEffectHandler: SideEffectHandler<PermissionEvent>,
+    val oneTimeMessageTracker: OneTimeMessageTracker,
     permissionRepository: PermissionRepository,
-    oneTimeMessageTracker: OneTimeMessageTracker,
 ): BaseViewModel(oneTimeMessageTracker) {
     internal var onDispatch: (UiEvent) -> Unit = {}
 
@@ -58,7 +59,7 @@ class PermissionViewModel @Inject constructor(
 
         if (event is PermissionEvent) {
             viewModelScope.launch {
-                permissionSideEffectHandler.handle(event, this@PermissionViewModel)
+                permissionSideEffectHandler.handle(event.resolve(oneTimeMessageTracker), this@PermissionViewModel)
             }
         }
     }
