@@ -24,7 +24,7 @@ fun PermissionDialogs(
             message = stringResource(R.string.permission_education_message),
             confirmAction = DialogButtonAction(
                 text = stringResource(R.string.permission_education_confirm),
-                onClick = { dispatch(PermissionEvent.Request) },
+                onClick = { dispatch(PermissionEvent.RequestPermission) },
                 color = { MaterialTheme.colorScheme.primary },
             ),
             dismissAction = DialogButtonAction(
@@ -39,7 +39,7 @@ fun PermissionDialogs(
             message = stringResource(R.string.permission_denied_message),
             confirmAction = DialogButtonAction(
                 text = stringResource(R.string.permission_denied_confirm),
-                onClick = { dispatch(PermissionEvent.Request) },
+                onClick = { dispatch(PermissionEvent.RequestPermission) },
                 color = { MaterialTheme.colorScheme.primary },
             ),
             dismissAction = DialogButtonAction(

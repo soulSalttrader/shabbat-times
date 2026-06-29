@@ -18,7 +18,7 @@ sealed interface PermissionEvent : UiEvent, Reducible<PermissionUiState> {
         }
     }
 
-    data object Request : PermissionEvent {
+    data object RequestPermission : PermissionEvent {
         override val reducer = PermissionReducer { state ->
             state.copy(permission = PermissionState.Requesting)
         }
@@ -76,5 +76,9 @@ sealed interface PermissionEvent : UiEvent, Reducible<PermissionUiState> {
         override val reducer = PermissionReducer { state ->
             state.copy(permission = PermissionState.Idle)
         }
+    }
+
+    data object PermissionRequested : PermissionEvent {
+        override val reducer = PermissionReducer { state -> state }
     }
 }

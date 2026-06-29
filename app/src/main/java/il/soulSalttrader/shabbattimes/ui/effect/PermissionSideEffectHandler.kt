@@ -21,25 +21,15 @@ class PermissionSideEffectHandler @Inject constructor(
             is PermissionEvent.SystemDeniedPermanently -> permissionRepository.updatePermissionState(LocationPermission.DeniedPermanently)
             is PermissionEvent.SystemDenied            -> permissionRepository.updatePermissionState(LocationPermission.DeniedRationale)
             is PermissionEvent.ReturnedFromAppSettings  -> permissionRepository.updatePermissionState(LocationPermission.Idle)
-            is PermissionEvent.ShowEducation -> {
-                val alreadyEducated = oneTimeMessageTracker.hasShown(LOCATION_PERMISSION_EDUCATION)
-                when (alreadyEducated) {
-                    true -> {
-                        permissionRepository.updatePermissionState(LocationPermission.Requesting)
-                        oneTimeMessageTracker.markShown(OneTimeMessage.LOCATION_PERMISSION_REQUESTED)
-                    }
-                    else -> {
-                        permissionRepository.updatePermissionState(LocationPermission.Education)
-                        oneTimeMessageTracker.markShown(LOCATION_PERMISSION_EDUCATION)
-                    }
-                }
+            is PermissionEvent.ShowEducation     -> {
+                permissionRepository.updatePermissionState(LocationPermission.Education)
+                oneTimeMessageTracker.markShown(LOCATION_PERMISSION_EDUCATION)
             }
-
-            is PermissionEvent.Request -> {
+            is PermissionEvent.RequestPermission -> {
                 permissionRepository.updatePermissionState(LocationPermission.Requesting)
                 oneTimeMessageTracker.markShown(OneTimeMessage.LOCATION_PERMISSION_REQUESTED)
             }
-            is PermissionEvent.OpenAppSettings          -> emitter.emitEffect(UiEffect.OpenAppSettings)
+            is PermissionEvent.OpenAppSettings   -> emitter.emitEffect(UiEffect.OpenAppSettings)
 
             else -> {} // TODO: Integrate logging framework (Timber)
         }

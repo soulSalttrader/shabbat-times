@@ -74,7 +74,7 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
             CardAction.OpenGpsSearch         -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
             CardAction.ShowDeniedPermanently -> permissionViewModel.dispatch(PermissionEvent.TappedCardDeniedPermanently)
             CardAction.ShowDeniedRationale   -> permissionViewModel.dispatch(PermissionEvent.TappedCardDenied)
-            CardAction.ShowEducation         -> permissionViewModel.dispatch(PermissionEvent.ShowEducation)
+            CardAction.PermissionRequested   -> permissionViewModel.dispatch(PermissionEvent.PermissionRequested)
             CardAction.None                  -> Unit
         }
     }

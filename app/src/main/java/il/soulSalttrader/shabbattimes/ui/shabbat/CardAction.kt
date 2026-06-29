@@ -4,6 +4,6 @@ sealed interface CardAction {
     data object OpenGpsSearch        : CardAction
     data object ShowDeniedRationale  : CardAction
     data object ShowDeniedPermanently : CardAction
-    data object ShowEducation        : CardAction
     data object None                 : CardAction
+    data object PermissionRequested : CardAction
 }
