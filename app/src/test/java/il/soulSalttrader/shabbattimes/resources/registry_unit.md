@@ -19,10 +19,9 @@ PERM_FRESH_S1
 |---|------------------------------------------------------------------------------------------------|---|
 | Reducer | ~ PERM_FRESH_S1_REDUCER_1 - should set Education and show dialog on ShowEducation              | ✅ |
 | Reducer | ~ PERM_FRESH_S1_REDUCER_2 - should set Requesting and show dialog on Request                   | ✅ |
-| Reducer | ~ PERM_FRESH_S1_REDUCER_3 - should set Granted on AllGranted                                   | ✅ |
+| Reducer | ~ PERM_FRESH_S1_REDUCER_3 - should set Granted on SystemGranted                                  | ✅ |
 | VM | ~ PERM_FRESH_S1_VM_1 - should reflect Granted after full Education → Requesting → Granted flow | ✅ |
 | VM | ~ PERM_FRESH_S1_VM_2 - should keep isDialogVisible after repo emission following ShowEducation | ✅ |
-| Handler | ~ PERM_HANDLER_S1 - should return AllGranted when all permissions granted                      | ✅ |
 | UI | ~ UI_CARD_S2_1 - should show GPS card when permission granted                                  | ✅ |
 
 ## SCENARIO: User denies permission on first ask
@@ -30,10 +29,9 @@ PERM_FRESH_S2
 
 | Layer | Slug                                                                                     | Status |
 |---|------------------------------------------------------------------------------------------|---|
-| Reducer | ~ PERM_FRESH_S2_REDUCER_1 - should set Denied on DeniedWithRationale                     | ✅ |
-| Reducer | ~ PERM_FRESH_S2_REDUCER_2 - should hide dialog and keep Denied on DismissedRationale     | ✅ |
+| Reducer | ~ PERM_FRESH_S2_REDUCER_1 - should set DeniedRationale on SystemDenied                  | ✅ |
+| Reducer | ~ PERM_FRESH_S2_REDUCER_2 - should set DeniedPermanently on DismissDeniedRationale     | ✅ |
 | VM | ~ PERM_FRESH_S2_VM - should show Denied state after deny flow                            | ✅ |
-| Handler | ~ PERM_HANDLER_S2 - should return DeniedWithRationale when all denied with rationale     | ✅ |
 | UI | ~ UI_DIALOG_S1 - should show system dialog after education dialog | ✅ |
 | UI | ~ UI_DIALOG_S2 - should show rationale dialog when system permission denied                       | 🖐️ |
 
@@ -42,7 +40,6 @@ PERM_FRESH_S3
 
 | Layer | Slug                                                                              | Status |
 |---|-----------------------------------------------------------------------------------|---|
-| Reducer | ~ PERM_FRESH_S3_REDUCER_1 - should set Requesting on AcceptedRationale            | ✅ |
 | VM | ~ PERM_FRESH_S3_VM - should reflect Granted after deny → accept rationale → grant | ✅ |
 | UI | ~ UI_DIALOG_S3 - should show rationale dialog after system dialog denial          | 🖐️ |
 
@@ -51,9 +48,8 @@ PERM_FRESH_S4
 
 | Layer | Slug                                                                                                                | Status               |
 |---|---------------------------------------------------------------------------------------------------------------------|----------------------|
-| Reducer | ~ PERM_FRESH_S4_REDUCER_1 - should set DeniedPermanently on DeniedPermanently                                       | ✅                    |
+| Reducer | ~ PERM_FRESH_S4_REDUCER_1 - should set DeniedPermanently on DismissDeniedPermanently                                     | ✅                    |
 | VM | ~ PERM_FRESH_S4_VM - should reflect DeniedPermanently after denying twice                                           | ✅                    |
-| Handler | ~ PERM_HANDLER_S3 - should return null when all denied without rationale                                            | ✅                    |
 | UI | ~ UI_DIALOG_S4 - should show GPS card after allowing via rationale                                                  | ✅ → see UI_CARD_S2_1 |
 | UI | ~ UI_DIALOG_S5 - should show permanently denied dialog after denying twice                                          | ✅                    |
 | UI | ~ UI_DIALOG_S6 - should show system dialog when tapping outdated GPS card with denied permission                    | ✅                    |
@@ -79,17 +75,6 @@ PERM_FRESH_S6
 
 ---
 
-## SCENARIO: Permission resolution handles partial grants correctly
-PERM_HANDLER_PARTIAL
-
-| Layer   | Slug                                                                                        | Status |
-|---------|---------------------------------------------------------------------------------------------|--|
-| Handler | ~ PERM_HANDLER_S4 - should return DeniedWithRationale when partially granted with rationale | ✅ |
-| Handler | ~ PERM_HANDLER_S5 - should return null when partially granted without rationale             | ✅ |
-| Handler | ~ PERM_HANDLER_S6 - should return DeniedWithRationale when any permission has rationale     | ✅ |
-
----
-
 # Permission — App Settings Flow
 
 ## SCENARIO: User grants permission in settings
@@ -97,9 +82,8 @@ PERM_SETTINGS_S1
 
 | Layer | Slug                                                                                                          | Status |
 |---|---------------------------------------------------------------------------------------------------------------|---|
-| Reducer | ~ PERM_SETTINGS_S1_REDUCER_1 - should set DeniedPermanently and show dialog on ShowDeniedPermanentlyDialog    | ✅ |
+| Reducer | ~ PERM_SETTINGS_S1_REDUCER_1 - should set DeniedPermanentlyRationale and on TappedCardDeniedPermanently       | ✅ |
 | Reducer | ~ PERM_SETTINGS_S1_REDUCER_2 - should reset to Idle on ReturnedFromAppSettings                                | ✅ |
-| Reducer | ~ PERM_SETTINGS_S1_REDUCER_3 - should start fresh Education flow after returning from settings                | ✅ |
 | VM | ~ PERM_SETTINGS_S1_VM_1 - should set Idle after returning from settings                                       | ✅ |
 | VM | ~ PERM_SETTINGS_S1_VM_2 - should start fresh Education flow when card is tapped after returning from Settings | ✅ |
 | UI | ~ UI_PERM_SETTINGS_S1 - should show GPS card after granting permission in settings                            | 🖐️ |
@@ -118,7 +102,7 @@ PERM_SETTINGS_S3
 
 | Layer | Slug                                                                                 | Status |
 |---|--------------------------------------------------------------------------------------|---|
-| Reducer | ~ PERM_SETTINGS_S3_REDUCER_1 - should keep DeniedPermanently on RequestedAppSettings | ✅ |
+| Reducer | ~ PERM_SETTINGS_S3_REDUCER_1 - should keep DeniedPermanently on OpenAppSettings | ✅ |
 | VM | ~ PERM_SETTINGS_S3_VM_1 - should keep DeniedPermanently when settings ignored        | ✅ |
 | UI | —                                                                                    | 🖐️ |
 
@@ -350,14 +334,14 @@ PERM_EDGE_S6
 | Layer   | Slug                                                                          | Status |
 |---------|-------------------------------------------------------------------------------|---|
 | VM      | ~ PERM_EDGE_S6_VM - should not change permission state on unrelated event     | ✅ |
-| Reducer | ~ PERM_EDGE_S6_REDUCER_1 - should not change Granted state on unrelated event |✅|
 
 ## SCENARIO: AllGranted works from any denied state
 PERM_EDGE_S7
 
 | Layer   | Slug                                                                               | Status |
 |---------|------------------------------------------------------------------------------------|--|
-| Reducer | ~ PERM_EDGE_S7_REDUCER_2 - should set Granted from DeniedPermanently on AllGranted           |✅|
+| Reducer | ~ PERM_EDGE_S7_REDUCER_1 - should set Granted from Denied on SystemGranted         |✅|
+| Reducer | ~ PERM_EDGE_S7_REDUCER_2 - should set Granted from DeniedPermanently on SystemGranted |✅|
 
 ---
 
