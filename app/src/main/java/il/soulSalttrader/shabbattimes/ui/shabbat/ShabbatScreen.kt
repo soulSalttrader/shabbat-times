@@ -6,6 +6,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,17 +48,22 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
     val permissionViewModel: PermissionViewModel = hiltViewModel()
     val permissionUiState by permissionViewModel.state.collectAsStateWithLifecycle()
 
+    var returnedFromSettings by rememberSaveable { mutableStateOf(false) }
+
     HandlePermissions(
         permissions = listOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
         ),
+        returnedFromSettings = returnedFromSettings,
+        onSettingsHandled = { returnedFromSettings = false },
         permissionState = permissionUiState,
         dispatch = permissionViewModel::dispatch,
     )
 
     PermissionDialogs(
         permissionState = permissionUiState,
+        onOpenSettings = { returnedFromSettings = true },
         dispatch = permissionViewModel::dispatch,
     )
 
