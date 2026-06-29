@@ -1,7 +1,5 @@
 package il.soulSalttrader.shabbattimes.ui.event
 
-import il.soulSalttrader.shabbattimes.model.LocationPermission
-import il.soulSalttrader.shabbattimes.model.toPermissionState
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import il.soulSalttrader.shabbattimes.ui.reducer.PermissionReducer
@@ -77,12 +75,6 @@ sealed interface PermissionEvent : UiEvent, Reducible<PermissionUiState> {
     data object ReturnedFromAppSettings : PermissionEvent {
         override val reducer = PermissionReducer { state ->
             state.copy(permission = PermissionState.Idle)
-        }
-    }
-
-    data class PermissionChanged(val permission: LocationPermission) : PermissionEvent {
-        override val reducer = PermissionReducer { state ->
-            state.copy(permission = permission.toPermissionState())
         }
     }
 }
