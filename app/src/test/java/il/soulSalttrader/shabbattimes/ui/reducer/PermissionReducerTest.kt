@@ -1,6 +1,5 @@
 package il.soulSalttrader.shabbattimes.ui.reducer
 
-import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
@@ -18,7 +17,7 @@ class PermissionReducerTest : DescribeSpec({
         }
 
         it("PERM_FRESH_S1_REDUCER_2 - should set Requesting and show dialog on Request") {
-            val result = PermissionEvent.Request.reducer reduce idle
+            val result = PermissionEvent.RequestPermission.reducer reduce idle
             result.permission shouldBe PermissionState.Requesting
         }
 
@@ -98,38 +97,6 @@ class PermissionReducerTest : DescribeSpec({
             val permDenied = idle.copy(permission = PermissionState.DeniedPermanently)
             val result = PermissionEvent.SystemGranted.reducer reduce permDenied
             result.permission shouldBe PermissionState.Granted
-        }
-    }
-
-    describe("PERM_MAPPING - SCENARIO: LocationPermission maps correctly to PermissionState") {
-        it("PERM_MAPPING_S1 - should map Idle to PermissionState.Idle") {
-            val result = PermissionEvent.PermissionChanged(LocationPermission.Idle).reducer reduce idle
-            result.permission shouldBe PermissionState.Idle
-        }
-
-        it("PERM_MAPPING_S2 - should map Education to PermissionState.Education") {
-            val result = PermissionEvent.PermissionChanged(LocationPermission.Education).reducer reduce idle
-            result.permission shouldBe PermissionState.Education
-        }
-
-        it("PERM_MAPPING_S3 - should map Requesting to PermissionState.Requesting") {
-            val result = PermissionEvent.PermissionChanged(LocationPermission.Requesting).reducer reduce idle
-            result.permission shouldBe PermissionState.Requesting
-        }
-
-        it("PERM_MAPPING_S4 - should map Granted to PermissionState.Granted") {
-            val result = PermissionEvent.PermissionChanged(LocationPermission.Granted).reducer reduce idle
-            result.permission shouldBe PermissionState.Granted
-        }
-
-        it("PERM_MAPPING_S5 - should map Denied to PermissionState.Denied") {
-            val result = PermissionEvent.PermissionChanged(LocationPermission.Denied).reducer reduce idle
-            result.permission shouldBe PermissionState.Denied
-        }
-
-        it("PERM_MAPPING_S6 - should map DeniedPermanently to PermissionState.DeniedPermanently") {
-            val result = PermissionEvent.PermissionChanged(LocationPermission.DeniedPermanently).reducer reduce idle
-            result.permission shouldBe PermissionState.DeniedPermanently
         }
     }
 })

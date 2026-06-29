@@ -352,12 +352,6 @@ PERM_MAPPING
 
 | Layer | Slug                                                                                  | Status |
 |---|---------------------------------------------------------------------------------------|---|
-| Reducer | ~ PERM_MAPPING_S1 - should map Idle to PermissionState.Idle                           | ✅ |
-| Reducer | ~ PERM_MAPPING_S2 - should map Education to PermissionState.Education                 | ✅ |
-| Reducer | ~ PERM_MAPPING_S3 - should map Requesting to PermissionState.Requesting               | ✅ |
-| Reducer | ~ PERM_MAPPING_S4 - should map Granted to PermissionState.Granted                     | ✅ |
-| Reducer | ~ PERM_MAPPING_S5 - should map Denied to PermissionState.Denied                       | ✅ |
-| Reducer | ~ PERM_MAPPING_S6 - should map DeniedPermanently to PermissionState.DeniedPermanently | ✅ |
 | VM | ~ PERM_MAPPING_VM - should reflect correct state for each repo emission               | ✅ |
 
 ---
