@@ -86,7 +86,7 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
                     ShabbatEntry(
                         location = SavedLocation.empty(),
                         times = null,
-                        status = searchUiState.gpsResult.toLocationStatus(),
+                        status = searchUiState.gpsResult.toLocationStatus(permissionUiState.permission),
                     ),
                 ).toImmutableList(),
                 isDraggable = false,
