@@ -241,18 +241,30 @@ PERM_CARD_S10
 
 # Card Content
 
-## SCENARIO: GPS Card displays correct location status
-CARD_CONTENT
+## SCENARIO: Card with granted permissions displays correct location status
+CARD_CONTENT_1
 
 | Layer | Slug                                                                               | Status |
 |-------|------------------------------------------------------------------------------------|---|
-| Unit  | ~ CARD_CONTENT_S1 - should map GpsResolved to LocationStatus.Current               | ✅ |
-| Unit  | ~ CARD_CONTENT_S2 - should map Loading to LocationStatus.Locating                  | ✅ |
-| Unit  | ~ CARD_CONTENT_S3 - should map Failure to LocationStatus.Unknown                   | ✅ |
-| Unit  | ~ CARD_CONTENT_S4 - should map Idle to LocationStatus.Unknown                      | ✅ |
-| Unit  | ~ CARD_CONTENT_S5 - should map Empty to LocationStatus.Unknown                     | ✅ |
-| Unit  | ~ CARD_CONTENT_S6 - should map Suggestions to LocationStatus.Unknown               | ✅ |
-| Unit  | ~ CARD_CONTENT_S7 - should map Failure with actual cause to LocationStatus.Unknown | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S1 - should map GpsResolved to LocationStatus.Current               | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S2 - should map Loading to LocationStatus.Locating                  | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S3 - should map Failure to LocationStatus.Unknown                   | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S4 - should map Idle to LocationStatus.Unknown                      | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S5 - should map Empty to LocationStatus.Unknown                     | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S6 - should map Suggestions to LocationStatus.Unknown               | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S7 - should map Failure with actual cause to LocationStatus.Unknown | ✅ |
+
+## SCENARIO: Card with denied permissions displays correct location status
+CARD_CONTENT_2
+
+| Layer | Slug                                                                               | Status |
+|-------|------------------------------------------------------------------------------------|---|
+| Unit  | ~ CARD_CONTENT_2_S1 - should map Idle with Denied permission to LocationStatus.NoPermission               | ✅ |
+| Unit  | ~ CARD_CONTENT_2_S2 - should map Loading with Denied permission to LocationStatus.NoPermission                  | ✅ |
+| Unit  | ~ CARD_CONTENT_2_S3 - should map Empty with Denied permission to LocationStatus.NoPermission                   | ✅ |
+| Unit  | ~ CARD_CONTENT_2_S4 - should map Suggestions with Denied permission to LocationStatus.NoPermission                      | ✅ |
+| Unit  | ~ CARD_CONTENT_2_S5 - should map GpsResolved with Denied permission to LocationStatus.NoPermission                     | ✅ |
+| Unit  | ~ CARD_CONTENT_2_S6 - should map Failure with Denied permission to LocationStatus.NoPermission               | ✅ |
 
 ## SCENARIO: Reorder cards via drag handle
 CARD_REORDER
