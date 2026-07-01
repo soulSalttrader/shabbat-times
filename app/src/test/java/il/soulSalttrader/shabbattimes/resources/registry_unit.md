@@ -481,3 +481,25 @@ NETWORK_1
 | Observer | ~ NETWORK_1_S3 - should return false if has NET_CAPABILITY_VALIDATED but not NET_CAPABILITY_INTERNET     | ✅ |
 | Observer | ~ NETWORK_1_S4 - should return true if has NET_CAPABILITY_VALIDATED and NET_CAPABILITY_INTERNET          | ✅ |
 | Observer | ~ NETWORK_1_S5 - should return false if has neither NET_CAPABILITY_VALIDATED nor NET_CAPABILITY_INTERNET | ✅ |
+
+---
+
+## SCENARIO: Network connectivity effects
+NETWORK_CONNECT_1
+
+| Layer | Slug                                                                                               | Status |
+|-------|----------------------------------------------------------------------------------------------------|--|
+| VM    | ~ NETWORK_CONNECT_1_S1 - should show restored internet toast when connection comes back                                | ✅ |
+| VM    | ~ NETWORK_CONNECT_1_S2 - should show no internet toast when connection is lost | ✅ |
+
+---
+
+## SCENARIO: Reload trigger behavior
+NETWORK_CONNECT_2
+
+| Layer      | Slug                                                                                               | Status |
+|------------|----------------------------------------------------------------------------------------------------|--|
+| Repository | ~ NETWORK_CONNECT_2_S1 - should reload halachic times when connection is restored                                | ✅ |
+| Repository | ~ NETWORK_CONNECT_2_S2 - should NOT reload when connection is lost | ✅ |
+
+---
