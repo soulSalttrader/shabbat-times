@@ -470,3 +470,14 @@ PERM_EDUCATION
 | VM    | ~ PERM_EDUCATION_S2 - should not re-show education after app restart simulation | ✅ |
 
 ---
+
+## SCENARIO: NetworkCapabilities
+NETWORK_1
+
+| Layer    | Slug                                                                                                     | Status |
+|----------|----------------------------------------------------------------------------------------------------------|--|
+| Observer | ~ NETWORK_1_S1 - should return false if NetworkCapabilities is null                                      | ✅ |
+| Observer | ~ NETWORK_1_S2 - should return false if has NET_CAPABILITY_INTERNET but not NET_CAPABILITY_VALIDATED     | ✅ |
+| Observer | ~ NETWORK_1_S3 - should return false if has NET_CAPABILITY_VALIDATED but not NET_CAPABILITY_INTERNET     | ✅ |
+| Observer | ~ NETWORK_1_S4 - should return true if has NET_CAPABILITY_VALIDATED and NET_CAPABILITY_INTERNET          | ✅ |
+| Observer | ~ NETWORK_1_S5 - should return false if has neither NET_CAPABILITY_VALIDATED nor NET_CAPABILITY_INTERNET | ✅ |
