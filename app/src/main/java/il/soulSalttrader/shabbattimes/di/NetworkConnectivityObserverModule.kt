@@ -8,7 +8,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import il.soulSalttrader.shabbattimes.network.NetworkConnectivityObserver
+import il.soulSalttrader.shabbattimes.network.NetworkObserver
 import jakarta.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -19,4 +22,11 @@ object NetworkConnectivityObserverModule {
     fun provideConnectivityManager(
         @ApplicationContext context: Context,
     ): ConnectivityManager = context.getSystemService<ConnectivityManager>()!!
+
+    @Singleton
+    @Provides
+    fun provideNetworkObserver(
+        connectivityManager: ConnectivityManager,
+        @ApplicationScope scope: CoroutineScope,
+    ): NetworkObserver = NetworkConnectivityObserver(connectivityManager, scope)
 }
