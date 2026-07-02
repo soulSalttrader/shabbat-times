@@ -132,6 +132,7 @@ dependencies {
     testImplementation(libs.junit4)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.mockk)
@@ -140,6 +141,7 @@ dependencies {
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.androidx.test.runner)
+    testImplementation(libs.robolectric)
 
     // UI / Instrumented Testing
     androidTestImplementation(libs.androidx.junit)
