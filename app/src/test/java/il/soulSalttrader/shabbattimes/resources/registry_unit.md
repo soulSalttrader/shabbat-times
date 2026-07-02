@@ -503,3 +503,16 @@ NETWORK_CONNECT_2
 | Repository | ~ NETWORK_CONNECT_2_S2 - should NOT reload when connection is lost | ✅ |
 
 ---
+
+## SCENARIO: NetworkObserver callback
+NETWORK_CONNECT_3
+
+| Layer    | Slug                                                                                                | Status |
+|----------|-----------------------------------------------------------------------------------------------------|--------|
+| Observer | ~ NETWORK_CONNECT_3_S1 - initial seed value reflects activeNetwork's capabilities at subscription time      | ✅      |
+| Observer | ~ NETWORK_CONNECT_3_S2 - onAvailable emits based on that network's capabilities                             | ✅      |
+| Observer | ~ NETWORK_CONNECT_3_S3 - onCapabilitiesChanged emits based on the new capabilities directly, not a re-fetch | ✅      |
+| Observer | ~ NETWORK_CONNECT_3_S4 - onLost re-queries activeNetwork, reflecting another active network if present      | ✅      |
+| Observer | ~ NETWORK_CONNECT_3_S5 - onUnavailable emits false unconditionally                                          | ✅      |
+
+---
