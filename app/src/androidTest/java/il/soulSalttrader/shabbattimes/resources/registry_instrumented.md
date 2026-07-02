@@ -119,3 +119,10 @@ PERM_DISPATCH_S1
 | UI | ~ PERM_DISPATCH_S1_4 - should dispatch event only once even if ON_RESUME fires multiple times | ✅ |
 
 ---
+
+## SCENARIO: Observer lifecycle
+NETWORK_1
+
+| Layer    | Slug                                                                                             | Status |
+|----------|--------------------------------------------------------------------------------------------------|--------|
+| Observer | ~ NETWORK_3_S1 - awaitClose unregisters the callback when subscribers drop to zero after timeout | ❓      |
