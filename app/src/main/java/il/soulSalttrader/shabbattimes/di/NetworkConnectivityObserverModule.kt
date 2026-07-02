@@ -8,8 +8,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import il.soulSalttrader.shabbattimes.network.NetworkConnectivityObserver
-import il.soulSalttrader.shabbattimes.network.NetworkObserver
+import il.soulSalttrader.shabbattimes.network.observer.NetworkConnectivityObserver
+import il.soulSalttrader.shabbattimes.network.observer.NetworkObserver
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 

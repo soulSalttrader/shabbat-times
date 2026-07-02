@@ -1,4 +1,4 @@
-package il.soulSalttrader.shabbattimes.network
+package il.soulSalttrader.shabbattimes.network.observer
 
 import kotlinx.coroutines.flow.Flow
 

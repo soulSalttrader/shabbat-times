@@ -1,5 +1,6 @@
 package il.soulSalttrader.shabbattimes.network
 
+import il.soulSalttrader.shabbattimes.network.observer.NetworkObserver
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
