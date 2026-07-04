@@ -10,45 +10,73 @@ import com.google.android.gms.location.LocationResult
 import il.soulSalttrader.shabbattimes.common.constants.GpsConfig.INTERVAL_MS
 import il.soulSalttrader.shabbattimes.common.constants.GpsConfig.MIN_DISTANCE_METERS
 import il.soulSalttrader.shabbattimes.common.constants.GpsConfig.PRIORITY
+import il.soulSalttrader.shabbattimes.model.LocationPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 @Singleton
 class GpsLocationRepositoryImpl @Inject constructor(
     private val fusedClient: FusedLocationProviderClient,
     private val scope: CoroutineScope,
+    permissionRepository: PermissionRepository,
 ) : GpsLocationRepository {
+
+    @SuppressLint("MissingPermission")
+    override suspend fun fetchLastKnownLocation() {
+        suspendCancellableCoroutine<Location?> { continuation ->
+            fusedClient.lastLocation
+                .addOnSuccessListener { location -> continuation.resume(location) }
+                .addOnFailureListener { cause -> continuation.resumeWithException(cause) }
+        }?.let { _manualLocation.emit(it) }
+    }
+    private val _manualLocation = MutableSharedFlow<Location>(extraBufferCapacity = 1)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @SuppressLint("MissingPermission")
-    override val location: Flow<Location?> = callbackFlow {
-        val request = LocationRequest.Builder(PRIORITY, INTERVAL_MS)
-            .setMinUpdateDistanceMeters(MIN_DISTANCE_METERS)
-            .build()
+    override val location: Flow<Location?> = permissionRepository.permissionState
+        .flatMapLatest { permission ->
+            when (permission) {
+                is LocationPermission.Granted -> merge(
+                    callbackFlow {
+                        val request = LocationRequest.Builder(PRIORITY, INTERVAL_MS)
+                            .setMinUpdateDistanceMeters(MIN_DISTANCE_METERS)
+                            .build()
 
-        val callback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                trySend(result.locations.lastOrNull())
+                        val callback = object : LocationCallback() {
+                            override fun onLocationResult(result: LocationResult) {
+                                result.locations.lastOrNull()?.let { trySend(it) }
+                            }
+                        }
+
+                        fusedClient.requestLocationUpdates(
+                            request,
+                            callback,
+                            Looper.getMainLooper(),
+                        )
+
+                        awaitClose { fusedClient.removeLocationUpdates(callback) }
+                    },
+                    _manualLocation
+                )
+                else -> flowOf(null)
             }
-        }
-
-        fusedClient.requestLocationUpdates(
-            request,
-            callback,
-            Looper.getMainLooper()
+        }.shareIn(
+            scope = scope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            replay = 1,
         )
-
-        awaitClose { fusedClient.removeLocationUpdates(callback) }
-    }.shareIn(
-        scope = scope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        replay = 1,
-    )
 }
