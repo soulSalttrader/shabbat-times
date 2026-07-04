@@ -3,6 +3,7 @@ package il.soulSalttrader.shabbattimes.ui.viewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.common.userMessage
+import il.soulSalttrader.shabbattimes.repository.GpsLocationRepository
 import il.soulSalttrader.shabbattimes.settings.OneTimeMessageTracker
 import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
 import il.soulSalttrader.shabbattimes.ui.event.GpsEvent
@@ -20,10 +21,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class GpsViewModel @Inject constructor(
     private val updateCurrentLocationUseCase: UpdateCurrentLocationUseCase,
+    private val gpsLocationRepository: GpsLocationRepository,
     resolveGpsLocationUseCase: ResolveGpsLocationUseCase,
     oneTimeMessageTracker: OneTimeMessageTracker,
 ) : BaseViewModel(oneTimeMessageTracker) {
@@ -51,6 +54,11 @@ class GpsViewModel @Inject constructor(
                 is GpsEvent -> event.reducer reduce current
                 else        -> current
             }
+        }
+
+        when (event) {
+            is GpsEvent.GpsLocationRequested -> viewModelScope.launch { gpsLocationRepository.fetchLastKnownLocation() }
+            else -> Unit
         }
     }
 }

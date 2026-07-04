@@ -12,6 +12,7 @@ import il.soulSalttrader.shabbattimes.repository.GeocodingRepository
 import il.soulSalttrader.shabbattimes.repository.GeocodingRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.GpsLocationRepository
 import il.soulSalttrader.shabbattimes.repository.GpsLocationRepositoryImpl
+import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepositoryInMemory
 import il.soulSalttrader.shabbattimes.repository.SolarTimesRepository
@@ -42,8 +43,9 @@ abstract class RepositoryModule {
         fun provideGpsLocationRepository(
             fusedClient: FusedLocationProviderClient,
             @ApplicationScope scope: CoroutineScope,
+            permissionRepository: PermissionRepository,
         ): GpsLocationRepository =
-            GpsLocationRepositoryImpl(fusedClient, scope)
+            GpsLocationRepositoryImpl(fusedClient, scope, permissionRepository)
 
         @Provides
         @Singleton
