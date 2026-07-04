@@ -1,6 +1,5 @@
 package il.soulSalttrader.shabbattimes.useCase
 
-import android.location.Location
 import il.soulSalttrader.shabbattimes.model.Coordinates
 import il.soulSalttrader.shabbattimes.model.CurrentLocationState
 import il.soulSalttrader.shabbattimes.model.LocationPermission
@@ -18,15 +17,6 @@ class ObserveGpsLocationUseCase @Inject constructor(
     private val permissionRepository: PermissionRepository,
     private val gpsLocationRepository: GpsLocationRepository,
 ) {
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val rawLocation: Flow<Location?> = permissionRepository.permissionState
-        .flatMapLatest { permission ->
-            when (permission) {
-                is LocationPermission.Granted -> gpsLocationRepository.location
-                else                          -> flowOf(null)
-            }
-        }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     operator fun invoke(): Flow<CurrentLocationState> = permissionRepository.permissionState
         .flatMapLatest { permission ->
