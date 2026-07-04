@@ -31,6 +31,13 @@ fun HandlePermissions(
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (permissionState.permission == PermissionState.Idle) {
+            val isGranted = permissions.all { permissionHandler.isGranted(it) }
+            if (isGranted) dispatch(PermissionEvent.SystemGranted)
+        }
+    }
+
     LaunchedEffect(permissionState.permission) {
         if (permissionState.permission == PermissionState.Requesting) {
             val result = permissionHandler.request(permissions)
