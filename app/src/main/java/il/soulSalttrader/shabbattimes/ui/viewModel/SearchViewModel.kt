@@ -5,12 +5,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.common.constants.LocationConfig.MAX_SAVED_LOCATIONS
 import il.soulSalttrader.shabbattimes.common.userMessage
-import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.model.SaveLocationResult
 import il.soulSalttrader.shabbattimes.network.onFailure
 import il.soulSalttrader.shabbattimes.network.onSuccess
-import il.soulSalttrader.shabbattimes.repository.PermissionRepository
 import il.soulSalttrader.shabbattimes.settings.OneTimeMessageTracker
 import il.soulSalttrader.shabbattimes.ui.UiText
 import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
@@ -20,9 +18,7 @@ import il.soulSalttrader.shabbattimes.ui.normalizedOrEmpty
 import il.soulSalttrader.shabbattimes.ui.normalizedOrNull
 import il.soulSalttrader.shabbattimes.ui.search.SearchUiState
 import il.soulSalttrader.shabbattimes.useCase.GetLocationSuggestionsUseCase
-import il.soulSalttrader.shabbattimes.useCase.ResolveGpsLocationUseCase
 import il.soulSalttrader.shabbattimes.useCase.SaveLocationUseCase
-import il.soulSalttrader.shabbattimes.useCase.UpdateCurrentLocationUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -34,11 +30,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -46,23 +40,9 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val saveLocationUseCase: SaveLocationUseCase,
-    private val updateCurrentLocationUseCase: UpdateCurrentLocationUseCase,
     private val getLocationSuggestion: GetLocationSuggestionsUseCase,
-    resolveGpsLocationUseCase: ResolveGpsLocationUseCase,
-    permissionRepository: PermissionRepository,
     oneTimeMessageTracker: OneTimeMessageTracker,
 ) : BaseViewModel(oneTimeMessageTracker) {
-
-    init {
-        viewModelScope.launch {
-            permissionRepository.permissionState
-                .filter { it == LocationPermission.Granted }
-                .collect {
-                    dispatch(SearchEvent.GpsLocationRequested)
-                }
-        }
-    }
-
     private val _state: MutableStateFlow<SearchUiState> = MutableStateFlow(value = SearchUiState())
     private val queryFlow: Flow<String> = _state
         .map { it.query.normalizedOrEmpty() }
@@ -89,30 +69,11 @@ class SearchViewModel @Inject constructor(
             initialValue = emptyList(),
         )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val gpsLocationFlow: StateFlow<ResolvedLocation?> = resolveGpsLocationUseCase()
-        .onEach { resolved -> updateCurrentLocationUseCase(resolved) }
-        .catch { cause ->
-            dispatch(SearchEvent.GpsLocationError(cause))
-            emitEffect(UiEffect.ShowToast(cause.userMessage()))
-            emit(null)
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null,
-        )
-
     val state: StateFlow<SearchUiState> = combine(
         _state,
         suggestionsLocationFlow,
-        permissionRepository.permissionState,
-        gpsLocationFlow,
-    ) { state, suggestions, permission, gpsLocation ->
-        val withGpsLocation = gpsLocation?.let { SearchEvent.GpsLocationLoaded(it).reducer reduce state } ?: state
-        val withPermission = SearchEvent.GpsPermissionChanged(permission).reducer reduce withGpsLocation
-
-        SearchEvent.SuggestionsLoaded(suggestions).reducer reduce withPermission
+    ) { state, suggestions ->
+        SearchEvent.SuggestionsLoaded(suggestions).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
