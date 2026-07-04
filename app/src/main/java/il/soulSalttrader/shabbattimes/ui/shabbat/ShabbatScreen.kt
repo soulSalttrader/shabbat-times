@@ -19,8 +19,8 @@ import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.ui.FailureScreen
 import il.soulSalttrader.shabbattimes.ui.LoadingScreen
 import il.soulSalttrader.shabbattimes.ui.effect.handleUiEffect
+import il.soulSalttrader.shabbattimes.ui.event.GpsEvent
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
-import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.ui.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionDialogs
@@ -30,6 +30,8 @@ import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.ui.search.SearchConfig
 import il.soulSalttrader.shabbattimes.ui.search.default
 import il.soulSalttrader.shabbattimes.ui.search.toLocationStatus
+import il.soulSalttrader.shabbattimes.ui.gps.toLocationStatus
+import il.soulSalttrader.shabbattimes.ui.viewModel.GpsViewModel
 import il.soulSalttrader.shabbattimes.ui.viewModel.PermissionViewModel
 import il.soulSalttrader.shabbattimes.ui.viewModel.SearchViewModel
 import il.soulSalttrader.shabbattimes.ui.viewModel.ShabbatViewModel
@@ -41,6 +43,9 @@ import kotlinx.coroutines.flow.merge
 fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
     val shabbatViewModel: ShabbatViewModel = hiltViewModel()
     val shabbatState by shabbatViewModel.state.collectAsStateWithLifecycle()
+
+    val gpsViewMode: GpsViewModel = hiltViewModel()
+    val gpsUiState by gpsViewMode.state.collectAsStateWithLifecycle()
 
     val searchViewModel: SearchViewModel = hiltViewModel()
     val searchUiState by searchViewModel.state.collectAsStateWithLifecycle()
@@ -71,7 +76,7 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
 
     val onCardClick = {
         when (permissionUiState.permission.dispatchCardAction()) {
-            CardAction.OpenGpsSearch         -> searchViewModel.dispatch(SearchEvent.GpsLocationRequested)
+            CardAction.OpenGpsSearch         -> gpsViewMode.dispatch(GpsEvent.GpsLocationRequested)
             CardAction.ShowDeniedPermanently -> permissionViewModel.dispatch(PermissionEvent.TappedCardDeniedPermanently)
             CardAction.ShowDeniedRationale   -> permissionViewModel.dispatch(PermissionEvent.TappedCardDenied)
             CardAction.PermissionRequested   -> permissionViewModel.dispatch(PermissionEvent.PermissionRequested)
@@ -95,7 +100,7 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
                     ShabbatEntry(
                         location = SavedLocation.empty(),
                         times = null,
-                        status = searchUiState.gpsResult.toLocationStatus(permissionUiState.permission),
+                        status = gpsUiState.gpsResult.toLocationStatus(permissionUiState.permission),
                     ),
                 ).toImmutableList(),
                 isDraggable = false,
