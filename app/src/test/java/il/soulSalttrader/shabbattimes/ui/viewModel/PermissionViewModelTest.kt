@@ -8,8 +8,8 @@ import il.soulSalttrader.shabbattimes.settings.DataStoreOneTimeMessageTracker
 import il.soulSalttrader.shabbattimes.settings.FakeOneTimeMessageTracker
 import il.soulSalttrader.shabbattimes.settings.OneTimeMessage
 import il.soulSalttrader.shabbattimes.ui.effect.PermissionSideEffectHandler
+import il.soulSalttrader.shabbattimes.ui.event.GpsEvent
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
-import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
@@ -551,7 +551,7 @@ class PermissionViewModelTest : DescribeSpec({
                     awaitItem() // Idle
 
                     // dispatch an event that doesn't belong to PermissionViewModel
-                    vm.dispatch(SearchEvent.GpsLocationRequested)
+                    vm.dispatch(GpsEvent.GpsLocationRequested)
                     testDispatcher.scheduler.advanceUntilIdle()
 
                     // no new emission — state unchanged
