@@ -110,13 +110,17 @@ UI_SEARCH_S2
 # SCENARIO: should never dispatch same event multiple times consecutively
 PERM_DISPATCH_S1
 
-| Layer | Slug                                                                          | Status |
-|---|-------------------------------------------------------------------------------|---|
-| UI | ~ PERM_DISPATCH_S1_1 - should dispatch AllGranted exactly once | ✅ |
-| UI | ~ PERM_DISPATCH_S1_2 - should dispatch DeniedWithRationale exactly once | ✅ |
-| UI | ~ PERM_DISPATCH_S1_3 - should call onSettingsHandled when returnedFromSettings is true | ✅ |
-| UI | ~ PERM_DISPATCH_S1_4 - should not call onSettingsHandled when returnedFromSettings is false | ✅ |
-| UI | ~ PERM_DISPATCH_S1_4 - should dispatch event only once even if ON_RESUME fires multiple times | ✅ |
+| Layer | Slug                                                                                                    | Status |
+|---|---------------------------------------------------------------------------------------------------------|---|
+| UI | ~ PERM_DISPATCH_S1_1 - should dispatch AllGranted exactly once                                          | ✅ |
+| UI | ~ PERM_DISPATCH_S1_2 - should dispatch DeniedWithRationale exactly once                                 | ✅ |
+| UI | ~ PERM_DISPATCH_S1_3 - should call onSettingsHandled when returnedFromSettings is true                  | ✅ |
+| UI | ~ PERM_DISPATCH_S1_4 - should not call onSettingsHandled when returnedFromSettings is false             | ✅ |
+| UI | ~ PERM_DISPATCH_S1_5 - should dispatch event only once even if ON_RESUME fires multiple times           | ✅ |
+| UI | ~ PERM_DISPATCH_S1_6 - should dispatch SystemGranted once on initial composition when already granted   | ✅ |
+| UI | ~ PERM_DISPATCH_S1_7 - should not dispatch anything on initial composition when not granted             | ✅ |
+| UI | ~ PERM_DISPATCH_S1_8 - should not check granted state on initial composition when permission is not Idle | ✅ |
+| UI | ~ PERM_DISPATCH_S1_9 - should not re-dispatch SystemGranted on recomposition                            | ✅ |
 
 ---
 
