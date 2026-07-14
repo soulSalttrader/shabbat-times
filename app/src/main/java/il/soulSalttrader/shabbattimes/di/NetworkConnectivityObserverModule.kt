@@ -8,6 +8,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import il.soulSalttrader.shabbattimes.network.observer.ConnectivityFlowSource
+import il.soulSalttrader.shabbattimes.network.observer.ConnectivityManagerFlowSource
 import il.soulSalttrader.shabbattimes.network.observer.NetworkConnectivityObserver
 import il.soulSalttrader.shabbattimes.network.observer.NetworkObserver
 import jakarta.inject.Singleton
@@ -25,8 +27,14 @@ object NetworkConnectivityObserverModule {
 
     @Singleton
     @Provides
-    fun provideNetworkObserver(
+    fun provideConnectivityFlowSource(
         connectivityManager: ConnectivityManager,
+    ): ConnectivityFlowSource = ConnectivityManagerFlowSource(connectivityManager)
+
+    @Singleton
+    @Provides
+    fun provideNetworkObserver(
+        connectivityFlowSource: ConnectivityFlowSource,
         @ApplicationScope scope: CoroutineScope,
-    ): NetworkObserver = NetworkConnectivityObserver(connectivityManager, scope)
+    ): NetworkObserver = NetworkConnectivityObserver(connectivityFlowSource, scope)
 }
