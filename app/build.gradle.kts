@@ -154,6 +154,7 @@ dependencies {
     androidTestImplementation(libs.hilt.android.testing)
     androidTestUtil(libs.androidx.orchestrator)
     kspAndroidTest(libs.hilt.compiler)
+    androidTestImplementation(libs.mockk.android)
 
     // Debug
     debugImplementation(libs.androidx.ui.tooling)
