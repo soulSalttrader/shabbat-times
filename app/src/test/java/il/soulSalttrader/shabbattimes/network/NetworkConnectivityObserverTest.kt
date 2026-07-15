@@ -3,12 +3,22 @@ package il.soulSalttrader.shabbattimes.network
 import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
 import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
+import il.soulSalttrader.shabbattimes.network.observer.ConnectivityFlowSource
+import il.soulSalttrader.shabbattimes.network.observer.NetworkConnectivityObserver
 import il.soulSalttrader.shabbattimes.network.observer.isOnline
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NetworkConnectivityObserverTest : DescribeSpec({
@@ -48,6 +58,38 @@ class NetworkConnectivityObserverTest : DescribeSpec({
                 every { hasCapability(NET_CAPABILITY_VALIDATED) } returns false
             }
             capabilities.isOnline() shouldBe false
+        }
+    }
+
+    describe("NETWORK_2 - SCENARIO: NetworkConnectivityObserver: WhileSubscribed(5000)") {
+        it("NETWORK_2_1 - should stop collecting from source after last subscriber unsubscribes and WhileSubscribed timeout elapses") {
+            runTest {
+                var upstreamActive = false
+                val sourceFlow = flow {
+                    upstreamActive = true
+                    try {
+                        emitAll(MutableSharedFlow<Boolean>(replay = 0))
+                    } finally {
+                        upstreamActive = false
+                    }
+                }
+                val fakeSource = object : ConnectivityFlowSource {
+                    override fun observe(): Flow<Boolean> = sourceFlow
+                }
+
+                val observer = NetworkConnectivityObserver(fakeSource, backgroundScope)
+
+                val job = launch { observer.isConnected.collect { } }
+                runCurrent()
+                upstreamActive shouldBe true
+
+                job.cancel()
+                runCurrent()
+                upstreamActive shouldBe true // still active — WhileSubscribed(5000) grace period
+
+                advanceTimeBy(5001)
+                upstreamActive shouldBe false // now unsubscribed upstream
+            }
         }
     }
 })
