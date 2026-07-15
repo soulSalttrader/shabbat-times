@@ -2,12 +2,14 @@ package il.soulSalttrader.shabbattimes.ui.viewModel
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.common.userMessage
 import il.soulSalttrader.shabbattimes.di.InMemory
 import il.soulSalttrader.shabbattimes.di.Persisted
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.model.toUnavailabilityWarning
+import il.soulSalttrader.shabbattimes.network.observer.NetworkObserver
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.toBatchOutcome
 import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
@@ -16,6 +18,7 @@ import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
 import il.soulSalttrader.shabbattimes.settings.OneTimeMessage
 import il.soulSalttrader.shabbattimes.settings.OneTimeMessageTracker
+import il.soulSalttrader.shabbattimes.ui.UiText
 import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
 import il.soulSalttrader.shabbattimes.ui.event.UiEvent
@@ -26,13 +29,17 @@ import il.soulSalttrader.shabbattimes.useCase.RemoveSavedLocationUseCase
 import il.soulSalttrader.shabbattimes.useCase.ReorderLocationsUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -47,18 +54,34 @@ class ShabbatViewModel @Inject constructor(
     observeGpsLocationUseCase: ObserveGpsLocationUseCase,
     userPreferencesRepository: UserPreferencesRepository,
     permissionRepository: PermissionRepository,
-) : ViewModel() {
-    private val _effects: MutableSharedFlow<UiEffect> = MutableSharedFlow(extraBufferCapacity = 20)
-    val effects: SharedFlow<UiEffect> = _effects.asSharedFlow()
+    networkConnectivityObserver: NetworkObserver,
     oneTimeMessageTracker: OneTimeMessageTracker,
 ) : BaseViewModel(oneTimeMessageTracker) {
+    private val reloadTrigger = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    init {
+        viewModelScope.launch {
+            networkConnectivityObserver.isConnected
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { connected ->
+                    when (connected) {
+                        true -> emitEffect(UiEffect.ShowToast(UiText.Resource(R.string.restored_internet)))
+                        else -> emitEffect(UiEffect.ShowToast(UiText.Resource(R.string.error_no_internet)))
+                    }
+
+                    if (connected) { reloadTrigger.tryEmit(Unit) }
+                }
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val halachicTimesFlow: StateFlow<List<HalachicTimes>> = combine(
         currentLocationRepository.location,
         savedLocationsRepository.locations,
         userPreferencesRepository.shabbatPreferences,
-    ) { gpsLocation, savedLocations, preferences ->
+        reloadTrigger.onStart { emit(Unit) },
+    ) { gpsLocation, savedLocations, preferences, _ ->
         val locations = buildList {
             gpsLocation?.let { add(it) }
             addAll(savedLocations)
