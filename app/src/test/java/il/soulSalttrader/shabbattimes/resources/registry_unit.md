@@ -471,7 +471,7 @@ PERM_EDUCATION
 
 ---
 
-## SCENARIO: NetworkCapabilities
+## SCENARIO: NetworkCapabilities1
 NETWORK_1
 
 | Layer    | Slug                                                                                                     | Status |
@@ -481,6 +481,24 @@ NETWORK_1
 | Observer | ~ NETWORK_1_S3 - should return false if has NET_CAPABILITY_VALIDATED but not NET_CAPABILITY_INTERNET     | ✅ |
 | Observer | ~ NETWORK_1_S4 - should return true if has NET_CAPABILITY_VALIDATED and NET_CAPABILITY_INTERNET          | ✅ |
 | Observer | ~ NETWORK_1_S5 - should return false if has neither NET_CAPABILITY_VALIDATED nor NET_CAPABILITY_INTERNET | ✅ |
+
+---
+
+## SCENARIO: NetworkCapabilities2
+NETWORK_2
+
+| Layer    | Slug                                                                                                                      | Status |
+|----------|---------------------------------------------------------------------------------------------------------------------------|--|
+| Observer | ~ NETWORK_2_1 - should stop collecting from source after last subscriber unsubscribes and WhileSubscribed timeout elapses | ✅ |
+
+---
+
+## SCENARIO: NetworkCapabilities3
+NETWORK_2
+
+| Layer    | Slug                                                                                                                      | Status |
+|----------|---------------------------------------------------------------------------------------------------------------------------|--|
+| Observer | ~ NETWORK_3_1 - should delegate to networkCallbackFlow extension on ConnectivityManager   | ✅ |
 
 ---
 

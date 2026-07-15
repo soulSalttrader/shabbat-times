@@ -127,6 +127,7 @@ PERM_DISPATCH_S1
 ## SCENARIO: Observer lifecycle
 NETWORK_1
 
-| Layer    | Slug                                                                                             | Status |
-|----------|--------------------------------------------------------------------------------------------------|--------|
-| Observer | ~ NETWORK_3_S1 - awaitClose unregisters the callback when subscribers drop to zero after timeout | ❓      |
+| Layer    | Slug                                                                                           | Status |
+|----------|------------------------------------------------------------------------------------------------|------|
+| Observer | ~ NETWORK_4_1 - should unregister network callback when flow collection is cancelled           | ✅     |
+| Observer | ~ NETWORK_4_2 - should emit distinct debounced values and replay last value to new subscribers | ✅     |
