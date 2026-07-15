@@ -29,7 +29,6 @@ import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.ui.search.SearchConfig
 import il.soulSalttrader.shabbattimes.ui.search.default
-import il.soulSalttrader.shabbattimes.ui.search.toLocationStatus
 import il.soulSalttrader.shabbattimes.ui.gps.toLocationStatus
 import il.soulSalttrader.shabbattimes.ui.viewModel.GpsViewModel
 import il.soulSalttrader.shabbattimes.ui.viewModel.PermissionViewModel
