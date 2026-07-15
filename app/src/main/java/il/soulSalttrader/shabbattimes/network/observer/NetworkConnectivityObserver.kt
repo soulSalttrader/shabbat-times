@@ -1,6 +1,5 @@
 package il.soulSalttrader.shabbattimes.network.observer
 
-import android.net.ConnectivityManager
 import il.soulSalttrader.shabbattimes.di.ApplicationScope
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -14,13 +13,13 @@ import kotlinx.coroutines.flow.shareIn
 
 @Singleton
 class NetworkConnectivityObserver @Inject constructor(
-    connectivityManager: ConnectivityManager,
+    connectivityFlowSource: ConnectivityFlowSource,
     @param:ApplicationScope private val scope: CoroutineScope,
 ) : NetworkObserver {
 
     @OptIn(FlowPreview::class)
-    override val isConnected: Flow<Boolean> = connectivityManager
-        .networkCallbackFlow()
+    override val isConnected: Flow<Boolean> = connectivityFlowSource
+        .observe()
         .distinctUntilChanged()
         .debounce(300L)
         .shareIn(
