@@ -13,17 +13,17 @@ Ashkenazi, Sephardic, Mizrahi, Hasidic, or Jerusalem.
 - Screenshots reflect the current UI state at the time of capture.
 
 <p align="start">
-  <img src="docs/settings_screen.png" width="180" />
-  <img src="docs/init01.png" width="180" />
-  <img src="docs/init02%20(edu).png" width="180" />
-  <img src="docs/init03%20(perm).png" width="180" />
+  <img src="docs/init-dark.png" width="180" />
+  <img src="docs/home-dark.png" width="180" />
+  <img src="docs/edu-dark.png" width="180" />
+  <img src="docs/perm-dark.png" width="180" />
 </p>
 
 <p align="start">
-  <img src="docs/list01.png" width="180" />
-  <img src="docs/list02%20(swipe).png" width="180" />
-  <img src="docs/list03%20(swipe).png" width="180" />
-  <img src="docs/list04%20(current).png" width="180" />
+  <img src="docs/delete-dark.png" width="180" />
+  <img src="docs/search-dark.png" width="180" />
+  <img src="docs/settings-dark.png" width="180" />
+  <img src="docs/settings-havdalah-dark.png" width="180" />
 </p>
 
 ---
