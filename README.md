@@ -6,19 +6,19 @@ Shabbat Times is a calendar app that displays accurate candle lighting and Havda
 
 - Screenshots reflect the current UI state at the time of capture.
 
-<p style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
-  <img src="docs/assets/init-dark.png" alt="Init screen" />
-  <img src="docs/assets/home-dark.png" alt="Home screen" />
-  <img src="docs/assets/edu-dark.png" alt="Education screen" />
-  <img src="docs/assets/perm-dark.png" alt="Permissions screen" />
-</p>
+<div>
 
-<p style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
-  <img src="docs/assets/delete-dark.png" alt="Delete action" />
-  <img src="docs/assets/search-dark.png" alt="Search screen" />
-  <img src="docs/assets/settings-dark.png" alt="Settings screen" />
-  <img src="docs/assets/settings-havdalah-dark.png" alt="Havdalah settings" />
-</p>
+  <img src="docs/assets/init-dark.png" width="180" alt="Init screen" />
+  <img src="docs/assets/home-dark.png" width="180" alt="Home screen" />
+  <img src="docs/assets/edu-dark.png" width="180" alt="Education screen" />
+  <img src="docs/assets/perm-dark.png" width="180" alt="Permissions screen" />
+
+  <img src="docs/assets/delete-dark.png" width="180" alt="Delete" />
+  <img src="docs/assets/search-dark.png" width="180" alt="Search" />
+  <img src="docs/assets/settings-dark.png" width="180" alt="Settings" />
+  <img src="docs/assets/settings-havdalah-dark.png" width="180" alt="Havdalah" />
+
+</div>
 
 ### Features
 
