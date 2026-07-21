@@ -16,20 +16,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.TestTags
-import il.soulSalttrader.shabbattimes.ui.search.SearchItem
-import il.soulSalttrader.shabbattimes.ui.search.SearchItems
-import il.soulSalttrader.shabbattimes.ui.search.SearchItems.Add
+import il.soulSalttrader.shabbattimes.ui.FabItems.Search
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIconImage
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FabMenu(
-    onClick: () -> Unit,
+    onAction: (FabAction) -> Unit,
     modifier: Modifier = Modifier,
     expanded: Boolean? = null,
     onExpandedChange: ((Boolean) -> Unit)? = null,
-    items: List<SearchItem> = listOf(Add),
+    items: List<FabItem> = listOf(Search),
 ) {
     var internalExpanded by remember { mutableStateOf(false) }
     val isExpanded = expanded ?: internalExpanded
@@ -45,25 +43,25 @@ fun FabMenu(
         expanded = isExpanded,
         button = { FabMenuButton(isExpanded, toggleExpanded) },
     ) {
-        FabMenuItems(items, onClick, toggleExpanded)
+        FabMenuItems(items, onAction, toggleExpanded)
     }
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun FloatingActionButtonMenuScope.FabMenuItems(
-    items: List<SearchItem>,
-    onClick: () -> Unit,
+    items: List<FabItem>,
+    onAction: (FabAction) -> Unit,
     toggleExpanded: () -> Unit,
 ) {
     items.forEach { item ->
         FloatingActionButtonMenuItem(
             modifier = when (item) {
-                Add  -> Modifier.testTag(TestTags.FAB_NEW_LOCATION)
-                else -> Modifier
+                Search -> Modifier.testTag(TestTags.FAB_NEW_LOCATION)
+                else   -> Modifier
             },
             onClick = {
-                onClick()
+                onAction(item.action)
                 toggleExpanded()
             },
             text = { item.title?.let { Text(it.asString()) } },

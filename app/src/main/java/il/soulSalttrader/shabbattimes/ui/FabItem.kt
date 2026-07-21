@@ -1,10 +1,10 @@
-package il.soulSalttrader.shabbattimes.ui.search
+package il.soulSalttrader.shabbattimes.ui
 
-import il.soulSalttrader.shabbattimes.ui.UiText
 import il.soulSalttrader.shabbattimes.ui.uiIcon.UiIcon
 
-data class SearchItem(
+data class FabItem(
     val title: UiText?,
     val selectedIcon: UiIcon,
     val unselectedIcon: UiIcon,
+    val action: FabAction,
 )
