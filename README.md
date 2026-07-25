@@ -4,7 +4,7 @@ Shabbat Times is a calendar app that displays accurate candle lighting and Havda
 
 ### Screenshots
 
-- Screenshots reflect the current UI state at the time of capture.
+Screenshots reflect the current UI state at the time of capture.
 
 <div>
 
@@ -31,11 +31,13 @@ Shabbat Times is a calendar app that displays accurate candle lighting and Havda
   - Location autocomplete search
   - Dynamic GPS location with permission handling
   - User-saved locations with drag-to-reorder (order persisted via Room)
-  - Dynamic location labels (current location, distance in km, locating, no permission)
+  - Dynamic location labels (current location, distance in km, locating, no permission, etc.)
   - Swipe-to-delete saved locations
   - Auto-refresh current location on app restart if permission granted
+  - One-time education messages and high-latitude warnings
+  - Real-time network connectivity monitoring with automatic data refresh
 - Settings screen with:
-  - Community tradition selector (Sephardic, Mizrahi, Ashkenazi, Hasidic, Jerusalem)
+  - Applies halachic logic using a precise astronomical engine, supporting granular preferences for candle lighting and Havdalah criteria (Solar Depression or Fixed Offset)
   - About section (version, contact, developer)
   - Ko-fi support link
 
@@ -47,14 +49,15 @@ Shabbat Times is a calendar app that displays accurate candle lighting and Havda
 - OkHttp + Retrofit
 - KotlinX Serialization
 - Room Persistence
+- DataStore
 - Kotlin Coroutines & Flow
 
 ### Build & Run
 
 1. Clone the repository.
 2. Open the project in Android Studio (latest stable version recommended) and let it sync Gradle — this will fetch the correct Android SDK components automatically.
-3. Set up `local.properties`.
-4. Add required API keys (Geo API key required in `local.properties` or as an environment variable).
+3. Set up `secrets.properties`.
+4. Add required API keys (Geo API key required in `secrets.properties` or as an environment variable).
 5. Debug builds work out of the box with Android Studio's auto-generated debug key — no setup needed. 
 6. Release builds require a signing keystore which is not included in this repository; contributors only need debug builds for local development.
 
