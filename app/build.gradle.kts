@@ -21,9 +21,9 @@ android {
     defaultConfig {
         applicationId = "il.soulSaltrader.shabbattimes"
         minSdk = 30
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
-        versionName = "v1.5.2"
+        versionName = "v1.6.0"
 
 //        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner = "il.soulSalttrader.shabbattimes.HiltTestRunner"
