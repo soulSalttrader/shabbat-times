@@ -2,6 +2,7 @@ package il.soulSalttrader.shabbattimes.ui.event
 
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.model.CurrentLocationState
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.SavedLocation
@@ -18,7 +19,7 @@ import kotlinx.collections.immutable.toImmutableList
 sealed interface ShabbatEvent : UiEvent, Reducible<ShabbatUiState> {
     data class ShabbatEntryLoaded(
         val savedLocations: List<SavedLocation>,
-        val currentLocation: SavedLocation?,
+        val currentLocation: CurrentLocationState,
         val halachicTimes: List<HalachicTimes>,
         val permission: LocationPermission,
     ) : ShabbatEvent {

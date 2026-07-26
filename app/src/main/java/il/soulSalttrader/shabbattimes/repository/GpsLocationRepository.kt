@@ -5,4 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface GpsLocationRepository {
     val location: Flow<Location?>
+    suspend fun fetchLastKnownLocation()
 }

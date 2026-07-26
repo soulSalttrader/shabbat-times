@@ -19,10 +19,8 @@ PERM_FRESH_S1
 |---|------------------------------------------------------------------------------------------------|---|
 | Reducer | ~ PERM_FRESH_S1_REDUCER_1 - should set Education and show dialog on ShowEducation              | ✅ |
 | Reducer | ~ PERM_FRESH_S1_REDUCER_2 - should set Requesting and show dialog on Request                   | ✅ |
-| Reducer | ~ PERM_FRESH_S1_REDUCER_3 - should set Granted on AllGranted                                   | ✅ |
+| Reducer | ~ PERM_FRESH_S1_REDUCER_3 - should set Granted on SystemGranted                                  | ✅ |
 | VM | ~ PERM_FRESH_S1_VM_1 - should reflect Granted after full Education → Requesting → Granted flow | ✅ |
-| VM | ~ PERM_FRESH_S1_VM_2 - should keep isDialogVisible after repo emission following ShowEducation | ✅ |
-| Handler | ~ PERM_HANDLER_S1 - should return AllGranted when all permissions granted                      | ✅ |
 | UI | ~ UI_CARD_S2_1 - should show GPS card when permission granted                                  | ✅ |
 
 ## SCENARIO: User denies permission on first ask
@@ -30,10 +28,9 @@ PERM_FRESH_S2
 
 | Layer | Slug                                                                                     | Status |
 |---|------------------------------------------------------------------------------------------|---|
-| Reducer | ~ PERM_FRESH_S2_REDUCER_1 - should set Denied on DeniedWithRationale                     | ✅ |
-| Reducer | ~ PERM_FRESH_S2_REDUCER_2 - should hide dialog and keep Denied on DismissedRationale     | ✅ |
-| VM | ~ PERM_FRESH_S2_VM - should show Denied state after deny flow                            | ✅ |
-| Handler | ~ PERM_HANDLER_S2 - should return DeniedWithRationale when all denied with rationale     | ✅ |
+| Reducer | ~ PERM_FRESH_S2_REDUCER_1 - should set DeniedRationale on SystemDenied                  | ✅ |
+| Reducer | ~ PERM_FRESH_S2_REDUCER_2 - should set DeniedPermanently on DismissDeniedRationale     | ✅ |
+| VM | ~ PERM_FRESH_S2_VM - should show DeniedRationale state after deny flow                           | ✅ |
 | UI | ~ UI_DIALOG_S1 - should show system dialog after education dialog | ✅ |
 | UI | ~ UI_DIALOG_S2 - should show rationale dialog when system permission denied                       | 🖐️ |
 
@@ -42,7 +39,6 @@ PERM_FRESH_S3
 
 | Layer | Slug                                                                              | Status |
 |---|-----------------------------------------------------------------------------------|---|
-| Reducer | ~ PERM_FRESH_S3_REDUCER_1 - should set Requesting on AcceptedRationale            | ✅ |
 | VM | ~ PERM_FRESH_S3_VM - should reflect Granted after deny → accept rationale → grant | ✅ |
 | UI | ~ UI_DIALOG_S3 - should show rationale dialog after system dialog denial          | 🖐️ |
 
@@ -51,9 +47,8 @@ PERM_FRESH_S4
 
 | Layer | Slug                                                                                                                | Status               |
 |---|---------------------------------------------------------------------------------------------------------------------|----------------------|
-| Reducer | ~ PERM_FRESH_S4_REDUCER_1 - should set DeniedPermanently on DeniedPermanently                                       | ✅                    |
+| Reducer | ~ PERM_FRESH_S4_REDUCER_1 - should set DeniedPermanently on DismissDeniedPermanently                                     | ✅                    |
 | VM | ~ PERM_FRESH_S4_VM - should reflect DeniedPermanently after denying twice                                           | ✅                    |
-| Handler | ~ PERM_HANDLER_S3 - should return null when all denied without rationale                                            | ✅                    |
 | UI | ~ UI_DIALOG_S4 - should show GPS card after allowing via rationale                                                  | ✅ → see UI_CARD_S2_1 |
 | UI | ~ UI_DIALOG_S5 - should show permanently denied dialog after denying twice                                          | ✅                    |
 | UI | ~ UI_DIALOG_S6 - should show system dialog when tapping outdated GPS card with denied permission                    | ✅                    |
@@ -73,20 +68,9 @@ PERM_FRESH_S6
 
 | Layer | Slug                                                                                                            | Status |
 |---|-----------------------------------------------------------------------------------------------------------------|--|
-| VM | ~ PERM_FRESH_S6_VM - should return to Idle with dialog hidden when Education dialog dismissed | ✅ |
+| VM | ~ PERM_FRESH_S6_VM - should return to Idle when Education dialog dismissed | ✅ |
 | UI | ~ UI_DIALOG_S8 - should show Education dialog when card tapped with Idle permission                             | ✅ |
 | UI | ~ UI_DIALOG_S9 - should keep empty card when Education dialog is dismissed                                      | ✅ |
-
----
-
-## SCENARIO: Permission resolution handles partial grants correctly
-PERM_HANDLER_PARTIAL
-
-| Layer   | Slug                                                                                        | Status |
-|---------|---------------------------------------------------------------------------------------------|--|
-| Handler | ~ PERM_HANDLER_S4 - should return DeniedWithRationale when partially granted with rationale | ✅ |
-| Handler | ~ PERM_HANDLER_S5 - should return null when partially granted without rationale             | ✅ |
-| Handler | ~ PERM_HANDLER_S6 - should return DeniedWithRationale when any permission has rationale     | ✅ |
 
 ---
 
@@ -97,9 +81,8 @@ PERM_SETTINGS_S1
 
 | Layer | Slug                                                                                                          | Status |
 |---|---------------------------------------------------------------------------------------------------------------|---|
-| Reducer | ~ PERM_SETTINGS_S1_REDUCER_1 - should set DeniedPermanently and show dialog on ShowDeniedPermanentlyDialog    | ✅ |
+| Reducer | ~ PERM_SETTINGS_S1_REDUCER_1 - should set DeniedPermanentlyRationale and on TappedCardDeniedPermanently       | ✅ |
 | Reducer | ~ PERM_SETTINGS_S1_REDUCER_2 - should reset to Idle on ReturnedFromAppSettings                                | ✅ |
-| Reducer | ~ PERM_SETTINGS_S1_REDUCER_3 - should start fresh Education flow after returning from settings                | ✅ |
 | VM | ~ PERM_SETTINGS_S1_VM_1 - should set Idle after returning from settings                                       | ✅ |
 | VM | ~ PERM_SETTINGS_S1_VM_2 - should start fresh Education flow when card is tapped after returning from Settings | ✅ |
 | UI | ~ UI_PERM_SETTINGS_S1 - should show GPS card after granting permission in settings                            | 🖐️ |
@@ -118,7 +101,7 @@ PERM_SETTINGS_S3
 
 | Layer | Slug                                                                                 | Status |
 |---|--------------------------------------------------------------------------------------|---|
-| Reducer | ~ PERM_SETTINGS_S3_REDUCER_1 - should keep DeniedPermanently on RequestedAppSettings | ✅ |
+| Reducer | ~ PERM_SETTINGS_S3_REDUCER_1 - should keep DeniedPermanently on OpenAppSettings | ✅ |
 | VM | ~ PERM_SETTINGS_S3_VM_1 - should keep DeniedPermanently when settings ignored        | ✅ |
 | UI | —                                                                                    | 🖐️ |
 
@@ -224,24 +207,64 @@ PERM_CARD_S6
 
 | Layer | Slug                                                       | Status |
 |-------|------------------------------------------------------------|--|
-| Presentation mapping    | ~ PERM_CARD_S6_UI_1 - should return ShowEducation for Idle | ✅ |
+| Presentation mapping    | ~ PERM_CARD_S6_UI_1 - should return PermissionRequested for Idle | ✅ |
+
+## SCENARIO: Card click with Education permission starts education flow
+PERM_CARD_S7
+
+| Layer | Slug                                                       | Status |
+|-------|------------------------------------------------------------|--|
+| Presentation mapping    | ~ PERM_CARD_S7_UI_1 - should return PermissionRequested for Education | ✅ |
+
+## SCENARIO: Card click with Requesting permission has no action
+PERM_CARD_S8
+
+| Layer | Slug                                                       | Status |
+|-------|------------------------------------------------------------|--|
+| Presentation mapping    | ~ PERM_CARD_S8_UI_1 - should return None for Requesting | ✅ |
+
+## SCENARIO: Card click with DeniedRationale permission has no action
+PERM_CARD_S9 
+
+| Layer | Slug                                                       | Status |
+|-------|------------------------------------------------------------|--|
+| Presentation mapping    | ~ PERM_CARD_S9_UI_1 - should return None for DeniedRationale | ✅ |
+
+## SCENARIO: Card click with DeniedPermanentlyRationale permission has no action
+PERM_CARD_S10
+
+| Layer | Slug                                                       | Status |
+|-------|------------------------------------------------------------|--|
+| Presentation mapping    | ~ PERM_CARD_S10_UI_1 - should return None for DeniedPermanentlyRationale | ✅ |
 
 ---
 
 # Card Content
 
-## SCENARIO: GPS Card displays correct location status
-CARD_CONTENT
+## SCENARIO: Card with granted permissions displays correct location status
+CARD_CONTENT_1
 
 | Layer | Slug                                                                               | Status |
 |-------|------------------------------------------------------------------------------------|---|
-| Unit  | ~ CARD_CONTENT_S1 - should map GpsResolved to LocationStatus.Current               | ✅ |
-| Unit  | ~ CARD_CONTENT_S2 - should map Loading to LocationStatus.Locating                  | ✅ |
-| Unit  | ~ CARD_CONTENT_S3 - should map Failure to LocationStatus.Unknown                   | ✅ |
-| Unit  | ~ CARD_CONTENT_S4 - should map Idle to LocationStatus.Unknown                      | ✅ |
-| Unit  | ~ CARD_CONTENT_S5 - should map Empty to LocationStatus.Unknown                     | ✅ |
-| Unit  | ~ CARD_CONTENT_S6 - should map Suggestions to LocationStatus.Unknown               | ✅ |
-| Unit  | ~ CARD_CONTENT_S7 - should map Failure with actual cause to LocationStatus.Unknown | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S1 - should map GpsResolved to LocationStatus.Current               | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S2 - should map Loading to LocationStatus.Locating                  | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S3 - should map Failure to LocationStatus.Unknown                   | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S4 - should map Idle to LocationStatus.Unknown                      | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S5 - should map Empty to LocationStatus.Unknown                     | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S6 - should map Suggestions to LocationStatus.Unknown               | ✅ |
+| Unit  | ~ CARD_CONTENT_1_S7 - should map Failure with actual cause to LocationStatus.Unknown | ✅ |
+
+## SCENARIO: Card with denied permissions displays correct location status
+CARD_CONTENT_2
+
+| Layer | Slug                                                                               | Status |
+|-------|------------------------------------------------------------------------------------|---|
+| Unit  | ~ CARD_CONTENT_2_S1 - should map Idle with Denied permission to LocationStatus.NoPermission               | ✅ |
+| Unit  | ~ CARD_CONTENT_2_S2 - should map Loading with Denied permission to LocationStatus.NoPermission                  | ✅ |
+| Unit  | ~ CARD_CONTENT_2_S3 - should map Empty with Denied permission to LocationStatus.NoPermission                   | ✅ |
+| Unit  | ~ CARD_CONTENT_2_S4 - should map Suggestions with Denied permission to LocationStatus.NoPermission                      | ✅ |
+| Unit  | ~ CARD_CONTENT_2_S5 - should map GpsResolved with Denied permission to LocationStatus.NoPermission                     | ✅ |
+| Unit  | ~ CARD_CONTENT_2_S6 - should map Failure with Denied permission to LocationStatus.NoPermission               | ✅ |
 
 ## SCENARIO: Reorder cards via drag handle
 CARD_REORDER
@@ -322,14 +345,14 @@ PERM_EDGE_S6
 | Layer   | Slug                                                                          | Status |
 |---------|-------------------------------------------------------------------------------|---|
 | VM      | ~ PERM_EDGE_S6_VM - should not change permission state on unrelated event     | ✅ |
-| Reducer | ~ PERM_EDGE_S6_REDUCER_1 - should not change Granted state on unrelated event |✅|
 
 ## SCENARIO: AllGranted works from any denied state
 PERM_EDGE_S7
 
 | Layer   | Slug                                                                               | Status |
 |---------|------------------------------------------------------------------------------------|--|
-| Reducer | ~ PERM_EDGE_S7_REDUCER_2 - should set Granted from DeniedPermanently on AllGranted           |✅|
+| Reducer | ~ PERM_EDGE_S7_REDUCER_1 - should set Granted from Denied on SystemGranted         |✅|
+| Reducer | ~ PERM_EDGE_S7_REDUCER_2 - should set Granted from DeniedPermanently on SystemGranted |✅|
 
 ---
 
@@ -340,26 +363,11 @@ PERM_MAPPING
 
 | Layer | Slug                                                                                  | Status |
 |---|---------------------------------------------------------------------------------------|---|
-| Reducer | ~ PERM_MAPPING_S1 - should map Idle to PermissionState.Idle                           | ✅ |
-| Reducer | ~ PERM_MAPPING_S2 - should map Education to PermissionState.Education                 | ✅ |
-| Reducer | ~ PERM_MAPPING_S3 - should map Requesting to PermissionState.Requesting               | ✅ |
-| Reducer | ~ PERM_MAPPING_S4 - should map Granted to PermissionState.Granted                     | ✅ |
-| Reducer | ~ PERM_MAPPING_S5 - should map Denied to PermissionState.Denied                       | ✅ |
-| Reducer | ~ PERM_MAPPING_S6 - should map DeniedPermanently to PermissionState.DeniedPermanently | ✅ |
 | VM | ~ PERM_MAPPING_VM - should reflect correct state for each repo emission               | ✅ |
 
 ---
 
 # Permission — Bug Regression
-
-## SCENARIO: combine() fires twice causing invalid intermediate state
-PERM_COMBINE_S1
-
-| Layer | Slug                                                                              | Status |
-|---|-----------------------------------------------------------------------------------|---|
-| VM | ~ PERM_COMBINE_S1_VM - should never produce Idle+dialogVisible intermediate state | ✅ |
-
----
 
 ## SCENARIO: Idle flash on cold start with DeniedPermanently
 PERM_COMBINE_S2
@@ -367,5 +375,162 @@ PERM_COMBINE_S2
 | Layer | Slug                                                                                | Status |
 |---|-------------------------------------------------------------------------------------|---|
 | VM | ~ PERM_COMBINE_S2_VM - should not flash Idle before DeniedPermanently on cold start | ✅ |
+
+---
+
+# Solar Ephemeris Calculator
+
+## SCENARIO: Compute solar declination
+EPHEMERIS-NOAA-S1
+
+| Layer      | Slug                                                                                | Status |
+|------------|-------------------------------------------------------------------------------------|---|
+| Calculator | ~ EPHEMERIS-NOAA-S1_1 - should returns declination near -22.84° on the perihelion | ✅ |
+| Calculator | ~ EPHEMERIS-NOAA-S1_2 - should returns declination near 0° at March equinox | ✅ |
+| Calculator | ~ EPHEMERIS-NOAA-S1_3 - should returns declination near +23.44° at June solstice | ✅ |
+| Calculator | ~ EPHEMERIS-NOAA-S1_4 - should returns declination near 22.83° on the aphelion | ✅ |
+| Calculator | ~ EPHEMERIS-NOAA-S1_5 - should returns declination near 0° at September equinox | ✅ |
+| Calculator | ~ EPHEMERIS-NOAA-S1_6 - should returns declination near -23.44° at December solstice | ✅ |
+
+## SCENARIO: Compute Equation of time
+EPHEMERIS-NOAA-S2
+
+| Layer | Slug                                                                                | Status |
+|--|-------------------------------------------------------------------------------------|---|
+| Calculator | ~ EPHEMERIS-NOAA-S2_1 - equation of time should be near -4.5 min on the Perihelion | ✅ |
+| Calculator | ~ EPHEMERIS-NOAA-S2_2 - equation of time should be near -7.3 min on March equinox | ✅ |
+| Calculator | ~ EPHEMERIS-NOAA-S2_3 - equation of time should be near -1.7 min on June solstice | ✅ |
+| Calculator | ~ EPHEMERIS-NOAA-S2_4 - equation of time should be near -4.5 min on the aphelion | ✅ |
+| Calculator | ~ EPHEMERIS-NOAA-S2_5 - equation of time should be near +7.2 min on the September equinox | ✅ |
+| Calculator | ~ EPHEMERIS-NOAA-S2_6 - equation of time should be near +1.7 min on December solstice | ✅ |
+
+---
+
+## SCENARIO: Compute Solar Altitude Calculations
+EPHEMERIS-ALTITUDE-S1
+
+| Layer | Slug                                                                                | Status |
+|--|-------------------------------------------------------------------------------------|---|
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_1 - should be near zenith (89.99°) at Tropic of Cancer on Summer Solstice 2026 | ✅ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_2 - should be near zenith (89.99°) at Tropic of Capricorn on Winter Solstice 2026 | ✅ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_3 - should show Midnight Sun (~ +23.44°) at North Pole on Summer Solstice 2026" | ✅ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_4 - should show polar night (~ -23.44°) at South Pole on Winter Solstice 2026 | ✅ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_5 - should have correct altitude (~ 23.38) at Greenwich during Equation of Time peak (Autumn 2026) | ✅ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_6 - should be near horizon (~ 1.8°) at International Date Line on March Equinox | ✅ |
+| Calculator | ~ EPHEMERIS-ALTITUDE-S1_7 - should have correct noon altitude (~ 61.35° ) in Prague on Summer Solstice 2026 | ✅ |
+
+---
+
+## SCENARIO: Evening Time For Depression
+SOLAR-DEPRESSION_S1
+
+| Layer | Slug                                                                                | Status |
+|--|-------------------------------------------------------------------------------------|--|
+| Calculator | ~ SOLAR-DEPRESSION_S1_1 - Evening Civil Twilight (6°) - Summer Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_2 - Evening Civil Twilight (6°) - Winter Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_3 - Morning Civil Twilight (6°) - Summer Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_4 - Morning Civil Twilight (6°) - Winter Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_5 - Evening Nautical Twilight (12°) - Summer Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_6 - Evening Nautical Twilight (12°) - Winter Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_7 - Morning Nautical Twilight (12°) - Summer Solstice Prague | ❓ |
+| Calculator | ~ SOLAR-DEPRESSION_S1_8 - Morning Nautical Twilight (12°) - Winter Solstice Prague | ❓ |
+
+---
+
+## SCENARIO: SOLAR-BI-SEARCH_S1 - Find Crossing
+SOLAR-BI-SEARCH_S1
+
+| Layer | Slug                                                                                | Status |
+|--|-------------------------------------------------------------------------------------|--------|
+| Calculator | ~ SOLAR-BI-SEARCH_S1_1 - Evening Civil Twilight (6°) - Summer Solstice Prague | ✅      |
+| Calculator | ~ SOLAR-BI-SEARCH_S1_2 - Evening Civil Twilight (6°) - Winter Solstice Prague | ✅      |
+| Calculator | ~ SOLAR-BI-SEARCH_S1_3 - Evening Nautical Twilight (12°) - Summer Solstice Prague | ✅      |
+| Calculator | ~ SOLAR-BI-SEARCH_S1_4 - Evening Civil Twilight (6°) - March Equinox Prague | ✅      |
+| Calculator | ~ SOLAR-BI-SEARCH_S1_5 - Evening Nautical Twilight (12°) - Summer Solstice Gdansk | ✅      |
+| Calculator | ~ SOLAR-BI-SEARCH_S1_6 - Evening Nautical Twilight (12°) - Summer Solstice Riga (White Nights) | ✅      |
+
+---
+
+## SCENARIO: SolarTimesResultDto.toDomain()
+PARSER_DATE_S1
+
+| Layer  | Slug                                                                                | Status |
+|--------|-------------------------------------------------------------------------------------|--|
+| Parser | ~ PARSER_DATE_S1_1 - handle empty strings by returning null instants | ✅ |
+| Parser | ~ PARSER_DATE_S1_2 - should parse valid times correctly | ✅ |
+
+---
+
+## SCENARIO: one-time education dialog
+PERM_EDUCATION
+
+| Layer | Slug                                                                                | Status |
+|-------|-------------------------------------------------------------------------------------|--|
+| VM    | ~ PERM_EDUCATION_S1 - should show education dialog only on first trigger | ✅ |
+| VM    | ~ PERM_EDUCATION_S2 - should not re-show education after app restart simulation | ✅ |
+
+---
+
+## SCENARIO: NetworkCapabilities1
+NETWORK_1
+
+| Layer    | Slug                                                                                                     | Status |
+|----------|----------------------------------------------------------------------------------------------------------|--|
+| Observer | ~ NETWORK_1_S1 - should return false if NetworkCapabilities is null                                      | ✅ |
+| Observer | ~ NETWORK_1_S2 - should return false if has NET_CAPABILITY_INTERNET but not NET_CAPABILITY_VALIDATED     | ✅ |
+| Observer | ~ NETWORK_1_S3 - should return false if has NET_CAPABILITY_VALIDATED but not NET_CAPABILITY_INTERNET     | ✅ |
+| Observer | ~ NETWORK_1_S4 - should return true if has NET_CAPABILITY_VALIDATED and NET_CAPABILITY_INTERNET          | ✅ |
+| Observer | ~ NETWORK_1_S5 - should return false if has neither NET_CAPABILITY_VALIDATED nor NET_CAPABILITY_INTERNET | ✅ |
+
+---
+
+## SCENARIO: NetworkCapabilities2
+NETWORK_2
+
+| Layer    | Slug                                                                                                                      | Status |
+|----------|---------------------------------------------------------------------------------------------------------------------------|--|
+| Observer | ~ NETWORK_2_1 - should stop collecting from source after last subscriber unsubscribes and WhileSubscribed timeout elapses | ✅ |
+
+---
+
+## SCENARIO: NetworkCapabilities3
+NETWORK_2
+
+| Layer    | Slug                                                                                                                      | Status |
+|----------|---------------------------------------------------------------------------------------------------------------------------|--|
+| Observer | ~ NETWORK_3_1 - should delegate to networkCallbackFlow extension on ConnectivityManager   | ✅ |
+
+---
+
+## SCENARIO: Network connectivity effects
+NETWORK_CONNECT_1
+
+| Layer | Slug                                                                                               | Status |
+|-------|----------------------------------------------------------------------------------------------------|--|
+| VM    | ~ NETWORK_CONNECT_1_S1 - should show restored internet toast when connection comes back                                | ✅ |
+| VM    | ~ NETWORK_CONNECT_1_S2 - should show no internet toast when connection is lost | ✅ |
+
+---
+
+## SCENARIO: Reload trigger behavior
+NETWORK_CONNECT_2
+
+| Layer      | Slug                                                                                               | Status |
+|------------|----------------------------------------------------------------------------------------------------|--|
+| Repository | ~ NETWORK_CONNECT_2_S1 - should reload halachic times when connection is restored                                | ✅ |
+| Repository | ~ NETWORK_CONNECT_2_S2 - should NOT reload when connection is lost | ✅ |
+
+---
+
+## SCENARIO: NetworkObserver callback
+NETWORK_CONNECT_3
+
+| Layer    | Slug                                                                                                | Status |
+|----------|-----------------------------------------------------------------------------------------------------|--------|
+| Observer | ~ NETWORK_CONNECT_3_S1 - initial seed value reflects activeNetwork's capabilities at subscription time      | ✅      |
+| Observer | ~ NETWORK_CONNECT_3_S2 - onAvailable emits based on that network's capabilities                             | ✅      |
+| Observer | ~ NETWORK_CONNECT_3_S3 - onCapabilitiesChanged emits based on the new capabilities directly, not a re-fetch | ✅      |
+| Observer | ~ NETWORK_CONNECT_3_S4 - onLost re-queries activeNetwork, reflecting another active network if present      | ✅      |
+| Observer | ~ NETWORK_CONNECT_3_S5 - onUnavailable emits false unconditionally                                          | ✅      |
 
 ---

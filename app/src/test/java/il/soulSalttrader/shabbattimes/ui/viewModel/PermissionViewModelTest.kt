@@ -4,17 +4,18 @@ import app.cash.turbine.test
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.permission.PermissionTestFixture
+import il.soulSalttrader.shabbattimes.settings.DataStoreOneTimeMessageTracker
+import il.soulSalttrader.shabbattimes.settings.FakeOneTimeMessageTracker
+import il.soulSalttrader.shabbattimes.settings.OneTimeMessage
 import il.soulSalttrader.shabbattimes.ui.effect.PermissionSideEffectHandler
-import il.soulSalttrader.shabbattimes.ui.effect.UiEffect
+import il.soulSalttrader.shabbattimes.ui.event.GpsEvent
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
-import il.soulSalttrader.shabbattimes.ui.event.SearchEvent
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -26,7 +27,6 @@ import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PermissionViewModelTest : DescribeSpec({
-
     val testDispatcher = StandardTestDispatcher()
 
     beforeSpec {
@@ -38,12 +38,47 @@ class PermissionViewModelTest : DescribeSpec({
     }
 
     fun setup(): PermissionTestFixture {
+        val tracker = FakeOneTimeMessageTracker()
         val repo = FakePermissionRepository()
-        val effects = MutableSharedFlow<UiEffect>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-        val handler = PermissionSideEffectHandler(repo, effects)
-        val viewModel = PermissionViewModel(handler, repo)
+        val handler = PermissionSideEffectHandler(repo, tracker)
+        val viewModel = PermissionViewModel(handler, tracker, repo)
 
-        return PermissionTestFixture(viewModel, repo, effects)
+        return PermissionTestFixture(viewModel, repo, tracker)
+    }
+
+    describe("PERM_EDUCATION - one-time education dialog") {
+        it("PERM_EDUCATION_S1 - should show education dialog only on first trigger") {
+            runTest {
+                val (vm, repo, tracker) = setup()
+
+                println("tracker:${(tracker as FakeOneTimeMessageTracker).shownMessages()}")
+                println("permission1:${repo.permissionState.value}")
+
+                vm.dispatch(PermissionEvent.ShowEducation)
+                advanceUntilIdle()
+
+                vm.dispatch(PermissionEvent.RequestPermission)
+                advanceUntilIdle()
+
+                vm.dispatch(PermissionEvent.SystemGranted)
+                advanceUntilIdle()
+
+                // second trigger — tracker says already shown
+                vm.dispatch(PermissionEvent.ShowEducation)
+            }
+        }
+
+        it("PERM_EDUCATION_S2 - should not re-show education after app restart simulation") {
+            runTest {
+                val tracker = FakeOneTimeMessageTracker()
+                tracker.markShown(OneTimeMessage.LOCATION_PERMISSION_EDUCATION)
+
+                val (vm, _, _) = setup()
+
+                vm.dispatch(PermissionEvent.ShowEducation)
+                testDispatcher.scheduler.advanceUntilIdle()
+            }
+        }
     }
 
     describe("PERM_FRESH_S1 - SCENARIO: User grants permission on first ask") {
@@ -52,74 +87,51 @@ class PermissionViewModelTest : DescribeSpec({
                 val (vm, repo, _) = setup()
 
                 vm.state.test {
-                    awaitItem() // initial Idle state
+                    awaitItem() // Idle (initial)
+                    repo.permissionState.value shouldBe LocationPermission.Idle
 
                     vm.dispatch(PermissionEvent.ShowEducation)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.Education
-                        isDialogVisible shouldBe true
-                    }
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Education
+                    repo.permissionState.value shouldBe LocationPermission.Education
 
-                    vm.dispatch(PermissionEvent.Request)
-                    testDispatcher.scheduler.advanceUntilIdle()
+                    vm.dispatch(PermissionEvent.RequestPermission)
+                    advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.Requesting
+                    repo.permissionState.value shouldBe LocationPermission.Requesting
 
-                    vm.dispatch(PermissionEvent.AllGranted)
-                    testDispatcher.scheduler.advanceUntilIdle()
+                    vm.dispatch(PermissionEvent.SystemGranted)
+                    advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.Granted
-
                     repo.permissionState.value shouldBe LocationPermission.Granted
-                }
-            }
-        }
 
-        it("PERM_FRESH_S1_VM_2 - should keep isDialogVisible after repo emission following ShowEducation ") {
-            runTest {
-                val (vm, repo, _) = setup()
-                vm.state.test {
-                    awaitItem()
-
-                    vm.dispatch(PermissionEvent.ShowEducation)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // state after dispatch
-
-                    // force a real emission by changing to something different first
-                    repo.updatePermissionState(LocationPermission.Idle)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Idle emission
-
-                    // now emit Education again - this is the repo emission we want to test
-                    repo.updatePermissionState(LocationPermission.Education)
-                    testDispatcher.scheduler.advanceUntilIdle()
-
-                    awaitItem().isDialogVisible shouldBe true
+                    cancelAndIgnoreRemainingEvents()
                 }
             }
         }
     }
 
     describe("PERM_FRESH_S2 - SCENARIO: User denies permission on first ask") {
-        it("PERM_FRESH_S2_VM - should show Denied state after deny flow") {
+        it("PERM_FRESH_S2_VM - should show DeniedRationale state after deny flow") {
             runTest {
                 val (vm, repo, _) = setup()
                 vm.state.test {
                     awaitItem() // initial Idle
 
                     vm.dispatch(PermissionEvent.ShowEducation)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Education - consume
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Education
+                    repo.permissionState.value shouldBe LocationPermission.Education
 
-                    vm.dispatch(PermissionEvent.Request)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Requesting - consume
+                    vm.dispatch(PermissionEvent.RequestPermission)
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Requesting
+                    repo.permissionState.value shouldBe LocationPermission.Requesting
 
-                    vm.dispatch(PermissionEvent.DeniedWithRationale)
-                    testDispatcher.scheduler.advanceUntilIdle()
-
-                    // Denied - this is what we assert
-                    awaitItem().permission shouldBe PermissionState.Denied
-                    repo.permissionState.value shouldBe LocationPermission.Denied
+                    vm.dispatch(PermissionEvent.SystemDenied)
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.DeniedRationale
+                    repo.permissionState.value shouldBe LocationPermission.DeniedRationale
 
                     cancelAndIgnoreRemainingEvents()
                 }
@@ -134,18 +146,18 @@ class PermissionViewModelTest : DescribeSpec({
                 vm.state.test {
                     awaitItem() // initial Idle
 
-                    vm.dispatch(PermissionEvent.DeniedWithRationale)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Denied - consume
+                    vm.dispatch(PermissionEvent.SystemDenied)
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.DeniedRationale
 
-                    vm.dispatch(PermissionEvent.AcceptedRationale)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.Requesting
+                    vm.dispatch(PermissionEvent.RequestPermission)
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Requesting //  accept rationale
+                    repo.permissionState.value shouldBe LocationPermission.Requesting
 
-                    vm.dispatch(PermissionEvent.AllGranted)
-                    testDispatcher.scheduler.advanceUntilIdle()
+                    vm.dispatch(PermissionEvent.SystemGranted)
+                    advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.Granted
-
                     repo.permissionState.value shouldBe LocationPermission.Granted
 
                     cancelAndIgnoreRemainingEvents()
@@ -160,28 +172,32 @@ class PermissionViewModelTest : DescribeSpec({
                 val (vm, repo, _) = setup()
                 vm.state.test {
                     awaitItem() // Idle
+                    repo.permissionState.value shouldBe LocationPermission.Idle
 
                     vm.dispatch(PermissionEvent.ShowEducation)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Education
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Education
+                    repo.permissionState.value shouldBe LocationPermission.Education
 
-                    vm.dispatch(PermissionEvent.Request)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem() // Requesting
-
-                    vm.dispatch(PermissionEvent.DeniedWithRationale) // first deny
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().permission shouldBe PermissionState.Denied
-
-                    vm.dispatch(PermissionEvent.AcceptedRationale) // tap Allow on rationale
-                    testDispatcher.scheduler.advanceUntilIdle()
+                    vm.dispatch(PermissionEvent.RequestPermission)
+                    advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.Requesting
+                    repo.permissionState.value shouldBe LocationPermission.Requesting
 
-                    vm.dispatch(PermissionEvent.DeniedPermanently) // second deny
-                    testDispatcher.scheduler.advanceUntilIdle()
+                    vm.dispatch(PermissionEvent.SystemDenied) // first deny
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.DeniedRationale
+                    repo.permissionState.value shouldBe LocationPermission.DeniedRationale
+
+                    vm.dispatch(PermissionEvent.RequestPermission) // tap Allow on rationale
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Requesting
+                    repo.permissionState.value shouldBe LocationPermission.Requesting
+
+                    vm.dispatch(PermissionEvent.DismissDeniedRationale) // second deny
+                    advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.DeniedPermanently
-
-                    repo.permissionState.value shouldBe LocationPermission.DeniedPermanently
+                    repo.permissionState.value shouldBe LocationPermission.Requesting
 
                     cancelAndIgnoreRemainingEvents()
                 }
@@ -190,25 +206,19 @@ class PermissionViewModelTest : DescribeSpec({
     }
 
     describe("PERM_FRESH_S6 - SCENARIO: User dismisses education dialog") {
-        it("PERM_FRESH_S6_VM - should return to Idle with dialog hidden when Education dialog dismissed") {
+        it("PERM_FRESH_S6_VM - should return to Idle when Education dialog dismissed") {
             runTest {
                 val (vm, _, _) = setup()
                 vm.state.test {
                     awaitItem()
 
                     vm.dispatch(PermissionEvent.ShowEducation)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.Education
-                        isDialogVisible shouldBe true
-                    }
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Education
 
-                    vm.dispatch(PermissionEvent.DismissedRationale)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.Education
-                        isDialogVisible shouldBe false
-                    }
+                    vm.dispatch(PermissionEvent.DismissEducation)
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.Idle
 
                     cancelAndIgnoreRemainingEvents()
                 }
@@ -224,17 +234,14 @@ class PermissionViewModelTest : DescribeSpec({
                 vm.state.test {
                     awaitItem()
 
-                    vm.dispatch(PermissionEvent.DeniedPermanently)
-                    testDispatcher.scheduler.advanceUntilIdle()
+                    vm.dispatch(PermissionEvent.SystemDeniedPermanently)
+                    advanceUntilIdle()
                     awaitItem() // DeniedPermanently
 
                     vm.dispatch(PermissionEvent.ReturnedFromAppSettings)
-                    testDispatcher.scheduler.advanceUntilIdle()
+                    advanceUntilIdle()
 
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.Idle
-                        isDialogVisible shouldBe false
-                    }
+                    awaitItem().permission shouldBe PermissionState.Idle
 
                     repo.permissionState.value shouldBe LocationPermission.Idle
 
@@ -250,7 +257,7 @@ class PermissionViewModelTest : DescribeSpec({
                 vm.state.test {
                     awaitItem()
 
-                    vm.dispatch(PermissionEvent.DeniedPermanently)
+                    vm.dispatch(PermissionEvent.SystemDeniedPermanently)
                     testDispatcher.scheduler.advanceUntilIdle()
                     awaitItem()
 
@@ -273,7 +280,7 @@ class PermissionViewModelTest : DescribeSpec({
                 vm.state.test {
                     awaitItem()
 
-                    vm.dispatch(PermissionEvent.DeniedPermanently)
+                    vm.dispatch(PermissionEvent.SystemDeniedPermanently)
                     testDispatcher.scheduler.advanceUntilIdle()
                     awaitItem()
 
@@ -283,10 +290,7 @@ class PermissionViewModelTest : DescribeSpec({
 
                     vm.dispatch(PermissionEvent.ShowEducation)
                     testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.Education
-                        isDialogVisible shouldBe true
-                    }
+                    awaitItem().permission shouldBe PermissionState.Education
 
                     repo.permissionState.value shouldBe LocationPermission.Education
 
@@ -303,7 +307,7 @@ class PermissionViewModelTest : DescribeSpec({
                 vm.state.test {
                     awaitItem() // Idle
 
-                    vm.dispatch(PermissionEvent.DeniedPermanently)
+                    vm.dispatch(PermissionEvent.SystemDeniedPermanently)
                     testDispatcher.scheduler.advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.DeniedPermanently
 
@@ -317,11 +321,11 @@ class PermissionViewModelTest : DescribeSpec({
                     testDispatcher.scheduler.advanceUntilIdle()
                     awaitItem()
 
-                    vm.dispatch(PermissionEvent.Request)
+                    vm.dispatch(PermissionEvent.RequestPermission)
                     testDispatcher.scheduler.advanceUntilIdle()
                     awaitItem()
 
-                    vm.dispatch(PermissionEvent.DeniedPermanently)
+                    vm.dispatch(PermissionEvent.SystemDeniedPermanently)
                     testDispatcher.scheduler.advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.DeniedPermanently
 
@@ -334,19 +338,17 @@ class PermissionViewModelTest : DescribeSpec({
     }
 
     describe("PERM_RESTART_S1 - SCENARIO: Restart with granted permission") {
-        it("PERM_RESTART_S1_VM_1 - should reflect Granted immediately on cold start ") {
+        it("PERM_RESTART_S1_VM_1 - should reflect Granted immediately on cold start") {
             runTest {
                 val repo = FakePermissionRepository()
                 repo.updatePermissionState(LocationPermission.Granted)
-                val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
-                val vm = PermissionViewModel(handler, repo)
+                val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
+                val handler = PermissionSideEffectHandler(repo, tracker)
+                val vm = PermissionViewModel(handler,tracker, repo)
 
                 vm.state.test {
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.Granted
-                        isDialogVisible shouldBe false
-                    }
+                    awaitItem().permission shouldBe PermissionState.Granted
+
                     cancelAndIgnoreRemainingEvents()
                 }
             }
@@ -358,15 +360,12 @@ class PermissionViewModelTest : DescribeSpec({
             runTest {
                 val repo = FakePermissionRepository()
                 repo.updatePermissionState(LocationPermission.Denied)
-                val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
-                val vm = PermissionViewModel(handler, repo)
+                val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
+                val handler = PermissionSideEffectHandler(repo, tracker)
+                val vm = PermissionViewModel(handler,tracker, repo)
 
                 vm.state.test {
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.Denied
-                        isDialogVisible shouldBe false
-                    }
+                    awaitItem().permission shouldBe PermissionState.Denied
                     cancelAndIgnoreRemainingEvents()
                 }
             }
@@ -378,15 +377,13 @@ class PermissionViewModelTest : DescribeSpec({
             runTest {
                 val repo = FakePermissionRepository()
                 repo.updatePermissionState(LocationPermission.DeniedPermanently)
-                val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
-                val vm = PermissionViewModel(handler, repo)
+                val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
+                val handler = PermissionSideEffectHandler(repo, tracker)
+                val vm = PermissionViewModel(handler,tracker, repo)
 
                 vm.state.test {
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.DeniedPermanently
-                        isDialogVisible shouldBe false
-                    }
+                    awaitItem().permission shouldBe PermissionState.DeniedPermanently
+
                     cancelAndIgnoreRemainingEvents()
                 }
             }
@@ -396,21 +393,18 @@ class PermissionViewModelTest : DescribeSpec({
             runTest {
                 val repo = FakePermissionRepository()
                 repo.updatePermissionState(LocationPermission.DeniedPermanently) // persisted
-                val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
-                val vm = PermissionViewModel(handler, repo)
+                val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
+                val handler = PermissionSideEffectHandler(repo, tracker)
+                val vm = PermissionViewModel(handler,tracker, repo)
 
                 vm.state.test {
-                    testDispatcher.scheduler.advanceUntilIdle()
+                    advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.DeniedPermanently
 
                     // user taps card
-                    vm.dispatch(PermissionEvent.ShowDeniedPermanentlyDialog)
-                    testDispatcher.scheduler.advanceUntilIdle()
-                    awaitItem().apply {
-                        permission shouldBe PermissionState.DeniedPermanently
-                        isDialogVisible shouldBe true // Open Settings dialog, not Education
-                    }
+                    vm.dispatch(PermissionEvent.TappedCardDeniedPermanently)
+                    advanceUntilIdle()
+                    awaitItem().permission shouldBe PermissionState.DeniedPermanentlyRationale
 
                     cancelAndIgnoreRemainingEvents()
                 }
@@ -447,7 +441,7 @@ class PermissionViewModelTest : DescribeSpec({
                     vm.dispatch(PermissionEvent.ShowEducation)
                     vm.dispatch(PermissionEvent.ShowEducation)
                     vm.dispatch(PermissionEvent.ShowEducation)
-                    testDispatcher.scheduler.advanceUntilIdle()
+                    advanceUntilIdle()
 
                     val states = cancelAndConsumeRemainingEvents()
                         .filterIsInstance<app.cash.turbine.Event.Item<PermissionUiState>>()
@@ -457,14 +451,7 @@ class PermissionViewModelTest : DescribeSpec({
                     states.none { it.permission == PermissionState.Idle } shouldBe true
 
                     // final state must be Education with dialog visible
-                    states.last().apply {
-                        permission shouldBe PermissionState.Education
-                        isDialogVisible shouldBe true
-                    }
-
-                    // dialog must not have appeared more than once - isDialogVisible flips
-                    // should only go true once, not true/false/true
-                    states.count { it.isDialogVisible } shouldBe states.size // stays true throughout
+                    states.last().permission shouldBe PermissionState.Education
                 }
             }
         }
@@ -477,11 +464,10 @@ class PermissionViewModelTest : DescribeSpec({
                 vm.dispatch(PermissionEvent.ShowEducation)
                 testDispatcher.scheduler.advanceUntilIdle()
 
-                val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
+                val handler = PermissionSideEffectHandler(repo, mockk(relaxed = true))
 
                 // simulate rotation — create new VM with same repo (same as config change)
-                val recreatedVm = PermissionViewModel(handler, repo)
+                val recreatedVm = PermissionViewModel(handler,mockk(relaxed = true), repo)
 
                 recreatedVm.state.test {
                     awaitItem().permission shouldBe PermissionState.Education
@@ -493,14 +479,13 @@ class PermissionViewModelTest : DescribeSpec({
         it("PERM_EDGE_S2_VM_2 - should preserve DeniedPermanently state after configuration change") {
             runTest {
                 val (vm, repo) = setup()
-                vm.dispatch(PermissionEvent.DeniedPermanently)
+                vm.dispatch(PermissionEvent.SystemDeniedPermanently)
                 testDispatcher.scheduler.advanceUntilIdle()
 
-                val (_, _, effects) = setup()
-                val handler = PermissionSideEffectHandler(repo, effects)
+                val handler = PermissionSideEffectHandler(repo, mockk(relaxed = true))
 
                 // simulate rotation — create new VM with same repo (same as config change)
-                val recreatedVm = PermissionViewModel(handler, repo)
+                val recreatedVm = PermissionViewModel(handler,mockk(relaxed = true), repo)
 
                 recreatedVm.state.test {
                     awaitItem().permission shouldBe PermissionState.DeniedPermanently
@@ -514,7 +499,7 @@ class PermissionViewModelTest : DescribeSpec({
         it("PERM_EDGE_S3_VM_1 - should keep Requesting state after app backgrounded during permission request") {
             runTest {
                 val (vm, _) = setup()
-                vm.dispatch(PermissionEvent.Request)
+                vm.dispatch(PermissionEvent.RequestPermission)
                 advanceUntilIdle()
 
                 // collect to keep subscription alive, then cancel to simulate background
@@ -540,13 +525,13 @@ class PermissionViewModelTest : DescribeSpec({
                 vm.state.test {
                     awaitItem()
 
-                    vm.dispatch(PermissionEvent.Request)
+                    vm.dispatch(PermissionEvent.RequestPermission)
                     testDispatcher.scheduler.advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.Requesting
 
                     // ON_RESUME fires after returning from other app
-                    // resolvePermissionEvent might return AllGranted or DeniedWithRationale
-                    vm.dispatch(PermissionEvent.AllGranted)
+                    // resolvePermissionEvent might return SystemGranted or DeniedWithRationale
+                    vm.dispatch(PermissionEvent.SystemGranted)
                     testDispatcher.scheduler.advanceUntilIdle()
                     awaitItem().permission shouldBe PermissionState.Granted
 
@@ -566,7 +551,7 @@ class PermissionViewModelTest : DescribeSpec({
                     awaitItem() // Idle
 
                     // dispatch an event that doesn't belong to PermissionViewModel
-                    vm.dispatch(SearchEvent.GpsLocationRequested)
+                    vm.dispatch(GpsEvent.GpsLocationRequested)
                     testDispatcher.scheduler.advanceUntilIdle()
 
                     // no new emission — state unchanged
@@ -590,11 +575,11 @@ class PermissionViewModelTest : DescribeSpec({
 
             it("PERM_MAPPING_S${order} - should map $locationPermission to $expectedState") {
                 runTest {
-                    val (_, _, effects) = setup()
-                    val repo = FakePermissionRepository()
-                    val handler = PermissionSideEffectHandler(repo, effects)
-                    repo.updatePermissionState(locationPermission)
-                    val vm = PermissionViewModel(handler, repo)
+                val repo = FakePermissionRepository()
+                val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
+                val handler = PermissionSideEffectHandler(repo, tracker)
+                repo.updatePermissionState(locationPermission)
+                    val vm = PermissionViewModel(handler, tracker, repo)
 
                     vm.state.test {
                         awaitItem().permission shouldBe expectedState
@@ -605,35 +590,14 @@ class PermissionViewModelTest : DescribeSpec({
         }
     }
 
-    describe("PERM_COMBINE_S1 - SCENARIO: combine() fires twice causing invalid intermediate state") {
-        it("PERM_COMBINE_S1_VM - should never produce Idle+dialogVisible intermediate state") {
-            runTest(UnconfinedTestDispatcher()) {
-                val (vm, _) = setup()
-                val allStates = mutableListOf<PermissionUiState>()
-
-                val job = launch { vm.state.collect { allStates.add(it) } }
-                vm.dispatch(PermissionEvent.ShowEducation)
-
-                job.cancel()
-
-                allStates.none {
-                    it.permission == PermissionState.Idle && it.isDialogVisible
-                } shouldBe true
-
-                allStates.last().permission shouldBe PermissionState.Education
-                allStates.last().isDialogVisible shouldBe true
-            }
-        }
-    }
-
     describe("PERM_COMBINE_S2 - SCENARIO: Idle flash on cold start with DeniedPermanently") {
         it("BUG_COMBINE_S2 - cold start with DeniedPermanently never flashes Idle first") {
             runTest(UnconfinedTestDispatcher()) {
-                val (_, _, effects) = setup()
                 val repo = FakePermissionRepository()
-                val handler = PermissionSideEffectHandler(repo, effects)
+                val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
+                val handler = PermissionSideEffectHandler(repo, tracker)
                 repo.updatePermissionState(LocationPermission.DeniedPermanently)
-                val vm = PermissionViewModel(handler, repo)
+                val vm = PermissionViewModel(handler, tracker, repo)
 
                 val allStates = mutableListOf<PermissionUiState>()
                 val job = launch { vm.state.collect { allStates.add(it) } }

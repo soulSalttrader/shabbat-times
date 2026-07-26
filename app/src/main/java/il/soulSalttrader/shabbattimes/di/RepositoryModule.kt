@@ -13,7 +13,6 @@ import il.soulSalttrader.shabbattimes.repository.GeocodingRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.GpsLocationRepository
 import il.soulSalttrader.shabbattimes.repository.GpsLocationRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
-import il.soulSalttrader.shabbattimes.repository.PermissionRepositoryImpl
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepository
 import il.soulSalttrader.shabbattimes.repository.SavedLocationsRepositoryInMemory
 import il.soulSalttrader.shabbattimes.repository.SolarTimesRepository

@@ -6,6 +6,9 @@ import il.soulSalttrader.shabbattimes.model.LocationStatus
 import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
+import il.soulSalttrader.shabbattimes.model.TimeState
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 fun jerusalemLocation(id: String = "id_1") = SavedLocation(
@@ -38,25 +41,65 @@ fun gpsLocation() = SavedLocation(
 
 val jerusalemEntry = ShabbatEntry(
     location = jerusalemLocation(),
-    times = HalachicTimesDisplay(jerusalemLocation().coordinates),
+    times = HalachicTimesDisplay(
+        coordinates = jerusalemLocation().coordinates,
+        candleLighting = TimeState.Available(
+            LocalTime.of(18, 45),
+            LocalDate.of(2026, 6, 19)
+        ),
+        havdalah = TimeState.Available(
+            LocalTime.of(20, 12),
+            LocalDate.of(2026, 6, 20)
+        ),
+    ),
     status = LocationStatus.Nearby(1.0),
 )
 
 val telAvivEntry = ShabbatEntry(
     location = telAvivLocation(),
-    times = HalachicTimesDisplay(telAvivLocation().coordinates),
+    times = HalachicTimesDisplay(
+        coordinates = telAvivLocation().coordinates,
+        candleLighting = TimeState.Available(
+            time = LocalTime.of(20, 0,5),
+            date = LocalDate.of(2026, 6, 19)
+        ),
+        havdalah = TimeState.Available(
+            time = LocalTime.of(21, 30),
+            date = LocalDate.of(2026, 6, 20)
+        ),
+    ),
     status = LocationStatus.Nearby(2.0),
 )
 
 val brnoEntry = ShabbatEntry(
     location = brnoLocation(),
-    times = HalachicTimesDisplay(brnoLocation().coordinates),
+    times = HalachicTimesDisplay(
+        coordinates = brnoLocation().coordinates,
+        candleLighting = TimeState.Available(
+            time = LocalTime.of(16, 10),
+            date = LocalDate.of(2026, 12, 18)
+        ),
+        havdalah = TimeState.Available(
+            time = LocalTime.of(17, 0,5),
+            date = LocalDate.of(2026, 12, 19)
+        ),
+    ),
     status = LocationStatus.Nearby(3.0),
 )
 
 val gpsEntry = ShabbatEntry(
     location = gpsLocation(),
-    times = HalachicTimesDisplay(gpsLocation().coordinates),
+    times = HalachicTimesDisplay(
+        coordinates = gpsLocation().coordinates,
+        candleLighting = TimeState.Available(
+            time = LocalTime.of(16, 10),
+            date = LocalDate.of(2026, 12, 18)
+        ),
+        havdalah = TimeState.Available(
+            time = LocalTime.of(17, 0,5),
+            date = LocalDate.of(2026, 12, 19)
+        ),
+    ),
     status = LocationStatus.Current,
 )
 

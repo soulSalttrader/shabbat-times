@@ -11,6 +11,8 @@ import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
 import il.soulSalttrader.shabbattimes.TestTags.LOCATION_CARD
 import il.soulSalttrader.shabbattimes.TestTags.SWIPE_CARD_DIALOG
 import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay.Companion.EMPTY_DATE
+import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay.Companion.EMPTY_TIME
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.model.SavedLocation.Companion.LOCATION_ID
 import org.junit.Ignore
@@ -114,29 +116,25 @@ class ShabbatCardTest : BaseInstrumentedTest() {
 
     @Test
     fun `UI_CARD_CONTENT_S2 - should display shabbat times on card`() {
-        uiRobot
-            .addShabbatCard(LOCATION_ID)
-            .assertCardPresented(LOCATION_CARD)
-
         cardRobot
             .assertTextPlaceholdersCount(
-                text = "--:--",
-                cardTag = LOCATION_CARD,
+                text = EMPTY_TIME,
+                cardTag = EMPTY_CARD,
                 expectedCount = 2,
             )
             .assertTextPlaceholdersCount(
-                text = "dd/mm/yyyy",
-                cardTag = LOCATION_CARD,
+                text = EMPTY_DATE,
+                cardTag = EMPTY_CARD,
                 expectedCount = 2
             )
             .assertTextPlaceholdersCount(
                 text = "Candle Lighting",
-                cardTag = LOCATION_CARD,
+                cardTag = EMPTY_CARD,
                 expectedCount = 1,
             )
             .assertTextPlaceholdersCount(
                 text = "Havdalah Time",
-                cardTag = LOCATION_CARD,
+                cardTag = EMPTY_CARD,
                 expectedCount = 1,
             )
     }

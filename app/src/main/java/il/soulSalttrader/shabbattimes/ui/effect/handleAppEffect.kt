@@ -6,6 +6,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import il.soulSalttrader.shabbattimes.common.openAppSettings
+import kotlinx.coroutines.delay
 
 suspend fun handleUiEffect(
     effect: UiEffect,
@@ -17,8 +18,9 @@ suspend fun handleUiEffect(
             Toast.makeText(
                 context,
                 effect.message.resolve(context),
-                Toast.LENGTH_LONG,
+                Toast.LENGTH_SHORT,
             ).show()
+            delay(2000)
         }
         is UiEffect.ShowSnackBar    -> {
             val result = snackbarHostState.showSnackbar(

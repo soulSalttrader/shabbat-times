@@ -2,15 +2,14 @@ package il.soulSalttrader.shabbattimes.ui.event
 
 import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
+import il.soulSalttrader.shabbattimes.model.ResolvedLocation
 import il.soulSalttrader.shabbattimes.ui.Input
 import il.soulSalttrader.shabbattimes.ui.Selection
+import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
+import il.soulSalttrader.shabbattimes.ui.reducer.SearchReducer
 import il.soulSalttrader.shabbattimes.ui.search.SearchResultState
 import il.soulSalttrader.shabbattimes.ui.search.SearchUiState
 import il.soulSalttrader.shabbattimes.ui.search.SearchVisibility
-import il.soulSalttrader.shabbattimes.model.LocationPermission
-import il.soulSalttrader.shabbattimes.model.ResolvedLocation
-import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
-import il.soulSalttrader.shabbattimes.ui.reducer.SearchReducer
 
 sealed interface SearchEvent : UiEvent, Reducible<SearchUiState> {
     data class QueryChanged(val newQuery: String) : SearchEvent {
@@ -79,39 +78,6 @@ sealed interface SearchEvent : UiEvent, Reducible<SearchUiState> {
     object SearchCommitted : SearchEvent {
         override val reducer = SearchReducer { state ->
             state.copy(visibility = SearchVisibility.Collapsed)
-        }
-    }
-
-    data class GpsLocationLoaded(val location: ResolvedLocation) : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(gpsResult = SearchResultState.GpsResolved(location))
-        }
-    }
-
-    data class GpsLocationError(val cause: Throwable) : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(gpsResult = SearchResultState.Failure(cause))
-        }
-    }
-
-    data object GpsLocationRequested : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(gpsResult = SearchResultState.Loading)
-        }
-    }
-
-    data class GpsPermissionChanged(val permission: LocationPermission) : SearchEvent {
-        override val reducer = SearchReducer { state ->
-            state.copy(
-                gpsResult = when (permission) {
-                    is LocationPermission.Idle              -> SearchResultState.Idle
-                    is LocationPermission.Requesting        -> SearchResultState.Loading
-                    is LocationPermission.Denied            -> SearchResultState.Idle
-                    is LocationPermission.DeniedPermanently -> SearchResultState.Idle
-
-                    else -> state.gpsResult
-                }
-            )
         }
     }
 }

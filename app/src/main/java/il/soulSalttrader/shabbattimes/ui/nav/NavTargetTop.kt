@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface NavTargetTop : NavTarget {
     @Serializable object Previous : NavTargetTop
-    @Serializable object Settings : NavTargetBottom
+    @Serializable object Settings : NavTargetTop
 }

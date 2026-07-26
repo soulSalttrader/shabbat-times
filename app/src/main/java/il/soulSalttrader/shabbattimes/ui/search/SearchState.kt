@@ -7,9 +7,3 @@ data class SearchState(
     val hasQuery: Boolean,
     val searchActive: Boolean,
 )
-
-fun SearchUiState.default() = SearchState(
-    suggestions = suggestionsOrEmpty(),
-    hasQuery = hasQuery(),
-    searchActive = isSearchActive(),
-)
