@@ -94,6 +94,7 @@ class DialogFlowTest : BaseInstrumentedTest() {
             .assertCardPresented(GPS_CARD)
         permissionRobot
             .tapCardToStartPermissionFlow(GPS_CARD)
+            .assertAppDialogAppeared(RATIONALE_DIALOG, true)
         systemPermissionRobot
             .assertSystemDialogAppeared(composeRule)
             .allowWhileUsingApp(composeRule)

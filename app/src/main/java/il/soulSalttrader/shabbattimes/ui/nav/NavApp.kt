@@ -29,7 +29,7 @@ fun NavApp(
         navigator.collectNavigationCommands(navController)
     }
 
-    val startDestination = NavTargetBottom.Shabbat
+    val startDestination = NavTargetRoot.Shabbat
 
     NavHost(
         modifier = modifier,

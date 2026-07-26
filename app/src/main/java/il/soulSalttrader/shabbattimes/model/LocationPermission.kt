@@ -6,5 +6,7 @@ sealed interface LocationPermission {
     data object Requesting : LocationPermission
     data object Granted : LocationPermission
     data object Denied : LocationPermission
+    data object DeniedRationale : LocationPermission
     data object DeniedPermanently : LocationPermission
+    data object DeniedPermanentlyRationale : LocationPermission
 }

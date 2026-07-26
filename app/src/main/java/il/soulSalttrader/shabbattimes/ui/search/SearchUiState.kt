@@ -8,7 +8,6 @@ import il.soulSalttrader.shabbattimes.model.State
 data class SearchUiState(
     val query: Input<String> = Input.Idle,
     val suggestionResults: SearchResultState = SearchResultState.Idle,
-    val gpsResult: SearchResultState = SearchResultState.Idle,
     val selectedSuggestion: Selection<ResolvedLocation?> = Selection.Idle,
     val visibility: SearchVisibility = SearchVisibility.Collapsed,
 ) : State

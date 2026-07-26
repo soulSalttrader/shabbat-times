@@ -1,8 +1,9 @@
 package il.soulSalttrader.shabbattimes.ui.shabbat
 
-interface CardAction {
-    data object OpenGpsSearch : CardAction
-    data object AcceptRationale : CardAction
-    data object ShowDeniedDialog : CardAction
-    data object ShowEducation : CardAction
+sealed interface CardAction {
+    data object OpenGpsSearch        : CardAction
+    data object ShowDeniedRationale  : CardAction
+    data object ShowDeniedPermanently : CardAction
+    data object None                 : CardAction
+    data object PermissionRequested : CardAction
 }

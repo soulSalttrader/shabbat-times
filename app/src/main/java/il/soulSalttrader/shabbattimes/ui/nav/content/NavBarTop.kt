@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import il.soulSalttrader.shabbattimes.ui.nav.NavItem
 import il.soulSalttrader.shabbattimes.ui.nav.NavTarget
-import il.soulSalttrader.shabbattimes.ui.nav.NavTargetBottom
+import il.soulSalttrader.shabbattimes.ui.nav.NavTargetRoot
 import il.soulSalttrader.shabbattimes.ui.nav.Navigator
 import il.soulSalttrader.shabbattimes.ui.nav.extractTopBarItems
 import il.soulSalttrader.shabbattimes.ui.nav.titleOr
@@ -24,7 +24,7 @@ fun NavBarTop(
     navigator: Navigator,
     scrollBehavior: TopAppBarScrollBehavior,
     currentNavTarget: NavTarget? = null,
-    isNavIconVisible: Boolean = currentNavTarget != NavTargetBottom.Shabbat,
+    isNavIconVisible: Boolean = currentNavTarget != NavTargetRoot.Shabbat,
 ) {
     val (topNavigationItem, topActionItems) = navItems.extractTopBarItems()
 

@@ -11,8 +11,9 @@
     <string name="location_status_nearby">%1$s km away</string>
     <string name="location_status_locating">Getting your location…</string>
     <string name="location_status_unknown">Unknown distance</string>
-    <string name="location_status_no_permission">Tap to use current location</string>
+    <string name="location_status_no_permission">Tap to grant location permission</string>
     <string name="location_status_last_known">Last known location</string>
+    <string name="location_added">Saved! Pick another spot</string>
 
     <!-- Presets -->
     <string name="preset_ashkenazi">Ashkenazi</string>
@@ -24,9 +25,8 @@
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_my_tradition">My tradition</string>
-    <string name="settings_candle_lighting_summary">Candle lighting: %1$d min before sunset</string>
-    <string name="settings_havdalah_summary">Havdalah: %1$d min after sunset</string>
-    <string name="settings_preset_summary">%1$d min before sunset · %2$d min after sunset</string>
+    <string name="tradition_candle_lighting_offset">Candle lighting time</string>
+    <string name="tradition_havdalah_offset">Havdalah time</string>
     <string name="settings_about">About</string>
     <string name="settings_version">Version</string>
     <string name="settings_developer">Developer</string>
@@ -37,6 +37,40 @@
     <string name="settings_ko_fi_url">https://ko-fi.com/soulsalttrader</string>
     <string name="settings_support_title">Buy me a coffee!</string>
     <string name="settings_support_subtitle">Enjoying the app? Keep it alive on Ko-fi!</string>
+
+    <!-- Candle lighting Offsets -->
+    <string name="candle_offset_10_title">Sha\'at HaDchak</string>
+    <string name="candle_offset_10_desc">%1$s before sunset</string>
+    <string name="candle_offset_15_title">Masorti Minhag</string>
+    <string name="candle_offset_15_desc">%1$s before sunset</string>
+    <string name="candle_offset_18_title">Standard Minhag</string>
+    <string name="candle_offset_18_desc">%1$s before sunset</string>
+    <string name="candle_offset_20_title">New York Minhag</string>
+    <string name="candle_offset_20_desc">%1$s before sunset</string>
+    <string name="candle_offset_22_title">Hasidic Minhag</string>
+    <string name="candle_offset_22_desc">%1$s before sunset</string>
+    <string name="candle_offset_30_title">Haifa Minhag</string>
+    <string name="candle_offset_30_desc">%1$s before sunset</string>
+    <string name="candle_offset_40_title">Jerusalem Minhag</string>
+    <string name="candle_offset_40_desc">%1$s before sunset</string>
+    <string name="candle_offset_45_title">Skver Minhag</string>
+    <string name="candle_offset_45_desc">%1$s before sunset</string>
+    <string name="candle_offset_50_title">Chazon Ish Minhag</string>
+    <string name="candle_offset_50_desc">%1$s before sunset</string>
+
+    <!-- Nightfalls -->
+    <string name="zman_5_95_title">Tzeit Baal HaTanya</string>
+    <string name="zman_5_95_desc">%1$s below horizon</string>
+    <string name="zman_6_48_title">Tzeit Shulchan Aruch</string>
+    <string name="zman_6_48_desc">%1$s below horizon</string>
+    <string name="zman_7_083_title">Tzeit Gaon Rabbeinu Eliyahu</string>
+    <string name="zman_7_083_desc">%1$s below horizon</string>
+    <string name="zman_8_5_title">Tzeit L\'chumra</string>
+    <string name="zman_8_5_desc">%1$s below horizon</string>
+    <string name="zman_72_min_title">Tzeit Rabbeinu Tam</string>
+    <string name="zman_72_min_desc">%1$s after sunset</string>
+    <string name="alot_16_1_title">Alot Magen Avraham</string>
+    <string name="alot_16_1_desc">%1$s below horizon</string>
 
     <!-- Search -->
     <string name="search_limit_reached">Maximum of %1$d saved locations reached</string>
@@ -77,12 +111,50 @@
     <!-- Misc -->
     <string name="display_count_max">99+</string>
 
+    <!-- Edge Cases -->
+    <string name="unavailable_dialog_title">Please consult a local rabbi</string>
+    <string name="unavailable_dialog_confirm">Got it</string>
+    <string name="unavailable_note">see note</string>
+
+    <string name="unavailable_candle_lighting_body">
+        Candle lightning can\'t be calculated for this location —
+        the sun doesn\'t set in the usual way at this latitude.
+        Consult a local rabbi for guidance.
+    </string>
+
+    <string name="unavailable_candle_lighting_snackbar">
+        Candle lighting time cannot be determined at this latitude
+        because the sun does not set (or sets extremely late).
+    </string>
+
+    <string name="unavailable_havdalah_body">
+        Havdalah can\'t be calculated for this location —
+        the sun doesn\'t set in the usual way at this latitude.
+        Consult a local rabbi for guidance.
+    </string>
+
+    <string name="unavailable_havdalah_snackbar">
+        Havdalah time cannot be determined at this latitude
+        because the sun does not set (or sets extremely late).
+    </string>
+
+    <string name="unavailable_both_body">
+        Candle lightning and Havdalah can\'t be calculated for this location —
+        the sun doesn\'t set in the usual way at this latitude.
+        Consult a local rabbi for guidance.
+    </string>
+
+    <string name="unavailable_both_snackbar">
+        Havdalah and CandleLightning times cannot be determined at this latitude
+        because the sun does not set (or sets extremely late).
+    </string>
+
     <!-- Error Handling -->
     <string name="error_unknown">Unknown error</string>
     <string name="error_unexpected">Unexpected error</string>
     <string name="error_times_failed">Some times failed to load</string>
     <string name="error_something_went_wrong">Oops! Something went wrong</string>
-    <string name="error_no_internet">No internet connection</string>
+    <string name="error_no_internet">You\'re offline</string>
     <string name="error_critical_failure">Something went wrong</string>
     <string name="error_no_results">No results found</string>
     <string name="error_unauthorized">Session expired, please sign in again</string>
@@ -92,4 +164,9 @@
     <string name="error_timeout">Connection timed out</string>
     <string name="error_invalid_request">Invalid request, please try again</string>
     <string name="error_invalid_date">Invalid date, please try again</string>
+
+    <string name="restored_internet">Back online</string>
+
+    <string name="batch_partial_failure">Couldn\'t update %1$d of %2$d items</string>
+    <string name="batch_all_failed_mixed">Several errors occurred</string>
 </resources>

@@ -14,7 +14,6 @@ import il.soulSalttrader.shabbattimes.BuildConfig
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.common.openEmail
 import il.soulSalttrader.shabbattimes.settings.AboutItemDisplay
-import il.soulSalttrader.shabbattimes.settings.ShabbatPreset
 import il.soulSalttrader.shabbattimes.ui.event.SettingsEvent
 import il.soulSalttrader.shabbattimes.ui.viewModel.SettingsViewModel
 
@@ -50,13 +49,15 @@ fun SettingsScreen() {
             .fillMaxSize()
             .padding(vertical = 8.dp),
         items = items,
-        presets = ShabbatPreset.all,
-        selected = settingsUiState.preset,
-        onPresetSelected = { preset ->
+        preferences = settingsUiState.preferences,
+        onCandleOffsetChange = { candleLightningOffset ->
             settingsViewModel.dispatch(
-                SettingsEvent.PresetSelected(
-                    preset
-                )
+                SettingsEvent.SetCandleLightingOffset(candleLightningOffset)
+            )
+        },
+        onHavdalahCriterionChange= { havdalahCriterion ->
+            settingsViewModel.dispatch(
+                SettingsEvent.SetHavdalahCriterion(havdalahCriterion)
             )
         },
     )

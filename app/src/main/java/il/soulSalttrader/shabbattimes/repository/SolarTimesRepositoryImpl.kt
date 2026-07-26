@@ -1,15 +1,15 @@
 package il.soulSalttrader.shabbattimes.repository
 
 import il.soulSalttrader.shabbattimes.common.asNetworkFailure
-import il.soulSalttrader.shabbattimes.common.toDisplayString
+import il.soulSalttrader.shabbattimes.common.toApiDateString
 import il.soulSalttrader.shabbattimes.di.SolarTimesService
 import il.soulSalttrader.shabbattimes.model.SolarTimesRequest
 import il.soulSalttrader.shabbattimes.network.NetworkResult
 import il.soulSalttrader.shabbattimes.network.dto.asNetworkResult
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SolarTimesRepositoryImpl @Inject constructor(
@@ -21,7 +21,7 @@ class SolarTimesRepositoryImpl @Inject constructor(
         withContext(context = dispatcher) {
             runCatching {
                 apiService.api.getSolarTimes(
-                    date = request.date.toDisplayString(),
+                    date = request.date.toApiDateString(),
                     lat = request.coordinates.latitude,
                     lng = request.coordinates.longitude,
                     timezone = request.timeZone.id,

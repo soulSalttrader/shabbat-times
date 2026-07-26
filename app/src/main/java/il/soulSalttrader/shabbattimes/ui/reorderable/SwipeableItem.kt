@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.TestTags.SWIPE_CARD_DIALOG
+import il.soulSalttrader.shabbattimes.ui.DialogButtonAction
 import il.soulSalttrader.shabbattimes.ui.ExplanatoryDialog
 import kotlinx.coroutines.launch
 
@@ -58,21 +59,29 @@ fun <T> SwipeableItem(
     ) { content() }
 
     if (showDialog) {
-        ExplanatoryDialog(
-            message = message,
-            title = title,
-            onConfirmText = onConfirmText,
-            onDismissText = onDismissText,
-            onConfirm = {
+        val confirmAction = DialogButtonAction(
+            text = onConfirmText,
+            onClick = {
                 swipeConfig.onSwipe(item)
                 showDialog = false
             },
-            onDismiss = {
+            color = { MaterialTheme.colorScheme.error },
+        )
+
+        val dismissAction = DialogButtonAction(
+            text = onDismissText,
+            onClick = {
                 showDialog = false
                 coroutineScope.launch { dismissState.reset() }
             },
-            onConfirmColor = { MaterialTheme.colorScheme.error },
-            onDismissColor = { MaterialTheme.colorScheme.primary },
+            color = { MaterialTheme.colorScheme.primary }
+        )
+
+        ExplanatoryDialog(
+            message = message,
+            title = title,
+            confirmAction = confirmAction,
+            dismissAction = dismissAction,
             testTag = SWIPE_CARD_DIALOG
         )
     }

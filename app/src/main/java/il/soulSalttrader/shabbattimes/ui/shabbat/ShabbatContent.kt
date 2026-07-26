@@ -31,9 +31,10 @@ import il.soulSalttrader.shabbattimes.ui.reorderable.rememberReorderableState
 import il.soulSalttrader.shabbattimes.ui.reorderable.reorderableList
 import il.soulSalttrader.shabbattimes.ui.search.LocationSearchScreen
 import il.soulSalttrader.shabbattimes.ui.search.SearchConfig
-import il.soulSalttrader.shabbattimes.ui.search.SearchItem
-import il.soulSalttrader.shabbattimes.ui.search.SearchItems.Add
+import il.soulSalttrader.shabbattimes.ui.FabItem
+import il.soulSalttrader.shabbattimes.ui.FabItems.Search
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
+import il.soulSalttrader.shabbattimes.ui.FabAction
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -94,7 +95,10 @@ private fun BoxScope.AnimatedSearchScrim(
             modifier = modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
-                .clickable { searchConfig.action.onChangeVisibility(false) }
+                .clickable {
+                    searchConfig.action.onChangeVisibility(false)
+                    searchConfig.action.onQueryCleared()
+                }
                 .testTag(TestTags.SEARCH_SCRIM)
         )
     }
@@ -123,7 +127,7 @@ private fun BoxScope.AnimatedSearchOverlay(
 private fun BoxScope.AnimatedSearchFab(
     modifier: Modifier = Modifier,
     searchConfig: SearchConfig,
-    fabItems: List<SearchItem> = listOf(Add),
+    fabItems: List<FabItem> = listOf(Search),
 ) {
     AnimatedVisibility(
         modifier = modifier
@@ -134,7 +138,11 @@ private fun BoxScope.AnimatedSearchFab(
     ) {
         FabMenu(
             items = fabItems,
-            onClick = { searchConfig.action.onChangeVisibility(!searchConfig.state.searchActive) },
+            onAction = { action ->
+                when (action) {
+                    FabAction.ToggleSearchOverlay -> searchConfig.action.onChangeVisibility(!searchConfig.state.searchActive)
+                }
+            },
         )
     }
 }

@@ -7,7 +7,7 @@ import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
 import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.SettingsEvent
 import il.soulSalttrader.shabbattimes.ui.settings.SettingsUiState
-import il.soulSalttrader.shabbattimes.useCase.SaveShabbatPresetUseCase
+import il.soulSalttrader.shabbattimes.useCase.SaveShabbatPreferenceUseCase
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,14 +19,14 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val saveShabbatPreset: SaveShabbatPresetUseCase,
+    private val saveShabbatPreferences: SaveShabbatPreferenceUseCase,
     repository: UserPreferencesRepository,
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<SettingsUiState> = MutableStateFlow(value = SettingsUiState())
 
-    val state: StateFlow<SettingsUiState> = repository.shabbatPreset
-        .map { SettingsUiState(preset = it) }
+    val state: StateFlow<SettingsUiState> = repository.shabbatPreferences
+        .map { SettingsUiState(preferences = it) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -34,7 +34,7 @@ class SettingsViewModel @Inject constructor(
         )
 
     fun dispatch(event: UiEvent) {
-        val newState = _state.updateAndGet { current ->
+        _state.updateAndGet { current ->
             when (event) {
                 is SettingsEvent -> event.reducer reduce current
                 else             -> current
@@ -42,14 +42,21 @@ class SettingsViewModel @Inject constructor(
         }
 
         when (event) {
-            is SettingsEvent.PresetSelected -> handlePresetSelected(newState)
-            else                            -> Unit
+            is SettingsEvent.SetCandleLightingOffset -> handleCandleLightningOffsetSelected(event)
+            is SettingsEvent.SetHavdalahCriterion    -> handleHavdalahCriterionSelected(event)
+            else                                     -> Unit
         }
     }
 
-    private fun handlePresetSelected(newState: SettingsUiState) {
+    private fun handleHavdalahCriterionSelected(event: SettingsEvent.SetHavdalahCriterion) {
         viewModelScope.launch {
-            saveShabbatPreset(newState.preset)
+            saveShabbatPreferences(event.criterion)
+        }
+    }
+
+    private fun handleCandleLightningOffsetSelected(event: SettingsEvent.SetCandleLightingOffset) {
+        viewModelScope.launch {
+            saveShabbatPreferences(event.offset)
         }
     }
 }

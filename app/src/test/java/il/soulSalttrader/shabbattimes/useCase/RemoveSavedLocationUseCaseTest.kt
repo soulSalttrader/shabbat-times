@@ -22,7 +22,7 @@ class RemoveSavedLocationUseCaseTest : DescribeSpec({
         savedLocationsRepository = mockk(relaxed = true)
         currentLocationRepository = mockk(relaxed = true)
         permissionRepository = FakePermissionRepository()
-        useCase = RemoveSavedLocationUseCase(currentLocationRepository, savedLocationsRepository, permissionRepository)
+        useCase = RemoveSavedLocationUseCase(currentLocationRepository, savedLocationsRepository)
     }
 
     describe("PERM_CARD_S2 - SCENARIO: Remove GPS card, revoke permission, re-add") {

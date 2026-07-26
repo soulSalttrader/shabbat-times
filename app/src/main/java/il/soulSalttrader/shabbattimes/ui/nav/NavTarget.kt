@@ -12,8 +12,8 @@ sealed interface NavTarget {
                 this?.destination?.hasRoute<NavTargetTop.Settings>() == true   -> NavTargetTop.Settings
                 this?.destination?.hasRoute<NavTargetTop.Previous>() == true   -> NavTargetTop.Previous
 
-                this?.destination?.hasRoute<NavTargetBottom.Shabbat>() == true -> NavTargetBottom.Shabbat
-                else                                                           -> null
+                this?.destination?.hasRoute<NavTargetRoot.Shabbat>() == true -> NavTargetRoot.Shabbat
+                else                                                         -> null
             }
         }
     }

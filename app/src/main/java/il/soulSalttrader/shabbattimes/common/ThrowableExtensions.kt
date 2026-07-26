@@ -1,5 +1,7 @@
 package il.soulSalttrader.shabbattimes.common
 
+import android.util.Log
+import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.model.SolarTimesException
 import il.soulSalttrader.shabbattimes.network.NetworkResult
@@ -10,8 +12,8 @@ import java.util.concurrent.TimeoutException
 
 fun Throwable?.userMessage(): UiText {
     val cause = this?.cause ?: this
-    return cause?.let {
-        when (it) {
+    return cause?.let { exception ->
+        when (exception) {
             is SolarTimesException.InvalidRequest  -> UiText.Resource(R.string.error_invalid_request)
             is SolarTimesException.InvalidDate     -> UiText.Resource(R.string.error_invalid_date)
             is SolarTimesException.InvalidTimezone -> UiText.Resource(R.string.error_server)
@@ -19,7 +21,12 @@ fun Throwable?.userMessage(): UiText {
             is HttpException                       -> UiText.Resource(R.string.error_server)
             is IOException                         -> UiText.Resource(R.string.error_no_internet)
             is TimeoutException                    -> UiText.Resource(R.string.error_timeout)
-            else                                   -> UiText.Resource(R.string.error_unknown)
+            else                                   -> {
+                if (Debug.enabled) {
+                    Log.d("UnexpectedError", "Unhandled exception: ${exception::class.java.simpleName}", exception)
+                }
+                UiText.Resource(R.string.error_unknown)
+            }
         }
     } ?: UiText.Resource(R.string.error_unknown)
 }
