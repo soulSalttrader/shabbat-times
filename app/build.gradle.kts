@@ -166,6 +166,22 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 }
 
+ktlint {
+    android.set(true) // enables Android-specific rule adjustments
+    ignoreFailures.set(false) // fail the build on violations (enforced in CI)
+    verbose.set(true) // prints per-file processing, useful for debugging
+
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE) // XML report, useful for CI annotations
+    }
+
+    filter {
+        exclude("**/generated/**") // skip KSP/Hilt/Room generated code
+        exclude("**/build/**")
+    }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 
