@@ -11,10 +11,6 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
-kotlin {
-    jvmToolchain(17)
-}
-
 android {
     namespace = "il.soulSalttrader.shabbattimes"
     compileSdk = 37
@@ -85,6 +81,14 @@ android {
         unitTests { isReturnDefaultValues = true }
         execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
@@ -161,8 +165,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
-
-room { schemaDirectory("$projectDir/schemas") }
 
 tasks.withType<Test> {
     useJUnitPlatform()
