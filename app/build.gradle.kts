@@ -167,6 +167,7 @@ dependencies {
 }
 
 ktlint {
+    version.set(libs.versions.ktlint.engine.get())
     android.set(true) // enables Android-specific rule adjustments
     ignoreFailures.set(false) // fail the build on violations (enforced in CI)
     verbose.set(true) // prints per-file processing, useful for debugging
