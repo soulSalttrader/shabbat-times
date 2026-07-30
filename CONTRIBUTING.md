@@ -14,7 +14,7 @@ I'm not actively seeking external contributors at this time, but bug reports and
 
 ### Important
 
-By submitting a pull request, you agree that your contribution becomes part of the project and is licensed under the same **all-rights-reserved** terms as the rest of the codebase. 
+By submitting a pull request, you agree that your contribution becomes part of the project and is licensed under the same **all-rights-reserved** terms as the rest of the codebase.
 You grant the maintainer a perpetual, irrevocable license to use, modify, and distribute your contribution.
 
 ### Getting Started (for reference)
@@ -30,7 +30,7 @@ See [README.md](README.md) for setup and build instructions.
 > Promotion from `develop` to `main` is handled separately as part of release planning.
 
 ## Code style
-- Follows the [Kotlin official style guide](https://kotlinlang.org/docs/coding-conventions.html)
+- Follows the [Kotlin official style guide](https://kotlinlang.org/docs/coding-conventions.html), with a few project-specific exceptions - see [docs/CODE_STYLE_EXCEPTIONS.md](docs/CODE_STYLE_EXCEPTIONS.md)
 - Run `./gradlew ktlintCheck` before committing (fails the build on style violations; use `./gradlew ktlintFormat` to auto-fix most issues)
 
 > Keep commits focused and messages descriptive
@@ -41,7 +41,7 @@ Please read [ARCHITECTURE.md](docs/ARCHITECTURE.md) before making structural cha
 ## Testing
 - Unit tests: `./gradlew test`
 - Instrumented tests: `./gradlew connectedAndroidTest`
- 
+
 > Make sure both pass before opening a PR
 
 ---
