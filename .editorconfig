@@ -1,5 +1,10 @@
 root = true
 
+# To disable a ktlint rule, use: ktlint_<ruleset-id>_<rule-id> = disabled
+# The ruleset/rule-id come from the violation message ktlint prints, e.g.:
+#   "... (standard:function-signature)" → ktlint_standard_function-signature = disabled
+# See docs/CODE_STYLE_EXCEPTIONS.md for why each rule below is disabled.
+
 # ========== All files ==========
 [*]
 charset = utf-8
