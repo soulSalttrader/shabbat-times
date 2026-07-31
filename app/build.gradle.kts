@@ -46,7 +46,7 @@ android {
         buildConfigField(
             type = "String",
             name = "GEOAPIFY_API_KEY",
-            value = "\"$geoApiKey\""
+            value = "\"$geoApiKey\"",
         )
     }
 
@@ -55,7 +55,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -174,7 +174,7 @@ ktlint {
 
     reporters {
         reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
-        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE) // XML report, useful for CI annotations
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE) // XML report, for CI annotations
     }
 
     filter {
