@@ -32,6 +32,8 @@ See [README.md](README.md) for setup and build instructions.
 ## Code style
 - Follows the [Kotlin official style guide](https://kotlinlang.org/docs/coding-conventions.html), with a few project-specific exceptions - see [docs/CODE_STYLE_EXCEPTIONS.md](docs/CODE_STYLE_EXCEPTIONS.md)
 - Run `./gradlew ktlintCheck` before committing (fails the build on style violations; use `./gradlew ktlintFormat` to auto-fix most issues)
+- Pure formatting commits are excluded from `git blame` via `.git-blame-ignore-revs`
+  - run `git config blame.ignoreRevsFile .git-blame-ignore-revs` once after cloning to enable this locally
 
 > Keep commits focused and messages descriptive
 
