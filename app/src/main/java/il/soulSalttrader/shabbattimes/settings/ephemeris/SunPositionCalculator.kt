@@ -20,12 +20,14 @@ object SunPositionCalculator {
         meanAnomalyRad: Double,
         julianCenturiesSinceJ2000: Double,
     ): Double {
-        val c1 = CENTER_CORRECTION_C1_BASE - julianCenturiesSinceJ2000 * (CENTER_CORRECTION_C1_PER_CENTURY + CENTER_CORRECTION_C1_PER_CENTURY_SQ * julianCenturiesSinceJ2000)
+        val c1 = CENTER_CORRECTION_C1_BASE -
+            julianCenturiesSinceJ2000 *
+            (CENTER_CORRECTION_C1_PER_CENTURY + CENTER_CORRECTION_C1_PER_CENTURY_SQ * julianCenturiesSinceJ2000)
         val c2 = CENTER_CORRECTION_C2_BASE - CENTER_CORRECTION_C2_PER_CENTURY * julianCenturiesSinceJ2000
 
         return sin(meanAnomalyRad) * c1 +
-                sin(2 * meanAnomalyRad) * c2 +
-                sin(3 * meanAnomalyRad) * CENTER_CORRECTION_C3
+            sin(2 * meanAnomalyRad) * c2 +
+            sin(3 * meanAnomalyRad) * CENTER_CORRECTION_C3
     }
 
     fun getSunTrueLongitudeDeg(
@@ -39,6 +41,6 @@ object SunPositionCalculator {
     fun getSunApparentLongitudeDeg(
         sunTrueLongitudeDeg: Double,
         moonNodeLongitudeDeg: Double,
-    ): Double = sunTrueLongitudeDeg - APPARENT_LONGITUDE_ABERRATION - APPARENT_LONGITUDE_NUTATION_AMPLITUDE * sin(toRadians(moonNodeLongitudeDeg)
-    )
+    ): Double = sunTrueLongitudeDeg -
+        APPARENT_LONGITUDE_ABERRATION - APPARENT_LONGITUDE_NUTATION_AMPLITUDE * sin(toRadians(moonNodeLongitudeDeg))
 }

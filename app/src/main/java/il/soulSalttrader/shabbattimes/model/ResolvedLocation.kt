@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes.model
 
-import kotlinx.serialization.Serializable
 import java.time.ZoneId
+import kotlinx.serialization.Serializable
 
 @Serializable()
 data class ResolvedLocation(

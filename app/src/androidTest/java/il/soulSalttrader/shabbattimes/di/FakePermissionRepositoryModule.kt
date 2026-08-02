@@ -11,7 +11,7 @@ import jakarta.inject.Singleton
 @Module
 @TestInstallIn(
     components = [SingletonComponent::class],
-    replaces = [PermissionRepositoryModule::class]
+    replaces = [PermissionRepositoryModule::class],
 )
 object FakePermissionRepositoryModule {
 

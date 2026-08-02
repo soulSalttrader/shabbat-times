@@ -74,5 +74,5 @@ private fun inlineIconContent(
             contentColor = contentColor,
             contentDescription = contentDescription,
         )
-    }
+    },
 )

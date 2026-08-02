@@ -57,7 +57,7 @@ object DepressionFixtures {
         targetDegrees = 12.0,
         latitude = 50.088,
         longitude = 14.420,
-        expectedResult = Instant.parse("2026-12-21T16:21:40Z")..Instant.parse("2026-12-21T16:22:40Z")
+        expectedResult = Instant.parse("2026-12-21T16:21:40Z")..Instant.parse("2026-12-21T16:22:40Z"),
     )
 
     val summerSolsticeMorningNauticalTwilightPrague = DepressionTestCase(

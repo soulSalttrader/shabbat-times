@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class GeoapifyDatasource(
     @SerialName("sourcename")
     val sourceName: String? = null,
-    val attribution: String? = null
+    val attribution: String? = null,
 )

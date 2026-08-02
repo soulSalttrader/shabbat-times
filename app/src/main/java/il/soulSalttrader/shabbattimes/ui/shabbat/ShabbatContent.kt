@@ -25,16 +25,16 @@ import androidx.compose.ui.unit.dp
 import il.soulSalttrader.shabbattimes.R
 import il.soulSalttrader.shabbattimes.TestTags
 import il.soulSalttrader.shabbattimes.model.SavedLocation
+import il.soulSalttrader.shabbattimes.model.ShabbatEntry
+import il.soulSalttrader.shabbattimes.ui.FabAction
+import il.soulSalttrader.shabbattimes.ui.FabItem
+import il.soulSalttrader.shabbattimes.ui.FabItems.Search
 import il.soulSalttrader.shabbattimes.ui.FabMenu
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.ui.reorderable.rememberReorderableState
 import il.soulSalttrader.shabbattimes.ui.reorderable.reorderableList
 import il.soulSalttrader.shabbattimes.ui.search.LocationSearchScreen
 import il.soulSalttrader.shabbattimes.ui.search.SearchConfig
-import il.soulSalttrader.shabbattimes.ui.FabItem
-import il.soulSalttrader.shabbattimes.ui.FabItems.Search
-import il.soulSalttrader.shabbattimes.model.ShabbatEntry
-import il.soulSalttrader.shabbattimes.ui.FabAction
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -45,7 +45,7 @@ fun ShabbatContent(
     isDraggable: Boolean = true,
 
     onClick: () -> Unit = {},
-    onReorder: (from: Int, to: Int) -> Unit = {_, _ ->},
+    onReorder: (from: Int, to: Int) -> Unit = { _, _ -> },
 ) {
     val state = rememberReorderableState(items = items, onReorder = onReorder)
     val header = stringResource(R.string.shabbat_my_locations)
@@ -68,13 +68,13 @@ fun ShabbatContent(
                 ShabbatCard(
                     modifier = modifier, // drag modifier
                     testTag = when (item.location.id) {
-                        SavedLocation.GPS_ID   -> TestTags.GPS_CARD
+                        SavedLocation.GPS_ID -> TestTags.GPS_CARD
                         SavedLocation.EMPTY_ID -> TestTags.EMPTY_CARD
-                        else                   -> TestTags.LOCATION_CARD
+                        else -> TestTags.LOCATION_CARD
                     },
                     item = item,
                     isDraggable = isDraggable,
-                    onClick = { onClick() }
+                    onClick = { onClick() },
                 )
             }
         }
@@ -88,7 +88,7 @@ fun ShabbatContent(
 @Composable
 private fun BoxScope.AnimatedSearchScrim(
     modifier: Modifier = Modifier,
-    searchConfig: SearchConfig
+    searchConfig: SearchConfig,
 ) {
     AnimatedVisibility(visible = searchConfig.state.searchActive) {
         Box(
@@ -99,7 +99,7 @@ private fun BoxScope.AnimatedSearchScrim(
                     searchConfig.action.onChangeVisibility(false)
                     searchConfig.action.onQueryCleared()
                 }
-                .testTag(TestTags.SEARCH_SCRIM)
+                .testTag(TestTags.SEARCH_SCRIM),
         )
     }
 }
@@ -112,7 +112,7 @@ private fun BoxScope.AnimatedSearchOverlay(
     AnimatedVisibility(
         visible = searchConfig.state.searchActive,
         enter = slideInVertically { -it / 2 } + fadeIn(),
-        exit = slideOutVertically { -it / 2 } + fadeOut()
+        exit = slideOutVertically { -it / 2 } + fadeOut(),
     ) {
         LocationSearchScreen(
             searchConfig = searchConfig,
@@ -140,7 +140,11 @@ private fun BoxScope.AnimatedSearchFab(
             items = fabItems,
             onAction = { action ->
                 when (action) {
-                    FabAction.ToggleSearchOverlay -> searchConfig.action.onChangeVisibility(!searchConfig.state.searchActive)
+                    FabAction.ToggleSearchOverlay -> {
+                        searchConfig.action.onChangeVisibility(
+                            !searchConfig.state.searchActive,
+                        )
+                    }
                 }
             },
         )

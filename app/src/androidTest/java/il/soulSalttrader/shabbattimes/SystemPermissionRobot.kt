@@ -10,7 +10,7 @@ import androidx.test.uiautomator.Until
 import java.io.File
 
 class SystemPermissionRobot(
-    private val device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    private val device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()),
 ) {
     private val tag = "PermissionRobot"
     private val permissionPackage = "com.android.permissioncontroller"
@@ -29,7 +29,7 @@ class SystemPermissionRobot(
 
         val appeared = device.wait(
             Until.hasObject(By.res(grantDialogID)),
-            timeoutMs
+            timeoutMs,
         )
 
         Log.d(tag, "$appeared")
@@ -42,7 +42,7 @@ class SystemPermissionRobot(
 
         val allowButton = device.wait(
             Until.findObject(By.res(allowForegroundID)),
-            timeoutMs
+            timeoutMs,
         )
 
         if (allowButton != null) {
@@ -66,7 +66,7 @@ class SystemPermissionRobot(
 
         val denyButton = device.wait(
             Until.findObject(By.res(denyID)),
-            timeoutMs
+            timeoutMs,
         )
 
         if (denyButton != null) {

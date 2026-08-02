@@ -43,7 +43,7 @@ fun NavBarTop(
                 IconButton(
                     onClick = { navigator.navigateUp() },
                     enabled = isNavIconVisible,
-                    modifier = Modifier.alpha(if (isNavIconVisible) 1f else 0f)
+                    modifier = Modifier.alpha(if (isNavIconVisible) 1f else 0f),
                 ) {
                     NavBarIcon(
                         isSelected = false,
@@ -66,6 +66,6 @@ fun NavBarTop(
                 }
             }
         },
-        scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior,
     )
 }

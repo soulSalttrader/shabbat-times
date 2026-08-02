@@ -4,8 +4,8 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
 import il.soulSalttrader.shabbattimes.model.Coordinates
 import il.soulSalttrader.shabbattimes.model.SavedLocation
-import kotlinx.coroutines.runBlocking
 import java.time.ZoneId
+import kotlinx.coroutines.runBlocking
 
 fun addCard(
     rule: ComposeTestRule,
@@ -19,7 +19,7 @@ fun addCard(
                 name = cityName,
                 coordinates = Coordinates(0.0, 0.0),
                 timeZoneId = ZoneId.systemDefault(),
-            )
+            ),
         )
     }
     rule.waitForIdle()
@@ -37,7 +37,7 @@ fun removeCard(
                 name = cityName,
                 coordinates = Coordinates(0.0, 0.0),
                 timeZoneId = ZoneId.systemDefault(),
-            )
+            ),
         )
     }
     rule.waitForIdle()

@@ -25,5 +25,7 @@ class FakeSavedLocationsRepository : SavedLocationsRepository {
         _locations.value = locations
     }
 
-    fun clear() { _locations.value = emptyList() }
+    fun clear() {
+        _locations.value = emptyList()
+    }
 }

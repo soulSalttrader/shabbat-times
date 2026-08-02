@@ -20,7 +20,7 @@ class ResolveGpsLocationUseCase @Inject constructor(
     operator fun invoke(): Flow<GpsResultState> = observeGpsLocation()
         .flatMapLatest { state ->
             when (state) {
-                is CurrentLocationState.Idle     -> flowOf(GpsResultState.Idle)
+                is CurrentLocationState.Idle -> flowOf(GpsResultState.Idle)
                 is CurrentLocationState.Fetching -> flowOf(GpsResultState.Loading)
                 is CurrentLocationState.Available -> flow {
                     emit(GpsResultState.Loading)

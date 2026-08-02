@@ -14,14 +14,14 @@ fun Throwable?.userMessage(): UiText {
     val cause = this?.cause ?: this
     return cause?.let { exception ->
         when (exception) {
-            is SolarTimesException.InvalidRequest  -> UiText.Resource(R.string.error_invalid_request)
-            is SolarTimesException.InvalidDate     -> UiText.Resource(R.string.error_invalid_date)
+            is SolarTimesException.InvalidRequest -> UiText.Resource(R.string.error_invalid_request)
+            is SolarTimesException.InvalidDate -> UiText.Resource(R.string.error_invalid_date)
             is SolarTimesException.InvalidTimezone -> UiText.Resource(R.string.error_server)
-            is SolarTimesException.UnknownError    -> UiText.Resource(R.string.error_server)
-            is HttpException                       -> UiText.Resource(R.string.error_server)
-            is IOException                         -> UiText.Resource(R.string.error_no_internet)
-            is TimeoutException                    -> UiText.Resource(R.string.error_timeout)
-            else                                   -> {
+            is SolarTimesException.UnknownError -> UiText.Resource(R.string.error_server)
+            is HttpException -> UiText.Resource(R.string.error_server)
+            is IOException -> UiText.Resource(R.string.error_no_internet)
+            is TimeoutException -> UiText.Resource(R.string.error_timeout)
+            else -> {
                 if (Debug.enabled) {
                     Log.d("UnexpectedError", "Unhandled exception: ${exception::class.java.simpleName}", exception)
                 }
@@ -30,6 +30,5 @@ fun Throwable?.userMessage(): UiText {
         }
     } ?: UiText.Resource(R.string.error_unknown)
 }
-
 
 fun Throwable.asNetworkFailure(): NetworkResult.Failure = NetworkResult.Failure(cause = this)

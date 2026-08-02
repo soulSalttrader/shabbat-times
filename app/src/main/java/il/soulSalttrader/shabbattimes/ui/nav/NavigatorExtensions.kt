@@ -19,10 +19,10 @@ suspend fun Navigator.collectNavigationCommands(navController: NavHostController
     commands.collect { action ->
         with(navController) {
             when (action) {
-                is NavAction.To        -> handleTo(action)
-                is NavAction.Up        -> handleUp()
-                is NavAction.ResetTo   -> handleResetTo(action)
-                is NavAction.PopTo     -> handlePopTo(action)
+                is NavAction.To -> handleTo(action)
+                is NavAction.Up -> handleUp()
+                is NavAction.ResetTo -> handleResetTo(action)
+                is NavAction.PopTo -> handlePopTo(action)
                 is NavAction.PopToRoot -> handlePopToRoot()
             }
         }

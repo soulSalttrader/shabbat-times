@@ -52,12 +52,12 @@ fun SettingsScreen() {
         preferences = settingsUiState.preferences,
         onCandleOffsetChange = { candleLightningOffset ->
             settingsViewModel.dispatch(
-                SettingsEvent.SetCandleLightingOffset(candleLightningOffset)
+                SettingsEvent.SetCandleLightingOffset(candleLightningOffset),
             )
         },
-        onHavdalahCriterionChange= { havdalahCriterion ->
+        onHavdalahCriterionChange = { havdalahCriterion ->
             settingsViewModel.dispatch(
-                SettingsEvent.SetHavdalahCriterion(havdalahCriterion)
+                SettingsEvent.SetHavdalahCriterion(havdalahCriterion),
             )
         },
     )

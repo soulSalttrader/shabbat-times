@@ -24,7 +24,7 @@ fun IconTextButton(
     contentDescription: String? = null,
     colors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary
+        contentColor = MaterialTheme.colorScheme.onPrimary,
     ),
     shape: Shape = CircleShape,
     enabled: Boolean = true,

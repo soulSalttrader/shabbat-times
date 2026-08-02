@@ -16,7 +16,7 @@ class FakeSolarTimesRepository : SolarTimesRepository {
             dusk = null,
             nauticalTwilightEnd = null,
             zoneOffset = ZoneOffset.UTC,
-        )
+        ),
     )
 
     override suspend fun getSolarTimes(request: SolarTimesRequest): NetworkResult<SolarTimes> {

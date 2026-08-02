@@ -8,10 +8,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
-}
-
-kotlin {
-    jvmToolchain(17)
+    alias(libs.plugins.ktlint)
 }
 
 android {
@@ -23,7 +20,7 @@ android {
         minSdk = 30
         targetSdk = 37
         versionCode = 1
-        versionName = "v1.6.1"
+        versionName = "v1.6.2"
 
 //        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner = "il.soulSalttrader.shabbattimes.HiltTestRunner"
@@ -49,7 +46,7 @@ android {
         buildConfigField(
             type = "String",
             name = "GEOAPIFY_API_KEY",
-            value = "\"$geoApiKey\""
+            value = "\"$geoApiKey\"",
         )
     }
 
@@ -58,7 +55,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -84,6 +81,14 @@ android {
         unitTests { isReturnDefaultValues = true }
         execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
@@ -161,7 +166,22 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 }
 
-room { schemaDirectory("$projectDir/schemas") }
+ktlint {
+    version.set(libs.versions.ktlint.engine.get())
+    android.set(true) // enables Android-specific rule adjustments
+    ignoreFailures.set(false) // fail the build on violations (enforced in CI)
+    verbose.set(true) // prints per-file processing, useful for debugging
+
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE) // XML report, for CI annotations
+    }
+
+    filter {
+        exclude("**/generated/**") // skip KSP/Hilt/Room generated code
+        exclude("**/build/**")
+    }
+}
 
 tasks.withType<Test> {
     useJUnitPlatform()

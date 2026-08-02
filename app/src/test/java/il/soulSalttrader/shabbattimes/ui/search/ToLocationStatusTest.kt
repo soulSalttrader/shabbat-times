@@ -8,7 +8,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 
-class ToLocationStatusTest : DescribeSpec( {
+class ToLocationStatusTest : DescribeSpec({
     describe("CARD_CONTENT_1 - SCENARIO: Card with granted permissions displays correct location status") {
         it("CARD_CONTENT_1_S1 - should map GpsResolved to LocationStatus.Current") {
             GpsResultState.Resolved(mockk()).toLocationStatus(PermissionState.Granted) shouldBe LocationStatus.Current

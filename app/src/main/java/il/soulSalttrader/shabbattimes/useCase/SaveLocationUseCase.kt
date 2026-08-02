@@ -18,7 +18,7 @@ class SaveLocationUseCase @Inject constructor(
                 name = resolved.name,
                 coordinates = resolved.coordinates,
                 timeZoneId = resolved.timeZoneId,
-            )
+            ),
         )
         return SaveLocationResult.Success
     }

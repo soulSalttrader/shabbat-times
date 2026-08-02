@@ -4,11 +4,11 @@ import android.util.Log
 import il.soulSalttrader.shabbattimes.Debug
 import il.soulSalttrader.shabbattimes.Debug.formatEventName
 import il.soulSalttrader.shabbattimes.Debug.formatStateTransition
+import il.soulSalttrader.shabbattimes.model.State
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 import il.soulSalttrader.shabbattimes.ui.search.SearchUiState
-import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
-import il.soulSalttrader.shabbattimes.model.State
 import il.soulSalttrader.shabbattimes.ui.settings.SettingsUiState
+import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 
 fun interface Reducer<S : State> {
     infix fun reduce(state: S): S
@@ -21,7 +21,7 @@ fun interface Reducer<S : State> {
                 val nextState = reduce(state)
                 val eventName = baseReducer.formatEventName()
 
-                Log.d(tag,state.formatStateTransition(eventName = eventName, next = nextState))
+                Log.d(tag, state.formatStateTransition(eventName = eventName, next = nextState))
                 nextState
             }
         } ?: this

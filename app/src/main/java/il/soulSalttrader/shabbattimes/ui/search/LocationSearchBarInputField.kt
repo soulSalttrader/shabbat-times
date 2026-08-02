@@ -38,7 +38,7 @@ fun LocationSearchBarInputField(
 
     trailingIcon: @Composable (() -> Unit)? = {
         TrailingSearchIconButton(
-            onClick = onTrailingIconClick(hasQuery, onClear, onExpandedChange, expanded)
+            onClick = onTrailingIconClick(hasQuery, onClear, onExpandedChange, expanded),
         )
     },
 ) {
@@ -61,7 +61,7 @@ private fun onTrailingIconClick(
 ) = {
     when {
         hasQuery -> onClear()
-        else     -> onExpandedChange(expanded)
+        else -> onExpandedChange(expanded)
     }
 }
 

@@ -60,7 +60,7 @@ fun ColumnScope.LocationSearchSuggestionPanel(
 
                 when {
                     suggestions.isNotEmpty() -> suggestionList(suggestions, onSuggestionSelected)
-                    query.isNotEmpty()       -> suggestionHint(query)
+                    query.isNotEmpty() -> suggestionHint(query)
                 }
             }
         }
@@ -74,7 +74,7 @@ private fun LazyListScope.suggestionList(
 ) {
     itemsIndexed(
         items = suggestions,
-        key = { index, _ -> index }
+        key = { index, _ -> index },
     ) { index, suggestion ->
         SuggestionListItem(
             suggestion = suggestion,
@@ -84,7 +84,7 @@ private fun LazyListScope.suggestionList(
 
         if (index < suggestions.lastIndex) {
             HorizontalDivider(
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 16.dp),
             )
         }
     }
@@ -104,7 +104,7 @@ private fun SuggestionListItem(
             .clickable {
                 onSuggestionSelected(suggestion)
             }
-            .testTag(TestTags.SEARCH_SUGGESTION_ITEM)
+            .testTag(TestTags.SEARCH_SUGGESTION_ITEM),
     )
 }
 

@@ -11,11 +11,11 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.di.FakePermissionRepositoryModule
 import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
 import il.soulSalttrader.shabbattimes.model.LocationPermission
-import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
+import kotlinx.coroutines.runBlocking
 
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -54,7 +54,7 @@ abstract class BaseInstrumentedTest {
             activityScenario.close()
 
             resetFakes()
-        }.onFailure { e ->  Log.w("BaseInstrumentedTest", "Cleanup failed", e) }
+        }.onFailure { e -> Log.w("BaseInstrumentedTest", "Cleanup failed", e) }
     }
 
     private fun resetFakes() {

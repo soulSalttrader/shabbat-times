@@ -28,9 +28,11 @@ class SolarTimesRepositoryImpl @Inject constructor(
                     timeFormat = 24,
                 )
             }
-                .map { dto -> dto.asNetworkResult()
+                .map { dto ->
+                    dto.asNetworkResult()
                 }
-                .recover { cause -> cause.asNetworkFailure()
+                .recover { cause ->
+                    cause.asNetworkFailure()
                 }
                 .getOrElse { cause -> NetworkResult.Failure(cause) }
         }

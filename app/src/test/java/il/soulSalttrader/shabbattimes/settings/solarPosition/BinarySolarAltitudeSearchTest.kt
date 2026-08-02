@@ -2,11 +2,11 @@ package il.soulSalttrader.shabbattimes.settings.solarPosition
 
 import il.soulSalttrader.shabbattimes.settings.ephemeris.NoaaSolarEphemerisCalculator
 import il.soulSalttrader.shabbattimes.settings.ephemeris.SolarEphemerisCalculator
-import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarAltitudeSearchFixtures.summerSolsticeGdanskNauticalTwilight
 import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarAltitudeSearchFixtures.marchEquinoxPragueCivilTwilight
-import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarAltitudeSearchFixtures.summerSolsticeRigaNauticalTwilight
+import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarAltitudeSearchFixtures.summerSolsticeGdanskNauticalTwilight
 import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarAltitudeSearchFixtures.summerSolsticePragueCivilTwilight
 import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarAltitudeSearchFixtures.summerSolsticePragueNauticalTwilight
+import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarAltitudeSearchFixtures.summerSolsticeRigaNauticalTwilight
 import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarAltitudeSearchFixtures.winterSolsticePragueCivilTwilight
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.datatest.withData
@@ -34,7 +34,7 @@ class BinarySolarAltitudeSearchTest : DescribeSpec({
                 "SOLAR-BI-SEARCH_S1_4 - Evening Civil Twilight (6°) - March Equinox Prague" to marchEquinoxPragueCivilTwilight,
                 "SOLAR-BI-SEARCH_S1_5 - Evening Nautical Twilight (12°) - Summer Solstice Gdansk" to summerSolsticeGdanskNauticalTwilight,
                 "SOLAR-BI-SEARCH_S1_6 - Evening Nautical Twilight (12°) - Summer Solstice Riga (White Nights)" to summerSolsticeRigaNauticalTwilight,
-            )
+            ),
         ) { testCase ->
 
             val result = search.findCrossing(
@@ -42,7 +42,7 @@ class BinarySolarAltitudeSearchTest : DescribeSpec({
                 targetAltitudeDeg = testCase.targetAltitudeDeg,
                 positionCalculator = positionCalculator,
                 latitudeDeg = testCase.latitude,
-                longitudeDeg = testCase.longitude
+                longitudeDeg = testCase.longitude,
             )
 
             when {

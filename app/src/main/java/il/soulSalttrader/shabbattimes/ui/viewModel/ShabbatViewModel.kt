@@ -9,8 +9,8 @@ import il.soulSalttrader.shabbattimes.di.Persisted
 import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.model.toUnavailabilityWarning
-import il.soulSalttrader.shabbattimes.network.observer.NetworkObserver
 import il.soulSalttrader.shabbattimes.network.NetworkResult
+import il.soulSalttrader.shabbattimes.network.observer.NetworkObserver
 import il.soulSalttrader.shabbattimes.network.toBatchOutcome
 import il.soulSalttrader.shabbattimes.repository.CurrentLocationRepository
 import il.soulSalttrader.shabbattimes.repository.PermissionRepository
@@ -70,7 +70,9 @@ class ShabbatViewModel @Inject constructor(
                         else -> emitEffect(UiEffect.ShowToast(UiText.Resource(R.string.error_no_internet)))
                     }
 
-                    if (connected) { reloadTrigger.tryEmit(Unit) }
+                    if (connected) {
+                        reloadTrigger.tryEmit(Unit)
+                    }
                 }
         }
     }
@@ -122,7 +124,12 @@ class ShabbatViewModel @Inject constructor(
         savedLocationsRepository.locations,
         permissionRepository.permissionState,
     ) { state, halachicTimes, currentLocationState, savedLocations, permission ->
-        ShabbatEvent.ShabbatEntryLoaded(savedLocations, currentLocationState, halachicTimes, permission).reducer reduce state
+        ShabbatEvent.ShabbatEntryLoaded(
+            savedLocations,
+            currentLocationState,
+            halachicTimes,
+            permission,
+        ).reducer reduce state
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -133,14 +140,14 @@ class ShabbatViewModel @Inject constructor(
         _state.updateAndGet { current ->
             when (event) {
                 is ShabbatEvent -> event.reducer reduce current
-                else            -> current
+                else -> current
             }
         }
 
         when (event) {
-            is ShabbatEvent.LocationDeleted  -> handleDeleteLocation(event)
+            is ShabbatEvent.LocationDeleted -> handleDeleteLocation(event)
             is ShabbatEvent.ReorderLocations -> handleReorderLocations(event)
-            else                             -> Unit
+            else -> Unit
         }
     }
 

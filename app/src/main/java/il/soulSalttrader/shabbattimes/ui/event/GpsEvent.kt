@@ -13,7 +13,7 @@ sealed interface GpsEvent : UiEvent, Reducible<GpsUiState> {
                 gpsResult = when (location) {
                     null -> GpsResultState.Idle
                     else -> GpsResultState.Resolved(location)
-                }
+                },
             )
         }
     }

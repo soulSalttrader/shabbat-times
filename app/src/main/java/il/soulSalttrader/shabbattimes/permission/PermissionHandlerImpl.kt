@@ -1,8 +1,8 @@
 package il.soulSalttrader.shabbattimes.permission
 
+import kotlin.coroutines.resume
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 
 class PermissionHandlerImpl(
     private val checkPermission: (String) -> Boolean,

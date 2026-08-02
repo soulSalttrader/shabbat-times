@@ -9,10 +9,12 @@ import java.time.ZoneId
 import java.util.UUID
 
 fun GeoapifyResultDto.toResolvedLocation(
-    requestCoordinates: Coordinates? = null
+    requestCoordinates: Coordinates? = null,
 ): ResolvedLocation {
     val apiCoordinates = Coordinates(latitude ?: 0.0, longitude ?: 0.0).normalize()
-    if (Debug.enabled) { Log.d("ResolvedLocation", "request: $requestCoordinates api: $apiCoordinates") }
+    if (Debug.enabled) {
+        Log.d("ResolvedLocation", "request: $requestCoordinates api: $apiCoordinates")
+    }
 
     return ResolvedLocation(
         id = placeId ?: UUID.randomUUID().toString(),

@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
-import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatScaffold
 import il.soulSalttrader.shabbattimes.ui.nav.NavApp
 import il.soulSalttrader.shabbattimes.ui.nav.Navigator
+import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatScaffold
 import il.soulSalttrader.shabbattimes.ui.theme.ShabbatTheme
 import jakarta.inject.Inject
 
@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
             ShabbatTheme {
                 ShabbatScaffold(navigator) { innerPadding, snackbarHostState ->
                     NavApp(

@@ -18,12 +18,12 @@ object UiEffectModule {
     @ViewModelScoped
     fun provideUiEffects(): MutableSharedFlow<UiEffect> = MutableSharedFlow(
         extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
     @Provides
     @ViewModelScoped
     fun provideUiEffectFlowAsSharedFlow(
-        flow: MutableSharedFlow<UiEffect>
+        flow: MutableSharedFlow<UiEffect>,
     ): SharedFlow<UiEffect> = flow
 }

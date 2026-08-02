@@ -34,7 +34,7 @@ class ReorderLocationsUseCaseTest : DescribeSpec({
                             telAvivLocation(),
                             brnoLocation(),
                             jerusalemLocation(),
-                        )
+                        ),
                     )
                 }
             }
@@ -49,7 +49,7 @@ class ReorderLocationsUseCaseTest : DescribeSpec({
                             brnoLocation(),
                             jerusalemLocation(),
                             telAvivLocation(),
-                        )
+                        ),
                     )
                 }
             }
@@ -64,7 +64,7 @@ class ReorderLocationsUseCaseTest : DescribeSpec({
                             brnoLocation(),
                             jerusalemLocation(),
                             telAvivLocation(),
-                        )
+                        ),
                     )
                 }
             }
@@ -79,7 +79,7 @@ class ReorderLocationsUseCaseTest : DescribeSpec({
                             jerusalemLocation(),
                             telAvivLocation(),
                             brnoLocation(),
-                        )
+                        ),
                     )
                 }
             }
@@ -93,12 +93,11 @@ class ReorderLocationsUseCaseTest : DescribeSpec({
                         listOf(
                             telAvivLocation(),
                             brnoLocation(),
-                            gpsLocation()
-                        )
+                            gpsLocation(),
+                        ),
                     )
                 }
             }
         }
     }
 })
-

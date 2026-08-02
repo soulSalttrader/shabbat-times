@@ -18,7 +18,7 @@ object SolarTimesFixtures {
         sunset = sunset,
         dusk = dusk,
         nauticalTwilightEnd = nauticalTwilightEnd,
-        zoneOffset = zoneOffset
+        zoneOffset = zoneOffset,
     )
 
     val summerSolsticePrague = default(

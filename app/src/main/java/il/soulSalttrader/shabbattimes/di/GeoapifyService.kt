@@ -8,7 +8,7 @@ import kotlin.getValue
 
 @Singleton
 class GeoapifyService @Inject constructor(
-    @param:GeoapifyRetrofit private val retrofit: Retrofit
+    @param:GeoapifyRetrofit private val retrofit: Retrofit,
 ) {
     val api: GeoapifyApi by lazy { retrofit.create(GeoapifyApi::class.java) }
 }

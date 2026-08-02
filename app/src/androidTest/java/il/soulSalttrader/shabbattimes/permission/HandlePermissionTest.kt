@@ -31,7 +31,7 @@ class HandlePermissionsTest {
 
         composeRule.setContent {
             CompositionLocalProvider(
-                LocalPermissionHandler provides FakePermissionHandler(granted = true)
+                LocalPermissionHandler provides FakePermissionHandler(granted = true),
             ) {
                 HandlePermissions(
                     permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -56,7 +56,7 @@ class HandlePermissionsTest {
                 LocalPermissionHandler provides FakePermissionHandler(
                     granted = false,
                     requestResult = PermissionResult.Explain(listOf(Manifest.permission.ACCESS_FINE_LOCATION)),
-                )
+                ),
             ) {
                 HandlePermissions(
                     permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -78,7 +78,7 @@ class HandlePermissionsTest {
 
         composeRule.setContent {
             CompositionLocalProvider(
-                LocalPermissionHandler provides FakePermissionHandler(granted = true)
+                LocalPermissionHandler provides FakePermissionHandler(granted = true),
             ) {
                 HandlePermissions(
                     permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -100,7 +100,7 @@ class HandlePermissionsTest {
 
         composeRule.setContent {
             CompositionLocalProvider(
-                LocalPermissionHandler provides FakePermissionHandler(granted = true)
+                LocalPermissionHandler provides FakePermissionHandler(granted = true),
             ) {
                 HandlePermissions(
                     permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION),

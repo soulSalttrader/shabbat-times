@@ -14,7 +14,7 @@ fun LocalDate.nextOrTodayDayOfWeek(target: DayOfWeek): LocalDate {
 
     return when {
         candidate.isBefore(this) -> candidate.plusWeeks(1)
-        else                     -> candidate
+        else -> candidate
     }
 }
 
@@ -38,7 +38,7 @@ fun parseRollingOver(
     val sameDay = date.atTime(time).toInstant(zoneOffset)
 
     val reference = referenceInstant ?: Instant.MIN
-    return when (sameDay.isBefore(reference))  {
+    return when (sameDay.isBefore(reference)) {
         true -> date.plusDays(1).atTime(time).toInstant(zoneOffset)
         else -> sameDay
     }

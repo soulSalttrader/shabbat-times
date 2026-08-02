@@ -7,7 +7,7 @@ import retrofit2.Retrofit
 
 @Singleton
 class SolarTimesService @Inject constructor(
-    @param:SolarTimesRetrofit private val retrofit: Retrofit
+    @param:SolarTimesRetrofit private val retrofit: Retrofit,
 ) {
     val api: SolarTimesApi by lazy { retrofit.create(SolarTimesApi::class.java) }
 }
