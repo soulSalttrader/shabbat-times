@@ -16,8 +16,8 @@ import java.time.Instant
 object EphemerisFixtures {
 
     val perihelion = SolarTestCase.Ephemeris(
-        "Perihelion",
-        Instant.parse("2026-01-03T17:15:00Z"),
+        name = "Perihelion",
+        instant = Instant.parse("2026-01-03T17:15:00Z"),
         expectedDeclinationDeg = -22.84,
         expectedEquationOfTimeMinutes = -4.5,
         declinationTolerance = 0.1,
@@ -26,15 +26,15 @@ object EphemerisFixtures {
 
     val marchEquinox = SolarTestCase.Ephemeris(
         name = "March equinox",
-        Instant.parse("2026-03-20T14:46:00Z"),
+        instant = Instant.parse("2026-03-20T14:46:00Z"),
         expectedDeclinationDeg = 0.0,
         expectedEquationOfTimeMinutes = -7.3,
         equationOfTimeTolerance = 0.3,
     )
 
     val juneSolstice = SolarTestCase.Ephemeris(
-        "June solstice",
-        Instant.parse("2026-06-21T08:24:00Z"),
+        name = "June solstice",
+        instant = Instant.parse("2026-06-21T08:24:00Z"),
         expectedDeclinationDeg = 23.44,
         expectedEquationOfTimeMinutes = -1.7,
         equationOfTimeTolerance = 0.3,
@@ -42,7 +42,7 @@ object EphemerisFixtures {
 
     val aphelion = SolarTestCase.Ephemeris(
         name = "Aphelion",
-        Instant.parse("2026-07-06T17:30:00Z"),
+        instant = Instant.parse("2026-07-06T17:30:00Z"),
         expectedDeclinationDeg = 22.83,
         expectedEquationOfTimeMinutes = -4.5,
         declinationTolerance = 0.2,
@@ -51,15 +51,15 @@ object EphemerisFixtures {
 
     val septemberEquinox = SolarTestCase.Ephemeris(
         name = "September equinox",
-        Instant.parse("2026-09-23T00:05:00Z"),
+        instant = Instant.parse("2026-09-23T00:05:00Z"),
         expectedDeclinationDeg = 0.0,
         expectedEquationOfTimeMinutes = 7.3,
         equationOfTimeTolerance = 0.3,
     )
 
     val decemberSolstice = SolarTestCase.Ephemeris(
-        "December solstice",
-        Instant.parse("2026-12-21T20:50:00Z"),
+        name = "December solstice",
+        instant = Instant.parse("2026-12-21T20:50:00Z"),
         expectedDeclinationDeg = -23.44,
         expectedEquationOfTimeMinutes = 1.7,
         equationOfTimeTolerance = 0.3,

@@ -10,7 +10,7 @@ sealed interface SolarTestCase {
         val expectedDeclinationDeg: Double,
         val expectedEquationOfTimeMinutes: Double,
         val declinationTolerance: Double = 0.08,
-        val equationOfTimeTolerance: Double = 0.6
+        val equationOfTimeTolerance: Double = 0.6,
     ) : SolarTestCase
 
     data class Observation(
@@ -19,7 +19,7 @@ sealed interface SolarTestCase {
         val latitude: Double,
         val longitude: Double,
         val expectedAltitudeRange: ClosedFloatingPointRange<Double>,
-        val altitudeTolerance: Double = 0.5
+        val altitudeTolerance: Double = 0.5,
     ) : SolarTestCase
 
     data class DepressionTestCase(
@@ -38,6 +38,6 @@ sealed interface SolarTestCase {
         val latitude: Double,
         val longitude: Double,
         val expectedWindow: ClosedRange<Instant>? = null,
-        val description: String = name
+        val description: String = name,
     ) : SolarTestCase
 }

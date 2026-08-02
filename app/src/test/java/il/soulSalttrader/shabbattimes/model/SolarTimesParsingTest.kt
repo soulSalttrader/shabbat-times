@@ -13,7 +13,7 @@ class SolarTimesParsingTest : DescribeSpec({
                 sunset = "",
                 dusk = "",
                 nauticalTwilightEnd = "",
-                utcOffsetMinutes = 120
+                utcOffsetMinutes = 120,
             )
 
             val domain = dto.toDomain()
@@ -30,7 +30,7 @@ class SolarTimesParsingTest : DescribeSpec({
                 sunset = "19:30:00",
                 dusk = "20:00:00",
                 nauticalTwilightEnd = "20:30:00",
-                utcOffsetMinutes = 120
+                utcOffsetMinutes = 120,
             )
 
             val domain = dto.toDomain()
