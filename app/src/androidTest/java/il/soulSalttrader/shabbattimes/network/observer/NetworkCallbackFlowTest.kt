@@ -1,6 +1,7 @@
 package il.soulSalttrader.shabbattimes.network.observer
 
 import junit.framework.TestCase.assertEquals
+import org.junit.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -9,9 +10,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Test
 
-class NetworkCallbackFlowTest  {
+class NetworkCallbackFlowTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test

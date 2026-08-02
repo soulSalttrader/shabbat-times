@@ -22,7 +22,7 @@ class ShabbatCardRobot(
     fun dragCardUp(tag: String) = apply {
         uiRobot.waitForTag(tag)
 
-        val handleNode = rule.onNode(hasTestTag(DRAG_HANDLE).and(hasAnyAncestor(hasTestTag(tag))), true,)
+        val handleNode = rule.onNode(hasTestTag(DRAG_HANDLE).and(hasAnyAncestor(hasTestTag(tag))), true)
         val handleBounds = handleNode.fetchSemanticsNode().boundsInRoot
 
         rule.onRoot().assertExists().performTouchInput {
@@ -43,7 +43,7 @@ class ShabbatCardRobot(
             swipe(
                 start = Offset(width * 0.70f, height / 2f),
                 end = Offset(width * 0.12f, height / 2f),
-                durationMillis = 280
+                durationMillis = 280,
             )
         }
         rule.waitForIdle()
@@ -58,7 +58,7 @@ class ShabbatCardRobot(
         rule.onAllNodes(
             hasText(text, substring)
                 .and(hasAnyAncestor(hasTestTag(cardTag))),
-            useUnmergedTree = true
+            useUnmergedTree = true,
         ).assertCountEquals(expectedCount)
     }
 
@@ -66,7 +66,7 @@ class ShabbatCardRobot(
         rule.onNode(
             hasTestTag(LOCATION_LABEL)
                 .and(hasAnyAncestor(hasTestTag(cardTag))),
-            useUnmergedTree = true
+            useUnmergedTree = true,
         ).assertExists()
     }
 }

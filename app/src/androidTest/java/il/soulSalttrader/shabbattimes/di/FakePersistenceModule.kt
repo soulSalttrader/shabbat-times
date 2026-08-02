@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @Module
 @TestInstallIn(
     components = [SingletonComponent::class],
-    replaces = [PersistenceModule::class]
+    replaces = [PersistenceModule::class],
 )
 object FakePersistenceModule {
     val fakeSavedLocations = FakeSavedLocationsRepository()
