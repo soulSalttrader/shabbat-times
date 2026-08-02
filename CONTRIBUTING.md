@@ -2,7 +2,7 @@
 
 Thanks for your interest in this project.
 
-**Note**: This project is **not open source**. It is distributed under an all-rights-reserved license (see [LICENSE](LICENSE)).
+**Note**: This project is **not open source**. It is distributed under an all-rights-reserved license (see [LICENSE](LICENSE.md)).
 
 I'm not actively seeking external contributors at this time, but bug reports and feature suggestions are always welcome.
 
