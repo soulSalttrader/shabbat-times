@@ -29,7 +29,6 @@ class CurrentLocationRepositoryRoom @Inject constructor(
             )
 
     override suspend fun update(location: SavedLocation?) {
-        if (location == null) dao.clear()
-        else dao.upsert(location.toCurrentLocationEntity())
+        if (location == null) dao.clear() else dao.upsert(location.toCurrentLocationEntity())
     }
 }

@@ -25,11 +25,11 @@ class PermissionViewModel @Inject constructor(
     val permissionSideEffectHandler: SideEffectHandler<PermissionEvent>,
     val oneTimeMessageTracker: OneTimeMessageTracker,
     permissionRepository: PermissionRepository,
-): BaseViewModel(oneTimeMessageTracker) {
+) : BaseViewModel(oneTimeMessageTracker) {
     internal var onDispatch: (UiEvent) -> Unit = {}
 
     private val _state: MutableStateFlow<PermissionUiState> = MutableStateFlow(
-        permissionRepository.permissionState.value.toUiState(PermissionUiState())
+        permissionRepository.permissionState.value.toUiState(PermissionUiState()),
     )
 
     val state: StateFlow<PermissionUiState> = _state.asStateFlow()
@@ -52,8 +52,9 @@ class PermissionViewModel @Inject constructor(
                 is PermissionEvent.TappedCardDenied,
                 is PermissionEvent.TappedCardDeniedPermanently,
                 is PermissionEvent.DismissDeniedRationale,
-                is PermissionEvent.DismissDeniedPermanently -> event.reducer reduce current
-                else                                        -> current
+                is PermissionEvent.DismissDeniedPermanently,
+                -> event.reducer reduce current
+                else -> current
             }
         }
 

@@ -22,6 +22,7 @@ import il.soulSalttrader.shabbattimes.ui.effect.handleUiEffect
 import il.soulSalttrader.shabbattimes.ui.event.GpsEvent
 import il.soulSalttrader.shabbattimes.ui.event.PermissionEvent
 import il.soulSalttrader.shabbattimes.ui.event.ShabbatEvent
+import il.soulSalttrader.shabbattimes.ui.gps.toLocationStatus
 import il.soulSalttrader.shabbattimes.ui.permission.HandlePermissions
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionDialogs
 import il.soulSalttrader.shabbattimes.ui.permission.dispatchCardAction
@@ -29,7 +30,6 @@ import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeConfig
 import il.soulSalttrader.shabbattimes.ui.reorderable.SwipeState
 import il.soulSalttrader.shabbattimes.ui.search.SearchConfig
 import il.soulSalttrader.shabbattimes.ui.search.default
-import il.soulSalttrader.shabbattimes.ui.gps.toLocationStatus
 import il.soulSalttrader.shabbattimes.ui.viewModel.GpsViewModel
 import il.soulSalttrader.shabbattimes.ui.viewModel.PermissionViewModel
 import il.soulSalttrader.shabbattimes.ui.viewModel.SearchViewModel
@@ -75,11 +75,13 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
 
     val onCardClick = {
         when (permissionUiState.permission.dispatchCardAction()) {
-            CardAction.OpenGpsSearch         -> gpsViewMode.dispatch(GpsEvent.GpsLocationRequested)
-            CardAction.ShowDeniedPermanently -> permissionViewModel.dispatch(PermissionEvent.TappedCardDeniedPermanently)
-            CardAction.ShowDeniedRationale   -> permissionViewModel.dispatch(PermissionEvent.TappedCardDenied)
-            CardAction.PermissionRequested   -> permissionViewModel.dispatch(PermissionEvent.PermissionRequested)
-            CardAction.None                  -> Unit
+            CardAction.OpenGpsSearch -> gpsViewMode.dispatch(GpsEvent.GpsLocationRequested)
+            CardAction.ShowDeniedPermanently -> {
+                permissionViewModel.dispatch(PermissionEvent.TappedCardDeniedPermanently)
+            }
+            CardAction.ShowDeniedRationale -> permissionViewModel.dispatch(PermissionEvent.TappedCardDenied)
+            CardAction.PermissionRequested -> permissionViewModel.dispatch(PermissionEvent.PermissionRequested)
+            CardAction.None -> Unit
         }
     }
 
@@ -89,11 +91,11 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
     )
 
     when (val entries = shabbatState.shabbat) {
-        is ShabbatResultState.Idle    -> LoadingScreen()
+        is ShabbatResultState.Idle -> LoadingScreen()
 
         is ShabbatResultState.Loading -> LoadingScreen()
 
-        is ShabbatResultState.Empty   -> {
+        is ShabbatResultState.Empty -> {
             ShabbatContent(
                 items = listOf(
                     ShabbatEntry(
@@ -108,7 +110,7 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
             )
         }
 
-        is ShabbatResultState.Ready   -> {
+        is ShabbatResultState.Ready -> {
             ShabbatContent(
                 items = entries.entries,
                 swipeConfig = SwipeConfig(toLeft = SwipeState.Delete) { item ->
@@ -116,14 +118,14 @@ fun ShabbatScreen(snackbarHostState: SnackbarHostState) {
                         ShabbatEvent.LocationDeleted(
                             savedLocation = item.location,
                             isCurrent = item.status == LocationStatus.Current,
-                        )
+                        ),
                     )
                 },
                 searchConfig = searchConfig,
                 onClick = onCardClick,
                 onReorder = { from, to ->
                     shabbatViewModel.dispatch(
-                        ShabbatEvent.ReorderLocations(from = from, to = to)
+                        ShabbatEvent.ReorderLocations(from = from, to = to),
                     )
                 },
             )

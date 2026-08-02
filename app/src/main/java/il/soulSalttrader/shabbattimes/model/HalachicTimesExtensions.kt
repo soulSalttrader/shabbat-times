@@ -18,8 +18,8 @@ fun List<HalachicTimes>.toUnavailabilityWarning(): UiText? {
 
     return when {
         candleUnavailable && havdalahUnavailable -> UiText.Resource(R.string.unavailable_both_snackbar)
-        candleUnavailable                        -> UiText.Resource(R.string.unavailable_candle_lighting_snackbar)
-        havdalahUnavailable                      -> UiText.Resource(R.string.unavailable_havdalah_snackbar)
-        else                                     -> null
+        candleUnavailable -> UiText.Resource(R.string.unavailable_candle_lighting_snackbar)
+        havdalahUnavailable -> UiText.Resource(R.string.unavailable_havdalah_snackbar)
+        else -> null
     }
 }

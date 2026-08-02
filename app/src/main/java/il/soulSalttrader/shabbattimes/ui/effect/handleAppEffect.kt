@@ -14,7 +14,7 @@ suspend fun handleUiEffect(
     snackbarHostState: SnackbarHostState,
 ) {
     when (effect) {
-        is UiEffect.ShowToast       -> {
+        is UiEffect.ShowToast -> {
             Toast.makeText(
                 context,
                 effect.message.resolve(context),
@@ -22,14 +22,16 @@ suspend fun handleUiEffect(
             ).show()
             delay(2000)
         }
-        is UiEffect.ShowSnackBar    -> {
+        is UiEffect.ShowSnackBar -> {
             val result = snackbarHostState.showSnackbar(
                 message = effect.message.resolve(context),
                 actionLabel = effect.actionLabel?.resolve(context),
                 duration = SnackbarDuration.Long,
             )
 
-            if (result == SnackbarResult.ActionPerformed) { effect.onAction?.invoke() }
+            if (result == SnackbarResult.ActionPerformed) {
+                effect.onAction?.invoke()
+            }
         }
         is UiEffect.OpenAppSettings -> context.openAppSettings()
     }

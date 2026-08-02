@@ -7,12 +7,12 @@ import il.soulSalttrader.shabbattimes.model.HalachicTimes
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.model.ShabbatEntry
+import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.model.findForLocation
 import il.soulSalttrader.shabbattimes.model.resolveLocationStatus
 import il.soulSalttrader.shabbattimes.model.toDisplay
 import il.soulSalttrader.shabbattimes.ui.reducer.Reducible
 import il.soulSalttrader.shabbattimes.ui.reducer.ShabbatReducer
-import il.soulSalttrader.shabbattimes.model.ShabbatResultState
 import il.soulSalttrader.shabbattimes.ui.shabbat.ShabbatUiState
 import kotlinx.collections.immutable.toImmutableList
 
@@ -39,8 +39,8 @@ sealed interface ShabbatEvent : UiEvent, Reducible<ShabbatUiState> {
             state.copy(
                 shabbat = when {
                     savedLocations.isEmpty() -> ShabbatResultState.Empty
-                    else                     -> ShabbatResultState.Ready(shabbatEntries)
-                }
+                    else -> ShabbatResultState.Ready(shabbatEntries)
+                },
             )
         }
     }
@@ -57,10 +57,13 @@ sealed interface ShabbatEvent : UiEvent, Reducible<ShabbatUiState> {
     }
 
     data class LocationDeleted(val savedLocation: SavedLocation, val isCurrent: Boolean) : ShabbatEvent {
-        override val reducer = ShabbatReducer { state -> state } // The reducer is a no-op because the repository flow handles the UI update reactively
+        // The reducer is a no-op because the repository flow handles the UI update reactively
+        override val reducer = ShabbatReducer { state -> state }
     }
 
     data class ReorderLocations(val from: Int, val to: Int) : ShabbatEvent {
-        override val reducer = ShabbatReducer { state -> state } // The reducer is a no-op because order is persisted to the repository, which triggers ShabbatEntryLoaded to rebuild entries in the correct order reactively
+        // The reducer is a no-op because order is persisted to the repository,
+        // which triggers ShabbatEntryLoaded to rebuild entries in the correct order reactively
+        override val reducer = ShabbatReducer { state -> state }
     }
 }

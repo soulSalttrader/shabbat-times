@@ -1,7 +1,7 @@
 package il.soulSalttrader.shabbattimes.model
 
-import java.time.LocalDate
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneOffset
 
 data class SolarTimes(

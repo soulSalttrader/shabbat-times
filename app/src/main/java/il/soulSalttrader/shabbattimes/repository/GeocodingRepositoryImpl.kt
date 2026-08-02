@@ -20,24 +20,26 @@ class GeocodingRepositoryImpl @Inject constructor(
         runCatching {
             val response = geoapifyService.api.reverseGeocode(coordinates.latitude, coordinates.longitude)
             response.results?.firstOrNull()?.toResolvedLocation(
-                requestCoordinates = coordinates.normalize()
+                requestCoordinates = coordinates.normalize(),
             ) ?: return@withContext NetworkResult.Failure()
         }.fold(
             onSuccess = { data -> NetworkResult.Success(data) },
-            onFailure = { cause -> NetworkResult.Failure(cause) }
+            onFailure = { cause -> NetworkResult.Failure(cause) },
         )
     }
 
     override suspend fun autocompleteGeocode(query: String) = withContext(dispatcher) {
         val normalized = query.trim()
-        if (normalized.length < 2) { return@withContext NetworkResult.Success(emptyList()) }
+        if (normalized.length < 2) {
+            return@withContext NetworkResult.Success(emptyList())
+        }
 
         runCatching {
             val response = geoapifyService.api.autocomplete(queryText = normalized)
             response.results?.map { it.toResolvedLocation() } ?: emptyList()
         }.fold(
             onSuccess = { data -> NetworkResult.Success(data) },
-            onFailure = { cause -> NetworkResult.Failure(cause) }
+            onFailure = { cause -> NetworkResult.Failure(cause) },
         )
     }
 }

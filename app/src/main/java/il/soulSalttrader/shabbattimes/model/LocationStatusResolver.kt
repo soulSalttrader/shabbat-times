@@ -12,9 +12,9 @@ fun resolveLocationStatus(
     val isGps = location.id == SavedLocation.GPS_ID
 
     return when {
-        permission is Denied            -> LocationStatus.NoPermission
+        permission is Denied -> LocationStatus.NoPermission
         permission is DeniedPermanently -> LocationStatus.NoPermission
-        permission is Requesting        -> LocationStatus.Locating
+        permission is Requesting -> LocationStatus.Locating
 
         currentLocation is CurrentLocationState.Fetching -> LocationStatus.Locating
 
@@ -27,7 +27,7 @@ fun resolveLocationStatus(
             val distanceKm = currentLocation.coordinates.distanceTo(location.coordinates)
             when {
                 distanceKm < 0.1 -> LocationStatus.Current
-                else             -> LocationStatus.Nearby(distanceKm)
+                else -> LocationStatus.Nearby(distanceKm)
             }
         }
 

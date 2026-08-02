@@ -13,6 +13,8 @@ class RemoveSavedLocationUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(location: SavedLocation, isCurrent: Boolean) {
         savedLocationsRepository.remove(location)
-        if (isCurrent) { currentLocationRepository.update(null) }
+        if (isCurrent) {
+            currentLocationRepository.update(null)
+        }
     }
 }

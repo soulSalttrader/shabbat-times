@@ -14,7 +14,10 @@ fun NavBarBottomItems(
 ) {
     navItems.forEach { navItem ->
         val isSelected = currentNavTarget == navItem.target
-        val onClick = { navigator.navigateTo(target = navItem.target); Unit }
+        val onClick = {
+            navigator.navigateTo(target = navItem.target)
+            Unit
+        }
 
         itemContent(navItem, isSelected, onClick)
     }

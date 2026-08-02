@@ -32,9 +32,8 @@ fun rememberPermissionHandler(): PermissionHandler {
     lateinit var handler: PermissionHandlerImpl
 
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { result -> handler.onResult(result) }
-
 
     fun checkPermission(perm: String) =
         ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
@@ -46,7 +45,7 @@ fun rememberPermissionHandler(): PermissionHandler {
         PermissionHandlerImpl(
             checkPermission = ::checkPermission,
             checkShouldShowRationale = ::checkShouldShowRationale,
-            launch = launcher::launch
+            launch = launcher::launch,
         )
     }
 

@@ -21,15 +21,19 @@ class ObserveGpsLocationUseCase @Inject constructor(
     operator fun invoke(): Flow<CurrentLocationState> = permissionRepository.permissionState
         .flatMapLatest { permission ->
             when (permission) {
-                is LocationPermission.Granted -> gpsLocationRepository.location
-                    .map { location ->
-                        if (location != null) CurrentLocationState.Available(
-                            coordinates = Coordinates(location.latitude, location.longitude)
-                        )
-                        else CurrentLocationState.Fetching
-                    }
-                    .onStart { emit(CurrentLocationState.Fetching) } // ← only when Granted
-                else -> flowOf(CurrentLocationState.Idle)            // ← Idle for everything else
+                is LocationPermission.Granted ->
+                    gpsLocationRepository.location
+                        .map { location ->
+                            if (location != null) {
+                                CurrentLocationState.Available(
+                                    coordinates = Coordinates(location.latitude, location.longitude),
+                                )
+                            } else {
+                                CurrentLocationState.Fetching
+                            }
+                        }
+                        .onStart { emit(CurrentLocationState.Fetching) } // ← only when Granted
+                else -> flowOf(CurrentLocationState.Idle) // ← Idle for everything else
             }
         }
 }

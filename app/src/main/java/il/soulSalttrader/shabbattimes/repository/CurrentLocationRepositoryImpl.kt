@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 
 @Singleton
 class CurrentLocationRepositoryImpl @Inject constructor() : CurrentLocationRepository {
-    private val _currentLocation = MutableStateFlow<SavedLocation?>(null)
-    override val location: StateFlow<SavedLocation?> = _currentLocation
+    private val _location = MutableStateFlow<SavedLocation?>(null)
+    override val location: StateFlow<SavedLocation?> = _location
 
     override suspend fun update(location: SavedLocation?) {
-        _currentLocation.value = location
+        _location.value = location
     }
 }

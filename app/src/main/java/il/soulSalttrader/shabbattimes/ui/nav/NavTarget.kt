@@ -7,14 +7,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface NavTarget {
     companion object {
-        fun NavBackStackEntry?.fromBackStackEntry(): NavTarget? {
-            return when {
-                this?.destination?.hasRoute<NavTargetTop.Settings>() == true   -> NavTargetTop.Settings
-                this?.destination?.hasRoute<NavTargetTop.Previous>() == true   -> NavTargetTop.Previous
+        fun NavBackStackEntry?.fromBackStackEntry(): NavTarget? = when {
+            this?.destination?.hasRoute<NavTargetTop.Settings>() == true -> NavTargetTop.Settings
+            this?.destination?.hasRoute<NavTargetTop.Previous>() == true -> NavTargetTop.Previous
 
-                this?.destination?.hasRoute<NavTargetRoot.Shabbat>() == true -> NavTargetRoot.Shabbat
-                else                                                         -> null
-            }
+            this?.destination?.hasRoute<NavTargetRoot.Shabbat>() == true -> NavTargetRoot.Shabbat
+            else -> null
         }
     }
 }

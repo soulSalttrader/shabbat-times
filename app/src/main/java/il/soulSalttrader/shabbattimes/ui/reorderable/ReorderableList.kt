@@ -15,11 +15,11 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import il.soulSalttrader.shabbattimes.ui.ItemContent
 import il.soulSalttrader.shabbattimes.ui.SectionHeader
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 fun <T> LazyListScope.reorderableList(
     state: ReorderableState<T>,
@@ -42,17 +42,20 @@ fun <T> LazyListScope.reorderableList(
                 item = item,
                 swipeConfig = swipeConfig,
             ) {
-                content.Content(item, Modifier.draggableHandle(
-                    onDragStopped = {
-                        val from = state.pendingFrom
-                        val to = state.pendingTo
-                        if (from != -1 && to != -1 && from != to) {
-                            state.onReorder(from, to)
-                        }
-                        state.pendingFrom = -1
-                        state.pendingTo = -1
-                    }
-                ))
+                content.Content(
+                    item,
+                    Modifier.draggableHandle(
+                        onDragStopped = {
+                            val from = state.pendingFrom
+                            val to = state.pendingTo
+                            if (from != -1 && to != -1 && from != to) {
+                                state.onReorder(from, to)
+                            }
+                            state.pendingFrom = -1
+                            state.pendingTo = -1
+                        },
+                    ),
+                )
             }
         }
     }

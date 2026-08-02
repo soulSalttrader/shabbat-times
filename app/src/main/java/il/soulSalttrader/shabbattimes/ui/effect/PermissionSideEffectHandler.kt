@@ -17,19 +17,33 @@ class PermissionSideEffectHandler @Inject constructor(
 
     override suspend fun handle(event: PermissionEvent, emitter: EffectEmitter) {
         when (event) {
-            is PermissionEvent.SystemGranted           -> permissionRepository.updatePermissionState(LocationPermission.Granted)
-            is PermissionEvent.SystemDeniedPermanently -> permissionRepository.updatePermissionState(LocationPermission.DeniedPermanently)
-            is PermissionEvent.SystemDenied            -> permissionRepository.updatePermissionState(LocationPermission.DeniedRationale)
-            is PermissionEvent.ReturnedFromAppSettings  -> permissionRepository.updatePermissionState(LocationPermission.Idle)
-            is PermissionEvent.ShowEducation     -> {
+            is PermissionEvent.SystemGranted -> {
+                permissionRepository.updatePermissionState(LocationPermission.Granted)
+            }
+
+            is PermissionEvent.SystemDeniedPermanently -> {
+                permissionRepository.updatePermissionState(LocationPermission.DeniedPermanently)
+            }
+
+            is PermissionEvent.SystemDenied -> {
+                permissionRepository.updatePermissionState(LocationPermission.DeniedRationale)
+            }
+
+            is PermissionEvent.ReturnedFromAppSettings -> {
+                permissionRepository.updatePermissionState(LocationPermission.Idle)
+            }
+
+            is PermissionEvent.ShowEducation -> {
                 permissionRepository.updatePermissionState(LocationPermission.Education)
                 oneTimeMessageTracker.markShown(LOCATION_PERMISSION_EDUCATION)
             }
+
             is PermissionEvent.RequestPermission -> {
                 permissionRepository.updatePermissionState(LocationPermission.Requesting)
                 oneTimeMessageTracker.markShown(OneTimeMessage.LOCATION_PERMISSION_REQUESTED)
             }
-            is PermissionEvent.OpenAppSettings   -> emitter.emitEffect(UiEffect.OpenAppSettings)
+
+            is PermissionEvent.OpenAppSettings -> emitter.emitEffect(UiEffect.OpenAppSettings)
 
             else -> {} // TODO: Integrate logging framework (Timber)
         }

@@ -16,6 +16,6 @@ object PermissionModule {
     @Provides
     @ViewModelScoped
     fun providePermissionSideEffectHandler(
-        handler: PermissionSideEffectHandler
+        handler: PermissionSideEffectHandler,
     ): SideEffectHandler<PermissionEvent> = handler
 }

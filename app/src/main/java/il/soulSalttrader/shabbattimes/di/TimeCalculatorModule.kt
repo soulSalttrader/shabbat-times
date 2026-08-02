@@ -5,13 +5,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.scopes.ViewModelScoped
+import il.soulSalttrader.shabbattimes.settings.ephemeris.NoaaSolarEphemerisCalculator
+import il.soulSalttrader.shabbattimes.settings.ephemeris.SolarEphemerisCalculator
 import il.soulSalttrader.shabbattimes.settings.solarPosition.AstronomicalSolarDepressionCalculator
 import il.soulSalttrader.shabbattimes.settings.solarPosition.BinarySolarAltitudeSearch
 import il.soulSalttrader.shabbattimes.settings.solarPosition.EphemerisBasedSolarPositionCalculator
-import il.soulSalttrader.shabbattimes.settings.ephemeris.NoaaSolarEphemerisCalculator
 import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarAltitudeSearch
 import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarDepressionTimeCalculator
-import il.soulSalttrader.shabbattimes.settings.ephemeris.SolarEphemerisCalculator
 import il.soulSalttrader.shabbattimes.settings.solarPosition.SolarPositionCalculator
 
 @Module
@@ -24,7 +24,7 @@ object TimeCalculatorModule {
     @Provides
     @ViewModelScoped
     fun providePositionCalculator(
-        ephemerisCalculator: SolarEphemerisCalculator
+        ephemerisCalculator: SolarEphemerisCalculator,
     ): SolarPositionCalculator = EphemerisBasedSolarPositionCalculator(ephemerisCalculator)
 
     @Provides

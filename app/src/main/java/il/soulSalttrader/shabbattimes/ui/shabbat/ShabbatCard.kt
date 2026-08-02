@@ -98,7 +98,7 @@ fun ShabbatCard(
                     contentDescription = "dragHandle",
                     contentColor = when (item.status) {
                         LocationStatus.Current -> colors.contentColor
-                        else                   -> colors.contentColor
+                        else -> colors.contentColor
                     },
                 )
             }
@@ -108,7 +108,7 @@ fun ShabbatCard(
 
 @Composable
 private fun getDefaultCardColors(status: LocationStatus) = when (status) {
-    is LocationStatus.Current           -> CardDefaults.cardColors(
+    is LocationStatus.Current -> CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
@@ -118,7 +118,7 @@ private fun getDefaultCardColors(status: LocationStatus) = when (status) {
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     )
 
-    else                                -> CardDefaults.cardColors(
+    else -> CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -183,7 +183,7 @@ private fun ShabbatTimeColumn(
             modifier = modifier.padding(vertical = 4.dp),
         )
 
-        is Unavailable         -> ShabbatDateTimeUnavailable(
+        is Unavailable -> ShabbatDateTimeUnavailable(
             label = label,
             modifier = modifier.padding(vertical = 4.dp),
             colors = colors,
@@ -191,7 +191,7 @@ private fun ShabbatTimeColumn(
             showWarningIcon = showWarningIcon,
         )
 
-        else                   -> ShabbatDateTimeAvailable(
+        else -> ShabbatDateTimeAvailable(
             label = label,
             time = null,
             date = null,
@@ -208,12 +208,12 @@ private fun UiIconLocationLabel(
 ) {
     Row(modifier = Modifier.testTag(TestTags.LOCATION_LABEL)) {
         val icon = when (status) {
-            is LocationStatus.Current           -> UiIcon.Resource(R.drawable.location_on_24px)
+            is LocationStatus.Current -> UiIcon.Resource(R.drawable.location_on_24px)
             is LocationStatus.LastKnownLocation -> UiIcon.Resource(R.drawable.pin_history_24)
-            is LocationStatus.Unknown           -> UiIcon.Resource(R.drawable.not_listed_location_24)
-            is LocationStatus.NoPermission      -> UiIcon.Resource(R.drawable.location_off_24dp)
-            is LocationStatus.Nearby            -> UiIcon.Resource(R.drawable.add_location24)
-            is LocationStatus.Locating          -> UiIcon.Resource(R.drawable.moved_location_24dp)
+            is LocationStatus.Unknown -> UiIcon.Resource(R.drawable.not_listed_location_24)
+            is LocationStatus.NoPermission -> UiIcon.Resource(R.drawable.location_off_24dp)
+            is LocationStatus.Nearby -> UiIcon.Resource(R.drawable.add_location24)
+            is LocationStatus.Locating -> UiIcon.Resource(R.drawable.moved_location_24dp)
         }
 
         UiIconLabel(
@@ -221,7 +221,7 @@ private fun UiIconLocationLabel(
             leadingIcon = icon,
             contentColor = when (status) {
                 LocationStatus.Current -> colors.contentColor
-                else                   -> colors.contentColor
+                else -> colors.contentColor
             },
         )
     }
@@ -234,7 +234,7 @@ private fun LocationTitle(
 ) {
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = name,
@@ -243,8 +243,8 @@ private fun LocationTitle(
             modifier = Modifier.weight(1f),
             autoSize = TextAutoSize.StepBased(
                 minFontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                maxFontSize = MaterialTheme.typography.headlineLarge.fontSize
-            )
+                maxFontSize = MaterialTheme.typography.headlineLarge.fontSize,
+            ),
         )
     }
 }
@@ -316,8 +316,8 @@ private fun ShabbatDateTimeUnavailable(
 
     if (showDialog) {
         val message = when (unavailableReason) {
-            Both           -> stringResource(R.string.unavailable_both_body)
-            Havdalah       -> stringResource(R.string.unavailable_havdalah_body)
+            Both -> stringResource(R.string.unavailable_both_body)
+            Havdalah -> stringResource(R.string.unavailable_havdalah_body)
             CandleLighting -> stringResource(R.string.unavailable_candle_lighting_body)
         }
 
@@ -327,7 +327,7 @@ private fun ShabbatDateTimeUnavailable(
             confirmAction = DialogButtonAction(
                 text = stringResource(R.string.unavailable_dialog_confirm),
                 onClick = { showDialog = false },
-                color = { MaterialTheme.colorScheme.primary }
+                color = { MaterialTheme.colorScheme.primary },
             ),
         )
     }

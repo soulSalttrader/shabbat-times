@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
-abstract class BaseViewModel (
+abstract class BaseViewModel(
     private val oneTimeMessageTracker: OneTimeMessageTracker,
 ) : ViewModel(), EffectEmitter {
     private val _effects = MutableSharedFlow<UiEffect>(extraBufferCapacity = 20)

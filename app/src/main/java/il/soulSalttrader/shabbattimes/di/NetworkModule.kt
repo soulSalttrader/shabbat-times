@@ -12,11 +12,11 @@ import il.soulSalttrader.shabbattimes.network.JsonConfig
 import il.soulSalttrader.shabbattimes.network.OkHttpClientFactory
 import il.soulSalttrader.shabbattimes.network.SolarTimesApi
 import jakarta.inject.Singleton
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
 @Module
 @InstallIn(SingletonComponent::class)

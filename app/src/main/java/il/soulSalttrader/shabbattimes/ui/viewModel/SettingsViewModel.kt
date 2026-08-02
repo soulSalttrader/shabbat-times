@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.soulSalttrader.shabbattimes.repository.UserPreferencesRepository
-import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.event.SettingsEvent
+import il.soulSalttrader.shabbattimes.ui.event.UiEvent
 import il.soulSalttrader.shabbattimes.ui.settings.SettingsUiState
 import il.soulSalttrader.shabbattimes.useCase.SaveShabbatPreferenceUseCase
 import jakarta.inject.Inject
@@ -30,21 +30,21 @@ class SettingsViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = SettingsUiState()
+            initialValue = SettingsUiState(),
         )
 
     fun dispatch(event: UiEvent) {
         _state.updateAndGet { current ->
             when (event) {
                 is SettingsEvent -> event.reducer reduce current
-                else             -> current
+                else -> current
             }
         }
 
         when (event) {
             is SettingsEvent.SetCandleLightingOffset -> handleCandleLightningOffsetSelected(event)
-            is SettingsEvent.SetHavdalahCriterion    -> handleHavdalahCriterionSelected(event)
-            else                                     -> Unit
+            is SettingsEvent.SetHavdalahCriterion -> handleHavdalahCriterionSelected(event)
+            else -> Unit
         }
     }
 

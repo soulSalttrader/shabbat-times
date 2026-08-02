@@ -77,20 +77,20 @@ class SearchViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = SearchUiState()
+        initialValue = SearchUiState(),
     )
 
     fun dispatch(event: UiEvent) {
         val newState = _state.updateAndGet { current ->
             when (event) {
                 is SearchEvent -> event.reducer reduce current
-                else           -> current
+                else -> current
             }
         }
 
         when (event) {
             is SearchEvent.SuggestionSelected -> handleSuggestionSelected(newState)
-            else                              -> Unit
+            else -> Unit
         }
     }
 
@@ -107,7 +107,7 @@ class SearchViewModel @Inject constructor(
                         ),
                         actionLabel = UiText.Resource(R.string.search_limit_action),
                         onAction = { dispatch(SearchEvent.SearchVisibilityChanged(false)) },
-                    )
+                    ),
                 )
                 SaveLocationResult.Success -> emitEffect(UiEffect.ShowToast(UiText.Resource(R.string.location_added)))
             }

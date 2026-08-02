@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Singleton
 class UserPreferencesRepositoryImpl @Inject constructor(
     private val userPreferences: UserPreferences,
-): UserPreferencesRepository {
+) : UserPreferencesRepository {
     override val shabbatPreferences: Flow<ShabbatPreferences> =
         userPreferences.shabbatPreferences()
 

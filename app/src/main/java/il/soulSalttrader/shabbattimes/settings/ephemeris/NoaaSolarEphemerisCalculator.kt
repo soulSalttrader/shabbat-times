@@ -44,7 +44,12 @@ class NoaaSolarEphemerisCalculator : SolarEphemerisCalculator {
 
         // Declination and Equation of Time
         val declinationRad = getDeclinationRad(correctedObliquityDeg, sunApparentLongitudeDeg)
-        val equationOfTimeMinutes = getEquationOfTimeMinutes(meanLongitudeDeg, meanAnomalyRad, eccentricity, correctedObliquityDeg)
+        val equationOfTimeMinutes = getEquationOfTimeMinutes(
+            meanLongitudeDeg,
+            meanAnomalyRad,
+            eccentricity,
+            correctedObliquityDeg,
+        )
 
         return SolarEphemeris(declinationRad, equationOfTimeMinutes)
     }

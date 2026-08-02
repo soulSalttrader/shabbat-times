@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.first
 @Singleton
 class DataStoreOneTimeMessageTracker @Inject constructor(
     private val dataStore: DataStore<Preferences>,
-): OneTimeMessageTracker {
+) : OneTimeMessageTracker {
     companion object {
         private val SHOWN_MESSAGE_KEY = stringSetPreferencesKey("shown_one_time_messages")
     }
