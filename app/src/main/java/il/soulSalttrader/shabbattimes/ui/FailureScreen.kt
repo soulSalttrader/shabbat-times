@@ -38,7 +38,7 @@ fun FailureScreen(
         ) {
             UiIconImage(
                 icon = UiIcon.Resource(R.drawable.sentiment_very_dissatisfied_outlined_192),
-                contentDescription = null
+                contentDescription = null,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -76,6 +76,6 @@ fun Preview(modifier: Modifier = Modifier) {
     FailureScreen(
         modifier = Modifier,
         cause = null,
-        onRetry = { /* no op */ }
+        onRetry = { /* no op */ },
     )
 }

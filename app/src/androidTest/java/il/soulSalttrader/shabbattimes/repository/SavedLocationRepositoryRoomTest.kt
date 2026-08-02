@@ -10,15 +10,15 @@ import il.soulSalttrader.shabbattimes.gpsLocation
 import il.soulSalttrader.shabbattimes.jerusalemLocation
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import il.soulSalttrader.shabbattimes.telAvivLocation
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class SavedLocationsRepositoryRoomTest {
@@ -65,7 +65,7 @@ class SavedLocationsRepositoryRoomTest {
                 jerusalemLocation(),
                 brnoLocation(),
                 telAvivLocation(),
-            )
+            ),
         )
 
         val result = dao.observeAll().first()
@@ -87,7 +87,7 @@ class SavedLocationsRepositoryRoomTest {
                 brnoLocation(),
                 telAvivLocation(),
                 jerusalemLocation(),
-            )
+            ),
         )
 
         val result = dao.observeAll().first()
@@ -111,7 +111,7 @@ class SavedLocationsRepositoryRoomTest {
                 jerusalemLocation(),
                 telAvivLocation(),
                 brnoLocation(),
-            )
+            ),
         )
 
         val result = dao.observeAll().first()

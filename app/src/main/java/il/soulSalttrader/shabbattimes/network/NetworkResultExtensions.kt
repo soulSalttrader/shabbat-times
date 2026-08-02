@@ -5,7 +5,7 @@ import il.soulSalttrader.shabbattimes.ui.viewModel.BatchOutcome
 
 inline fun <T, R> NetworkResult<T>.fold(
     onSuccess: (T) -> R,
-    onFailure: (NetworkResult.Failure) -> R
+    onFailure: (NetworkResult.Failure) -> R,
 ): R =
     when (this) {
         is NetworkResult.Success -> onSuccess(data)
@@ -13,15 +13,15 @@ inline fun <T, R> NetworkResult<T>.fold(
     }
 
 inline fun <T, R> NetworkResult<T>.map(
-    transform: (T) -> R
+    transform: (T) -> R,
 ): NetworkResult<R> =
     fold(
         onSuccess = { NetworkResult.Success(transform(it)) },
-        onFailure = { it }
+        onFailure = { it },
     )
 
 inline fun <T> NetworkResult<T>.mapFailure(
-    transform: (NetworkResult.Failure) -> NetworkResult.Failure
+    transform: (NetworkResult.Failure) -> NetworkResult.Failure,
 ): NetworkResult<T> =
     when (this) {
         is NetworkResult.Success -> this
@@ -29,13 +29,17 @@ inline fun <T> NetworkResult<T>.mapFailure(
     }
 
 inline fun <T> NetworkResult<T>.onSuccess(action: (T) -> Unit): NetworkResult<T> {
-    if (this is NetworkResult.Success) { action(data) }
+    if (this is NetworkResult.Success) {
+        action(data)
+    }
 
     return this
 }
 
 inline fun <T> NetworkResult<T>.onFailure(action: (NetworkResult.Failure) -> Unit): NetworkResult<T> {
-    if (this is NetworkResult.Failure) { action(this) }
+    if (this is NetworkResult.Failure) {
+        action(this)
+    }
     return this
 }
 
@@ -54,9 +58,9 @@ inline fun <T> NetworkResult<T>.getOrElse(onFailure: (NetworkResult.Failure) -> 
 fun <T> List<NetworkResult<T>>.toBatchOutcome(): BatchOutcome {
     val failures = filterIsInstance<NetworkResult.Failure>()
     return when {
-        failures.isEmpty()    -> BatchOutcome.AllSucceeded
+        failures.isEmpty() -> BatchOutcome.AllSucceeded
         failures.size == size -> BatchOutcome.AllFailed(failures.first().cause.userMessage())
-        else                  -> {
+        else -> {
             BatchOutcome.PartiallyFailed(
                 failedCount = failures.size,
                 totalCount = size,

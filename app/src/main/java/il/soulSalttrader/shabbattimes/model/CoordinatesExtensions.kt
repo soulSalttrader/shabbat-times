@@ -27,8 +27,8 @@ fun Coordinates.distanceTo(other: Coordinates): Double {
     val dLon = Math.toRadians(other.longitude - longitude)
 
     val a = sin(dLat / 2).pow(2) +
-            cos(lat1) * cos(lat2) *
-            sin(dLon / 2).pow(2)
+        cos(lat1) * cos(lat2) *
+        sin(dLon / 2).pow(2)
 
     val c = 2 * atan2(sqrt(a), sqrt(1 - a))
 

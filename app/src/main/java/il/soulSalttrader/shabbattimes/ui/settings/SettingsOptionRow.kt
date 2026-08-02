@@ -38,13 +38,12 @@ fun <T : SettingsOption> SettingsOptionRow(
     }
 }
 
-
 @Preview
 @Composable
 fun PreviewSettingsOptionRow() {
     SettingsOptionRow(
         label = "Candle lightning time",
         selected = CandleLightingOffset.entries[0],
-        onClick = {}
+        onClick = {},
     )
 }

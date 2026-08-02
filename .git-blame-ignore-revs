@@ -1,0 +1,24 @@
+# .git-blame-ignore-revs
+#
+# Commits listed here are excluded from `git blame` output (both locally, after running
+# `git config blame.ignoreRevsFile .git-blame-ignore-revs`, and automatically on GitHub's web UI).
+#
+# Add ONLY commits that are pure formatting/mechanical changes with no logic difference -
+# never a commit that also changes behavior.
+
+# --- ktlint formatting pass (2026-08-02) ---
+
+# run
+# git log --format="# %s (%ad)%n%H%n" --date=iso --grep="^style:"
+
+# style: format and clean up instrumented tests (2026-08-02 15:35:59 +0200)
+2a5df723505f1025ec5569c8ad847cc27357cf01
+
+# style: apply formatting fixes and standardize imports in tests (2026-08-02 15:29:48 +0200)
+0b2e4f1d9c87ebf44912d04d9da7f00e4fc5ecf4
+
+# style: apply consistent code formatting and import cleanup (2026-08-02 13:05:40 +0200)
+232c708e9810ac5a4f3a242a8c5965e65a3a50c7
+
+# style: add trailing commas in build.gradle.kts (2026-07-31 17:33:31 +0200)
+c362966902de72f7f2d7a7cfb51b7a8fce2ab937

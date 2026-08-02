@@ -28,7 +28,7 @@ class UiRobot(
         rule.onNode(
             hasTestTag(DRAG_HANDLE)
                 .and(hasAnyAncestor(hasTestTag(testTag))),
-            useUnmergedTree = true
+            useUnmergedTree = true,
         ).assertExists()
     }
 
@@ -37,7 +37,7 @@ class UiRobot(
         rule.onNode(
             hasTestTag(DRAG_HANDLE)
                 .and(hasAnyAncestor(hasTestTag(testTag))),
-            useUnmergedTree = true
+            useUnmergedTree = true,
         ).assertDoesNotExist()
     }
 

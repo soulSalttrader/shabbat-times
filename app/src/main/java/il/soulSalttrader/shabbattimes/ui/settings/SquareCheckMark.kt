@@ -27,7 +27,7 @@ fun SquareCheckmark(
                 when (selected) {
                     true -> MaterialTheme.colorScheme.primaryContainer
                     false -> MaterialTheme.colorScheme.surfaceVariant
-                }
+                },
             ),
         contentAlignment = Alignment.Center,
     ) {

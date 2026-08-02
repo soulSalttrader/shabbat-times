@@ -54,7 +54,7 @@ class BinarySolarAltitudeSearch : SolarAltitudeSearch {
             val alt2 = altitudeAt(t2)
 
             when {
-                targetAltitudeDeg in alt2..<alt1                      ->
+                targetAltitudeDeg in alt2..<alt1 ->
                     return AltitudeBracket(t1, t2, descending = true)
                 alt1 < targetAltitudeDeg && alt2 >= targetAltitudeDeg ->
                     return AltitudeBracket(t1, t2, descending = false)
@@ -81,8 +81,11 @@ class BinarySolarAltitudeSearch : SolarAltitudeSearch {
             val mid = lo.plusSeconds(Duration.between(lo, hi).seconds / 2)
             val midAltitude = altitudeAt(mid)
 
-            val midIsBeforeTarget = if (descending) midAltitude > targetAltitudeDeg
-            else midAltitude < targetAltitudeDeg
+            val midIsBeforeTarget = if (descending) {
+                midAltitude > targetAltitudeDeg
+            } else {
+                midAltitude < targetAltitudeDeg
+            }
 
             if (midIsBeforeTarget) lo = mid else hi = mid
         }

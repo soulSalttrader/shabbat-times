@@ -68,27 +68,28 @@ data class GeoapifyResultDto(
     // ────────────────────────────────────────────────
     // Core location
     // ────────────────────────────────────────────────
-    @SerialName("lat")          val latitude: Double? = null,
-    @SerialName("lon")          val longitude: Double? = null,
+    @SerialName("lat") val latitude: Double? = null,
+    @SerialName("lon") val longitude: Double? = null,
     val timezone: GeoapifyTimezone? = null, // "America/New_York"
 
     // ────────────────────────────────────────────────
     // Address components
     // ────────────────────────────────────────────────
-    @SerialName("country")      val countryName: String? = null,   // "United States"
-    @SerialName("country_code") val countryCode: String? = null,   // "us"
-    @SerialName("state")        val stateOrRegion: String? = null, // "New York"
-    @SerialName("state_code")   val stateCode: String? = null,     // "NY"
-    @SerialName("city")         val cityName: String? = null,      // "New York"
-    @SerialName("housenumber")  val houseNumber: String? = null,
-    @SerialName("formatted")    val fullAddress: String? = null,   // "7th Avenue, New York, NY 10014, United States of America"
-    @SerialName("name")         val placeName: String? = null,     // "7th Avenue South"
-    @SerialName("place_id")     val placeId: String? = null,
-    val county: String? = null,     // "New York County"
-    val postcode: String? = null,   // "10014"
-    val suburb: String? = null,     // "Manhattan"
+    @SerialName("country") val countryName: String? = null, // "United States"
+    @SerialName("country_code") val countryCode: String? = null, // "us"
+    @SerialName("state") val stateOrRegion: String? = null, // "New York"
+    @SerialName("state_code") val stateCode: String? = null, // "NY"
+    @SerialName("city") val cityName: String? = null, // "New York"
+    @SerialName("housenumber") val houseNumber: String? = null,
+    // "7th Avenue, New York, NY 10014, United States of America"
+    @SerialName("formatted") val fullAddress: String? = null,
+    @SerialName("name") val placeName: String? = null, // "7th Avenue South"
+    @SerialName("place_id") val placeId: String? = null,
+    val county: String? = null, // "New York County"
+    val postcode: String? = null, // "10014"
+    val suburb: String? = null, // "Manhattan"
     val quarter: String? = null,
-    val street: String? = null,     // "7th Avenue South"
+    val street: String? = null, // "7th Avenue South"
 
     // ────────────────────────────────────────────────
     // Metadata & quality indicators

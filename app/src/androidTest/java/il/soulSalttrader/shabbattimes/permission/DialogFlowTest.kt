@@ -5,7 +5,6 @@ import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
-import il.soulSalttrader.shabbattimes.UiRobot
 import il.soulSalttrader.shabbattimes.PermissionRobot
 import il.soulSalttrader.shabbattimes.SystemPermissionRobot
 import il.soulSalttrader.shabbattimes.TestTags.BUTTON_DIALOG_CONFIRM
@@ -16,6 +15,7 @@ import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
 import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
 import il.soulSalttrader.shabbattimes.TestTags.LOCATION_CARD
 import il.soulSalttrader.shabbattimes.TestTags.RATIONALE_DIALOG
+import il.soulSalttrader.shabbattimes.UiRobot
 import il.soulSalttrader.shabbattimes.model.LocationPermission
 import il.soulSalttrader.shabbattimes.model.SavedLocation
 import org.junit.Test

@@ -20,7 +20,7 @@ sealed interface SearchEvent : UiEvent, Reducible<SearchUiState> {
                     when (newQuery.trim().length >= 2) {
                         true -> SearchResultState.Loading
                         else -> SearchResultState.Idle
-                    }
+                    },
             )
         }
     }
@@ -39,11 +39,11 @@ sealed interface SearchEvent : UiEvent, Reducible<SearchUiState> {
         override val reducer = SearchReducer { state ->
             state.copy(
                 suggestionResults = when {
-                    state.query is Input.Idle   -> SearchResultState.Idle
-                    state.query is Input.Empty  -> SearchResultState.Idle
+                    state.query is Input.Idle -> SearchResultState.Idle
+                    state.query is Input.Empty -> SearchResultState.Idle
                     resolvedLocations.isEmpty() -> SearchResultState.Empty
-                    else                        -> SearchResultState.Suggestions(resolvedLocations)
-                }
+                    else -> SearchResultState.Suggestions(resolvedLocations)
+                },
             )
         }
     }
@@ -70,7 +70,7 @@ sealed interface SearchEvent : UiEvent, Reducible<SearchUiState> {
                 visibility = when (expanded) {
                     true -> SearchVisibility.Expanded
                     else -> SearchVisibility.Collapsed
-                }
+                },
             )
         }
     }

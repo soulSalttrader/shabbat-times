@@ -41,7 +41,7 @@ fun <T> SwipeableItem(
         when (dismissState.currentValue) {
             SwipeToDismissBoxValue.EndToStart -> if (swipeConfig.toLeft.isEnabled) showDialog = true
             SwipeToDismissBoxValue.StartToEnd -> if (swipeConfig.toRight.isEnabled) swipeConfig.onSwipe(item)
-            else                              -> {}
+            else -> {}
         }
     }
 
@@ -74,7 +74,7 @@ fun <T> SwipeableItem(
                 showDialog = false
                 coroutineScope.launch { dismissState.reset() }
             },
-            color = { MaterialTheme.colorScheme.primary }
+            color = { MaterialTheme.colorScheme.primary },
         )
 
         ExplanatoryDialog(
@@ -82,11 +82,10 @@ fun <T> SwipeableItem(
             title = title,
             confirmAction = confirmAction,
             dismissAction = dismissAction,
-            testTag = SWIPE_CARD_DIALOG
+            testTag = SWIPE_CARD_DIALOG,
         )
     }
 }
-
 
 /**
  * Remembers a [SwipeToDismissBoxState] **without** using [androidx.compose.runtime.saveable.rememberSaveable].

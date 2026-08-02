@@ -35,7 +35,9 @@ class GpsViewModel @Inject constructor(
 
     val state: StateFlow<GpsUiState> = resolveGpsLocationUseCase()
         .onEach { resultState ->
-            if (resultState is GpsResultState.Resolved) { updateCurrentLocationUseCase(resultState.location) }
+            if (resultState is GpsResultState.Resolved) {
+                updateCurrentLocationUseCase(resultState.location)
+            }
         }
         .catch { cause ->
             emitEffect(UiEffect.ShowToast(cause.userMessage()))
@@ -45,14 +47,14 @@ class GpsViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = GpsUiState()
+            initialValue = GpsUiState(),
         )
 
     fun dispatch(event: UiEvent) {
         _state.updateAndGet { current ->
             when (event) {
                 is GpsEvent -> event.reducer reduce current
-                else        -> current
+                else -> current
             }
         }
 

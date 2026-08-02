@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class GeoapifyResponseDto(
     val results: List<GeoapifyResultDto>? = null,
     val status: String? = null,
-    val query: GeoapifyQuery? = null
+    val query: GeoapifyQuery? = null,
 )

@@ -38,10 +38,10 @@ fun LocationSearchScreen(
             .fillMaxWidth()
             .padding(horizontal = 32.dp),
         shape = RoundedCornerShape(20.dp),
-        tonalElevation = 6.dp
+        tonalElevation = 6.dp,
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             LocationSearchBarInputField(
                 state = state,

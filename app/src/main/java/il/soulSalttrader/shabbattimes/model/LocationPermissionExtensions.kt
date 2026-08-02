@@ -4,14 +4,14 @@ import il.soulSalttrader.shabbattimes.permission.PermissionState
 import il.soulSalttrader.shabbattimes.ui.permission.PermissionUiState
 
 fun LocationPermission.toPermissionState() = when (this) {
-    is LocationPermission.Idle                       -> PermissionState.Idle
-    is LocationPermission.Education                  -> PermissionState.Education
-    is LocationPermission.Requesting                 -> PermissionState.Requesting
-    is LocationPermission.Granted                    -> PermissionState.Granted
-    is LocationPermission.Denied                     -> PermissionState.Denied
-    is LocationPermission.DeniedPermanently          -> PermissionState.DeniedPermanently
+    is LocationPermission.Idle -> PermissionState.Idle
+    is LocationPermission.Education -> PermissionState.Education
+    is LocationPermission.Requesting -> PermissionState.Requesting
+    is LocationPermission.Granted -> PermissionState.Granted
+    is LocationPermission.Denied -> PermissionState.Denied
+    is LocationPermission.DeniedPermanently -> PermissionState.DeniedPermanently
     is LocationPermission.DeniedPermanentlyRationale -> PermissionState.DeniedPermanentlyRationale
-    is LocationPermission.DeniedRationale            -> PermissionState.DeniedRationale
+    is LocationPermission.DeniedRationale -> PermissionState.DeniedRationale
 }
 
 fun LocationPermission.toUiState(current: PermissionUiState) = current.copy(permission = toPermissionState())

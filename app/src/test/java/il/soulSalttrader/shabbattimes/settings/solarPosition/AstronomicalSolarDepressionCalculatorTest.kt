@@ -39,13 +39,13 @@ class AstronomicalSolarDepressionCalculatorTest : DescribeSpec({
                 "SOLAR-DEPRESSION_S1_6 - Evening Nautical Twilight (12°) - Winter Solstice Prague" to winterSolsticeNauticalTwilightPrague,
                 "SOLAR-DEPRESSION_S1_7 - Morning Nautical Twilight (12°) - Summer Solstice Prague" to summerSolsticeMorningNauticalTwilightPrague,
                 "SOLAR-DEPRESSION_S1_8 - Morning Nautical Twilight (12°) - Winter Solstice Prague" to winterSolsticeMorningNauticalTwilightPrague,
-            )
+            ),
         ) { testCase ->
             val result = calculator.eveningTimeForDepression(
                 targetDegrees = testCase.targetDegrees,
                 solarData = testCase.solarData,
                 latitude = testCase.latitude,
-                longitude = testCase.longitude
+                longitude = testCase.longitude,
             )
 
             when {

@@ -38,7 +38,10 @@ fun <T : SettingsOption> SettingsOptionSheet(
                 SettingsOptionItem(
                     option = option,
                     selected = option == selected,
-                    onClick = { onSelect(option); onDismiss() },
+                    onClick = {
+                        onSelect(option)
+                        onDismiss()
+                    },
                 )
             }
 
@@ -55,6 +58,6 @@ fun PreviewSettingsOptionSheet() {
         options = CandleLightingOffset.entries,
         selected = CandleLightingOffset.MIN_18,
         onSelect = {},
-        onDismiss = {}
+        onDismiss = {},
     )
 }

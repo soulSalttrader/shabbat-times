@@ -5,11 +5,11 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidTest
 import il.soulSalttrader.shabbattimes.BaseInstrumentedTest
 import il.soulSalttrader.shabbattimes.ShabbatCardRobot
-import il.soulSalttrader.shabbattimes.UiRobot
 import il.soulSalttrader.shabbattimes.TestTags.EMPTY_CARD
 import il.soulSalttrader.shabbattimes.TestTags.GPS_CARD
 import il.soulSalttrader.shabbattimes.TestTags.LOCATION_CARD
 import il.soulSalttrader.shabbattimes.TestTags.SWIPE_CARD_DIALOG
+import il.soulSalttrader.shabbattimes.UiRobot
 import il.soulSalttrader.shabbattimes.di.FakePersistenceModule
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay.Companion.EMPTY_DATE
 import il.soulSalttrader.shabbattimes.model.HalachicTimesDisplay.Companion.EMPTY_TIME
@@ -100,7 +100,6 @@ class ShabbatCardTest : BaseInstrumentedTest() {
             .assertCardNotPresented(GPS_CARD)
     }
 
-
     @Test
     fun `UI_CARD_CONTENT_S1 - should display location name on card`() {
         uiRobot
@@ -125,7 +124,7 @@ class ShabbatCardTest : BaseInstrumentedTest() {
             .assertTextPlaceholdersCount(
                 text = EMPTY_DATE,
                 cardTag = EMPTY_CARD,
-                expectedCount = 2
+                expectedCount = 2,
             )
             .assertTextPlaceholdersCount(
                 text = "Candle Lighting",
@@ -180,7 +179,11 @@ class ShabbatCardTest : BaseInstrumentedTest() {
             .assertDragHandleNotPresentedOnCard(EMPTY_CARD)
     }
 
-    @Ignore("ReorderableItem uses custom pointer input not triggerable via performTouchInput. Re-enable when Compose test framework supports drag-and-drop gestures reliably. See UI_CARD_REORDER_S1 in ui_scenarios.md")
+    @Ignore(
+        "ReorderableItem uses custom pointer input not triggerable via performTouchInput. " +
+            "Re-enable when Compose test framework supports drag-and-drop gestures reliably. " +
+            "See UI_CARD_REORDER_S1 in ui_scenarios.md",
+    )
     @Test
     fun `UI_CARD_REORDER_S1 - drag card up changes order`() {
         uiRobot

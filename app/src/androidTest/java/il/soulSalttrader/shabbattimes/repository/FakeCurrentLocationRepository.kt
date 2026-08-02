@@ -12,5 +12,7 @@ class FakeCurrentLocationRepository : CurrentLocationRepository {
         _location.value = location
     }
 
-    fun clear() { _location.value = null }
+    fun clear() {
+        _location.value = null
+    }
 }

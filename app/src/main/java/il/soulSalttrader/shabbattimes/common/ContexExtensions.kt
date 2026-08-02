@@ -26,9 +26,9 @@ import java.util.Locale
 fun Context.openAppSettings() {
     val intent = Intent(
         Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-        Uri.fromParts("package", packageName, null)
+        Uri.fromParts("package", packageName, null),
     ).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)  // Safe for non-Activity contexts
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Safe for non-Activity contexts
     }
     try {
         startActivity(intent)
@@ -72,7 +72,7 @@ fun Context.formatTime(
             SpanStyle(
                 fontSize = (LocalTextStyle.current.fontSize.value * amPmScale).sp,
                 color = LocalContentColor.current.copy(alpha),
-            )
+            ),
         ) {
             append(timeStr.substring(amPmStart))
         }

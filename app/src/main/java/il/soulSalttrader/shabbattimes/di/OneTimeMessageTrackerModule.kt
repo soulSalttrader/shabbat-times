@@ -14,6 +14,6 @@ abstract class OneTimeMessageTrackerModule {
     @Binds
     @Singleton
     abstract fun bindOneTimeMessageTracker(
-        impl: DataStoreOneTimeMessageTracker
+        impl: DataStoreOneTimeMessageTracker,
     ): OneTimeMessageTracker
 }

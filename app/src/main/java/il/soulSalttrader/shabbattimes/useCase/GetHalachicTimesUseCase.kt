@@ -21,7 +21,10 @@ class GetHalachicTimesUseCase @Inject constructor(
     private val shabbatCalendar: ShabbatCalendar,
     private val havdalahCalculator: SolarDepressionTimeCalculator,
 ) {
-    suspend operator fun invoke(locations: List<SavedLocation>, preferences: ShabbatPreferences): List<NetworkResult<HalachicTimes>> =
+    suspend operator fun invoke(
+        locations: List<SavedLocation>,
+        preferences: ShabbatPreferences,
+    ): List<NetworkResult<HalachicTimes>> =
         coroutineScope {
             locations.map { location ->
                 async {
@@ -46,28 +49,26 @@ class GetHalachicTimesUseCase @Inject constructor(
         preferences: ShabbatPreferences,
         startEvent: SolarTimesRequest,
         endEvent: SolarTimesRequest,
-    ): NetworkResult<HalachicTimes> {
-        return runCatching {
-            coroutineScope {
-                awaitAll(
-                    async { solarTimesRepository.getSolarTimes(startEvent) },
-                    async { solarTimesRepository.getSolarTimes(endEvent) },
-                ).map { it.getOrThrow() }
-            }
-        }.fold(
-            onSuccess = { (startSolar, endSolar) ->
-                val candleLightingState = startSolar.resolveCandleLighting(preferences)
-                val havdalahState = endSolar.resolveHavdalah(preferences, startEvent, havdalahCalculator)
+    ): NetworkResult<HalachicTimes> = runCatching {
+        coroutineScope {
+            awaitAll(
+                async { solarTimesRepository.getSolarTimes(startEvent) },
+                async { solarTimesRepository.getSolarTimes(endEvent) },
+            ).map { it.getOrThrow() }
+        }
+    }.fold(
+        onSuccess = { (startSolar, endSolar) ->
+            val candleLightingState = startSolar.resolveCandleLighting(preferences)
+            val havdalahState = endSolar.resolveHavdalah(preferences, startEvent, havdalahCalculator)
 
-                NetworkResult.Success(
-                    HalachicTimes(
-                        coordinates = startEvent.coordinates,
-                        candleLighting = candleLightingState,
-                        havdalah = havdalahState,
-                    )
-                )
-            },
-            onFailure = { cause -> NetworkResult.Failure(cause) }
-        )
-    }
+            NetworkResult.Success(
+                HalachicTimes(
+                    coordinates = startEvent.coordinates,
+                    candleLighting = candleLightingState,
+                    havdalah = havdalahState,
+                ),
+            )
+        },
+        onFailure = { cause -> NetworkResult.Failure(cause) },
+    )
 }

@@ -35,10 +35,9 @@ fun <T> SwipeBackground(
         horizontalArrangement = when (direction) {
             SwipeToDismissBoxValue.EndToStart -> Arrangement.End
             SwipeToDismissBoxValue.StartToEnd -> Arrangement.Start
-            else                              -> Arrangement.Center
-        }
+            else -> Arrangement.Center
+        },
     ) {
-
         UiIconImage(
             icon = swipe.appearance.icon,
             contentDescription = swipe.appearance.contentDescription,

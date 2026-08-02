@@ -35,7 +35,7 @@ fun PermissionDialogs(
             testTag = EDUCATION_DIALOG,
         )
 
-        PermissionState.DeniedRationale    -> ExplanatoryDialog(
+        PermissionState.DeniedRationale -> ExplanatoryDialog(
             message = stringResource(R.string.permission_denied_message),
             confirmAction = DialogButtonAction(
                 text = stringResource(R.string.permission_denied_confirm),
@@ -58,7 +58,7 @@ fun PermissionDialogs(
                     onOpenSettings()
                     dispatch(PermissionEvent.OpenAppSettings)
                 },
-                color = { MaterialTheme.colorScheme.primary }
+                color = { MaterialTheme.colorScheme.primary },
             ),
             dismissAction = DialogButtonAction(
                 text = stringResource(R.string.dialog_default_dismiss),

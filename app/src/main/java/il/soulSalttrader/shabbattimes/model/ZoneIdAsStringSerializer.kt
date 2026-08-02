@@ -1,11 +1,11 @@
 package il.soulSalttrader.shabbattimes.model
 
+import java.time.ZoneId
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import java.time.ZoneId
 
 object ZoneIdAsStringSerializer : KSerializer<ZoneId> {
     override val descriptor = PrimitiveSerialDescriptor("ZoneId", PrimitiveKind.STRING)

@@ -58,14 +58,14 @@ private fun FloatingActionButtonMenuScope.FabMenuItems(
         FloatingActionButtonMenuItem(
             modifier = when (item) {
                 Search -> Modifier.testTag(TestTags.FAB_NEW_LOCATION)
-                else   -> Modifier
+                else -> Modifier
             },
             onClick = {
                 onAction(item.action)
                 toggleExpanded()
             },
             text = { item.title?.let { Text(it.asString()) } },
-            icon = { UiIconImage(icon = item.unselectedIcon, contentDescription = item.title?.asString()) }
+            icon = { UiIconImage(icon = item.unselectedIcon, contentDescription = item.title?.asString()) },
         )
     }
 }
@@ -88,12 +88,12 @@ private fun FabMenuButton(
             icon = UiIcon.Resource(
                 resId = isExpanded.takeIf { it }
                     ?.let { expandedIconRes }
-                    ?: collapsedIconRes
+                    ?: collapsedIconRes,
             ),
             contentDescription = contentDescription,
             contentColor = isExpanded.takeIf { it }
                 ?.let { MaterialTheme.colorScheme.onPrimary }
-                ?: MaterialTheme.colorScheme.onPrimaryContainer
+                ?: MaterialTheme.colorScheme.onPrimaryContainer,
         )
     }
 }

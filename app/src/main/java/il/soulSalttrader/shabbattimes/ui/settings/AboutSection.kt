@@ -44,7 +44,7 @@ private fun AboutItem(
             color = when (onClick != null) {
                 true -> MaterialTheme.colorScheme.primary
                 false -> MaterialTheme.colorScheme.onSurfaceVariant
-            }
+            },
         )
     }
 }

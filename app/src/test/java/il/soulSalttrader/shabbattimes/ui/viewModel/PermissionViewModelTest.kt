@@ -344,7 +344,7 @@ class PermissionViewModelTest : DescribeSpec({
                 repo.updatePermissionState(LocationPermission.Granted)
                 val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
                 val handler = PermissionSideEffectHandler(repo, tracker)
-                val vm = PermissionViewModel(handler,tracker, repo)
+                val vm = PermissionViewModel(handler, tracker, repo)
 
                 vm.state.test {
                     awaitItem().permission shouldBe PermissionState.Granted
@@ -362,7 +362,7 @@ class PermissionViewModelTest : DescribeSpec({
                 repo.updatePermissionState(LocationPermission.Denied)
                 val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
                 val handler = PermissionSideEffectHandler(repo, tracker)
-                val vm = PermissionViewModel(handler,tracker, repo)
+                val vm = PermissionViewModel(handler, tracker, repo)
 
                 vm.state.test {
                     awaitItem().permission shouldBe PermissionState.Denied
@@ -379,7 +379,7 @@ class PermissionViewModelTest : DescribeSpec({
                 repo.updatePermissionState(LocationPermission.DeniedPermanently)
                 val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
                 val handler = PermissionSideEffectHandler(repo, tracker)
-                val vm = PermissionViewModel(handler,tracker, repo)
+                val vm = PermissionViewModel(handler, tracker, repo)
 
                 vm.state.test {
                     awaitItem().permission shouldBe PermissionState.DeniedPermanently
@@ -395,7 +395,7 @@ class PermissionViewModelTest : DescribeSpec({
                 repo.updatePermissionState(LocationPermission.DeniedPermanently) // persisted
                 val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
                 val handler = PermissionSideEffectHandler(repo, tracker)
-                val vm = PermissionViewModel(handler,tracker, repo)
+                val vm = PermissionViewModel(handler, tracker, repo)
 
                 vm.state.test {
                     advanceUntilIdle()
@@ -467,7 +467,7 @@ class PermissionViewModelTest : DescribeSpec({
                 val handler = PermissionSideEffectHandler(repo, mockk(relaxed = true))
 
                 // simulate rotation — create new VM with same repo (same as config change)
-                val recreatedVm = PermissionViewModel(handler,mockk(relaxed = true), repo)
+                val recreatedVm = PermissionViewModel(handler, mockk(relaxed = true), repo)
 
                 recreatedVm.state.test {
                     awaitItem().permission shouldBe PermissionState.Education
@@ -485,7 +485,7 @@ class PermissionViewModelTest : DescribeSpec({
                 val handler = PermissionSideEffectHandler(repo, mockk(relaxed = true))
 
                 // simulate rotation — create new VM with same repo (same as config change)
-                val recreatedVm = PermissionViewModel(handler,mockk(relaxed = true), repo)
+                val recreatedVm = PermissionViewModel(handler, mockk(relaxed = true), repo)
 
                 recreatedVm.state.test {
                     awaitItem().permission shouldBe PermissionState.DeniedPermanently
@@ -573,12 +573,12 @@ class PermissionViewModelTest : DescribeSpec({
             Triple(6, LocationPermission.DeniedPermanently, PermissionState.DeniedPermanently),
         ).forEach { (order, locationPermission, expectedState) ->
 
-            it("PERM_MAPPING_S${order} - should map $locationPermission to $expectedState") {
+            it("PERM_MAPPING_S$order - should map $locationPermission to $expectedState") {
                 runTest {
-                val repo = FakePermissionRepository()
-                val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
-                val handler = PermissionSideEffectHandler(repo, tracker)
-                repo.updatePermissionState(locationPermission)
+                    val repo = FakePermissionRepository()
+                    val tracker = mockk<DataStoreOneTimeMessageTracker>(relaxed = true)
+                    val handler = PermissionSideEffectHandler(repo, tracker)
+                    repo.updatePermissionState(locationPermission)
                     val vm = PermissionViewModel(handler, tracker, repo)
 
                     vm.state.test {

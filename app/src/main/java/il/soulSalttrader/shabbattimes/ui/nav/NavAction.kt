@@ -9,7 +9,7 @@ sealed interface NavAction {
         val navOptions: NavOptionsBuilder.() -> Unit = {
             launchSingleTop = true
             restoreState = true
-        }
+        },
     ) : NavAction
 
     data class ResetTo(
@@ -17,12 +17,12 @@ sealed interface NavAction {
         val navOptions: NavOptionsBuilder.() -> Unit = {
             popUpTo(0) { inclusive = true }
             launchSingleTop = true
-        }
+        },
     ) : NavAction
 
     data class PopTo(
         val target: NavTarget,
-        val navOptions: NavOptionsBuilder.() -> Unit = { }
+        val navOptions: NavOptionsBuilder.() -> Unit = { },
     ) : NavAction
 
     data object Up : NavAction

@@ -49,8 +49,13 @@ class UserPreferences @Inject constructor(
     private fun parseHavdalahCriterion(raw: String): HavdalahCriterion? {
         val (type, name) = raw.split(":", limit = 2).takeIf { it.size == 2 } ?: return null
         return when (type) {
-            "SOLAR" -> runCatching { HavdalahSolarDepression.valueOf(name) }.getOrNull()?.let { HavdalahCriterion.Solar(it) }
-            "FIXED" -> runCatching { HavdalahFixedOffset.valueOf(name) }.getOrNull()?.let { HavdalahCriterion.Fixed(it) }
+            "SOLAR" -> runCatching {
+                HavdalahSolarDepression.valueOf(name)
+            }.getOrNull()?.let { HavdalahCriterion.Solar(it) }
+
+            "FIXED" -> runCatching {
+                HavdalahFixedOffset.valueOf(name)
+            }.getOrNull()?.let { HavdalahCriterion.Fixed(it) }
             else -> null
         }
     }

@@ -16,10 +16,7 @@ fun NavHostController.handleTo(action: NavAction.To) {
     }
 
     if (Debug.enabled && wasAlreadyThere) {
-        Log.d(
-            "Navigator",
-            "Self-navigation ignored → already at $targetRoute"
-        )
+        Log.d("Navigator", "Self-navigation ignored → already at $targetRoute")
     }
 }
 
@@ -27,20 +24,14 @@ fun NavHostController.handleUp() {
     previousBackStackEntry?.let {
         navigateUp()
     } ?: run {
-        if (Debug.enabled) Log.d(
-            "Navigator",
-            "Up ignored → already at root"
-        )
+        if (Debug.enabled) Log.d("Navigator", "Up ignored → already at root")
     }
 }
 
 fun NavHostController.handleResetTo(action: NavAction.ResetTo) {
     if (Debug.enabled) {
         val targetRoute = action.target.route()
-        Log.d(
-            "Navigator",
-            "ResetTo -> clearing stack and navigating to $targetRoute"
-        )
+        Log.d("Navigator", "ResetTo -> clearing stack and navigating to $targetRoute")
     }
 
     navigate(action.target) {
@@ -50,10 +41,9 @@ fun NavHostController.handleResetTo(action: NavAction.ResetTo) {
 }
 
 fun NavHostController.handlePopTo(action: NavAction.PopTo) {
-    if (Debug.enabled) Log.d(
-        "Navigator",
-        "PopTo target not found in back stack: ${action.target}"
-    )
+    if (Debug.enabled) {
+        Log.d("Navigator", "PopTo target not found in back stack: ${action.target}")
+    }
 
     popBackStack(action.target, inclusive = false)
 }
@@ -67,6 +57,6 @@ fun NavHostController.handlePopToRoot() {
 
     popBackStack(
         graph.startDestinationId,
-        inclusive = false
+        inclusive = false,
     )
 }

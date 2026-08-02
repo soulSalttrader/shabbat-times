@@ -37,19 +37,20 @@ class EphemerisBasedSolarPositionCalculator(
     private fun trueSolarTimeMinutes(
         instant: Instant,
         longitudeDeg: Double,
-        equationOfTimeMinutes: Double
+        equationOfTimeMinutes: Double,
     ): Double {
         val utcMinutesOfDay = (instant.epochSecond % SECONDS_PER_DAY.toLong()) / 60.0
 
-        return (utcMinutesOfDay
-                + equationOfTimeMinutes
-                + SOLAR_TIME_MINUTES_PER_DEGREE_LONGITUDE
+        return (
+            utcMinutesOfDay +
+                equationOfTimeMinutes +
+                SOLAR_TIME_MINUTES_PER_DEGREE_LONGITUDE
                 * longitudeDeg
-        ) % MINUTES_PER_DAY
+            ) % MINUTES_PER_DAY
     }
 
     private fun hourAngleRadians(
-        trueSolarTimeMinutes: Double
+        trueSolarTimeMinutes: Double,
     ): Double {
         val quarterHourAngle = trueSolarTimeMinutes / HOUR_ANGLE_DEGREES_PER_MINUTE_GROUP
 
@@ -71,11 +72,11 @@ class EphemerisBasedSolarPositionCalculator(
 
         val altitudeRad =
             asin(
-                sin(latitudeRad)
-                    * sin(declinationRad)
-                    + cos(latitudeRad)
-                    * cos(declinationRad)
-                    * cos(hourAngleRad)
+                sin(latitudeRad) *
+                    sin(declinationRad) +
+                    cos(latitudeRad) *
+                    cos(declinationRad) *
+                    cos(hourAngleRad),
             )
 
         return Math.toDegrees(altitudeRad)

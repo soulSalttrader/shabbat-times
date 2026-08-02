@@ -45,11 +45,11 @@ val jerusalemEntry = ShabbatEntry(
         coordinates = jerusalemLocation().coordinates,
         candleLighting = TimeState.Available(
             LocalTime.of(18, 45),
-            LocalDate.of(2026, 6, 19)
+            LocalDate.of(2026, 6, 19),
         ),
         havdalah = TimeState.Available(
             LocalTime.of(20, 12),
-            LocalDate.of(2026, 6, 20)
+            LocalDate.of(2026, 6, 20),
         ),
     ),
     status = LocationStatus.Nearby(1.0),
@@ -60,12 +60,12 @@ val telAvivEntry = ShabbatEntry(
     times = HalachicTimesDisplay(
         coordinates = telAvivLocation().coordinates,
         candleLighting = TimeState.Available(
-            time = LocalTime.of(20, 0,5),
-            date = LocalDate.of(2026, 6, 19)
+            time = LocalTime.of(20, 0, 5),
+            date = LocalDate.of(2026, 6, 19),
         ),
         havdalah = TimeState.Available(
             time = LocalTime.of(21, 30),
-            date = LocalDate.of(2026, 6, 20)
+            date = LocalDate.of(2026, 6, 20),
         ),
     ),
     status = LocationStatus.Nearby(2.0),
@@ -77,11 +77,11 @@ val brnoEntry = ShabbatEntry(
         coordinates = brnoLocation().coordinates,
         candleLighting = TimeState.Available(
             time = LocalTime.of(16, 10),
-            date = LocalDate.of(2026, 12, 18)
+            date = LocalDate.of(2026, 12, 18),
         ),
         havdalah = TimeState.Available(
-            time = LocalTime.of(17, 0,5),
-            date = LocalDate.of(2026, 12, 19)
+            time = LocalTime.of(17, 0, 5),
+            date = LocalDate.of(2026, 12, 19),
         ),
     ),
     status = LocationStatus.Nearby(3.0),
@@ -93,11 +93,11 @@ val gpsEntry = ShabbatEntry(
         coordinates = gpsLocation().coordinates,
         candleLighting = TimeState.Available(
             time = LocalTime.of(16, 10),
-            date = LocalDate.of(2026, 12, 18)
+            date = LocalDate.of(2026, 12, 18),
         ),
         havdalah = TimeState.Available(
-            time = LocalTime.of(17, 0,5),
-            date = LocalDate.of(2026, 12, 19)
+            time = LocalTime.of(17, 0, 5),
+            date = LocalDate.of(2026, 12, 19),
         ),
     ),
     status = LocationStatus.Current,
